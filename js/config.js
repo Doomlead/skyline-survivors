@@ -136,4 +136,14 @@ function resetGameState() {
         timeSlow: 0
     };
     playerState.direction = 'right';
+
+    gameState.bossActive = false;
+    gameState.currentBossKey = null;
+    gameState.currentBossName = '';
+    gameState.pendingBossWave = null;
+    gameState.bossesDefeated = 0;
+    gameState.bossQueue = [];
+    gameState.classicBossFlags = { 10: false, 20: false, 30: false };
+    gameState.survivalBossFlags = { 10: false, 20: false, 30: false };
+    gameState.survivalBossesDefeated = 0;
 }

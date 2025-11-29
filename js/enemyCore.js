@@ -103,6 +103,11 @@ function spawnRandomEnemy(scene) {
 
 function spawnEnemyWave(scene) {
     if (gameState.mode === 'classic') {
+        const bossWaves = [10, 20, 30];
+        if (bossWaves.includes(gameState.wave)) {
+            startBossEncounter(scene, { mode: 'classic', wave: gameState.wave });
+            return;
+        }
         if (!gameState.enemiesToKillThisWave) {
             gameState.enemiesToKillThisWave = 20 + (gameState.wave - 1) * 5;
         }

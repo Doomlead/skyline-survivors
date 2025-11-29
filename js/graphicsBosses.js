@@ -47,12 +47,11 @@ function createMegaLanderGraphics(scene) {
     
     tentacles.forEach(tentacle => {
         // Tentacle base
-        megaLanderGraphics.fillStyle(0xff3333, 1);
+        megaLanderGraphics.lineStyle(6, 0xff3333, 1);
         megaLanderGraphics.beginPath();
         megaLanderGraphics.moveTo(tentacle.x, tentacle.y);
         megaLanderGraphics.lineTo(tentacle.x + Math.cos(tentacle.angle) * 25, tentacle.y + Math.sin(tentacle.angle) * 25);
-        megaLanderGraphics.lineWidth = 6;
-        megaLanderGraphics.stroke();
+        megaLanderGraphics.strokePath();
         
         // Glowing tip
         megaLanderGraphics.fillStyle(0xffaa00, 1);
@@ -92,9 +91,11 @@ function createTitanMutantGraphics(scene) {
     titanGraphics.fillStyle(0xff9955, 1);
     titanGraphics.beginPath();
     titanGraphics.moveTo(45, 15);
-    titanGraphics.quadraticCurveTo(60, 5, 75, 15);
+    titanGraphics.lineTo(60, 5);
+    titanGraphics.lineTo(75, 15);
     titanGraphics.lineTo(75, 20);
-    titanGraphics.quadraticCurveTo(60, 12, 45, 20);
+    titanGraphics.lineTo(60, 12);
+    titanGraphics.lineTo(45, 20);
     titanGraphics.closePath();
     titanGraphics.fillPath();
     
@@ -407,15 +408,11 @@ function createLeviathanBaiterGraphics(scene) {
     
     // Main body - long and sinuous
     leviathanGraphics.fillStyle(0x00ffff, 1);
-    leviathanGraphics.beginPath();
-    leviathanGraphics.ellipse(60, 55, 80, 45, 0.3, 0, Math.PI * 2);
-    leviathanGraphics.fill();
+    leviathanGraphics.fillEllipse(60, 55, 160, 90);
     
     // Underbelly - lighter
     leviathanGraphics.fillStyle(0x00ffaa, 1);
-    leviathanGraphics.beginPath();
-    leviathanGraphics.ellipse(60, 60, 70, 35, 0.3, 0, Math.PI * 2);
-    leviathanGraphics.fill();
+    leviathanGraphics.fillEllipse(60, 60, 140, 70);
     
     // Head - triangular predator shape
     leviathanGraphics.fillStyle(0x00ffff, 1);
@@ -467,8 +464,9 @@ function createLeviathanBaiterGraphics(scene) {
     leviathanGraphics.lineStyle(4, 0x00ffff, 1);
     leviathanGraphics.beginPath();
     leviathanGraphics.moveTo(10, 55);
-    leviathanGraphics.quadraticCurveTo(-10, 40, -5, 20);
-    leviathanGraphics.stroke();
+    leviathanGraphics.lineTo(-10, 40);
+    leviathanGraphics.lineTo(-5, 20);
+    leviathanGraphics.strokePath();
     
     leviathanGraphics.generateTexture('leviathanBaiter', 140, 100);
     leviathanGraphics.destroy();
@@ -518,12 +516,11 @@ function createApexKamikazeGraphics(scene) {
     
     appendages.forEach(app => {
         // Appendage stem
-        kamikazeGraphics.fillStyle(0xff3333, 1);
+        kamikazeGraphics.lineStyle(4, 0xff3333, 1);
         kamikazeGraphics.beginPath();
         kamikazeGraphics.moveTo(app.x, app.y);
         kamikazeGraphics.lineTo(app.x + Math.cos(app.angle) * 18, app.y + Math.sin(app.angle) * 18);
-        kamikazeGraphics.lineWidth = 4;
-        kamikazeGraphics.stroke();
+        kamikazeGraphics.strokePath();
         
         // Explosive head
         kamikazeGraphics.fillStyle(0xffff00, 1);
