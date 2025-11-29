@@ -123,9 +123,13 @@
     <script src="js/powerups.js"></script>
     <!-- 8. Player mechanics -->
     <script src="js/player.js"></script>
-    <!-- 9. Enemy AI -->
-    <script src="js/enemy.js"></script>
-    <!-- 10. Main game scene (must load last - initializes Phaser) -->
+    <!-- 9. defines constants used by other files-->
+    <script src="js/enemyConfig.js"></script>
+	<!-- 10. defines behavior functions used by the update loo-->
+	<script src="js/enemyBehaviors.js"></script>
+	<!-- 11.  contains spawning/combat that uses both config and behaviors -->
+	<script src="js/enemyCore.js"></script>
+    <!-- 12. Main game scene (must load last - initializes Phaser) -->
     <script src="js/game.js"></script>
 </body>
 </html>

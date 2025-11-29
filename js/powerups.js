@@ -40,6 +40,7 @@ function updatePowerUps(scene) {
     });
 }
 
+
 function collectPowerUp(playerSprite, powerUp) {
     gameState.score += 200;
     if (audioManager) audioManager.playSound('powerUpCollect');
@@ -157,6 +158,7 @@ function updatePowerUpMagnet(scene) {
         }
     });
 }
+
 
 function updatePowerUpTimers(delta) {
     if (playerState.powerUps.overdrive > 0) {

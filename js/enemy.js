@@ -200,13 +200,16 @@ function getEnemyHP(type) {
 }
 
 function spawnEnemy(scene, type, x, y) {
+    // Clamp X so enemies never spawn too close to world edges
+    const spawnX = Phaser.Math.Clamp(x, 100, CONFIG.worldWidth - 100);
+
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
-    const terrainVariation = Math.sin(x / 200) * 30;
+    const terrainVariation = Math.sin(spawnX / 200) * 30;
     const minClearance = 40;
     const topLimit = 20;
     const maxY = groundLevel - terrainVariation - minClearance;
     const spawnY = Phaser.Math.Clamp(y, topLimit, Math.max(topLimit + 10, maxY));
-    const enemy = enemies.create(x, spawnY, type);
+    const enemy = enemies.create(spawnX, spawnY, type);
     
     // Scale: swarmers small, new types vary by role
     let scale = 2.0;
@@ -238,7 +241,7 @@ function spawnEnemy(scene, type, x, y) {
     if (type === 'spawner') enemy.spawnTimer = 0; enemy.minionsSpawned = 0;
     if (type === 'turret') enemy.isPlanted = false; enemy.plantTimer = 0;
     
-    createSpawnEffect(scene, x, spawnY, type);
+    createSpawnEffect(scene, spawnX, spawnY, type);
     if (audioManager) audioManager.playSound('enemySpawn');
 
     // Only create trails for moving enemies

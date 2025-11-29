@@ -261,6 +261,7 @@ function updateProjectiles(scene) {
     });
 }
 
+
 function playerHitEnemy(playerSprite, enemy) {
     if (playerState.powerUps.invincibility > 0) {
         destroyEnemy(this, enemy);
@@ -435,3 +436,4 @@ function updateHumans(scene) {
         wrapWorldBounds(human);
     });
 }
+

@@ -22,6 +22,7 @@ function preload() {
     createGraphics(this);
 }
 
+
 function create() {
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight);
     createBackground(this);
@@ -81,6 +82,7 @@ function create() {
     initializeGame(this);
     this.gameScene = this;
 }
+
 
 function update(time, delta) {
     if (gameState.gameOver) {
