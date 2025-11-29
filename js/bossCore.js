@@ -35,6 +35,19 @@ function createBossTrail(scene, boss) {
     });
 }
 
+function initializeBossQueue() {
+    const pool = [...BOSS_TYPES];
+    const queue = [];
+
+    while (queue.length < 3 && pool.length > 0) {
+        const pickIndex = Math.floor(Math.random() * pool.length);
+        queue.push(pool.splice(pickIndex, 1)[0]);
+    }
+
+    gameState.bossQueue = queue;
+    gameState.bossesDefeated = 0;
+}
+
 function spawnBoss(scene, type, x, y) {
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const terrainVariation = Math.sin(x / 200) * 30;
@@ -75,6 +88,59 @@ function spawnBoss(scene, type, x, y) {
 
     createBossTrail(scene, boss);
     return boss;
+}
+
+function getNextBossType() {
+    if (!gameState.bossQueue) {
+        initializeBossQueue();
+    }
+    return gameState.bossQueue.shift();
+}
+
+function startBossEncounter(scene, triggerInfo = {}) {
+    if (gameState.bossActive) return null;
+
+    const bossType = getNextBossType();
+    if (!bossType) return null;
+
+    const spawnOffset = Math.random() < 0.5 ? -200 : 200;
+    const spawnX = scene.cameras.main.scrollX + CONFIG.width / 2 + spawnOffset;
+    const spawnY = CONFIG.height / 2;
+
+    gameState.bossActive = true;
+    gameState.currentBossKey = bossType;
+    gameState.currentBossName = bossType;
+
+    const warning = scene.add.text(
+        CONFIG.width / 2,
+        CONFIG.height / 2,
+        `WARNING!\n${bossType.toUpperCase()} INBOUND`,
+        {
+            fontSize: '32px',
+            fontFamily: 'Orbitron',
+            color: '#ff4444',
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 4
+        }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(210);
+
+    scene.tweens.add({
+        targets: warning,
+        alpha: 0,
+        y: CONFIG.height / 2 - 40,
+        duration: 2500,
+        onComplete: () => warning.destroy()
+    });
+
+    if (triggerInfo.mode === 'classic' && triggerInfo.wave) {
+        gameState.classicBossFlags[triggerInfo.wave] = true;
+    }
+    if (triggerInfo.mode === 'survival' && triggerInfo.minute) {
+        gameState.survivalBossFlags[triggerInfo.minute] = true;
+    }
+
+    return spawnBoss(scene, bossType, spawnX, spawnY);
 }
 
 function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngle) {
@@ -128,8 +194,9 @@ function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngl
 }
 
 function hitBoss(projectile, boss) {
+    const scene = projectile.scene;
     boss.hp -= projectile.damage || 1;
-    
+
     // Visual hit feedback
     scene.tweens.add({
         targets: boss,
@@ -138,10 +205,31 @@ function hitBoss(projectile, boss) {
         yoyo: true,
         ease: 'Linear'
     });
-    
+
     if (audioManager) audioManager.playSound('hitEnemy');
-    if (boss.hp <= 0) destroyBoss(this, boss);
+    if (boss.hp <= 0) destroyBoss(scene, boss);
     if (!projectile.isPiercing) projectile.destroy();
+}
+
+function playerHitBoss(playerSprite, boss) {
+    const scene = boss.scene;
+
+    if (playerState.powerUps.invincibility > 0) {
+        boss.hp -= 3;
+        if (boss.hp <= 0) destroyBoss(scene, boss);
+        return;
+    }
+
+    if (playerState.powerUps.shield > 0) {
+        playerState.powerUps.shield = 0;
+        boss.hp -= 2;
+        if (boss.hp <= 0) destroyBoss(scene, boss);
+        screenShake(scene, 10, 200);
+        if (audioManager) audioManager.playSound('hitPlayer');
+    } else {
+        screenShake(scene, 18, 320);
+        playerDie(scene);
+    }
 }
 
 function destroyBoss(scene, boss) {
@@ -216,6 +304,17 @@ function destroyBoss(scene, boss) {
 
     boss.destroy();
 
+    gameState.bossesDefeated = (gameState.bossesDefeated || 0) + 1;
+    gameState.survivalBossesDefeated = gameState.mode === 'survival'
+        ? (gameState.survivalBossesDefeated || 0) + 1
+        : gameState.survivalBossesDefeated;
+
+    if (bosses.countActive(true) === 0) {
+        gameState.bossActive = false;
+        gameState.currentBossKey = null;
+        gameState.currentBossName = '';
+    }
+
     // Check if boss wave complete
     if (gameState.mode === 'classic' && bosses.countActive(true) === 0 && enemies.countActive(true) === 0) {
         completeBossWave(scene);
@@ -278,3 +377,17 @@ function hitBossProjectile(playerSprite, projectile) {
         playerDie(this);
     }
 }
+
+function checkSurvivalBosses(scene) {
+    if (gameState.mode !== 'survival' || gameState.bossActive) return;
+
+    const elapsed = gameState.totalSurvivalDuration - gameState.timeRemaining;
+    const thresholds = [10, 20, 30];
+
+    thresholds.forEach(minute => {
+        if (!gameState.survivalBossFlags[minute] && elapsed >= minute * 60 * 1000) {
+            startBossEncounter(scene, { mode: 'survival', minute });
+        }
+    });
+}
+

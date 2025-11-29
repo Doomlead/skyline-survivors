@@ -342,9 +342,9 @@ function useSmartBomb(scene) {
     gameState.smartBombs--;
     if (audioManager) audioManager.playSound('smartBomb');
     enemies.children.entries.forEach(enemy => {
+        if (!enemy.active) return;
         createExplosion(scene, enemy.x, enemy.y);
-        gameState.score += 50;
-        enemy.destroy();
+        destroyEnemy(scene, enemy);
     });
     enemyProjectiles.clear(true);
     const flash = scene.add.rectangle(

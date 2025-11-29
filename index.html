@@ -117,23 +117,28 @@
     <script src="js/graphicsPlayer.js"></script>
     <!-- 5. All 9 enemy projectile types + 6 original enemies + 10 new enemies -->
     <script src="js/graphicsEnemies.js"></script>
-    <!-- 6. Human sprite + 16 power-up types + 5 utility sprites + main entry point -->
+    <!-- 6. Boss graphics before shared utility atlas -->
+    <script src="js/graphicsBosses.js"></script>
+    <!-- 7. Human sprite + 16 power-up types + 5 utility sprites + main entry point -->
     <script src="js/graphicsUtils.js"></script>
-    <!-- 7. Background creation -->
+    <!-- 8. Background creation -->
     <script src="js/background.js"></script>
-    <!-- 8. UI and HUD -->
+    <!-- 9. UI and HUD -->
     <script src="js/ui.js"></script>
-    <!-- 9. Power-up system -->
+    <!-- 10. Power-up system -->
     <script src="js/powerups.js"></script>
-    <!-- 10. Player mechanics -->
+    <!-- 11. Player mechanics -->
     <script src="js/player.js"></script>
-    <!-- 11. defines constants used by other files-->
+    <!-- 12. defines constants used by other files-->
     <script src="js/enemyConfig.js"></script>
-    <!-- 12. defines behavior functions used by the update loo-->
+    <!-- 13. Boss constants and behavior definitions -->
+    <script src="js/bossConfig.js"></script>
     <script src="js/enemyBehaviors.js"></script>
-    <!-- 13.  contains spawning/combat that uses both config and behaviors -->
+    <script src="js/bossBehavior.js"></script>
+    <!-- 14. contains spawning/combat that uses both config and behaviors -->
+    <script src="js/bossCore.js"></script>
     <script src="js/enemyCore.js"></script>
-    <!-- 14. Main game scene (must load last - initializes Phaser) -->
+    <!-- 15. Main game scene (must load last - initializes Phaser) -->
     <script src="js/game.js"></script>
 </body>
 </html>
