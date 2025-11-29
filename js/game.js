@@ -1,0 +1,246 @@
+// ------------------------
+// Main game scene and initialization
+// ------------------------
+
+function initializeGame(scene) {
+    for (let i = 0; i < gameState.humans; i++) {
+        spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
+    }
+    if (gameState.mode === 'survival') {
+        gameState.timeRemaining = gameState.timeRemaining || 30 * 60 * 1000;
+    } else {
+        gameState.wave = gameState.wave || 1;
+        gameState.enemiesToKillThisWave = 20 + (gameState.wave - 1) * 5;
+    }
+    if (gameState.mode === 'classic') {
+        spawnEnemyWave(scene);
+    }
+    updateUI();
+}
+
+function preload() {
+    createGraphics(this);
+}
+
+function create() {
+    this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight);
+    createBackground(this);
+
+    player = this.physics.add.sprite(100, 300, 'player');
+    player.setCollideWorldBounds(false);
+    player.setScale(1.25);
+    player.body.setSize(25, 10);
+
+    // Secondary "Wrap Camera" to show the other side of the world seamlessly
+    this.wrapCamera = this.cameras.add(0, 0, CONFIG.width, CONFIG.height);
+    this.wrapCamera.setVisible(false);
+
+    enemies = this.physics.add.group();
+    projectiles = this.physics.add.group();
+    enemyProjectiles = this.physics.add.group();
+    powerUps = this.physics.add.group();
+    humans = this.physics.add.group();
+    drones = this.physics.add.group();
+    explosions = this.add.group();
+
+    cursors = this.input.keyboard.createCursorKeys();
+    spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+    qKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
+    rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+    pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+
+    if (this._restartHandler) {
+        this.input.keyboard.off('keydown-R', this._restartHandler);
+    }
+    this._restartHandler = () => {
+        if (gameState.gameOver) {
+            resetGameState();
+            this.scene.restart();
+        }
+    };
+    this.input.keyboard.on('keydown-R', this._restartHandler);
+    this.events.once('shutdown', () => {
+        if (this._restartHandler) {
+            this.input.keyboard.off('keydown-R', this._restartHandler);
+            this._restartHandler = null;
+        }
+    });
+
+    this.physics.add.overlap(projectiles, enemies, hitEnemy, null, this);
+    this.physics.add.overlap(player, enemies, playerHitEnemy, null, this);
+    this.physics.add.overlap(player, enemyProjectiles, playerHitProjectile, null, this);
+    this.physics.add.overlap(player, powerUps, collectPowerUp, null, this);
+    this.physics.add.overlap(player, humans, rescueHuman, null, this);
+
+    createUI(this);
+
+    audioManager = new AudioManager(this);
+    audioManager.playAmbientMusic();
+
+    initializeGame(this);
+    this.gameScene = this;
+}
+
+function update(time, delta) {
+    if (gameState.gameOver) {
+        if (Phaser.Input.Keyboard.JustDown(rKey)) {
+            resetGameState();
+            this.scene.restart();
+        }
+        return;
+    }
+    if (gameState.paused) {
+        if (Phaser.Input.Keyboard.JustDown(pKey)) togglePause(this);
+        return;
+    }
+    if (gameState.mode === 'survival') {
+        gameState.timeRemaining -= delta;
+        if (gameState.timeRemaining <= 0) winGame(this);
+    }
+
+    updatePlayer(this, time);
+    
+    // -- Seamless Infinite Loop Logic --
+    
+    // 1. Wrap Player Physics
+    if (player.x < 0) {
+        player.x += CONFIG.worldWidth;
+    } else if (player.x >= CONFIG.worldWidth) {
+        player.x -= CONFIG.worldWidth;
+    }
+
+    // 2. Manual Camera Positioning (Rigid Lock to match retro feel)
+    const mainCam = this.cameras.main;
+    mainCam.scrollX = player.x - mainCam.width / 2;
+
+    // 3. Visual Seam Wrapping (Dual Camera)
+    const wrapCam = this.wrapCamera;
+    if (wrapCam) {
+        const scrollX = mainCam.scrollX;
+        const camW = mainCam.width;
+        
+        if (scrollX < 0) {
+            // Viewing Left Void -> Render World End
+            wrapCam.setVisible(true);
+            const gap = Math.abs(scrollX);
+            wrapCam.setViewport(0, 0, gap, mainCam.height);
+            wrapCam.scrollX = CONFIG.worldWidth + scrollX;
+        } else if (scrollX + camW > CONFIG.worldWidth) {
+            // Viewing Right Void -> Render World Start
+            wrapCam.setVisible(true);
+            const overshot = (scrollX + camW) - CONFIG.worldWidth;
+            wrapCam.setViewport(camW - overshot, 0, overshot, mainCam.height);
+            wrapCam.scrollX = 0;
+        } else {
+            wrapCam.setVisible(false);
+        }
+    }
+
+    updateEnemies(this, time, delta);
+    updateProjectiles(this);
+    updatePowerUps(this);
+    updatePowerUpMagnet(this);
+    updateDrones(this, time);
+    updateHumans(this);
+    updatePowerUpTimers(delta);
+
+    if (gameState.mode === 'survival') {
+        let spawnChance = 0.001 + gameState.difficulty * 0.001;
+        const progress = 1 - (gameState.timeRemaining / (30 * 60 * 1000));
+        spawnChance *= 1 + progress * 2;
+        if (humans.countActive(true) < 12 && Math.random() < 0.002) {
+            spawnHuman(this, Math.random() * (CONFIG.worldWidth - 200) + 100);
+        }
+        if (Math.random() < spawnChance) spawnRandomEnemy(this);
+    }
+
+    updateRadar(this);
+    updateUI();
+
+    if (!gameState.gameOver && typeof gameState.nextExtraLife === 'number') {
+        // Extra life thresholds: 10k, 30k, 70k, 150k, ...
+        // Recurrence: next = next * 2 + 10000
+        while (gameState.score >= gameState.nextExtraLife) {
+            gameState.lives++;
+            gameState.nextExtraLife = gameState.nextExtraLife * 2 + 10000;
+        }
+    }
+}
+
+// ------------------------
+// Phaser game setup
+// ------------------------
+
+const dimensions = getResponsiveScale();
+
+const config = {
+    type: Phaser.AUTO,
+    width: dimensions.width,
+    height: dimensions.height,
+    parent: 'game-container',
+    backgroundColor: '#0a0a2e',
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: CONFIG.width,
+        height: CONFIG.height
+    },
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 0 },
+            debug: false
+        }
+    },
+    scene: { preload, create, update }
+};
+
+const game = new Phaser.Game(config);
+
+window.addEventListener('resize', () => {
+    if (game && game.scale) game.scale.refresh();
+});
+window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+        if (game && game.scale) game.scale.refresh();
+    }, 100);
+});
+
+// ------------------------
+// Touch controls wiring
+// ------------------------
+
+(function setupTouchControls() {
+    const buttons = document.querySelectorAll('#touch-controls .tc-btn');
+    function setFlag(btn, isDown) {
+        const dir = btn.getAttribute('data-dir');
+        const action = btn.getAttribute('data-action');
+        if (dir) {
+            window.virtualInput[dir] = isDown;
+        } else if (action === 'fire') {
+            window.virtualInput.fire = isDown;
+        } else if (action === 'bomb' && isDown) {
+            const scene = game.scene.scenes && game.scene.scenes[0];
+            if (scene && scene.scene.isActive()) useSmartBomb(scene);
+        }
+    }
+    buttons.forEach(btn => {
+        ['pointerdown','touchstart','mousedown'].forEach(ev => {
+            btn.addEventListener(ev, e => { e.preventDefault(); setFlag(btn, true); });
+        });
+        ['pointerup','pointerleave','touchend','touchcancel','mouseup','mouseleave'].forEach(ev => {
+            btn.addEventListener(ev, e => { e.preventDefault(); setFlag(btn, false); });
+        });
+    });
+})();
+
+// ------------------------
+// Mute toggle wiring
+// ------------------------
+
+document.getElementById('mute-toggle').addEventListener('click', () => {
+    if (!audioManager) return;
+    const muted = audioManager.toggleMute();
+    document.getElementById('mute-toggle').textContent = muted ? 'Unmute' : 'Mute';
+});

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skyline Survivors - Defender/Stargate Evolution</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Phaser 3 -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.0/dist/phaser.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center">
+    <div class="w-full max-w-6xl px-4 flex flex-col items-center gap-2">
+        <header class="text-center mt-2 w-full flex flex-col items-center">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-[0.35em] text-cyan-400 uppercase mb-2">Skyline Survivors</h1>
+            
+            <!-- External HUD Container -->
+            <div id="hud-container" class="w-full bg-slate-900/90 border border-slate-700 p-2 rounded-lg flex flex-col gap-1 shadow-lg relative z-10">
+                <!-- Top Row: Stats -->
+                <div class="flex flex-wrap justify-between items-center text-xs md:text-sm font-orbitron font-bold px-2">
+                    <div class="text-cyan-400 w-32 text-left">SCORE: <span id="score-el">000000</span></div>
+                    <div class="text-amber-400 text-center flex-1" id="wave-el">WAVE 1  ENEMIES: 020</div>
+                    <div class="text-white text-center flex-1 hidden" id="timer-el">TIME: 00:00</div>
+                    <div class="flex gap-4 justify-end w-auto md:w-48">
+                        <div class="text-green-400">BOMBS: <span id="bombs-el">3</span></div>
+                        <div class="text-fuchsia-400">LIVES: <span id="lives-el">3</span></div>
+                    </div>
+                </div>
+                
+                <!-- Middle Row: Radar -->
+                <div class="w-full h-[40px] bg-black border border-cyan-900 relative overflow-hidden rounded">
+                    <canvas id="radar-canvas" width="800" height="40" class="w-full h-full block"></canvas>
+                </div>
+
+                <!-- Bottom Row: Powerups -->
+                <div class="text-[10px] md:text-xs text-cyan-200 font-orbitron min-h-[1.5em] text-center tracking-wider" id="powerups-el">
+                    
+                </div>
+            </div>
+        </header>
+
+        <main class="w-full flex flex-col items-center gap-3">
+            <div id="game-container" class="relative bg-black border border-slate-700 shadow-2xl overflow-hidden rounded-b-lg"></div>
+            <p class="text-[10px] md:text-xs text-slate-400 text-center leading-relaxed">
+                Desktop Controls: 
+                <span class="text-cyan-300">Arrow Keys</span> = Move,
+                <span class="text-cyan-300">Space</span> = Fire,
+                <span class="text-cyan-300">Shift</span> = Smart Bomb,
+                <span class="text-cyan-300">Q</span> = Hyperspace,
+                <span class="text-cyan-300">P</span> = Pause.
+            </p>
+        </main>
+
+        <!-- Simple on-screen controls for touch devices -->
+        <div id="touch-controls" class="mt-2 w-full max-w-3xl flex justify-between gap-4 select-none md:hidden">
+            <div class="flex gap-2">
+                <button data-dir="left" class="tc-btn px-4 py-3 rounded bg-slate-800/80 border border-slate-600 text-xs">◀</button>
+                <button data-dir="right" class="tc-btn px-4 py-3 rounded bg-slate-800/80 border border-slate-600 text-xs">▶</button>
+                <button data-dir="up" class="tc-btn px-4 py-3 rounded bg-slate-800/80 border border-slate-600 text-xs">▲</button>
+                <button data-dir="down" class="tc-btn px-4 py-3 rounded bg-slate-800/80 border border-slate-600 text-xs">▼</button>
+            </div>
+            <div class="flex gap-2">
+                <button data-action="fire" class="tc-btn px-4 py-3 rounded-full bg-emerald-600/80 border border-emerald-400 text-xs font-semibold">FIRE</button>
+                <button data-action="bomb" class="tc-btn px-4 py-3 rounded-full bg-fuchsia-700/80 border border-fuchsia-400 text-[10px] font-semibold">BOMB</button>
+            </div>
+        </div>
+
+        <footer class="mt-3 mb-4 text-[10px] text-slate-600 text-center">
+            Prototype build – we can iterate on enemies, waves, balance, and visuals next.
+        </footer>
+    </div>
+
+    <!-- Main Menu Overlay -->
+    <div id="menu-overlay" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div class="bg-slate-900/90 border border-cyan-400 rounded-lg px-6 py-6 max-w-md w-[90%] text-center shadow-2xl">
+            <h2 class="text-2xl font-semibold tracking-[0.25em] text-cyan-300 uppercase mb-3">Skyline Survivors</h2>
+            <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                Defend the skyline, rescue humans from abduction, and survive increasingly brutal waves.
+                Two modes available: classic wave progression and long-form survival.
+            </p>
+
+            <div class="flex flex-col gap-2 mb-4">
+                <button onclick="startGame('classic')" class="w-full py-2 rounded bg-cyan-600 hover:bg-cyan-500 border border-cyan-300 text-xs font-semibold tracking-widest uppercase">
+                    Start Classic Mode
+                </button>
+                <button onclick="startGame('survival')" class="w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 border border-emerald-300 text-xs font-semibold tracking-widest uppercase">
+                    Start Survival Mode
+                </button>
+            </div>
+
+            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-2">
+                <span>Press <span class="text-cyan-300">R</span> anytime on Game Over to restart.</span>
+                <button id="mute-toggle" class="px-2 py-1 border border-slate-600 rounded text-[10px] hover:border-cyan-400">
+                    Mute
+                </button>
+            </div>
+
+            <p class="text-[10px] text-slate-500 leading-relaxed">
+                Tip: Rescue abducted humans mid-air for big bonuses and power-ups. Use smart bombs sparingly.
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules - Load order matters! -->
+    <!-- 1. Config must load first (defines global state) -->
+    <script src="js/config.js"></script>
+    <!-- 2. Audio system -->
+    <script src="js/audio.js"></script>
+    <!-- 3. Utility functions -->
+    <script src="js/utility.js"></script>
+    <!-- 4. Graphics creation -->
+    <script src="js/graphic.js"></script>
+    <!-- 5. Background creation -->
+    <script src="js/background.js"></script>
+    <!-- 6. UI and HUD -->
+    <script src="js/ui.js"></script>
+    <!-- 7. Power-up system -->
+    <script src="js/powerups.js"></script>
+    <!-- 8. Player mechanics -->
+    <script src="js/player.js"></script>
+    <!-- 9. Enemy AI -->
+    <script src="js/enemy.js"></script>
+    <!-- 10. Main game scene (must load last - initializes Phaser) -->
+    <script src="js/game.js"></script>
+</body>
+</html>
