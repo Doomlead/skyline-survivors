@@ -99,6 +99,8 @@ function createGraphics(scene) {
     createOriginalEnemyGraphics(scene);
     createNewEnemyGraphics(scene);
 
+    createBossGraphics(scene);
+
     createHumanGraphics(scene);
     createPowerUpGraphics(scene);
     createUtilityGraphics(scene);
