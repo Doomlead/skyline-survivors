@@ -6,6 +6,9 @@ function initializeGame(scene) {
     for (let i = 0; i < gameState.humans; i++) {
         spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
     }
+    if (!gameState.bossQueue || gameState.bossQueue.length === 0) {
+        initializeBossQueue();
+    }
     if (gameState.mode === 'survival') {
         gameState.timeRemaining = gameState.timeRemaining || 30 * 60 * 1000;
     } else {
@@ -43,6 +46,7 @@ function create() {
     humans = this.physics.add.group();
     drones = this.physics.add.group();
     explosions = this.add.group();
+    bosses = this.physics.add.group();
 
     cursors = this.input.keyboard.createCursorKeys();
     spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -69,7 +73,9 @@ function create() {
     });
 
     this.physics.add.overlap(projectiles, enemies, hitEnemy, null, this);
+    this.physics.add.overlap(projectiles, bosses, hitBoss, null, this);
     this.physics.add.overlap(player, enemies, playerHitEnemy, null, this);
+    this.physics.add.overlap(player, bosses, playerHitBoss, null, this);
     this.physics.add.overlap(player, enemyProjectiles, playerHitProjectile, null, this);
     this.physics.add.overlap(player, powerUps, collectPowerUp, null, this);
     this.physics.add.overlap(player, humans, rescueHuman, null, this);
@@ -145,6 +151,8 @@ function update(time, delta) {
     updatePowerUpMagnet(this);
     updateDrones(this, time);
     updateHumans(this);
+    updateBosses(this, time, delta);
+    checkSurvivalBosses(this);
     updatePowerUpTimers(delta);
 
     if (gameState.mode === 'survival') {

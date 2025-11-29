@@ -92,9 +92,11 @@ function createTitanMutantGraphics(scene) {
     titanGraphics.fillStyle(0xff9955, 1);
     titanGraphics.beginPath();
     titanGraphics.moveTo(45, 15);
-    titanGraphics.quadraticCurveTo(60, 5, 75, 15);
+    titanGraphics.lineTo(60, 5);
+    titanGraphics.lineTo(75, 15);
     titanGraphics.lineTo(75, 20);
-    titanGraphics.quadraticCurveTo(60, 12, 45, 20);
+    titanGraphics.lineTo(60, 12);
+    titanGraphics.lineTo(45, 20);
     titanGraphics.closePath();
     titanGraphics.fillPath();
     
@@ -407,15 +409,11 @@ function createLeviathanBaiterGraphics(scene) {
     
     // Main body - long and sinuous
     leviathanGraphics.fillStyle(0x00ffff, 1);
-    leviathanGraphics.beginPath();
-    leviathanGraphics.ellipse(60, 55, 80, 45, 0.3, 0, Math.PI * 2);
-    leviathanGraphics.fill();
+    leviathanGraphics.fillEllipse(60, 55, 160, 90);
     
     // Underbelly - lighter
     leviathanGraphics.fillStyle(0x00ffaa, 1);
-    leviathanGraphics.beginPath();
-    leviathanGraphics.ellipse(60, 60, 70, 35, 0.3, 0, Math.PI * 2);
-    leviathanGraphics.fill();
+    leviathanGraphics.fillEllipse(60, 60, 140, 70);
     
     // Head - triangular predator shape
     leviathanGraphics.fillStyle(0x00ffff, 1);
@@ -467,7 +465,8 @@ function createLeviathanBaiterGraphics(scene) {
     leviathanGraphics.lineStyle(4, 0x00ffff, 1);
     leviathanGraphics.beginPath();
     leviathanGraphics.moveTo(10, 55);
-    leviathanGraphics.quadraticCurveTo(-10, 40, -5, 20);
+    leviathanGraphics.lineTo(-10, 40);
+    leviathanGraphics.lineTo(-5, 20);
     leviathanGraphics.stroke();
     
     leviathanGraphics.generateTexture('leviathanBaiter', 140, 100);
