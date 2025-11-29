@@ -24,7 +24,17 @@ const gameState = {
     timeRemaining: 0,
     enemiesToKillThisWave: 0,
     killsThisWave: 0,
-    nextExtraLife: 10000
+    nextExtraLife: 10000,
+    bossActive: false,
+    currentBossKey: null,
+    currentBossName: '',
+    pendingBossWave: null,
+    bossesDefeated: 0,
+    bossQueue: [],
+    classicBossFlags: { 10: false, 20: false, 30: false },
+    survivalBossFlags: { 10: false, 20: false, 30: false },
+    survivalBossesDefeated: 0,
+    totalSurvivalDuration: 30 * 60 * 1000
 };
 
 // Player state
@@ -67,6 +77,7 @@ let powerUps;
 let humans;
 let drones;
 let explosions;
+let bosses;
 
 // UI elements
 let scoreText;

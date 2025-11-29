@@ -1,0 +1,280 @@
+// ------------------------
+// Boss Spawning, Combat, and Core Management
+// ------------------------
+
+function createBossTrail(scene, boss) {
+    if (!scene || !boss) return;
+    if (boss.bossType === 'fortressTurret') return; // Stationary bosses have no trail
+
+    const cfg = BOSS_TRAIL_CONFIGS[boss.bossType] || BOSS_TRAIL_CONFIGS.megaLander;
+    const emitter = scene.add.particles(0, 0, 'particle', {
+        follow: boss,
+        lifespan: cfg.lifespan,
+        scale: cfg.scale,
+        alpha: cfg.alpha,
+        tint: cfg.tint,
+        quantity: cfg.quantity || 1,
+        frequency: cfg.frequency,
+        speedX: { min: -cfg.speed, max: cfg.speed },
+        speedY: { min: -cfg.speed * 0.6, max: cfg.speed * 0.6 },
+        blendMode: cfg.blendMode || 'ADD',
+        gravityY: cfg.gravityY || 0
+    });
+
+    boss.trailEmitter = emitter;
+    boss.once('destroy', () => {
+        const trail = boss.trailEmitter;
+        if (trail) {
+            trail.stop();
+            trail.stopFollow();
+            scene.time.delayedCall(500, () => {
+                if (trail && trail.destroy) trail.destroy();
+            });
+            boss.trailEmitter = null;
+        }
+    });
+}
+
+function spawnBoss(scene, type, x, y) {
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(x / 200) * 30;
+    const minClearance = 60;
+    const topLimit = 30;
+    const maxY = groundLevel - terrainVariation - minClearance;
+    const spawnY = Phaser.Math.Clamp(y, topLimit, Math.max(topLimit + 20, maxY));
+    
+    const boss = bosses.create(x, spawnY, type);
+    
+    const scale = getBossScale(type);
+    boss.setScale(scale);
+    boss.bossType = type;
+    boss.hp = getBossHP(type);
+    boss.maxHP = boss.hp;
+    boss.lastShot = 0;
+    
+    // Special properties per boss
+    if (type === 'megaLander') boss.orbitAngle = 0;
+    if (type === 'titanMutant') boss.wobbleAngle = 0;
+    if (type === 'hiveDrone') boss.hoverY = spawnY;
+    if (type === 'behemothBomber') { boss.bomberDirection = 1; boss.lastBombDrop = 0; }
+    if (type === 'colossalPod') boss.podPattern = 0;
+    if (type === 'leviathanBaiter') boss.serpentinePhase = 0;
+    if (type === 'apexKamikaze') boss.rotation = 0;
+    if (type === 'fortressTurret') { boss.isPlanted = false; boss.barrelMode = 0; }
+    if (type === 'overlordShield') boss.orbitAngle = 0;
+    
+    // Initial velocity for most bosses
+    let speed = 0;
+    if (type !== 'fortressTurret') {
+        speed = 40;
+    }
+    boss.setVelocity((Math.random() - 0.5) * speed, (Math.random() - 0.5) * speed);
+    
+    createSpawnEffect(scene, x, spawnY, 'boss');
+    if (audioManager) audioManager.playSound('enemySpawn');
+
+    createBossTrail(scene, boss);
+    return boss;
+}
+
+function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngle) {
+    const proj = enemyProjectiles.create(sourceX, sourceY, shotConfig.projectileType);
+    proj.setScale(1.5);
+    
+    // Calculate actual fire direction
+    let angle = fireAngle;
+    if (!angle) {
+        angle = Phaser.Math.Angle.Between(sourceX, sourceY, player.x, player.y);
+    }
+    
+    proj.setVelocity(
+        Math.cos(angle) * shotConfig.speed,
+        Math.sin(angle) * shotConfig.speed
+    );
+    proj.rotation = angle;
+    proj.enemyType = boss.bossType;
+    proj.damage = shotConfig.damage;
+    
+    // Add particle effects for heavy projectiles
+    if (shotConfig.damage > 1.5) {
+        const emitter = scene.add.particles(0, 0, 'particle', {
+            follow: proj,
+            scale: { start: 0.5, end: 0 },
+            alpha: { start: 0.7, end: 0 },
+            tint: 0xff6600,
+            lifespan: 250,
+            frequency: 30,
+            blendMode: 'ADD'
+        });
+        proj.emitter = emitter;
+
+        const originalDestroy = proj.destroy.bind(proj);
+        proj.destroy = () => {
+            if (proj.emitter) {
+                proj.emitter.stop();
+                proj.emitter.stopFollow();
+                scene.time.delayedCall(500, () => {
+                    if (proj.emitter) proj.emitter.destroy();
+                });
+            }
+            originalDestroy();
+        };
+    }
+
+    if (audioManager) audioManager.playSound('enemyShoot');
+    scene.time.delayedCall(4000, () => {
+        if (proj && proj.active) proj.destroy();
+    });
+}
+
+function hitBoss(projectile, boss) {
+    boss.hp -= projectile.damage || 1;
+    
+    // Visual hit feedback
+    scene.tweens.add({
+        targets: boss,
+        alpha: 0.6,
+        duration: 100,
+        yoyo: true,
+        ease: 'Linear'
+    });
+    
+    if (audioManager) audioManager.playSound('hitEnemy');
+    if (boss.hp <= 0) destroyBoss(this, boss);
+    if (!projectile.isPiercing) projectile.destroy();
+}
+
+function destroyBoss(scene, boss) {
+    // Massive death effect
+    screenShake(scene, 25, 500);
+    
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+            createEnhancedDeathEffect(scene, boss.x, boss.y, boss.bossType);
+        }, i * 150);
+    }
+
+    // Special boss death effects
+    switch (boss.bossType) {
+        case 'megaLander':
+            // Tentacles snap back
+            for (let i = 0; i < 4; i++) {
+                createExplosion(scene, boss.x + Math.cos(i * Math.PI / 2) * 40, boss.y + Math.sin(i * Math.PI / 2) * 40, 0xff4444);
+            }
+            break;
+        case 'titanMutant':
+            // Arms fall
+            for (let i = 0; i < 3; i++) {
+                const armX = boss.x + (i - 1) * 40;
+                createExplosion(scene, armX, boss.y + 40, 0xffaa66);
+            }
+            break;
+        case 'behemothBomber':
+            // Chain reaction of bombs
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createExplosion(scene, boss.x + Math.random() * 80 - 40, boss.y + Math.random() * 60 - 30, 0xff5533);
+                }, i * 100);
+            }
+            break;
+        case 'overlordShield':
+            // Shield burst outward
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                createExplosion(scene, boss.x + Math.cos(angle) * 60, boss.y + Math.sin(angle) * 60, 0x00ffff);
+            }
+            break;
+    }
+
+    const score = getBossScore(boss.bossType);
+    gameState.score += score * 2;  // Double score for bosses
+
+    const scorePopup = scene.add.text(
+        boss.x, boss.y - 40,
+        '★ BOSS DOWN ★\n+' + (score * 2),
+        {
+            fontSize: '24px',
+            fontFamily: 'Orbitron',
+            color: '#ffff00',
+            stroke: '#000000',
+            strokeThickness: 4,
+            align: 'center'
+        }
+    ).setOrigin(0.5);
+    
+    scene.tweens.add({
+        targets: scorePopup,
+        y: scorePopup.y - 60,
+        alpha: 0,
+        duration: 2000,
+        onComplete: () => scorePopup.destroy()
+    });
+
+    // Guaranteed powerup drop
+    spawnPowerUp(scene, boss.x, boss.y);
+    spawnPowerUp(scene, boss.x, boss.y);
+
+    boss.destroy();
+
+    // Check if boss wave complete
+    if (gameState.mode === 'classic' && bosses.countActive(true) === 0 && enemies.countActive(true) === 0) {
+        completeBossWave(scene);
+    }
+}
+
+function completeBossWave(scene) {
+    const completedWave = gameState.wave;
+    gameState.score += 3000;  // Large bonus for beating boss
+    if (audioManager) audioManager.playSound('waveComplete');
+
+    const bossWaveText = scene.add.text(
+        CONFIG.width / 2,
+        CONFIG.height / 2,
+        `BOSS DEFEATED!\nWAVE ${completedWave} COMPLETE!\nBonus: 3000 points`,
+        {
+            fontSize: '32px',
+            fontFamily: 'Orbitron',
+            color: '#00ff00',
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 4
+        }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(200);
+
+    scene.tweens.add({
+        targets: bossWaveText,
+        alpha: 0,
+        y: CONFIG.height / 2 - 80,
+        duration: 3000,
+        onComplete: () => bossWaveText.destroy()
+    });
+
+    gameState.wave++;
+    gameState.killsThisWave = 0;
+    gameState.enemiesToKillThisWave = 20 + (gameState.wave - 1) * 5;
+    
+    scene.time.delayedCall(3000, () => {
+        spawnEnemyWave(scene);
+    });
+}
+
+function hitBossProjectile(playerSprite, projectile) {
+    // Find if this projectile came from a boss
+    const sourceType = projectile.enemyType;
+    
+    if (playerState.powerUps.invincibility > 0) {
+        projectile.destroy();
+        return;
+    }
+    
+    if (playerState.powerUps.shield > 0) {
+        playerState.powerUps.shield = 0;
+        projectile.destroy();
+        screenShake(this, 10, 150);
+        if (audioManager) audioManager.playSound('hitPlayer');
+    } else {
+        projectile.destroy();
+        screenShake(this, 15, 300);
+        playerDie(this);
+    }
+}
