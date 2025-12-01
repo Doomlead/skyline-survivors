@@ -48,6 +48,8 @@ function create() {
     explosions = this.add.group();
     bosses = this.physics.add.group();
 
+    particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
+
     cursors = this.input.keyboard.createCursorKeys();
     spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
@@ -69,6 +71,11 @@ function create() {
         if (this._restartHandler) {
             this.input.keyboard.off('keydown-R', this._restartHandler);
             this._restartHandler = null;
+        }
+
+        if (particleManager) {
+            particleManager.destroy();
+            particleManager = null;
         }
     });
 
@@ -108,6 +115,10 @@ function update(time, delta) {
     }
 
     updatePlayer(this, time);
+
+    if (particleManager) {
+        particleManager.update(delta);
+    }
     
     // -- Seamless Infinite Loop Logic --
     
