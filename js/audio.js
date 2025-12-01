@@ -10,11 +10,19 @@ class AudioManager {
         this.sfxVolume = 0.7;
         this.isMuted = false;
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.musicSource = null;
+        this.musicGain = null;
+        this.musicBufferPromise = null;
         this.initSounds();
     }
 
     initSounds() {
-        this.sounds.bgMusic = { type: 'synth', play: () => this.playAmbientMusic() };
+        this.sounds.bgMusic = {
+            type: 'file',
+            buffer: null,
+            url: 'assets/sounds/music/Music.ogg',
+            play: () => this.playAmbientMusic()
+        };
 
         // Player
         this.sounds.playerFire = { type: 'synth', freq: 800, duration: 0.1, waveform: 'sine' };
@@ -143,45 +151,67 @@ class AudioManager {
         source.stop(now + duration);
     }
 
-    playAmbientMusic() {
-        if (this.isMuted) return;
-        const now = this.audioContext.currentTime;
-        const tempo = 0.5;
-        const beatDuration = 1 / tempo;
-        const notes = [
-            { freq: 440, start: 0, duration: beatDuration * 2 },
-            { freq: 550, start: beatDuration * 2, duration: beatDuration },
-            { freq: 660, start: beatDuration * 3, duration: beatDuration },
-            { freq: 550, start: beatDuration * 4, duration: beatDuration * 2 },
-            { freq: 440, start: beatDuration * 6, duration: beatDuration * 2 }
-        ];
+    async loadMusicBuffer() {
+        if (this.sounds.bgMusic.buffer) return this.sounds.bgMusic.buffer;
 
-        notes.forEach(note => {
-            const osc = this.audioContext.createOscillator();
+        if (!this.musicBufferPromise) {
+            this.musicBufferPromise = fetch(this.sounds.bgMusic.url)
+                .then(response => response.arrayBuffer())
+                .then(data => this.audioContext.decodeAudioData(data))
+                .then(buffer => {
+                    this.sounds.bgMusic.buffer = buffer;
+                    return buffer;
+                })
+                .catch(error => {
+                    console.warn('Failed to load background music:', error);
+                    this.musicBufferPromise = null;
+                    return null;
+                });
+        }
+
+        return this.musicBufferPromise;
+    }
+
+    async playAmbientMusic() {
+        if (this.isMuted || this.musicSource) return;
+
+        try {
+            await this.audioContext.resume();
+            const buffer = await this.loadMusicBuffer();
+            if (!buffer) return;
+
+            const source = this.audioContext.createBufferSource();
             const gain = this.audioContext.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = note.freq;
-            gain.gain.setValueAtTime(this.musicVolume * 0.3, now + note.start);
-            gain.gain.linearRampToValueAtTime(0, now + note.start + note.duration);
-            osc.connect(gain);
-            gain.connect(this.audioContext.destination);
-            osc.start(now + note.start);
-            osc.stop(now + note.start + note.duration);
-        });
 
-        if (!this.musicLoopId) {
-            this.musicLoopId = setInterval(() => {
-                if (!this.isMuted && !gameState.gameOver) {
-                    this.playAmbientMusic();
-                }
-            }, beatDuration * 8 * 1000);
+            source.buffer = buffer;
+            source.loop = true;
+            gain.gain.value = this.musicVolume;
+
+            source.connect(gain);
+            gain.connect(this.audioContext.destination);
+
+            source.start(0);
+
+            this.musicSource = source;
+            this.musicGain = gain;
+
+            source.onended = () => {
+                if (this.musicSource === source) this.musicSource = null;
+            };
+        } catch (e) {
+            console.warn('Audio playback failed:', e);
         }
     }
 
     stopMusic() {
-        if (this.musicLoopId) {
-            clearInterval(this.musicLoopId);
-            this.musicLoopId = null;
+        if (this.musicSource) {
+            this.musicSource.stop();
+            this.musicSource.disconnect();
+            this.musicSource = null;
+        }
+        if (this.musicGain) {
+            this.musicGain.disconnect();
+            this.musicGain = null;
         }
     }
 
@@ -194,6 +224,9 @@ class AudioManager {
 
     setMusicVolume(value) {
         this.musicVolume = Math.max(0, Math.min(1, value));
+        if (this.musicGain) {
+            this.musicGain.gain.value = this.musicVolume;
+        }
     }
 
     setSFXVolume(value) {
