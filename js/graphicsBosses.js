@@ -47,12 +47,11 @@ function createMegaLanderGraphics(scene) {
     
     tentacles.forEach(tentacle => {
         // Tentacle base
-        megaLanderGraphics.fillStyle(0xff3333, 1);
+        megaLanderGraphics.lineStyle(6, 0xff3333, 1);
         megaLanderGraphics.beginPath();
         megaLanderGraphics.moveTo(tentacle.x, tentacle.y);
         megaLanderGraphics.lineTo(tentacle.x + Math.cos(tentacle.angle) * 25, tentacle.y + Math.sin(tentacle.angle) * 25);
-        megaLanderGraphics.lineWidth = 6;
-        megaLanderGraphics.stroke();
+        megaLanderGraphics.strokePath();
         
         // Glowing tip
         megaLanderGraphics.fillStyle(0xffaa00, 1);
@@ -517,12 +516,11 @@ function createApexKamikazeGraphics(scene) {
     
     appendages.forEach(app => {
         // Appendage stem
-        kamikazeGraphics.fillStyle(0xff3333, 1);
+        kamikazeGraphics.lineStyle(4, 0xff3333, 1);
         kamikazeGraphics.beginPath();
         kamikazeGraphics.moveTo(app.x, app.y);
         kamikazeGraphics.lineTo(app.x + Math.cos(app.angle) * 18, app.y + Math.sin(app.angle) * 18);
-        kamikazeGraphics.lineWidth = 4;
-        kamikazeGraphics.stroke();
+        kamikazeGraphics.strokePath();
         
         // Explosive head
         kamikazeGraphics.fillStyle(0xffff00, 1);
