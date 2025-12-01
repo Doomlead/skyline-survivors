@@ -466,7 +466,7 @@ function createLeviathanBaiterGraphics(scene) {
     leviathanGraphics.moveTo(10, 55);
     leviathanGraphics.lineTo(-10, 40);
     leviathanGraphics.lineTo(-5, 20);
-    leviathanGraphics.strokePath();
+    leviathanGraphics.stroke();
     
     leviathanGraphics.generateTexture('leviathanBaiter', 140, 100);
     leviathanGraphics.destroy();

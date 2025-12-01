@@ -207,15 +207,27 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+applyResponsiveResize();
 
 window.addEventListener('resize', () => {
-    if (game && game.scale) game.scale.refresh();
+    applyResponsiveResize();
 });
 window.addEventListener('orientationchange', () => {
     setTimeout(() => {
-        if (game && game.scale) game.scale.refresh();
+        applyResponsiveResize();
     }, 100);
 });
+
+function applyResponsiveResize() {
+    if (!game || !game.scale) return;
+    const { width, height } = getResponsiveScale();
+    game.scale.resize(width, height);
+    if (game.canvas) {
+        game.canvas.style.width = `${width}px`;
+        game.canvas.style.height = `${height}px`;
+    }
+    game.scale.refresh();
+}
 
 // ------------------------
 // Touch controls wiring
