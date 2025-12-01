@@ -112,37 +112,37 @@
 
     <!-- JavaScript Modules - Load order matters! -->
     <!-- 1. Config must load first (defines global state) -->
-    <script src="js/config.js"></script>
+    <script src="js/config/config.js"></script>
     <!-- 2. Audio system -->
-    <script src="js/audio.js"></script>
+    <script src="js/audio/audio.js"></script>
     <!-- 3. Utility functions -->
-    <script src="js/utility.js"></script>
+    <script src="js/core/utility.js"></script>
     <!-- 4. Player ship + all 8 player projectile types + homing missile -->
-    <script src="js/graphicsPlayer.js"></script>
+    <script src="js/graphics/graphicsPlayer.js"></script>
     <!-- 5. All 9 enemy projectile types + 6 original enemies + 10 new enemies -->
-    <script src="js/graphicsEnemies.js"></script>
+    <script src="js/graphics/graphicsEnemies.js"></script>
     <!-- 6. Boss graphics before shared utility atlas -->
-    <script src="js/graphicsBosses.js"></script>
+    <script src="js/graphics/graphicsBosses.js"></script>
     <!-- 7. Human sprite + 16 power-up types + 5 utility sprites + main entry point -->
-    <script src="js/graphicsUtils.js"></script>
+    <script src="js/graphics/graphicsUtils.js"></script>
     <!-- 8. Background creation -->
-    <script src="js/background.js"></script>
+    <script src="js/graphics/background.js"></script>
     <!-- 9. UI and HUD -->
-    <script src="js/ui.js"></script>
+    <script src="js/ui/ui.js"></script>
     <!-- 10. Power-up system -->
-    <script src="js/powerups.js"></script>
+    <script src="js/entities/powerups.js"></script>
     <!-- 11. Player mechanics -->
-    <script src="js/player.js"></script>
+    <script src="js/entities/player.js"></script>
     <!-- 12. defines constants used by other files-->
-    <script src="js/enemyConfig.js"></script>
+    <script src="js/config/enemyConfig.js"></script>
     <!-- 13. Boss constants and behavior definitions -->
-    <script src="js/bossConfig.js"></script>
-    <script src="js/enemyBehaviors.js"></script>
-    <script src="js/bossBehavior.js"></script>
+    <script src="js/config/bossConfig.js"></script>
+    <script src="js/entities/enemyBehaviors.js"></script>
+    <script src="js/entities/bossBehavior.js"></script>
     <!-- 14. contains spawning/combat that uses both config and behaviors -->
-    <script src="js/bossCore.js"></script>
-    <script src="js/enemyCore.js"></script>
+    <script src="js/entities/bossCore.js"></script>
+    <script src="js/entities/enemyCore.js"></script>
     <!-- 15. Main game scene (must load last - initializes Phaser) -->
-    <script src="js/game.js"></script>
+    <script src="js/core/game.js"></script>
 </body>
 </html>
