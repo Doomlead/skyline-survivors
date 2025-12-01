@@ -214,7 +214,6 @@ function destroyEnemy(scene, enemy) {
     // Special death effects
     if (enemy.enemyType === 'kamikaze') {
         createExplosion(scene, enemy.x, enemy.y, 0xff0000);
-        screenShake(scene, 15, 300);
         enemies.children.entries.forEach(other => {
             if (other !== enemy && other.active && Phaser.Math.Distance.Between(enemy.x, enemy.y, other.x, other.y) < 80) {
                 other.hp -= 1;
@@ -299,7 +298,6 @@ function destroyEnemy(scene, enemy) {
     });
 
     if (Math.random() < 0.2) spawnPowerUp(scene, enemy.x, enemy.y);
-    screenShake(scene, 4, 100);
     enemy.destroy();
 
     if (gameState.mode === 'classic') {

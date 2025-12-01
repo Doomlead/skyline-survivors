@@ -160,10 +160,6 @@ function createEnhancedDeathEffect(scene, x, y, enemyType) {
         ease: 'Power2.easeOut',
         onComplete: () => blast.destroy()
     });
-    const bossTypes = ['bomber', 'pod'];
-    if (bossTypes.includes(enemyType)) {
-        screenShake(scene, 12, 200);
-    }
 }
 
 function getResponsiveScale() {
