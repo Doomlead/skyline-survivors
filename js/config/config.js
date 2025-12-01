@@ -92,6 +92,9 @@ let uiContainer;
 // Global audio manager instance
 let audioManager;
 
+// Global particle manager instance
+let particleManager;
+
 // Virtual input for touch controls
 window.virtualInput = {
     left: false,

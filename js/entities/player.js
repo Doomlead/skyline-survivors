@@ -366,7 +366,11 @@ function useSmartBomb(scene) {
 function useHyperspace(scene) {
     player.x = Math.random() * CONFIG.worldWidth;
     player.y = 100 + Math.random() * (CONFIG.worldHeight - 200);
-    createExplosion(scene, player.x, player.y, 0x00ffff);
+    if (particleManager) {
+        particleManager.blackHoleExplosion(player.x, player.y);
+    } else {
+        createExplosion(scene, player.x, player.y, 0x00ffff);
+    }
     if (audioManager) audioManager.playSound('hyperspace');
 }
 
