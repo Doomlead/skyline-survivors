@@ -246,8 +246,20 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, pier
 }
 
 function updateProjectiles(scene) {
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const destroyIfGrounded = (proj) => {
+        const terrainVariation = Math.sin(proj.x / 200) * 30;
+        const groundY = groundLevel - terrainVariation - 15;
+        if (proj.y >= groundY) {
+            proj.destroy();
+            return true;
+        }
+        return false;
+    };
+
     projectiles.children.entries.forEach(proj => {
         wrapWorldBounds(proj);
+        if (!proj.active || destroyIfGrounded(proj)) return;
         if (proj.projectileType === 'homing') {
             let nearestEnemy = null;
             let nearestDist = Infinity;
@@ -268,6 +280,7 @@ function updateProjectiles(scene) {
 
     enemyProjectiles.children.entries.forEach(proj => {
         wrapWorldBounds(proj);
+        if (!proj.active || destroyIfGrounded(proj)) return;
         if (playerState.powerUps.timeSlow > 0 && !proj.isSlowed) {
             proj.setVelocity(proj.body.velocity.x * 0.3, proj.body.velocity.y * 0.3);
             proj.isSlowed = true;
