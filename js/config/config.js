@@ -31,10 +31,10 @@ const gameState = {
     pendingBossWave: null,
     bossesDefeated: 0,
     bossQueue: [],
-    classicBossFlags: { 10: false, 20: false, 30: false },
-    survivalBossFlags: { 10: false, 20: false, 30: false },
+    classicBossFlags: { 5: false, 10: false, 15: false },
+    survivalBossFlags: { 5: false, 10: false, 15: false },
     survivalBossesDefeated: 0,
-    totalSurvivalDuration: 30 * 60 * 1000
+    totalSurvivalDuration: 15 * 60 * 1000
 };
 
 // Player state
@@ -148,7 +148,7 @@ function resetGameState() {
     gameState.pendingBossWave = null;
     gameState.bossesDefeated = 0;
     gameState.bossQueue = [];
-    gameState.classicBossFlags = { 10: false, 20: false, 30: false };
-    gameState.survivalBossFlags = { 10: false, 20: false, 30: false };
+    gameState.classicBossFlags = { 5: false, 10: false, 15: false };
+    gameState.survivalBossFlags = { 5: false, 10: false, 15: false };
     gameState.survivalBossesDefeated = 0;
 }

@@ -205,7 +205,7 @@ function getScreenPosition(scene, worldX, worldY) {
 
 function startGame(mode = 'classic') {
     gameState.mode = mode;
-    if (mode === 'survival') gameState.timeRemaining = 30 * 60 * 1000;
+    if (mode === 'survival') gameState.timeRemaining = gameState.totalSurvivalDuration;
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
 

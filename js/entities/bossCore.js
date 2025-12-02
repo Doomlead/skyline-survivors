@@ -351,10 +351,19 @@ function completeBossWave(scene) {
         onComplete: () => bossWaveText.destroy()
     });
 
+    const isFinalBossWave = completedWave >= 15;
+
+    if (isFinalBossWave) {
+        scene.time.delayedCall(1000, () => {
+            winGame(scene);
+        });
+        return;
+    }
+
     gameState.wave++;
     gameState.killsThisWave = 0;
     gameState.enemiesToKillThisWave = 20 + (gameState.wave - 1) * 5;
-    
+
     scene.time.delayedCall(3000, () => {
         spawnEnemyWave(scene);
     });
@@ -385,7 +394,7 @@ function checkSurvivalBosses(scene) {
     if (gameState.mode !== 'survival' || gameState.bossActive) return;
 
     const elapsed = gameState.totalSurvivalDuration - gameState.timeRemaining;
-    const thresholds = [10, 20, 30];
+    const thresholds = [5, 10, 15];
 
     thresholds.forEach(minute => {
         if (!gameState.survivalBossFlags[minute] && elapsed >= minute * 60 * 1000) {
