@@ -17,6 +17,8 @@ function createEnemyProjectileGraphics(scene) {
     enemyProjGraphics.fillEllipse(7, 4, 4, 2);
     enemyProjGraphics.fillStyle(0xffaaaa, 1);
     enemyProjGraphics.fillCircle(9, 4, 1);
+    enemyProjGraphics.lineStyle(1, 0xff6666, 0.6);
+    enemyProjGraphics.strokeEllipse(6, 4, 10, 6);
     enemyProjGraphics.generateTexture('enemyProjectile', 12, 8);
     enemyProjGraphics.destroy();
 
@@ -28,6 +30,8 @@ function createEnemyProjectileGraphics(scene) {
     landerProjGraphics.fillCircle(5, 5, 3);
     landerProjGraphics.fillStyle(0xff8888, 1);
     landerProjGraphics.fillCircle(5, 5, 1.5);
+    landerProjGraphics.lineStyle(1, 0xffddaa, 0.5);
+    landerProjGraphics.strokeCircle(5, 5, 4);
     landerProjGraphics.generateTexture('enemyProjectile_lander', 10, 10);
     landerProjGraphics.destroy();
 
@@ -49,6 +53,8 @@ function createEnemyProjectileGraphics(scene) {
     mutantProjGraphics.fillPath();
     mutantProjGraphics.fillStyle(0xff4444, 1);
     mutantProjGraphics.fillCircle(6, 6, 2);
+    mutantProjGraphics.lineStyle(1, 0x770000, 0.8);
+    mutantProjGraphics.strokeCircle(6, 6, 5.5);
     mutantProjGraphics.generateTexture('enemyProjectile_mutant', 12, 12);
     mutantProjGraphics.destroy();
 
@@ -62,6 +68,13 @@ function createEnemyProjectileGraphics(scene) {
     droneProjGraphics.fillCircle(5, 5, 2);
     droneProjGraphics.fillStyle(0xffaaaa, 1);
     droneProjGraphics.fillCircle(5, 5, 1);
+    droneProjGraphics.lineStyle(1, 0xff8888, 0.6);
+    droneProjGraphics.beginPath();
+    droneProjGraphics.moveTo(5, 0);
+    droneProjGraphics.lineTo(5, 10);
+    droneProjGraphics.moveTo(0, 5);
+    droneProjGraphics.lineTo(10, 5);
+    droneProjGraphics.strokePath();
     droneProjGraphics.generateTexture('enemyProjectile_drone', 10, 10);
     droneProjGraphics.destroy();
 
@@ -77,6 +90,8 @@ function createEnemyProjectileGraphics(scene) {
     bomberProjGraphics.fillCircle(6, 1, 2);
     bomberProjGraphics.fillStyle(0xffff00, 1);
     bomberProjGraphics.fillCircle(6, 1, 1);
+    bomberProjGraphics.lineStyle(1, 0xffaa00, 0.6);
+    bomberProjGraphics.strokeCircle(6, 6, 6);
     bomberProjGraphics.generateTexture('enemyProjectile_bomber', 12, 12);
     bomberProjGraphics.destroy();
 
@@ -92,6 +107,8 @@ function createEnemyProjectileGraphics(scene) {
     podProjGraphics.fillCircle(5, 5, 2.5);
     podProjGraphics.fillStyle(0xff8888, 1);
     podProjGraphics.fillCircle(5, 5, 1);
+    podProjGraphics.lineStyle(1, 0x660000, 0.6);
+    podProjGraphics.strokeCircle(5, 5, 5);
     podProjGraphics.generateTexture('enemyProjectile_pod', 10, 10);
     podProjGraphics.destroy();
 
@@ -108,6 +125,8 @@ function createEnemyProjectileGraphics(scene) {
     swarmerProjGraphics.fillPath();
     swarmerProjGraphics.fillStyle(0xffaaaa, 1);
     swarmerProjGraphics.fillCircle(7, 3, 1);
+    swarmerProjGraphics.lineStyle(1, 0xcc3333, 0.7);
+    swarmerProjGraphics.strokeEllipse(4, 3, 7, 5);
     swarmerProjGraphics.generateTexture('enemyProjectile_swarmer', 8, 6);
     swarmerProjGraphics.destroy();
 
@@ -121,6 +140,8 @@ function createEnemyProjectileGraphics(scene) {
     baiterProjGraphics.fillRect(8, 2, 6, 4);
     baiterProjGraphics.fillStyle(0xff8888, 1);
     baiterProjGraphics.fillRect(12, 3, 2, 2);
+    baiterProjGraphics.lineStyle(1, 0xff5555, 0.6);
+    baiterProjGraphics.strokeRect(0.5, 2.5, 13, 3);
     baiterProjGraphics.generateTexture('enemyProjectile_baiter', 14, 8);
     baiterProjGraphics.destroy();
 
@@ -139,6 +160,8 @@ function createEnemyProjectileGraphics(scene) {
     mineGraphics.fillTriangle(0, 8, 4, 6, 4, 10);
     mineGraphics.fillStyle(0xffff00, 1);
     mineGraphics.fillCircle(8, 8, 2);
+    mineGraphics.lineStyle(1, 0xffaaaa, 0.6);
+    mineGraphics.strokeCircle(8, 8, 7.5);
     mineGraphics.generateTexture('mine', 16, 16);
     mineGraphics.destroy();
 }
@@ -157,6 +180,10 @@ function createOriginalEnemyGraphics(scene) {
     landerGraphics.fillStyle(0xff4444, 1);
     landerGraphics.fillRect(2, 10, 1, 2);
     landerGraphics.fillRect(9, 10, 1, 2);
+    landerGraphics.lineStyle(1, 0xff2222, 0.7);
+    landerGraphics.strokeEllipse(6, 6, 10, 7);
+    landerGraphics.fillStyle(0xffff99, 0.9);
+    landerGraphics.fillCircle(6, 5, 1.2);
     landerGraphics.generateTexture('lander', 12, 12);
     landerGraphics.destroy();
 
@@ -212,6 +239,10 @@ function createOriginalEnemyGraphics(scene) {
     mutantGraphics.lineTo(7, 10);
     mutantGraphics.closePath();
     mutantGraphics.fillPath();
+    mutantGraphics.lineStyle(1, 0xcc5522, 0.6);
+    mutantGraphics.strokeEllipse(6, 5.5, 5, 5.5);
+    mutantGraphics.fillStyle(0xffffaa, 0.8);
+    mutantGraphics.fillCircle(6, 3.5, 0.8);
     mutantGraphics.generateTexture('mutant', 12, 12);
     mutantGraphics.destroy();
 
@@ -221,6 +252,10 @@ function createOriginalEnemyGraphics(scene) {
     droneGraphics.fillCircle(5, 5, 5);
     droneGraphics.fillStyle(0xff88ff, 0.6);
     droneGraphics.fillCircle(3, 3, 2);
+    droneGraphics.lineStyle(1, 0xaa22aa, 0.7);
+    droneGraphics.strokeCircle(5, 5, 5);
+    droneGraphics.fillStyle(0xffffff, 0.8);
+    droneGraphics.fillCircle(6.5, 4, 1);
     droneGraphics.generateTexture('drone', 10, 10);
     droneGraphics.destroy();
 
@@ -235,6 +270,10 @@ function createOriginalEnemyGraphics(scene) {
     bomberGraphics.fillCircle(8, 5, 2);
     bomberGraphics.fillStyle(0xffff00, 1);
     bomberGraphics.fillRect(7, 9, 2, 2);
+    bomberGraphics.lineStyle(1, 0x440000, 0.8);
+    bomberGraphics.strokeEllipse(8, 6, 11, 8);
+    bomberGraphics.fillStyle(0xffcc55, 0.7);
+    bomberGraphics.fillRect(5, 1, 6, 1.5);
     bomberGraphics.generateTexture('bomber', 16, 12);
     bomberGraphics.destroy();
 
@@ -244,6 +283,10 @@ function createOriginalEnemyGraphics(scene) {
     swarmerGraphics.fillCircle(4, 4, 4);
     swarmerGraphics.fillStyle(0x88ff88, 0.6);
     swarmerGraphics.fillCircle(3, 3, 1.5);
+    swarmerGraphics.lineStyle(1, 0x008800, 0.7);
+    swarmerGraphics.strokeCircle(4, 4, 3.5);
+    swarmerGraphics.fillStyle(0xbbffbb, 0.7);
+    swarmerGraphics.fillRect(3.2, 2.5, 1.6, 1);
     swarmerGraphics.generateTexture('swarmer', 8, 8);
     swarmerGraphics.destroy();
 
@@ -266,6 +309,10 @@ function createOriginalEnemyGraphics(scene) {
     podGraphics.fillCircle(7, 7, 2);
     podGraphics.fillCircle(13, 7, 2);
     podGraphics.fillCircle(10, 13, 2);
+    podGraphics.lineStyle(1, 0x550099, 0.7);
+    podGraphics.strokeEllipse(10, 10, 17, 17);
+    podGraphics.fillStyle(0xffee88, 0.7);
+    podGraphics.fillCircle(10, 6, 1.5);
     podGraphics.generateTexture('pod', 20, 20);
     podGraphics.destroy();
 
@@ -275,6 +322,15 @@ function createOriginalEnemyGraphics(scene) {
     baiterGraphics.fillTriangle(0, 6, 15, 0, 15, 12);
     baiterGraphics.fillStyle(0xff88ff, 0.5);
     baiterGraphics.fillTriangle(3, 6, 12, 2, 12, 10);
+    baiterGraphics.lineStyle(1, 0xcc00cc, 0.7);
+    baiterGraphics.beginPath();
+    baiterGraphics.moveTo(0, 6);
+    baiterGraphics.lineTo(15, 0);
+    baiterGraphics.lineTo(15, 12);
+    baiterGraphics.closePath();
+    baiterGraphics.strokePath();
+    baiterGraphics.fillStyle(0xffffff, 0.8);
+    baiterGraphics.fillCircle(11, 6, 1);
     baiterGraphics.generateTexture('baiter', 15, 12);
     baiterGraphics.destroy();
 }
@@ -308,6 +364,15 @@ function createNewEnemyGraphics(scene) {
     kamikazeGraphics.fillCircle(14, 6, 1.5);
     kamikazeGraphics.fillStyle(0x000000, 1);
     kamikazeGraphics.fillCircle(14.5, 6, 0.8);
+    kamikazeGraphics.lineStyle(1, 0xaa0000, 0.8);
+    kamikazeGraphics.beginPath();
+    kamikazeGraphics.moveTo(5, 3);
+    kamikazeGraphics.lineTo(16, 6);
+    kamikazeGraphics.lineTo(5, 9);
+    kamikazeGraphics.closePath();
+    kamikazeGraphics.strokePath();
+    kamikazeGraphics.fillStyle(0xffffaa, 0.8);
+    kamikazeGraphics.fillCircle(6, 6, 1);
     kamikazeGraphics.generateTexture('kamikaze', 18, 12);
     kamikazeGraphics.destroy();
 
@@ -330,6 +395,10 @@ function createNewEnemyGraphics(scene) {
     turretGraphics.fillCircle(8, 8, 2);
     turretGraphics.fillStyle(0xff8888, 0.6);
     turretGraphics.fillCircle(7, 7, 1);
+    turretGraphics.lineStyle(1, 0x222222, 0.8);
+    turretGraphics.strokeCircle(8, 8, 6);
+    turretGraphics.fillStyle(0xffffff, 0.6);
+    turretGraphics.fillRect(6, 6, 4, 1.5);
     turretGraphics.generateTexture('turret', 16, 16);
     turretGraphics.destroy();
 
@@ -357,6 +426,8 @@ function createNewEnemyGraphics(scene) {
         const y = 10 + Math.sin(angle) * 7;
         shieldGraphics.fillCircle(x, y, 1.5);
     }
+    shieldGraphics.lineStyle(1, 0x004455, 0.8);
+    shieldGraphics.strokeCircle(10, 10, 5.5);
     shieldGraphics.generateTexture('shield', 20, 20);
     shieldGraphics.destroy();
 
@@ -381,6 +452,8 @@ function createNewEnemyGraphics(scene) {
     seekerGraphics.fillCircle(7, 4, 0.8);
     seekerGraphics.fillCircle(7, 8, 0.8);
     seekerGraphics.fillCircle(11, 6, 0.8);
+    seekerGraphics.lineStyle(1, 0x441188, 0.7);
+    seekerGraphics.strokeEllipse(10, 6, 10, 8);
     seekerGraphics.generateTexture('seeker', 16, 12);
     seekerGraphics.destroy();
 
@@ -406,6 +479,10 @@ function createNewEnemyGraphics(scene) {
     // Central control node
     spawnerGraphics.fillStyle(0xff8800, 1);
     spawnerGraphics.fillCircle(10, 10, 2);
+    spawnerGraphics.lineStyle(1, 0x664400, 0.8);
+    spawnerGraphics.strokeEllipse(10, 10, 15, 13);
+    spawnerGraphics.fillStyle(0xffff99, 0.7);
+    spawnerGraphics.fillCircle(10, 6, 1.2);
     spawnerGraphics.generateTexture('spawner', 20, 20);
     spawnerGraphics.destroy();
 
@@ -437,6 +514,15 @@ function createNewEnemyGraphics(scene) {
     // Central eye
     shielderGraphics.fillStyle(0x00ff00, 1);
     shielderGraphics.fillCircle(10, 10, 2);
+    shielderGraphics.lineStyle(1, 0x005500, 0.7);
+    shielderGraphics.beginPath();
+    shielderGraphics.moveTo(10, 2);
+    shielderGraphics.lineTo(18, 10);
+    shielderGraphics.lineTo(10, 18);
+    shielderGraphics.lineTo(2, 10);
+    shielderGraphics.closePath();
+    shielderGraphics.strokePath();
+    shielderGraphics.strokeCircle(10, 10, 5);
     shielderGraphics.generateTexture('shielder', 20, 20);
     shielderGraphics.destroy();
 
@@ -474,6 +560,8 @@ function createNewEnemyGraphics(scene) {
     bouncerGraphics.moveTo(8, 9);
     bouncerGraphics.lineTo(12, 9);
     bouncerGraphics.strokePath();
+    bouncerGraphics.lineStyle(1, 0xffaa55, 0.7);
+    bouncerGraphics.strokeCircle(10, 7, 6);
     bouncerGraphics.generateTexture('bouncer', 16, 14);
     bouncerGraphics.destroy();
 
@@ -503,6 +591,8 @@ function createNewEnemyGraphics(scene) {
     sniperGraphics.fillStyle(0x555555, 1);
     sniperGraphics.fillTriangle(2, 0, 2, 5, 6, 5);
     sniperGraphics.fillTriangle(2, 14, 2, 9, 6, 9);
+    sniperGraphics.lineStyle(1, 0x222222, 0.8);
+    sniperGraphics.strokeEllipse(8, 7, 10, 8);
     sniperGraphics.generateTexture('sniper', 28, 14);
     sniperGraphics.destroy();
 
@@ -536,6 +626,10 @@ function createNewEnemyGraphics(scene) {
     swarmLeaderGraphics.fillCircle(4, 10, 1.5);
     swarmLeaderGraphics.fillCircle(16, 10, 1.5);
     swarmLeaderGraphics.fillCircle(10, 16, 1.5);
+    swarmLeaderGraphics.lineStyle(1, 0x331166, 0.7);
+    swarmLeaderGraphics.strokeEllipse(10, 10, 13, 11);
+    swarmLeaderGraphics.fillStyle(0xffee99, 0.7);
+    swarmLeaderGraphics.fillRect(9, 6, 2, 1.2);
     swarmLeaderGraphics.generateTexture('swarmLeader', 20, 20);
     swarmLeaderGraphics.destroy();
 
@@ -566,6 +660,8 @@ function createNewEnemyGraphics(scene) {
     regeneratorGraphics.fillCircle(10, 10, 2);
     regeneratorGraphics.fillStyle(0x00ff00, 1);
     regeneratorGraphics.fillCircle(10, 10, 1);
+    regeneratorGraphics.lineStyle(1, 0x006622, 0.8);
+    regeneratorGraphics.strokeEllipse(10, 10, 15, 13);
     regeneratorGraphics.generateTexture('regenerator', 20, 20);
     regeneratorGraphics.destroy();
 }
