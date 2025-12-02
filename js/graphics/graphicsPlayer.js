@@ -11,11 +11,23 @@ function createPlayerGraphics(scene) {
     // 1. Rear Engine Block (Dark Grey)
     playerGraphics.fillStyle(0x222233, 1);
     playerGraphics.fillRect(0, 6, 10, 12);
+    playerGraphics.lineStyle(1, 0x111122, 1);
+    playerGraphics.strokeRect(0.5, 6.5, 9, 11);
+    playerGraphics.lineStyle(1, 0x555577, 0.7);
+    playerGraphics.beginPath();
+    playerGraphics.moveTo(2, 7);
+    playerGraphics.lineTo(2, 17);
+    playerGraphics.moveTo(7, 7);
+    playerGraphics.lineTo(7, 17);
+    playerGraphics.strokePath();
     
     // 2. Engine Thrusters (Orange/Yellow Gradient Effect)
     playerGraphics.fillStyle(0xff4400, 1);
     playerGraphics.fillTriangle(0, 7, -4, 9, 0, 11);
     playerGraphics.fillTriangle(0, 13, -4, 15, 0, 17);
+    playerGraphics.fillStyle(0xffffaa, 0.8);
+    playerGraphics.fillRect(-1, 8, 3, 2);
+    playerGraphics.fillRect(-1, 14, 3, 2);
     playerGraphics.fillStyle(0xffff00, 1);
     playerGraphics.fillRect(0, 8, 2, 2);
     playerGraphics.fillRect(0, 14, 2, 2);
@@ -29,6 +41,14 @@ function createPlayerGraphics(scene) {
     playerGraphics.lineTo(6, 18);
     playerGraphics.closePath();
     playerGraphics.fillPath();
+    playerGraphics.lineStyle(1, 0x003344, 0.7);
+    playerGraphics.beginPath();
+    playerGraphics.moveTo(6, 12);
+    playerGraphics.lineTo(34, 14);
+    playerGraphics.lineTo(12, 22);
+    playerGraphics.lineTo(6, 18);
+    playerGraphics.closePath();
+    playerGraphics.strokePath();
 
     // 4. Top Wing/Fuselage (Lit Teal)
     playerGraphics.fillStyle(0x0088aa, 1);
@@ -39,6 +59,14 @@ function createPlayerGraphics(scene) {
     playerGraphics.lineTo(6, 6);
     playerGraphics.closePath();
     playerGraphics.fillPath();
+    playerGraphics.lineStyle(1, 0x00aadd, 0.6);
+    playerGraphics.beginPath();
+    playerGraphics.moveTo(6, 12);
+    playerGraphics.lineTo(34, 14);
+    playerGraphics.lineTo(12, 2);
+    playerGraphics.lineTo(6, 6);
+    playerGraphics.closePath();
+    playerGraphics.strokePath();
 
     // 5. Main Body Detail Stripe (White)
     playerGraphics.fillStyle(0xffffff, 0.8);
@@ -48,6 +76,11 @@ function createPlayerGraphics(scene) {
     playerGraphics.lineTo(10, 13);
     playerGraphics.closePath();
     playerGraphics.fillPath();
+    playerGraphics.lineStyle(1, 0x99ddff, 0.5);
+    playerGraphics.beginPath();
+    playerGraphics.moveTo(12, 10);
+    playerGraphics.lineTo(22, 11);
+    playerGraphics.strokePath();
 
     // 6. Cockpit (Glowing Glass)
     playerGraphics.fillStyle(0x00ffff, 0.7);
@@ -58,7 +91,7 @@ function createPlayerGraphics(scene) {
     playerGraphics.lineTo(12, 11);
     playerGraphics.closePath();
     playerGraphics.fillPath();
-    
+
     playerGraphics.lineStyle(1, 0x003333, 1);
     playerGraphics.beginPath();
     playerGraphics.moveTo(12, 5);
@@ -69,12 +102,18 @@ function createPlayerGraphics(scene) {
 
     playerGraphics.fillStyle(0xffffff, 0.9);
     playerGraphics.fillEllipse(15, 7, 3, 1.5);
+    playerGraphics.fillStyle(0x66ffff, 0.4);
+    playerGraphics.fillEllipse(15, 8.5, 5, 2.5);
 
     // 7. Weapon Hardpoint
     playerGraphics.fillStyle(0x333333, 1);
     playerGraphics.fillRect(14, 15, 8, 2);
     playerGraphics.fillStyle(0x111111, 1);
     playerGraphics.fillRect(22, 15.5, 2, 1);
+    playerGraphics.lineStyle(1, 0x777777, 0.6);
+    playerGraphics.strokeRect(14, 15, 10, 2);
+    playerGraphics.fillStyle(0xffaa00, 0.6);
+    playerGraphics.fillCircle(23, 16, 1.2);
 
     playerGraphics.generateTexture('player', 34, 24);
     playerGraphics.destroy();
