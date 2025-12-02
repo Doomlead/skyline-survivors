@@ -225,7 +225,7 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-applyResponsiveResize();
+game.events.once(Phaser.Core.Events.READY, applyResponsiveResize);
 
 window.addEventListener('resize', () => {
     applyResponsiveResize();
@@ -238,12 +238,22 @@ window.addEventListener('orientationchange', () => {
 
 function applyResponsiveResize() {
     if (!game || !game.scale) return;
+
+    // Phaser may not have created the canvas immediately; bail out and retry once ready
+    if (!game.isBooted || !game.scale.canvas) {
+        game.events.once(Phaser.Core.Events.READY, applyResponsiveResize);
+        return;
+    }
+
     const { width, height } = getResponsiveScale();
     game.scale.resize(width, height);
-    if (game.canvas) {
-        game.canvas.style.width = `${width}px`;
-        game.canvas.style.height = `${height}px`;
+
+    const canvas = game.scale.canvas || game.canvas;
+    if (canvas) {
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
     }
+
     game.scale.refresh();
 }
 
