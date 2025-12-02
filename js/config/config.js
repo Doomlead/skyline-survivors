@@ -41,6 +41,7 @@ const gameState = {
 const playerState = {
     fireRate: 200,
     lastFire: 0,
+    lastExhaustTime: 0,
     powerUps: {
         laser: 0,
         drone: 0,
@@ -121,6 +122,7 @@ function resetGameState() {
     gameState.nextExtraLife = 10000;
     playerState.fireRate = 200;
     playerState.lastFire = 0;
+    playerState.lastExhaustTime = 0;
     playerState.powerUps = {
         laser: 0,
         drone: 0,

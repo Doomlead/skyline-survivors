@@ -206,14 +206,20 @@ function shootAtPlayer(scene, enemy) {
 function hitEnemy(projectile, enemy) {
     enemy.hp -= projectile.damage || 1;
     if (audioManager) audioManager.playSound('hitEnemy');
+    if (projectile.projectileType === 'homing' && particleManager) {
+        particleManager.bulletExplosion(enemy.x, enemy.y);
+    }
     if (enemy.hp <= 0) destroyEnemy(this, enemy);
     if (!projectile.isPiercing) projectile.destroy();
 }
 
 function destroyEnemy(scene, enemy) {
+    let explosionSoundPlayed = false;
+
     // Special death effects
     if (enemy.enemyType === 'kamikaze') {
         createExplosion(scene, enemy.x, enemy.y, 0xff0000);
+        explosionSoundPlayed = true;
         enemies.children.entries.forEach(other => {
             if (other !== enemy && other.active && Phaser.Math.Distance.Between(enemy.x, enemy.y, other.x, other.y) < 80) {
                 other.hp -= 1;
@@ -222,6 +228,7 @@ function destroyEnemy(scene, enemy) {
         });
     } else if (enemy.enemyType === 'shield' && !enemy.shieldBroken) {
         createExplosion(scene, enemy.x, enemy.y, 0x00ffff);
+        explosionSoundPlayed = true;
     } else if (enemy.enemyType === 'spawner') {
         if (Math.random() < 0.5 && enemy.minionsSpawned < 8) {
             for (let i = 0; i < 3; i++) {
@@ -263,8 +270,13 @@ function destroyEnemy(scene, enemy) {
             fallingHuman.body.setSize(12, 18, true);
         }
         createExplosion(scene, fallingHuman.x, fallingHuman.y, 0x00ff00);
+        explosionSoundPlayed = true;
     }
 
+    if (particleManager) {
+        if (!explosionSoundPlayed && audioManager) audioManager.playSound('explosion');
+        particleManager.enemyExplosion(enemy.x, enemy.y);
+    }
     createEnhancedDeathEffect(scene, enemy.x, enemy.y, enemy.enemyType);
     const score = getEnemyScore(enemy.enemyType);
     gameState.score += score;

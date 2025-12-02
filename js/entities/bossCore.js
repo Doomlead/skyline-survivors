@@ -207,6 +207,9 @@ function hitBoss(projectile, boss) {
     });
 
     if (audioManager) audioManager.playSound('hitEnemy');
+    if (projectile.projectileType === 'homing' && particleManager) {
+        particleManager.bulletExplosion(boss.x, boss.y);
+    }
     if (boss.hp <= 0) destroyBoss(scene, boss);
     if (!projectile.isPiercing) projectile.destroy();
 }

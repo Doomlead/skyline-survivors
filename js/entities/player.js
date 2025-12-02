@@ -73,6 +73,20 @@ function updatePlayer(scene, time) {
             Math.floor(255 * colorShift)
         ));
     }
+
+    const velocityX = player.body.velocity.x;
+    const velocityY = player.body.velocity.y;
+    const movementSpeed = Math.hypot(velocityX, velocityY);
+    if (particleManager && movementSpeed > 20) {
+        const rotation = movementSpeed > 0
+            ? Math.atan2(velocityY, velocityX)
+            : (playerState.direction === 'right' ? 0 : Math.PI);
+        const exhaustInterval = 40;
+        if (!playerState.lastExhaustTime || time - playerState.lastExhaustTime >= exhaustInterval) {
+            particleManager.makeExhaustFire(player.x, player.y, rotation);
+            playerState.lastExhaustTime = time;
+        }
+    }
 }
 
 function fireWeapon(scene) {
@@ -298,9 +312,13 @@ function playerHitProjectile(playerSprite, projectile) {
 function playerDie(scene) {
     if (scene._isRespawning || gameState.gameOver) return;
     gameState.lives--;
-    createExplosion(scene, player.x, player.y);
+    if (particleManager) {
+        if (audioManager) audioManager.playSound('explosion');
+        particleManager.playerExplosion(player.x, player.y);
+    } else {
+        createExplosion(scene, player.x, player.y);
+    }
     screenShake(scene, 20, 500);
-    if (audioManager) audioManager.playSound('explosion');
 
     if (gameState.lives <= 0) {
         gameOver(scene);
