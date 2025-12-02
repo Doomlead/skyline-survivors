@@ -13,7 +13,27 @@ class AudioManager {
         this.musicSource = null;
         this.musicGain = null;
         this.musicBufferPromise = null;
+        this.setupUnlockHandlers();
         this.initSounds();
+    }
+
+    setupUnlockHandlers() {
+        const unlock = async () => {
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                try {
+                    await this.audioContext.resume();
+                } catch (e) {
+                    console.warn('AudioContext resume failed:', e);
+                }
+            }
+            ['pointerdown', 'touchstart', 'keydown'].forEach(evt => {
+                window.removeEventListener(evt, unlock);
+            });
+        };
+
+        ['pointerdown', 'touchstart', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, unlock, { once: true });
+        });
     }
 
     initSounds() {
