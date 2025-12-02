@@ -19,6 +19,9 @@ function initializeGame(scene) {
         spawnEnemyWave(scene);
     }
     updateUI();
+    if (audioManager) {
+        audioManager.playAmbientMusic();
+    }
 }
 
 function preload() {
@@ -90,14 +93,18 @@ function create() {
     createUI(this);
 
     audioManager = new AudioManager(this);
-    audioManager.playAmbientMusic();
 
-    initializeGame(this);
+    if (gameState.mode) {
+        initializeGame(this);
+    } else {
+        this.physics.pause();
+    }
     this.gameScene = this;
 }
 
 
 function update(time, delta) {
+    if (!gameState.mode) return;
     if (gameState.gameOver) {
         if (Phaser.Input.Keyboard.JustDown(rKey)) {
             resetGameState();
