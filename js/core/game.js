@@ -19,9 +19,6 @@ function initializeGame(scene) {
         spawnEnemyWave(scene);
     }
     updateUI();
-    if (audioManager) {
-        audioManager.playAmbientMusic();
-    }
 }
 
 function preload() {
@@ -93,18 +90,14 @@ function create() {
     createUI(this);
 
     audioManager = new AudioManager(this);
+    audioManager.playAmbientMusic();
 
-    if (gameState.mode) {
-        initializeGame(this);
-    } else {
-        this.physics.pause();
-    }
+    initializeGame(this);
     this.gameScene = this;
 }
 
 
 function update(time, delta) {
-    if (!gameState.mode) return;
     if (gameState.gameOver) {
         if (Phaser.Input.Keyboard.JustDown(rKey)) {
             resetGameState();
@@ -225,7 +218,7 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-game.events.once(Phaser.Core.Events.READY, applyResponsiveResize);
+applyResponsiveResize();
 
 window.addEventListener('resize', () => {
     applyResponsiveResize();
@@ -238,22 +231,12 @@ window.addEventListener('orientationchange', () => {
 
 function applyResponsiveResize() {
     if (!game || !game.scale) return;
-
-    // Phaser may not have created the canvas immediately; bail out and retry once ready
-    if (!game.isBooted || !game.scale.canvas) {
-        game.events.once(Phaser.Core.Events.READY, applyResponsiveResize);
-        return;
-    }
-
     const { width, height } = getResponsiveScale();
     game.scale.resize(width, height);
-
-    const canvas = game.scale.canvas || game.canvas;
-    if (canvas) {
-        canvas.style.width = `${width}px`;
-        canvas.style.height = `${height}px`;
+    if (game.canvas) {
+        game.canvas.style.width = `${width}px`;
+        game.canvas.style.height = `${height}px`;
     }
-
     game.scale.refresh();
 }
 

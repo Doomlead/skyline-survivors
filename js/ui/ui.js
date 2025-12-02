@@ -379,10 +379,6 @@ function cleanupPauseUI(scene) {
 function returnToMainMenu(scene) {
     cleanupPauseUI(scene);
     resetGameState();
-    gameState.mode = null;
-    if (audioManager) {
-        audioManager.stopMusic();
-    }
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'flex';
     scene.scene.restart();

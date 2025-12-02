@@ -20,7 +20,7 @@ const gameState = {
     gameOver: false,
     difficulty: 1,
     wave: 1,
-    mode: null,
+    mode: 'classic',
     timeRemaining: 0,
     enemiesToKillThisWave: 0,
     killsThisWave: 0,
