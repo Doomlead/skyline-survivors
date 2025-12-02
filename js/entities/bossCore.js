@@ -211,7 +211,7 @@ function hitBoss(projectile, boss) {
         particleManager.bulletExplosion(boss.x, boss.y);
     }
     if (boss.hp <= 0) destroyBoss(scene, boss);
-    if (!projectile.isPiercing) projectile.destroy();
+    projectile.destroy();
 }
 
 function playerHitBoss(playerSprite, boss) {

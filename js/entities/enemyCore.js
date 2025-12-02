@@ -210,7 +210,7 @@ function hitEnemy(projectile, enemy) {
         particleManager.bulletExplosion(enemy.x, enemy.y);
     }
     if (enemy.hp <= 0) destroyEnemy(this, enemy);
-    if (!projectile.isPiercing) projectile.destroy();
+    projectile.destroy();
 }
 
 function destroyEnemy(scene, enemy) {
