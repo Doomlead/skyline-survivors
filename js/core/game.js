@@ -10,7 +10,7 @@ function initializeGame(scene) {
         initializeBossQueue();
     }
     if (gameState.mode === 'survival') {
-        gameState.timeRemaining = gameState.timeRemaining || 30 * 60 * 1000;
+        gameState.timeRemaining = gameState.timeRemaining || gameState.totalSurvivalDuration;
     } else {
         gameState.wave = gameState.wave || 1;
         gameState.enemiesToKillThisWave = 20 + (gameState.wave - 1) * 5;
@@ -168,7 +168,7 @@ function update(time, delta) {
 
     if (gameState.mode === 'survival') {
         let spawnChance = 0.001 + gameState.difficulty * 0.001;
-        const progress = 1 - (gameState.timeRemaining / (30 * 60 * 1000));
+        const progress = 1 - (gameState.timeRemaining / gameState.totalSurvivalDuration);
         spawnChance *= 1 + progress * 2;
         if (humans.countActive(true) < 12 && Math.random() < 0.002) {
             spawnHuman(this, Math.random() * (CONFIG.worldWidth - 200) + 100);
