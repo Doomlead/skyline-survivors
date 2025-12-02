@@ -231,12 +231,15 @@ window.addEventListener('orientationchange', () => {
 
 function applyResponsiveResize() {
     if (!game || !game.scale) return;
+    if (!game.canvas) {
+        // The canvas may not be ready immediately after game creation.
+        setTimeout(applyResponsiveResize, 50);
+        return;
+    }
     const { width, height } = getResponsiveScale();
     game.scale.resize(width, height);
-    if (game.canvas) {
-        game.canvas.style.width = `${width}px`;
-        game.canvas.style.height = `${height}px`;
-    }
+    game.canvas.style.width = `${width}px`;
+    game.canvas.style.height = `${height}px`;
     game.scale.refresh();
 }
 

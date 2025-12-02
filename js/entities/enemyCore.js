@@ -214,6 +214,9 @@ function hitEnemy(projectile, enemy) {
 }
 
 function destroyEnemy(scene, enemy) {
+    if (!enemy || enemy.isBeingDestroyed) return;
+    enemy.isBeingDestroyed = true;
+
     let explosionSoundPlayed = false;
 
     // Special death effects
