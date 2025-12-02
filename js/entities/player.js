@@ -86,6 +86,9 @@ function updatePlayer(scene, time) {
             particleManager.makeExhaustFire(player.x, player.y, rotation);
             playerState.lastExhaustTime = time;
         }
+        particleManager.makeExhaustTrail(player.x, player.y, rotation, movementSpeed);
+    } else if (particleManager) {
+        particleManager.stopExhaustTrail();
     }
 }
 
