@@ -78,6 +78,8 @@ const BOSS_TRAIL_CONFIGS = {
     }
 };
 
+const BOSS_HP_MULTIPLIER = 4; // Increase boss health by 300%
+
 const BOSS_HP_VALUES = {
     megaLander: 25,
     titanMutant: 30,
@@ -195,7 +197,8 @@ const BOSS_TYPES = [
 ];
 
 function getBossHP(type) {
-    return BOSS_HP_VALUES[type] || 20;
+    const baseHP = BOSS_HP_VALUES[type] || 20;
+    return baseHP * BOSS_HP_MULTIPLIER;
 }
 
 function getBossScore(type) {
