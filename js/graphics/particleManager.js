@@ -6,6 +6,8 @@ class ParticleManager {
         this.screenHeight = screenHeight;
         this.spawnTime = Date.now();
         this.particles = [];
+        this.lastTrailPosition = null;
+        this.baseTrailSpacing = 14;
 
         this.createParticleTextures();
     }
@@ -188,6 +190,59 @@ class ParticleManager {
         this.createExhaustParticle(posX, posY, velSide2, sideColor, 'particle');
         this.createExhaustParticle(posX, posY, velSide1, sideColor, 'glowParticle');
         this.createExhaustParticle(posX, posY, velSide2, sideColor, 'glowParticle');
+    }
+
+    makeExhaustTrail(x, y, rotation, speed) {
+        const direction = { x: Math.cos(rotation), y: Math.sin(rotation) };
+        const trailOrigin = {
+            x: x + direction.x * -20,
+            y: y + direction.y * -20
+        };
+
+        const spacing = Math.max(6, this.baseTrailSpacing - speed * 0.01);
+
+        if (!this.lastTrailPosition) {
+            this.lastTrailPosition = { ...trailOrigin };
+            return;
+        }
+
+        const deltaX = trailOrigin.x - this.lastTrailPosition.x;
+        const deltaY = trailOrigin.y - this.lastTrailPosition.y;
+        const distance = Math.hypot(deltaX, deltaY);
+
+        if (distance < spacing) {
+            return;
+        }
+
+        const steps = Math.min(6, Math.floor(distance / spacing));
+        const normal = { x: deltaX / distance, y: deltaY / distance };
+        const color = { r: 0.55, g: 0.82, b: 1 };
+
+        for (let i = 1; i <= steps; i++) {
+            const posX = this.lastTrailPosition.x + normal.x * spacing * i;
+            const posY = this.lastTrailPosition.y + normal.y * spacing * i;
+            const wobble = (Math.random() - 0.5) * 12;
+            const sideways = { x: -direction.y * wobble, y: direction.x * wobble };
+            const drift = {
+                x: direction.x * -35 + sideways.x,
+                y: direction.y * -35 + sideways.y
+            };
+            this.createTrailParticle(posX, posY, drift, color);
+        }
+
+        this.lastTrailPosition = { ...trailOrigin };
+    }
+
+    stopExhaustTrail() {
+        this.lastTrailPosition = null;
+    }
+
+    createTrailParticle(x, y, velocity, color) {
+        const sprite = this.scene.add.sprite(x, y, 'glowParticle');
+        const lifespan = 500 + Math.random() * 350;
+        sprite.setData('affectedByGravity', false);
+        const control = new ParticleControl(sprite, velocity, lifespan, color, this.screenWidth, this.screenHeight);
+        this.particles.push(control);
     }
 
     createExhaustParticle(x, y, velocity, color, texture) {
