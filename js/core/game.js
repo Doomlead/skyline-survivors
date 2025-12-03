@@ -2,8 +2,6 @@
 // Main game scene and initialization
 // ------------------------
 
-const WRAP_OVERLAP = 12;
-
 function initializeGame(scene) {
     for (let i = 0; i < gameState.humans; i++) {
         spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
@@ -23,57 +21,6 @@ function initializeGame(scene) {
     updateUI();
 }
 
-function createWrapMasks(scene) {
-    return {
-        left: createWrapMask(scene, 'wrapMaskLeft', true),
-        right: createWrapMask(scene, 'wrapMaskRight', false)
-    };
-}
-
-function createWrapMask(scene, key, fadeLeftToRight) {
-    const width = WRAP_OVERLAP;
-    const height = CONFIG.height;
-    const texture = scene.textures.createCanvas(key, width, height);
-    const ctx = texture.context;
-    const gradient = ctx.createLinearGradient(0, 0, width, 0);
-
-    if (fadeLeftToRight) {
-        gradient.addColorStop(0, 'rgba(255,255,255,0)');
-        gradient.addColorStop(1, 'rgba(255,255,255,1)');
-    } else {
-        gradient.addColorStop(0, 'rgba(255,255,255,1)');
-        gradient.addColorStop(1, 'rgba(255,255,255,0)');
-    }
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-    texture.refresh();
-
-    const image = scene.add.image(0, 0, key).setOrigin(0, 0).setScrollFactor(0);
-    image.setVisible(false);
-
-    return {
-        image,
-        mask: image.createBitmapMask()
-    };
-}
-
-function positionWrapMask(maskData, x, height) {
-    if (!maskData) return null;
-    maskData.image.setVisible(true);
-    maskData.image.x = x;
-    maskData.image.y = 0;
-    maskData.image.displayWidth = WRAP_OVERLAP;
-    maskData.image.displayHeight = height;
-    return maskData.mask;
-}
-
-function hideWrapMasks(masks) {
-    if (!masks) return;
-    if (masks.left) masks.left.image.setVisible(false);
-    if (masks.right) masks.right.image.setVisible(false);
-}
-
 function preload() {
     createGraphics(this);
 }
@@ -91,7 +38,6 @@ function create() {
     // Secondary "Wrap Camera" to show the other side of the world seamlessly
     this.wrapCamera = this.cameras.add(0, 0, CONFIG.width, CONFIG.height);
     this.wrapCamera.setVisible(false);
-    this.wrapMasks = createWrapMasks(this);
 
     enemies = this.physics.add.group();
     projectiles = this.physics.add.group();
@@ -192,31 +138,19 @@ function update(time, delta) {
     if (wrapCam) {
         const scrollX = mainCam.scrollX;
         const camW = mainCam.width;
-        const overlap = WRAP_OVERLAP;
-
-        wrapCam.setVisible(false);
-        wrapCam.clearMask();
-        hideWrapMasks(this.wrapMasks);
-
+        
         if (scrollX < 0) {
             // Viewing Left Void -> Render World End
             wrapCam.setVisible(true);
             const gap = Math.abs(scrollX);
-            const viewportWidth = Math.min(camW, gap + overlap);
-            wrapCam.setViewport(0, 0, viewportWidth, mainCam.height);
-            wrapCam.scrollX = CONFIG.worldWidth + scrollX - overlap;
-            const mask = positionWrapMask(this.wrapMasks.right, viewportWidth - overlap, mainCam.height);
-            if (mask) wrapCam.setMask(mask);
+            wrapCam.setViewport(0, 0, gap, mainCam.height);
+            wrapCam.scrollX = CONFIG.worldWidth + scrollX;
         } else if (scrollX + camW > CONFIG.worldWidth) {
             // Viewing Right Void -> Render World Start
             wrapCam.setVisible(true);
             const overshot = (scrollX + camW) - CONFIG.worldWidth;
-            const viewportWidth = Math.min(camW, overshot + overlap);
-            const viewportX = camW - viewportWidth;
-            wrapCam.setViewport(viewportX, 0, viewportWidth, mainCam.height);
-            wrapCam.scrollX = -overlap;
-            const mask = positionWrapMask(this.wrapMasks.left, viewportX, mainCam.height);
-            if (mask) wrapCam.setMask(mask);
+            wrapCam.setViewport(camW - overshot, 0, overshot, mainCam.height);
+            wrapCam.scrollX = 0;
         } else {
             wrapCam.setVisible(false);
         }
