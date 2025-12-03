@@ -31,28 +31,22 @@ function createWrapMasks(scene) {
 }
 
 function createWrapMask(scene, key, fadeLeftToRight) {
-    const width = CONFIG.width;
+    const width = WRAP_OVERLAP;
     const height = CONFIG.height;
     const texture = scene.textures.createCanvas(key, width, height);
     const ctx = texture.context;
-
-    ctx.fillStyle = 'rgba(255,255,255,1)';
-    ctx.fillRect(0, 0, width, height);
+    const gradient = ctx.createLinearGradient(0, 0, width, 0);
 
     if (fadeLeftToRight) {
-        const gradient = ctx.createLinearGradient(0, 0, WRAP_OVERLAP, 0);
         gradient.addColorStop(0, 'rgba(255,255,255,0)');
         gradient.addColorStop(1, 'rgba(255,255,255,1)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, WRAP_OVERLAP, height);
     } else {
-        const gradient = ctx.createLinearGradient(width - WRAP_OVERLAP, 0, width, 0);
         gradient.addColorStop(0, 'rgba(255,255,255,1)');
         gradient.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(width - WRAP_OVERLAP, 0, WRAP_OVERLAP, height);
     }
 
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
     texture.refresh();
 
     const image = scene.add.image(0, 0, key).setOrigin(0, 0).setScrollFactor(0);
@@ -64,12 +58,12 @@ function createWrapMask(scene, key, fadeLeftToRight) {
     };
 }
 
-function positionWrapMask(maskData, x, height, viewportWidth) {
+function positionWrapMask(maskData, x, height) {
     if (!maskData) return null;
-    maskData.image.setVisible(false);
+    maskData.image.setVisible(true);
     maskData.image.x = x;
     maskData.image.y = 0;
-    maskData.image.displayWidth = viewportWidth;
+    maskData.image.displayWidth = WRAP_OVERLAP;
     maskData.image.displayHeight = height;
     return maskData.mask;
 }
@@ -211,7 +205,7 @@ function update(time, delta) {
             const viewportWidth = Math.min(camW, gap + overlap);
             wrapCam.setViewport(0, 0, viewportWidth, mainCam.height);
             wrapCam.scrollX = CONFIG.worldWidth + scrollX - overlap;
-            const mask = positionWrapMask(this.wrapMasks.right, viewportWidth - overlap, mainCam.height, viewportWidth);
+            const mask = positionWrapMask(this.wrapMasks.right, viewportWidth - overlap, mainCam.height);
             if (mask) wrapCam.setMask(mask);
         } else if (scrollX + camW > CONFIG.worldWidth) {
             // Viewing Right Void -> Render World Start
@@ -221,7 +215,7 @@ function update(time, delta) {
             const viewportX = camW - viewportWidth;
             wrapCam.setViewport(viewportX, 0, viewportWidth, mainCam.height);
             wrapCam.scrollX = -overlap;
-            const mask = positionWrapMask(this.wrapMasks.left, viewportX, mainCam.height, viewportWidth);
+            const mask = positionWrapMask(this.wrapMasks.left, viewportX, mainCam.height);
             if (mask) wrapCam.setMask(mask);
         } else {
             wrapCam.setVisible(false);
