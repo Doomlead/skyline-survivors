@@ -35,8 +35,14 @@ function create() {
     player.setScale(1.25);
     player.body.setSize(25, 10);
 
-    // Secondary "Wrap Camera" to show the other side of the world seamlessly
+    // Offscreen wrap camera rendered into a texture so edge overlap is seamless
+    this.wrapSurface = this.add.renderTexture(0, 0, CONFIG.width, CONFIG.height);
+    this.wrapSurface.setOrigin(0, 0);
+    this.wrapSurface.setScrollFactor(0);
+    this.wrapSurface.setVisible(false);
+
     this.wrapCamera = this.cameras.add(0, 0, CONFIG.width, CONFIG.height);
+    this.wrapCamera.setRenderToTexture(this.wrapSurface);
     this.wrapCamera.setVisible(false);
 
     enemies = this.physics.add.group();
@@ -133,26 +139,29 @@ function update(time, delta) {
     const mainCam = this.cameras.main;
     mainCam.scrollX = player.x - mainCam.width / 2;
 
-    // 3. Visual Seam Wrapping (Dual Camera)
+    // 3. Visual Seam Wrapping (RenderTexture overlay)
     const wrapCam = this.wrapCamera;
-    if (wrapCam) {
+    const wrapSurface = this.wrapSurface;
+    if (wrapCam && wrapSurface) {
         const scrollX = mainCam.scrollX;
         const camW = mainCam.width;
-        
-        if (scrollX < 0) {
-            // Viewing Left Void -> Render World End
-            wrapCam.setVisible(true);
-            const gap = Math.abs(scrollX);
-            wrapCam.setViewport(0, 0, gap, mainCam.height);
-            wrapCam.scrollX = CONFIG.worldWidth + scrollX;
-        } else if (scrollX + camW > CONFIG.worldWidth) {
-            // Viewing Right Void -> Render World Start
-            wrapCam.setVisible(true);
-            const overshot = (scrollX + camW) - CONFIG.worldWidth;
-            wrapCam.setViewport(camW - overshot, 0, overshot, mainCam.height);
-            wrapCam.scrollX = 0;
+        const camH = mainCam.height;
+
+        const leftGap = Math.ceil(Math.max(0, -scrollX));
+        const rightGap = Math.ceil(Math.max(0, (scrollX + camW) - CONFIG.worldWidth));
+
+        if (leftGap > 0) {
+            wrapCam.scrollX = scrollX + CONFIG.worldWidth;
+            wrapSurface.setVisible(true);
+            wrapSurface.setPosition(0, 0);
+            wrapSurface.setCrop(camW - leftGap, 0, leftGap, camH);
+        } else if (rightGap > 0) {
+            wrapCam.scrollX = scrollX - CONFIG.worldWidth;
+            wrapSurface.setVisible(true);
+            wrapSurface.setPosition(camW - rightGap, 0);
+            wrapSurface.setCrop(0, 0, rightGap, camH);
         } else {
-            wrapCam.setVisible(false);
+            wrapSurface.setVisible(false);
         }
     }
 
