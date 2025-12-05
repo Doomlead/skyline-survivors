@@ -2,7 +2,27 @@
 // Background - DETAILED Post-Apocalyptic Cityscape
 // ------------------------
 
+function createRNG(seed) {
+    let state = seed >>> 0;
+    return function mulberry32() {
+        state += 0x6D2B79F5;
+        let t = state;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
 function createBackground(scene) {
+    const rng = createRNG(CONFIG.backgroundSeed || 1337);
+    const random = () => rng();
+    const wrapOffsets = [0, CONFIG.worldWidth, -CONFIG.worldWidth];
+    const withWrappedX = (x, draw) => {
+        for (const offset of wrapOffsets) {
+            draw(x + offset);
+        }
+    };
+
     const groundY = CONFIG.worldHeight - 80;
     
     // ========================================
@@ -58,33 +78,35 @@ function createBackground(scene) {
     
     // Distant smoke plumes
     for (let i = 0; i < 8; i++) {
-        const px = Math.random() * CONFIG.worldWidth;
-        const py = CONFIG.worldHeight * 0.3 + Math.random() * CONFIG.worldHeight * 0.3;
-        
+        const px = random() * CONFIG.worldWidth;
+        const py = CONFIG.worldHeight * 0.3 + random() * CONFIG.worldHeight * 0.3;
+
         // Smoke column
-        for (let s = 0; s < 6; s++) {
-            const size = 30 + s * 15;
-            const alpha = 0.08 - s * 0.01;
-            atmosphere.fillStyle(0x222222, alpha);
-            atmosphere.fillCircle(px + s * 8 - 20, py - s * 40, size);
-        }
+        withWrappedX(px, (wrappedX) => {
+            for (let s = 0; s < 6; s++) {
+                const size = 30 + s * 15;
+                const alpha = 0.08 - s * 0.01;
+                atmosphere.fillStyle(0x222222, alpha);
+                atmosphere.fillCircle(wrappedX + s * 8 - 20, py - s * 40, size);
+            }
+        });
     }
     
     // Toxic clouds
     atmosphere.fillStyle(0x443355, 0.06);
     for (let i = 0; i < 12; i++) {
-        const cx = Math.random() * CONFIG.worldWidth;
-        const cy = CONFIG.worldHeight * 0.15 + Math.random() * CONFIG.worldHeight * 0.25;
-        const width = 100 + Math.random() * 200;
-        const height = 30 + Math.random() * 60;
-        atmosphere.fillEllipse(cx, cy, width, height);
+        const cx = random() * CONFIG.worldWidth;
+        const cy = CONFIG.worldHeight * 0.15 + random() * CONFIG.worldHeight * 0.25;
+        const width = 100 + random() * 200;
+        const height = 30 + random() * 60;
+        withWrappedX(cx, (wrappedX) => atmosphere.fillEllipse(wrappedX, cy, width, height));
     }
     
     // Ash/dust haze bands
     for (let i = 0; i < 5; i++) {
         const by = CONFIG.worldHeight * 0.4 + i * 50;
         atmosphere.fillStyle(0x4a3a30, 0.04);
-        atmosphere.fillRect(0, by, CONFIG.worldWidth, 30 + Math.random() * 40);
+        atmosphere.fillRect(0, by, CONFIG.worldWidth, 30 + random() * 40);
     }
     
     atmosphere.setScrollFactor(0.05);
@@ -96,48 +118,54 @@ function createBackground(scene) {
     
     // Regular stars
     for (let i = 0; i < 180; i++) {
-        const x = Math.random() * CONFIG.worldWidth;
-        const y = Math.random() * (CONFIG.worldHeight * 0.45);
-        const brightness = 0.2 + Math.random() * 0.8;
-        
-        // Some stars have color tint (pollution effect)
-        if (Math.random() > 0.85) {
-            stars.fillStyle(0xffaa88, brightness * 0.7);
-        } else if (Math.random() > 0.9) {
-            stars.fillStyle(0x88aaff, brightness * 0.8);
-        } else {
-            stars.fillStyle(0xffffff, brightness);
-        }
-        
-        const size = Math.random() > 0.9 ? 2 : 1;
-        stars.fillRect(x, y, size, size);
-        
-        // Twinkle effect on some stars
-        if (Math.random() > 0.95) {
-            stars.fillStyle(0xffffff, brightness * 0.3);
-            stars.fillRect(x - 1, y, 3, 1);
-            stars.fillRect(x, y - 1, 1, 3);
-        }
+        const x = random() * CONFIG.worldWidth;
+        const y = random() * (CONFIG.worldHeight * 0.45);
+        const brightness = 0.2 + random() * 0.8;
+
+        withWrappedX(x, (wrappedX) => {
+            // Some stars have color tint (pollution effect)
+            if (random() > 0.85) {
+                stars.fillStyle(0xffaa88, brightness * 0.7);
+            } else if (random() > 0.9) {
+                stars.fillStyle(0x88aaff, brightness * 0.8);
+            } else {
+                stars.fillStyle(0xffffff, brightness);
+            }
+
+            const size = random() > 0.9 ? 2 : 1;
+            stars.fillRect(wrappedX, y, size, size);
+
+            // Twinkle effect on some stars
+            if (random() > 0.95) {
+                stars.fillStyle(0xffffff, brightness * 0.3);
+                stars.fillRect(wrappedX - 1, y, 3, 1);
+                stars.fillRect(wrappedX, y - 1, 1, 3);
+            }
+        });
     }
     
     // Orbiting debris/satellites
     for (let i = 0; i < 5; i++) {
-        const dx = Math.random() * CONFIG.worldWidth;
-        const dy = Math.random() * (CONFIG.worldHeight * 0.3);
-        stars.fillStyle(0xffffff, 0.7);
-        stars.fillRect(dx, dy, 3, 1);
-        stars.fillStyle(0xff4400, 0.5);
-        stars.fillRect(dx + 3, dy, 2, 1);
+        const dx = random() * CONFIG.worldWidth;
+        const dy = random() * (CONFIG.worldHeight * 0.3);
+        withWrappedX(dx, (wrappedX) => {
+            stars.fillStyle(0xffffff, 0.7);
+            stars.fillRect(wrappedX, dy, 3, 1);
+            stars.fillStyle(0xff4400, 0.5);
+            stars.fillRect(wrappedX + 3, dy, 2, 1);
+        });
     }
     
     // Distant explosions/flashes
     for (let i = 0; i < 3; i++) {
-        const fx = Math.random() * CONFIG.worldWidth;
-        const fy = CONFIG.worldHeight * 0.5 + Math.random() * CONFIG.worldHeight * 0.2;
-        stars.fillStyle(0xff8844, 0.15);
-        stars.fillCircle(fx, fy, 25);
-        stars.fillStyle(0xffcc66, 0.25);
-        stars.fillCircle(fx, fy, 12);
+        const fx = random() * CONFIG.worldWidth;
+        const fy = CONFIG.worldHeight * 0.5 + random() * CONFIG.worldHeight * 0.2;
+        withWrappedX(fx, (wrappedX) => {
+            stars.fillStyle(0xff8844, 0.15);
+            stars.fillCircle(wrappedX, fy, 25);
+            stars.fillStyle(0xffcc66, 0.25);
+            stars.fillCircle(wrappedX, fy, 12);
+        });
     }
     
     stars.setScrollFactor(0.1);
@@ -155,9 +183,9 @@ function createBackground(scene) {
     
     let hx = 0;
     while (hx < CONFIG.worldWidth + 50) {
-        const buildingWidth = 8 + Math.random() * 25;
-        const buildingHeight = 20 + Math.random() * 70;
-        const destroyed = Math.random() > 0.6;
+        const buildingWidth = 8 + random() * 25;
+        const buildingHeight = 20 + random() * 70;
+        const destroyed = random() > 0.6;
         
         if (destroyed) {
             // Jagged destroyed top
@@ -170,7 +198,7 @@ function createBackground(scene) {
             horizonCity.lineTo(hx + buildingWidth, horizonY - buildingHeight);
         }
         
-        hx += buildingWidth + Math.random() * 5;
+        hx += buildingWidth + random() * 5;
     }
     
     horizonCity.lineTo(CONFIG.worldWidth, CONFIG.worldHeight);
@@ -179,11 +207,13 @@ function createBackground(scene) {
     
     // Distant fires glow on horizon
     for (let i = 0; i < 10; i++) {
-        const fx = Math.random() * CONFIG.worldWidth;
-        horizonCity.fillStyle(0xff3300, 0.2);
-        horizonCity.fillCircle(fx, horizonY - 20, 12);
-        horizonCity.fillStyle(0xff6600, 0.35);
-        horizonCity.fillCircle(fx, horizonY - 20, 6);
+        const fx = random() * CONFIG.worldWidth;
+        withWrappedX(fx, (wrappedX) => {
+            horizonCity.fillStyle(0xff3300, 0.2);
+            horizonCity.fillCircle(wrappedX, horizonY - 20, 12);
+            horizonCity.fillStyle(0xff6600, 0.35);
+            horizonCity.fillCircle(wrappedX, horizonY - 20, 6);
+        });
     }
     
     horizonCity.setScrollFactor(0.2);
@@ -194,14 +224,14 @@ function createBackground(scene) {
     const distantCity = scene.add.graphics();
     
     for (let i = 0; i < 35; i++) {
-        const bx = (i * (CONFIG.worldWidth / 35)) + Math.random() * 40;
-        const bWidth = 18 + Math.random() * 35;
-        const bHeight = 50 + Math.random() * 100;
+        const bx = (i * (CONFIG.worldWidth / 35)) + random() * 40;
+        const bWidth = 18 + random() * 35;
+        const bHeight = 50 + random() * 100;
         const by = CONFIG.worldHeight - 105;
         const left = bx - bWidth / 2;
         const top = by - bHeight;
         
-        const buildingType = Math.random();
+        const buildingType = random();
         
         distantCity.fillStyle(0x0c0c14, 1);
         
@@ -221,11 +251,11 @@ function createBackground(scene) {
             distantCity.moveTo(left, by);
             distantCity.lineTo(left, top + bHeight * 0.2);
             
-            const segs = 2 + Math.floor(Math.random() * 3);
+            const segs = 2 + Math.floor(random() * 3);
             for (let s = 0; s <= segs; s++) {
                 distantCity.lineTo(
                     left + (bWidth / segs) * s,
-                    top + Math.random() * bHeight * 0.25
+                    top + random() * bHeight * 0.25
                 );
             }
             
@@ -238,13 +268,13 @@ function createBackground(scene) {
             distantCity.fillRect(left, top, bWidth, bHeight);
             
             // Antenna
-            if (Math.random() > 0.7) {
+            if (random() > 0.7) {
                 distantCity.fillRect(left + bWidth / 2 - 1, top - 15, 2, 15);
             }
         }
         
         // Faint windows
-        if (Math.random() > 0.4) {
+        if (random() > 0.4) {
             distantCity.fillStyle(0x4488aa, 0.3);
             for (let wy = 10; wy < bHeight - 8; wy += 14) {
                 distantCity.fillRect(left + 3, top + wy, bWidth - 6, 2);
@@ -252,7 +282,7 @@ function createBackground(scene) {
         }
         
         // Small fires
-        if (Math.random() > 0.75) {
+        if (random() > 0.75) {
             distantCity.fillStyle(0xff4400, 0.25);
             distantCity.fillCircle(left + bWidth / 2, top + bHeight * 0.3, 8);
         }
@@ -260,13 +290,15 @@ function createBackground(scene) {
     
     // Distant smoke columns
     for (let i = 0; i < 6; i++) {
-        const sx = Math.random() * CONFIG.worldWidth;
+        const sx = random() * CONFIG.worldWidth;
         const sy = CONFIG.worldHeight - 130;
-        
-        distantCity.fillStyle(0x222228, 0.3);
-        for (let s = 0; s < 5; s++) {
-            distantCity.fillCircle(sx + s * 4, sy - s * 25, 12 + s * 4);
-        }
+
+        withWrappedX(sx, (wrappedX) => {
+            distantCity.fillStyle(0x222228, 0.3);
+            for (let s = 0; s < 5; s++) {
+                distantCity.fillCircle(wrappedX + s * 4, sy - s * 25, 12 + s * 4);
+            }
+        });
     }
     
     distantCity.setScrollFactor(0.3);
@@ -283,7 +315,7 @@ function createBackground(scene) {
     // Bridge pillars
     for (let i = 0; i < 8; i++) {
         const px = i * (CONFIG.worldWidth / 8) + 50;
-        const collapsed = Math.random() > 0.6;
+        const collapsed = random() > 0.6;
         
         if (collapsed) {
             // Broken pillar
@@ -302,10 +334,10 @@ function createBackground(scene) {
     
     // Broken road segments
     for (let i = 0; i < 6; i++) {
-        const segX = i * (CONFIG.worldWidth / 6) + Math.random() * 100;
-        const segY = bridgeY - 55 + Math.random() * 30;
-        const segWidth = 60 + Math.random() * 80;
-        const angle = -0.1 + Math.random() * 0.2;
+        const segX = i * (CONFIG.worldWidth / 6) + random() * 100;
+        const segY = bridgeY - 55 + random() * 30;
+        const segWidth = 60 + random() * 80;
+        const angle = -0.1 + random() * 0.2;
         
         midCity.fillStyle(0x1a1a24, 1);
         midCity.beginPath();
@@ -324,15 +356,15 @@ function createBackground(scene) {
     
     // Buildings
     for (let i = 0; i < 28; i++) {
-        const bx = (i * (CONFIG.worldWidth / 28)) + Math.random() * 50;
-        const bWidth = 28 + Math.random() * 50;
-        const bHeight = 70 + Math.random() * 110;
+        const bx = (i * (CONFIG.worldWidth / 28)) + random() * 50;
+        const bWidth = 28 + random() * 50;
+        const bHeight = 70 + random() * 110;
         const by = CONFIG.worldHeight - 92;
         const left = bx - bWidth / 2;
         const top = by - bHeight;
         
-        const destroyed = Math.random() > 0.35;
-        const buildingType = Math.random();
+        const destroyed = random() > 0.35;
+        const buildingType = random();
         
         midCity.fillStyle(0x161620, 1);
         
@@ -341,11 +373,11 @@ function createBackground(scene) {
             midCity.moveTo(left, by);
             midCity.lineTo(left, top + bHeight * 0.12);
             
-            const segments = 3 + Math.floor(Math.random() * 4);
+            const segments = 3 + Math.floor(random() * 4);
             for (let s = 0; s <= segments; s++) {
                 midCity.lineTo(
                     left + (bWidth / segments) * s,
-                    top + Math.random() * bHeight * 0.35
+                    top + random() * bHeight * 0.35
                 );
             }
             
@@ -357,16 +389,16 @@ function createBackground(scene) {
             // Exposed rebar/structure
             midCity.lineStyle(1, 0x2a2a35, 0.8);
             for (let r = 0; r < 3; r++) {
-                const rx = left + 5 + Math.random() * (bWidth - 10);
+                const rx = left + 5 + random() * (bWidth - 10);
                 midCity.beginPath();
                 midCity.moveTo(rx, top + bHeight * 0.15);
-                midCity.lineTo(rx + (Math.random() - 0.5) * 10, top - 10);
+                midCity.lineTo(rx + (random() - 0.5) * 10, top - 10);
                 midCity.strokePath();
             }
             midCity.lineStyle(0);
             
             // Fire glow
-            if (Math.random() > 0.4) {
+            if (random() > 0.4) {
                 const fx = left + bWidth / 2;
                 const fy = top + bHeight * 0.35;
                 midCity.fillStyle(0xff4400, 0.3);
@@ -392,8 +424,8 @@ function createBackground(scene) {
             midCity.fillStyle(0x6699bb, 0.5);
             for (let fy = 12; fy < bHeight - 10; fy += 15) {
                 for (let wx = 5; wx < bWidth - 8; wx += 11) {
-                    if (Math.random() > 0.25) {
-                        const state = Math.random();
+                    if (random() > 0.25) {
+                        const state = random();
                         if (state > 0.92) {
                             midCity.fillStyle(0xff4400, 0.7);
                         } else if (state > 0.6) {
@@ -440,7 +472,7 @@ function createBackground(scene) {
     for (let i = 0; i < 6; i++) {
         const poleX = i * (CONFIG.worldWidth / 6) + 80;
         const poleY = CONFIG.worldHeight - 88;
-        const fallen = Math.random() > 0.5;
+        const fallen = random() > 0.5;
         
         if (fallen) {
             // Fallen pole
@@ -454,7 +486,7 @@ function createBackground(scene) {
             nearCity.fillPath();
             
             // Sparking wire
-            if (Math.random() > 0.5) {
+            if (random() > 0.5) {
                 nearCity.fillStyle(0x44aaff, 0.6);
                 nearCity.fillCircle(poleX + 35, poleY - 10, 3);
                 nearCity.fillStyle(0xffffff, 0.8);
@@ -482,9 +514,9 @@ function createBackground(scene) {
     
     // Buildings
     for (let i = 0; i < 22; i++) {
-        const bx = (i * (CONFIG.worldWidth / 22)) + Math.random() * 65;
-        const bWidth = 40 + Math.random() * 60;
-        const bHeight = 90 + Math.random() * 130;
+        const bx = (i * (CONFIG.worldWidth / 22)) + random() * 65;
+        const bWidth = 40 + random() * 60;
+        const bHeight = 90 + random() * 130;
         const by = CONFIG.worldHeight - 86;
         const left = bx - bWidth / 2;
         const top = by - bHeight;
@@ -496,11 +528,11 @@ function createBackground(scene) {
         nearCity.moveTo(left, by);
         nearCity.lineTo(left, top + bHeight * 0.08);
         
-        const segments = 4 + Math.floor(Math.random() * 5);
+        const segments = 4 + Math.floor(random() * 5);
         for (let s = 0; s <= segments; s++) {
             nearCity.lineTo(
                 left + (bWidth / segments) * s,
-                top + Math.random() * bHeight * 0.38
+                top + random() * bHeight * 0.38
             );
         }
         
@@ -513,20 +545,20 @@ function createBackground(scene) {
         nearCity.fillStyle(0x141420, 1);
         // Holes in walls
         for (let h = 0; h < 3; h++) {
-            const hx = left + 8 + Math.random() * (bWidth - 16);
-            const hy = top + bHeight * 0.3 + Math.random() * bHeight * 0.4;
-            const hw = 8 + Math.random() * 15;
-            const hh = 6 + Math.random() * 12;
+            const hx = left + 8 + random() * (bWidth - 16);
+            const hy = top + bHeight * 0.3 + random() * bHeight * 0.4;
+            const hw = 8 + random() * 15;
+            const hh = 6 + random() * 12;
             nearCity.fillEllipse(hx, hy, hw, hh);
         }
         
         // Exposed rebar
         nearCity.lineStyle(1, 0x3a2a20, 0.9);
         for (let r = 0; r < 4; r++) {
-            const rx = left + 8 + Math.random() * (bWidth - 16);
+            const rx = left + 8 + random() * (bWidth - 16);
             nearCity.beginPath();
             nearCity.moveTo(rx, top + bHeight * 0.1);
-            nearCity.lineTo(rx + (Math.random() - 0.5) * 15, top - 8 - Math.random() * 15);
+            nearCity.lineTo(rx + (random() - 0.5) * 15, top - 8 - random() * 15);
             nearCity.strokePath();
         }
         nearCity.lineStyle(0);
@@ -534,22 +566,22 @@ function createBackground(scene) {
         // Rubble pile at base
         nearCity.fillStyle(0x141420, 1);
         for (let r = 0; r < 8; r++) {
-            const rx = left - 12 + Math.random() * (bWidth + 24);
-            const ry = by + Math.random() * 18;
-            const rw = 10 + Math.random() * 18;
-            const rh = 5 + Math.random() * 10;
+            const rx = left - 12 + random() * (bWidth + 24);
+            const ry = by + random() * 18;
+            const rw = 10 + random() * 18;
+            const rh = 5 + random() * 10;
             nearCity.fillRect(rx, ry, rw, rh);
         }
         
         // Scattered debris chunks
         nearCity.fillStyle(0x1a1a26, 1);
         for (let d = 0; d < 5; d++) {
-            const dx = left - 20 + Math.random() * (bWidth + 40);
-            const dy = by + 5 + Math.random() * 25;
+            const dx = left - 20 + random() * (bWidth + 40);
+            const dy = by + 5 + random() * 25;
             nearCity.beginPath();
             nearCity.moveTo(dx, dy);
-            nearCity.lineTo(dx + 4 + Math.random() * 8, dy - 2);
-            nearCity.lineTo(dx + 6 + Math.random() * 6, dy + 4);
+            nearCity.lineTo(dx + 4 + random() * 8, dy - 2);
+            nearCity.lineTo(dx + 6 + random() * 6, dy + 4);
             nearCity.lineTo(dx + 2, dy + 5);
             nearCity.closePath();
             nearCity.fillPath();
@@ -559,8 +591,8 @@ function createBackground(scene) {
         nearCity.fillStyle(0x99bbdd, 0.6);
         for (let fy = 18; fy < bHeight * 0.55; fy += 18) {
             for (let wx = 8; wx < bWidth - 12; wx += 14) {
-                if (Math.random() > 0.35) {
-                    const state = Math.random();
+                if (random() > 0.35) {
+                    const state = random();
                     if (state > 0.88) {
                         nearCity.fillStyle(0xff3300, 0.85);
                     } else if (state > 0.55) {
@@ -587,9 +619,9 @@ function createBackground(scene) {
         }
         
         // Fire effects (larger and more detailed)
-        if (Math.random() > 0.35) {
-            const fx = left + bWidth * 0.25 + Math.random() * bWidth * 0.5;
-            const fy = top + bHeight * 0.18 + Math.random() * bHeight * 0.4;
+        if (random() > 0.35) {
+            const fx = left + bWidth * 0.25 + random() * bWidth * 0.5;
+            const fy = top + bHeight * 0.18 + random() * bHeight * 0.4;
             
             // Fire glow
             nearCity.fillStyle(0xff2200, 0.2);
@@ -693,139 +725,151 @@ function createBackground(scene) {
     
     // Craters
     for (let i = 0; i < 12; i++) {
-        const cx = Math.random() * CONFIG.worldWidth;
-        const cy = groundY + 5 + Math.random() * 20;
-        const cw = 20 + Math.random() * 40;
-        const ch = 8 + Math.random() * 15;
-        
-        // Crater rim
-        terrain.fillStyle(0x3a3028, 1);
-        terrain.fillEllipse(cx, cy, cw + 6, ch + 3);
-        
-        // Crater hole
-        terrain.fillStyle(0x151210, 1);
-        terrain.fillEllipse(cx, cy + 2, cw, ch);
-        
-        // Scorch marks
-        terrain.fillStyle(0x1a1510, 0.6);
-        terrain.fillEllipse(cx, cy, cw + 15, ch + 8);
+        const cx = random() * CONFIG.worldWidth;
+        const cy = groundY + 5 + random() * 20;
+        const cw = 20 + random() * 40;
+        const ch = 8 + random() * 15;
+
+        withWrappedX(cx, (wrappedX) => {
+            // Crater rim
+            terrain.fillStyle(0x3a3028, 1);
+            terrain.fillEllipse(wrappedX, cy, cw + 6, ch + 3);
+
+            // Crater hole
+            terrain.fillStyle(0x151210, 1);
+            terrain.fillEllipse(wrappedX, cy + 2, cw, ch);
+
+            // Scorch marks
+            terrain.fillStyle(0x1a1510, 0.6);
+            terrain.fillEllipse(wrappedX, cy, cw + 15, ch + 8);
+        });
     }
-    
+
     // Wrecked vehicles
     for (let i = 0; i < 8; i++) {
-        const vx = Math.random() * CONFIG.worldWidth;
-        const vy = groundY + Math.random() * 15;
-        const flipped = Math.random() > 0.5;
+        const vx = random() * CONFIG.worldWidth;
+        const vy = groundY + random() * 15;
+        const flipped = random() > 0.5;
         
-        if (Math.random() > 0.5) {
+        if (random() > 0.5) {
             // Car wreck
             terrain.fillStyle(0x2a2520, 1);
-            if (flipped) {
-                terrain.fillRect(vx, vy, 25, 8);
-                terrain.fillRect(vx + 3, vy - 5, 18, 5);
-            } else {
-                terrain.fillRect(vx, vy, 25, 10);
-                terrain.fillRect(vx + 4, vy - 6, 16, 6);
-            }
-            
-            // Windows (broken)
-            terrain.fillStyle(0x101015, 0.8);
-            terrain.fillRect(vx + 5, vy - 5, 5, 4);
-            terrain.fillRect(vx + 12, vy - 5, 5, 4);
-            
-            // Wheels (or lack thereof)
-            terrain.fillStyle(0x151512, 1);
-            terrain.fillCircle(vx + 5, vy + 10, 4);
-            if (!flipped) {
-                terrain.fillCircle(vx + 20, vy + 10, 4);
-            }
-            
-            // Fire if burning
-            if (Math.random() > 0.6) {
-                terrain.fillStyle(0xff4400, 0.4);
-                terrain.fillCircle(vx + 12, vy - 8, 8);
-                terrain.fillStyle(0xff7700, 0.6);
-                terrain.fillCircle(vx + 12, vy - 10, 4);
-            }
+            withWrappedX(vx, (wrappedX) => {
+                if (flipped) {
+                    terrain.fillRect(wrappedX, vy, 25, 8);
+                    terrain.fillRect(wrappedX + 3, vy - 5, 18, 5);
+                } else {
+                    terrain.fillRect(wrappedX, vy, 25, 10);
+                    terrain.fillRect(wrappedX + 4, vy - 6, 16, 6);
+                }
+
+                // Windows (broken)
+                terrain.fillStyle(0x101015, 0.8);
+                terrain.fillRect(wrappedX + 5, vy - 5, 5, 4);
+                terrain.fillRect(wrappedX + 12, vy - 5, 5, 4);
+
+                // Wheels (or lack thereof)
+                terrain.fillStyle(0x151512, 1);
+                terrain.fillCircle(wrappedX + 5, vy + 10, 4);
+                if (!flipped) {
+                    terrain.fillCircle(wrappedX + 20, vy + 10, 4);
+                }
+
+                // Fire if burning
+                if (random() > 0.6) {
+                    terrain.fillStyle(0xff4400, 0.4);
+                    terrain.fillCircle(wrappedX + 12, vy - 8, 8);
+                    terrain.fillStyle(0xff7700, 0.6);
+                    terrain.fillCircle(wrappedX + 12, vy - 10, 4);
+                }
+            });
         } else {
             // Truck/bus wreck
             terrain.fillStyle(0x282420, 1);
-            terrain.fillRect(vx, vy, 40, 14);
-            terrain.fillRect(vx, vy - 8, 12, 8);
-            
-            // Burnt out
-            terrain.fillStyle(0x151512, 0.9);
-            terrain.fillRect(vx + 14, vy + 2, 22, 10);
+            withWrappedX(vx, (wrappedX) => {
+                terrain.fillRect(wrappedX, vy, 40, 14);
+                terrain.fillRect(wrappedX, vy - 8, 12, 8);
+
+                // Burnt out
+                terrain.fillStyle(0x151512, 0.9);
+                terrain.fillRect(wrappedX + 14, vy + 2, 22, 10);
+            });
         }
     }
     
     // Dead trees
     for (let i = 0; i < 10; i++) {
-        const tx = Math.random() * CONFIG.worldWidth;
+        const tx = random() * CONFIG.worldWidth;
         const ty = groundY - topNoise[Math.floor(tx / 28) % topNoise.length];
-        
-        terrain.fillStyle(0x1a1815, 1);
-        
-        // Trunk
-        terrain.fillRect(tx - 2, ty - 35, 4, 35);
-        
-        // Dead branches
-        terrain.lineStyle(2, 0x1a1815, 1);
-        terrain.beginPath();
-        terrain.moveTo(tx, ty - 30);
-        terrain.lineTo(tx - 15, ty - 45);
-        terrain.strokePath();
-        terrain.beginPath();
-        terrain.moveTo(tx, ty - 25);
-        terrain.lineTo(tx + 12, ty - 38);
-        terrain.strokePath();
-        terrain.beginPath();
-        terrain.moveTo(tx, ty - 18);
-        terrain.lineTo(tx - 10, ty - 28);
-        terrain.strokePath();
-        terrain.lineStyle(0);
+
+        withWrappedX(tx, (wrappedX) => {
+            terrain.fillStyle(0x1a1815, 1);
+
+            // Trunk
+            terrain.fillRect(wrappedX - 2, ty - 35, 4, 35);
+
+            // Dead branches
+            terrain.lineStyle(2, 0x1a1815, 1);
+            terrain.beginPath();
+            terrain.moveTo(wrappedX, ty - 30);
+            terrain.lineTo(wrappedX - 15, ty - 45);
+            terrain.strokePath();
+            terrain.beginPath();
+            terrain.moveTo(wrappedX, ty - 25);
+            terrain.lineTo(wrappedX + 12, ty - 38);
+            terrain.strokePath();
+            terrain.beginPath();
+            terrain.moveTo(wrappedX, ty - 18);
+            terrain.lineTo(wrappedX - 10, ty - 28);
+            terrain.strokePath();
+            terrain.lineStyle(0);
+        });
     }
     
     // Scattered debris
     terrain.fillStyle(0x4a3a2a, 0.8);
     for (let i = 0; i < 100; i++) {
-        const rx = Math.random() * CONFIG.worldWidth;
-        const ry = groundY - 3 - Math.random() * 35;
-        terrain.fillRect(rx, ry, 3 + Math.random() * 10, 2 + Math.random() * 5);
+        const rx = random() * CONFIG.worldWidth;
+        const ry = groundY - 3 - random() * 35;
+        withWrappedX(rx, (wrappedX) => terrain.fillRect(wrappedX, ry, 3 + random() * 10, 2 + random() * 5));
     }
     
     // Bones/remains (subtle)
     terrain.fillStyle(0x8a8070, 0.5);
     for (let i = 0; i < 6; i++) {
-        const bx = Math.random() * CONFIG.worldWidth;
-        const by = groundY + 5 + Math.random() * 20;
-        
+        const bx = random() * CONFIG.worldWidth;
+        const by = groundY + 5 + random() * 20;
+
         // Simple bone shapes
-        terrain.fillEllipse(bx, by, 8, 2);
-        terrain.fillCircle(bx - 3, by, 2);
-        terrain.fillCircle(bx + 3, by, 2);
+        withWrappedX(bx, (wrappedX) => {
+            terrain.fillEllipse(wrappedX, by, 8, 2);
+            terrain.fillCircle(wrappedX - 3, by, 2);
+            terrain.fillCircle(wrappedX + 3, by, 2);
+        });
     }
     
     // Toxic puddles
     for (let i = 0; i < 5; i++) {
-        const px = Math.random() * CONFIG.worldWidth;
-        const py = groundY + 10 + Math.random() * 15;
-        const pw = 20 + Math.random() * 30;
-        const ph = 5 + Math.random() * 8;
-        
-        terrain.fillStyle(0x2a4a30, 0.4);
-        terrain.fillEllipse(px, py, pw + 4, ph + 2);
-        terrain.fillStyle(0x3a6a40, 0.6);
-        terrain.fillEllipse(px, py, pw, ph);
-        terrain.fillStyle(0x5a8a50, 0.3);
-        terrain.fillEllipse(px - pw * 0.2, py - 1, pw * 0.3, ph * 0.4);
+        const px = random() * CONFIG.worldWidth;
+        const py = groundY + 10 + random() * 15;
+        const pw = 20 + random() * 30;
+        const ph = 5 + random() * 8;
+
+        withWrappedX(px, (wrappedX) => {
+            terrain.fillStyle(0x2a4a30, 0.4);
+            terrain.fillEllipse(wrappedX, py, pw + 4, ph + 2);
+            terrain.fillStyle(0x3a6a40, 0.6);
+            terrain.fillEllipse(wrappedX, py, pw, ph);
+            terrain.fillStyle(0x5a8a50, 0.3);
+            terrain.fillEllipse(wrappedX - pw * 0.2, py - 1, pw * 0.3, ph * 0.4);
+        });
     }
     
     // Foreground buildings (largest, most detailed)
     for (let i = 0; i < 18; i++) {
-        const bx = (i * (CONFIG.worldWidth / 18)) + Math.random() * 80;
-        const bWidth = 45 + Math.random() * 70;
-        const bHeight = 110 + Math.random() * 150;
+        const bx = (i * (CONFIG.worldWidth / 18)) + random() * 80;
+        const bWidth = 45 + random() * 70;
+        const bHeight = 110 + random() * 150;
         const noiseIdx = Math.floor((bx / CONFIG.worldWidth) * topNoise.length) % topNoise.length;
         const by = groundY - topNoise[noiseIdx];
         const left = bx - bWidth / 2;
@@ -838,11 +882,11 @@ function createBackground(scene) {
         terrain.moveTo(left, by);
         terrain.lineTo(left, top + bHeight * 0.06);
         
-        const segs = 5 + Math.floor(Math.random() * 5);
+        const segs = 5 + Math.floor(random() * 5);
         for (let s = 0; s <= segs; s++) {
             terrain.lineTo(
                 left + (bWidth / segs) * s,
-                top + Math.random() * bHeight * 0.32
+                top + random() * bHeight * 0.32
             );
         }
         
@@ -854,9 +898,9 @@ function createBackground(scene) {
         // Wall texture/damage
         terrain.fillStyle(0x161622, 0.8);
         for (let h = 0; h < 5; h++) {
-            const hx = left + 10 + Math.random() * (bWidth - 20);
-            const hy = top + bHeight * 0.25 + Math.random() * bHeight * 0.45;
-            terrain.fillEllipse(hx, hy, 10 + Math.random() * 18, 8 + Math.random() * 14);
+            const hx = left + 10 + random() * (bWidth - 20);
+            const hy = top + bHeight * 0.25 + random() * bHeight * 0.45;
+            terrain.fillEllipse(hx, hy, 10 + random() * 18, 8 + random() * 14);
         }
         
         // Exposed floors
@@ -869,10 +913,10 @@ function createBackground(scene) {
         // Rebar
         terrain.lineStyle(1, 0x4a3a30, 1);
         for (let r = 0; r < 6; r++) {
-            const rx = left + 10 + Math.random() * (bWidth - 20);
+            const rx = left + 10 + random() * (bWidth - 20);
             terrain.beginPath();
             terrain.moveTo(rx, top + bHeight * 0.08);
-            terrain.lineTo(rx + (Math.random() - 0.5) * 20, top - 12 - Math.random() * 20);
+            terrain.lineTo(rx + (random() - 0.5) * 20, top - 12 - random() * 20);
             terrain.strokePath();
         }
         terrain.lineStyle(0);
@@ -881,10 +925,10 @@ function createBackground(scene) {
         terrain.fillStyle(0x161620, 1);
         for (let r = 0; r < 12; r++) {
             terrain.fillRect(
-                left - 18 + Math.random() * (bWidth + 36),
-                by - 4 + Math.random() * 25,
-                8 + Math.random() * 18,
-                4 + Math.random() * 12
+                left - 18 + random() * (bWidth + 36),
+                by - 4 + random() * 25,
+                8 + random() * 18,
+                4 + random() * 12
             );
         }
         
@@ -892,8 +936,8 @@ function createBackground(scene) {
         terrain.fillStyle(0xaaccee, 0.7);
         for (let fy = 20; fy < bHeight * 0.45; fy += 20) {
             for (let wx = 10; wx < bWidth - 15; wx += 16) {
-                if (Math.random() > 0.28) {
-                    const state = Math.random();
+                if (random() > 0.28) {
+                    const state = random();
                     if (state > 0.9) {
                         terrain.fillStyle(0xff2200, 0.9);
                     } else if (state > 0.65) {
@@ -922,9 +966,9 @@ function createBackground(scene) {
         }
         
         // Fire (big and detailed)
-        if (Math.random() > 0.25) {
-            const fx = left + bWidth * 0.2 + Math.random() * bWidth * 0.6;
-            const fy = top + bHeight * 0.12 + Math.random() * bHeight * 0.4;
+        if (random() > 0.25) {
+            const fx = left + bWidth * 0.2 + random() * bWidth * 0.6;
+            const fy = top + bHeight * 0.12 + random() * bHeight * 0.4;
             
             // Ambient glow
             terrain.fillStyle(0xff1100, 0.15);
@@ -970,18 +1014,20 @@ function createBackground(scene) {
     
     // Warning signs
     for (let i = 0; i < 4; i++) {
-        const sx = Math.random() * CONFIG.worldWidth;
+        const sx = random() * CONFIG.worldWidth;
         const sy = groundY - 5;
-        
-        // Post
-        terrain.fillStyle(0x3a3530, 1);
-        terrain.fillRect(sx - 1, sy - 25, 3, 25);
-        
-        // Sign
-        terrain.fillStyle(0xaaaa30, 0.8);
-        terrain.fillRect(sx - 10, sy - 35, 20, 12);
-        terrain.fillStyle(0x1a1a15, 0.9);
-        terrain.fillRect(sx - 8, sy - 33, 16, 8);
+
+        withWrappedX(sx, (wrappedX) => {
+            // Post
+            terrain.fillStyle(0x3a3530, 1);
+            terrain.fillRect(wrappedX - 1, sy - 25, 3, 25);
+
+            // Sign
+            terrain.fillStyle(0xaaaa30, 0.8);
+            terrain.fillRect(wrappedX - 10, sy - 35, 20, 12);
+            terrain.fillStyle(0x1a1a15, 0.9);
+            terrain.fillRect(wrappedX - 8, sy - 33, 16, 8);
+        });
     }
     
     scene.groundLevel = groundY;
