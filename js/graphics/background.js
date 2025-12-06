@@ -69,7 +69,7 @@ function createBackground(scene) {
         skyGradient.fillStyle(Phaser.Display.Color.GetColor(r, g, b), 1);
         skyGradient.fillRect(0, y, CONFIG.worldWidth, bandHeight + 1);
     }
-    skyGradient.setScrollFactor(0);
+    wrapGraphicsLayer(skyGradient, 0, 'sky');
     
     // ========================================
     // LAYER 0.5: Atmospheric Effects (Smoke, Clouds)
@@ -109,7 +109,7 @@ function createBackground(scene) {
         atmosphere.fillRect(0, by, CONFIG.worldWidth, 30 + random() * 40);
     }
     
-    atmosphere.setScrollFactor(0.05);
+    wrapGraphicsLayer(atmosphere, 0.05, 'atmosphere');
     
     // ========================================
     // LAYER 1: Stars & Celestial Bodies
@@ -168,7 +168,7 @@ function createBackground(scene) {
         });
     }
     
-    stars.setScrollFactor(0.1);
+    wrapGraphicsLayer(stars, 0.1, 'stars');
     
     // ========================================
     // LAYER 2: Very Distant Cityscape (Horizon)
@@ -216,7 +216,7 @@ function createBackground(scene) {
         });
     }
     
-    horizonCity.setScrollFactor(0.2);
+    wrapGraphicsLayer(horizonCity, 0.2, 'horizon');
     
     // ========================================
     // LAYER 3: Distant City Silhouettes
@@ -301,7 +301,7 @@ function createBackground(scene) {
         });
     }
     
-    distantCity.setScrollFactor(0.3);
+    wrapGraphicsLayer(distantCity, 0.3, 'distant-city');
     
     // ========================================
     // LAYER 4: Mid-distance Destroyed City
@@ -461,7 +461,7 @@ function createBackground(scene) {
     midCity.strokePath();
     midCity.lineStyle(0);
     
-    midCity.setScrollFactor(0.5);
+    wrapGraphicsLayer(midCity, 0.5, 'mid-city');
     
     // ========================================
     // LAYER 5: Near Destroyed Buildings
@@ -659,7 +659,7 @@ function createBackground(scene) {
         }
     }
     
-    nearCity.setScrollFactor(0.7);
+    wrapGraphicsLayer(nearCity, 0.7, 'near-city');
     
     // ========================================
     // LAYER 6: Foreground Terrain & Details
@@ -1030,5 +1030,7 @@ function createBackground(scene) {
         });
     }
     
+    wrapGraphicsLayer(terrain, 1, 'terrain');
+
     scene.groundLevel = groundY;
 }
