@@ -2,93 +2,6 @@
 // Background - DETAILED Post-Apocalyptic Cityscape
 // ------------------------
 
-const backgroundState = {
-    layers: [],
-    accumScrollX: 0,
-    prevX: null,
-    depthCounter: 0
-};
-
-function resetBackgroundState(initialX = 0) {
-    backgroundState.layers = [];
-    backgroundState.accumScrollX = 0;
-    backgroundState.prevX = initialX;
-    backgroundState.depthCounter = 0;
-}
-
-function destroyBackgroundLayers(scene) {
-    backgroundState.layers.forEach(({ sprite, textureKey }) => {
-        if (sprite && sprite.destroy) {
-            sprite.destroy();
-        }
-        if (textureKey && scene.textures.exists(textureKey)) {
-            scene.textures.remove(textureKey);
-        }
-    });
-    backgroundState.layers = [];
-}
-
-function wrapGraphicsLayer(graphics, speedX, key) {
-    const scene = graphics.scene;
-    if (!scene) return;
-
-    const textureKey = `bg-${key}`;
-    if (scene.textures.exists(textureKey)) {
-        scene.textures.remove(textureKey);
-    }
-
-    const rt = scene.make.renderTexture({
-        x: 0,
-        y: 0,
-        width: CONFIG.worldWidth,
-        height: CONFIG.worldHeight,
-        add: false
-    });
-    rt.draw(graphics, 0, 0);
-    rt.saveTexture(textureKey);
-    rt.destroy();
-
-    graphics.destroy();
-
-    const cam = scene.cameras.main;
-    const tile = scene.add.tileSprite(0, 0, cam.width, CONFIG.worldHeight, textureKey)
-        .setOrigin(0, 0)
-        .setScrollFactor(0)
-        .setDepth(backgroundState.depthCounter++);
-
-    if (scene.wrapCamera) {
-        scene.wrapCamera.ignore(tile);
-    }
-
-    backgroundState.layers.push({ sprite: tile, speedX, textureKey });
-}
-
-function updateBackgroundParallax() {
-    if (!backgroundState.layers.length || typeof player === 'undefined' || !player) return;
-
-    const px = player.x;
-    if (backgroundState.prevX === null) {
-        backgroundState.prevX = px;
-        return;
-    }
-
-    let dx = px - backgroundState.prevX;
-    const half = CONFIG.worldWidth * 0.5;
-    if (dx > half) {
-        dx -= CONFIG.worldWidth;
-    } else if (dx < -half) {
-        dx += CONFIG.worldWidth;
-    }
-
-    backgroundState.accumScrollX += dx;
-    backgroundState.prevX = px;
-
-    const scroll = backgroundState.accumScrollX;
-    backgroundState.layers.forEach((layer) => {
-        layer.sprite.tilePositionX = scroll * layer.speedX;
-    });
-}
-
 function createRNG(seed) {
     let state = seed >>> 0;
     return function mulberry32() {
@@ -100,10 +13,7 @@ function createRNG(seed) {
     };
 }
 
-function createBackground(scene, initialPlayerX = 0) {
-    destroyBackgroundLayers(scene);
-    resetBackgroundState(initialPlayerX);
-
+function createBackground(scene) {
     const rng = createRNG(CONFIG.backgroundSeed || 1337);
     const random = () => rng();
     const wrapOffsets = [0, CONFIG.worldWidth, -CONFIG.worldWidth];
@@ -114,6 +24,9 @@ function createBackground(scene, initialPlayerX = 0) {
     };
 
     const groundY = CONFIG.worldHeight - 80;
+    
+    // Extended world width to cover camera overshoot
+    const EXTENDED_WIDTH = CONFIG.worldWidth + 200;
     
     // ========================================
     // LAYER 0: Dramatic Gradient Sky with Pollution
@@ -157,9 +70,10 @@ function createBackground(scene, initialPlayerX = 0) {
         }
         
         skyGradient.fillStyle(Phaser.Display.Color.GetColor(r, g, b), 1);
-        skyGradient.fillRect(0, y, CONFIG.worldWidth, bandHeight + 1);
+        // Extended to cover wrap camera overshoot
+        skyGradient.fillRect(-200, y, EXTENDED_WIDTH, bandHeight + 1);
     }
-    wrapGraphicsLayer(skyGradient, 0, 'sky');
+    skyGradient.setScrollFactor(0);
     
     // ========================================
     // LAYER 0.5: Atmospheric Effects (Smoke, Clouds)
@@ -196,10 +110,10 @@ function createBackground(scene, initialPlayerX = 0) {
     for (let i = 0; i < 5; i++) {
         const by = CONFIG.worldHeight * 0.4 + i * 50;
         atmosphere.fillStyle(0x4a3a30, 0.04);
-        atmosphere.fillRect(0, by, CONFIG.worldWidth, 30 + random() * 40);
+        atmosphere.fillRect(-200, by, EXTENDED_WIDTH, 30 + random() * 40);
     }
     
-    wrapGraphicsLayer(atmosphere, 0.05, 'atmosphere');
+    atmosphere.setScrollFactor(0.05);
     
     // ========================================
     // LAYER 1: Stars & Celestial Bodies
@@ -258,7 +172,7 @@ function createBackground(scene, initialPlayerX = 0) {
         });
     }
     
-    wrapGraphicsLayer(stars, 0.1, 'stars');
+    stars.setScrollFactor(0.1);
     
     // ========================================
     // LAYER 2: Very Distant Cityscape (Horizon)
@@ -266,34 +180,42 @@ function createBackground(scene, initialPlayerX = 0) {
     const horizonCity = scene.add.graphics();
     const horizonY = CONFIG.worldHeight - 120;
     
-    // Continuous skyline silhouette
+    // Continuous skyline silhouette with wraparound
     horizonCity.fillStyle(0x060608, 1);
-    horizonCity.beginPath();
-    horizonCity.moveTo(0, CONFIG.worldHeight);
     
-    let hx = 0;
-    while (hx < CONFIG.worldWidth + 50) {
-        const buildingWidth = 8 + random() * 25;
-        const buildingHeight = 20 + random() * 70;
-        const destroyed = random() > 0.6;
+    // Draw three copies for seamless wrapping
+    for (let copyOffset of [-CONFIG.worldWidth, 0, CONFIG.worldWidth]) {
+        // Reset RNG for each copy to ensure identical buildings
+        const copyRng = createRNG(CONFIG.backgroundSeed || 1337);
+        const copyRandom = () => copyRng();
         
-        if (destroyed) {
-            // Jagged destroyed top
-            horizonCity.lineTo(hx, horizonY - buildingHeight * 0.3);
-            horizonCity.lineTo(hx + buildingWidth * 0.3, horizonY - buildingHeight);
-            horizonCity.lineTo(hx + buildingWidth * 0.6, horizonY - buildingHeight * 0.5);
-            horizonCity.lineTo(hx + buildingWidth, horizonY - buildingHeight * 0.7);
-        } else {
-            horizonCity.lineTo(hx, horizonY - buildingHeight);
-            horizonCity.lineTo(hx + buildingWidth, horizonY - buildingHeight);
+        horizonCity.beginPath();
+        horizonCity.moveTo(copyOffset, CONFIG.worldHeight);
+        
+        let hx = 0;
+        while (hx < CONFIG.worldWidth + 50) {
+            const buildingWidth = 8 + copyRandom() * 25;
+            const buildingHeight = 20 + copyRandom() * 70;
+            const destroyed = copyRandom() > 0.6;
+            
+            if (destroyed) {
+                // Jagged destroyed top
+                horizonCity.lineTo(copyOffset + hx, horizonY - buildingHeight * 0.3);
+                horizonCity.lineTo(copyOffset + hx + buildingWidth * 0.3, horizonY - buildingHeight);
+                horizonCity.lineTo(copyOffset + hx + buildingWidth * 0.6, horizonY - buildingHeight * 0.5);
+                horizonCity.lineTo(copyOffset + hx + buildingWidth, horizonY - buildingHeight * 0.7);
+            } else {
+                horizonCity.lineTo(copyOffset + hx, horizonY - buildingHeight);
+                horizonCity.lineTo(copyOffset + hx + buildingWidth, horizonY - buildingHeight);
+            }
+            
+            hx += buildingWidth + copyRandom() * 5;
         }
         
-        hx += buildingWidth + random() * 5;
+        horizonCity.lineTo(copyOffset + CONFIG.worldWidth, CONFIG.worldHeight);
+        horizonCity.closePath();
+        horizonCity.fillPath();
     }
-    
-    horizonCity.lineTo(CONFIG.worldWidth, CONFIG.worldHeight);
-    horizonCity.closePath();
-    horizonCity.fillPath();
     
     // Distant fires glow on horizon
     for (let i = 0; i < 10; i++) {
@@ -306,7 +228,7 @@ function createBackground(scene, initialPlayerX = 0) {
         });
     }
     
-    wrapGraphicsLayer(horizonCity, 0.2, 'horizon');
+    horizonCity.setScrollFactor(0.2);
     
     // ========================================
     // LAYER 3: Distant City Silhouettes
@@ -391,7 +313,7 @@ function createBackground(scene, initialPlayerX = 0) {
         });
     }
     
-    wrapGraphicsLayer(distantCity, 0.3, 'distant-city');
+    distantCity.setScrollFactor(0.3);
     
     // ========================================
     // LAYER 4: Mid-distance Destroyed City
@@ -551,7 +473,7 @@ function createBackground(scene, initialPlayerX = 0) {
     midCity.strokePath();
     midCity.lineStyle(0);
     
-    wrapGraphicsLayer(midCity, 0.5, 'mid-city');
+    midCity.setScrollFactor(0.5);
     
     // ========================================
     // LAYER 5: Near Destroyed Buildings
@@ -749,7 +671,7 @@ function createBackground(scene, initialPlayerX = 0) {
         }
     }
     
-    wrapGraphicsLayer(nearCity, 0.7, 'near-city');
+    nearCity.setScrollFactor(0.7);
     
     // ========================================
     // LAYER 6: Foreground Terrain & Details
@@ -771,47 +693,56 @@ function createBackground(scene, initialPlayerX = 0) {
         return values;
     }
     
-    // Base terrain layer (darker)
+    // Base terrain layer (darker) - draw three copies for seamless wrapping
     const baseNoise = generateLoopingNoise(CONFIG.worldWidth, 35, 28, 0.5);
     terrain.fillStyle(0x1a1210, 1);
-    terrain.beginPath();
-    terrain.moveTo(0, CONFIG.worldHeight);
-    for (let i = 0; i < baseNoise.length; i++) {
-        const x = i * 35;
-        if (x > CONFIG.worldWidth) break;
-        terrain.lineTo(x, groundY - baseNoise[i] - 18);
+    
+    for (let copyOffset of [-CONFIG.worldWidth, 0, CONFIG.worldWidth]) {
+        terrain.beginPath();
+        terrain.moveTo(copyOffset, CONFIG.worldHeight);
+        for (let i = 0; i < baseNoise.length; i++) {
+            const x = i * 35;
+            if (x > CONFIG.worldWidth) break;
+            terrain.lineTo(copyOffset + x, groundY - baseNoise[i] - 18);
+        }
+        terrain.lineTo(copyOffset + CONFIG.worldWidth, CONFIG.worldHeight);
+        terrain.closePath();
+        terrain.fillPath();
     }
-    terrain.lineTo(CONFIG.worldWidth, CONFIG.worldHeight);
-    terrain.closePath();
-    terrain.fillPath();
     
     // Mid terrain layer
     const midNoise = generateLoopingNoise(CONFIG.worldWidth, 25, 18, 1.2);
     terrain.fillStyle(0x252018, 1);
-    terrain.beginPath();
-    terrain.moveTo(0, CONFIG.worldHeight);
-    for (let i = 0; i < midNoise.length; i++) {
-        const x = i * 25;
-        if (x > CONFIG.worldWidth) break;
-        terrain.lineTo(x, groundY - midNoise[i] - 10);
+    
+    for (let copyOffset of [-CONFIG.worldWidth, 0, CONFIG.worldWidth]) {
+        terrain.beginPath();
+        terrain.moveTo(copyOffset, CONFIG.worldHeight);
+        for (let i = 0; i < midNoise.length; i++) {
+            const x = i * 25;
+            if (x > CONFIG.worldWidth) break;
+            terrain.lineTo(copyOffset + x, groundY - midNoise[i] - 10);
+        }
+        terrain.lineTo(copyOffset + CONFIG.worldWidth, CONFIG.worldHeight);
+        terrain.closePath();
+        terrain.fillPath();
     }
-    terrain.lineTo(CONFIG.worldWidth, CONFIG.worldHeight);
-    terrain.closePath();
-    terrain.fillPath();
     
     // Top terrain layer
     const topNoise = generateLoopingNoise(CONFIG.worldWidth, 28, 14, 2.1);
     terrain.fillStyle(0x352a20, 1);
-    terrain.beginPath();
-    terrain.moveTo(0, CONFIG.worldHeight);
-    for (let i = 0; i < topNoise.length; i++) {
-        const x = i * 28;
-        if (x > CONFIG.worldWidth) break;
-        terrain.lineTo(x, groundY - topNoise[i] - 4);
+    
+    for (let copyOffset of [-CONFIG.worldWidth, 0, CONFIG.worldWidth]) {
+        terrain.beginPath();
+        terrain.moveTo(copyOffset, CONFIG.worldHeight);
+        for (let i = 0; i < topNoise.length; i++) {
+            const x = i * 28;
+            if (x > CONFIG.worldWidth) break;
+            terrain.lineTo(copyOffset + x, groundY - topNoise[i] - 4);
+        }
+        terrain.lineTo(copyOffset + CONFIG.worldWidth, CONFIG.worldHeight);
+        terrain.closePath();
+        terrain.fillPath();
     }
-    terrain.lineTo(CONFIG.worldWidth, CONFIG.worldHeight);
-    terrain.closePath();
-    terrain.fillPath();
     
     // Craters
     for (let i = 0; i < 12; i++) {
@@ -1120,7 +1051,5 @@ function createBackground(scene, initialPlayerX = 0) {
         });
     }
     
-    wrapGraphicsLayer(terrain, 1, 'terrain');
-
     scene.groundLevel = groundY;
 }

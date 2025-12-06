@@ -28,6 +28,8 @@ function preload() {
 
 function create() {
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight);
+    createBackground(this);
+
     player = this.physics.add.sprite(100, 300, 'player');
     player.setCollideWorldBounds(false);
     player.setScale(1.25);
@@ -36,8 +38,6 @@ function create() {
     // Secondary "Wrap Camera" to show the other side of the world seamlessly
     this.wrapCamera = this.cameras.add(0, 0, CONFIG.width, CONFIG.height);
     this.wrapCamera.setVisible(false);
-
-    createBackground(this, player.x);
 
     enemies = this.physics.add.group();
     projectiles = this.physics.add.group();
@@ -77,8 +77,6 @@ function create() {
             particleManager.destroy();
             particleManager = null;
         }
-
-        destroyBackgroundLayers(this);
     });
 
     this.physics.add.overlap(projectiles, enemies, hitEnemy, null, this);
@@ -121,7 +119,7 @@ function update(time, delta) {
     if (particleManager) {
         particleManager.update(delta);
     }
-
+    
     // -- Seamless Infinite Loop Logic --
     
     // 1. Wrap Player Physics
@@ -130,8 +128,6 @@ function update(time, delta) {
     } else if (player.x >= CONFIG.worldWidth) {
         player.x -= CONFIG.worldWidth;
     }
-
-    updateBackgroundParallax();
 
     // 2. Manual Camera Positioning (Rigid Lock to match retro feel)
     const mainCam = this.cameras.main;
@@ -143,18 +139,19 @@ function update(time, delta) {
         const scrollX = mainCam.scrollX;
         const camW = mainCam.width;
         
+        // Add 2px safety buffer to prevent sub-pixel gaps
         if (scrollX < 0) {
             // Viewing Left Void -> Render World End
             wrapCam.setVisible(true);
-            const gap = Math.abs(scrollX);
-            wrapCam.setViewport(0, 0, gap, mainCam.height);
-            wrapCam.scrollX = CONFIG.worldWidth + scrollX;
+            const gap = Math.abs(scrollX) + 2;
+            wrapCam.setViewport(0, 0, Math.min(gap, camW), mainCam.height);
+            wrapCam.scrollX = CONFIG.worldWidth + scrollX - 2;
         } else if (scrollX + camW > CONFIG.worldWidth) {
             // Viewing Right Void -> Render World Start
             wrapCam.setVisible(true);
-            const overshot = (scrollX + camW) - CONFIG.worldWidth;
-            wrapCam.setViewport(camW - overshot, 0, overshot, mainCam.height);
-            wrapCam.scrollX = 0;
+            const overshot = (scrollX + camW) - CONFIG.worldWidth + 2;
+            wrapCam.setViewport(camW - overshot, 0, Math.min(overshot, camW), mainCam.height);
+            wrapCam.scrollX = -2;
         } else {
             wrapCam.setVisible(false);
         }
