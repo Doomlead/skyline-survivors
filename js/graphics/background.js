@@ -23,18 +23,6 @@ function createBackground(scene) {
         }
     };
 
-    let layerId = 0;
-    const wrapGraphicsLayer = (graphics, scrollFactor, keyHint) => {
-        const textureKey = `bg-layer-${keyHint || 'layer'}-${layerId++}`;
-        graphics.generateTexture(textureKey, CONFIG.worldWidth, CONFIG.worldHeight);
-        graphics.destroy();
-
-        for (const offset of [-CONFIG.worldWidth, 0, CONFIG.worldWidth]) {
-            const sprite = scene.add.image(offset, 0, textureKey).setOrigin(0, 0);
-            sprite.setScrollFactor(scrollFactor);
-        }
-    };
-
     const groundY = CONFIG.worldHeight - 80;
     
     // ========================================
