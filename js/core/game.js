@@ -28,8 +28,6 @@ function preload() {
 
 function create() {
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight);
-    createBackground(this);
-
     player = this.physics.add.sprite(100, 300, 'player');
     player.setCollideWorldBounds(false);
     player.setScale(1.25);
@@ -38,6 +36,8 @@ function create() {
     // Secondary "Wrap Camera" to show the other side of the world seamlessly
     this.wrapCamera = this.cameras.add(0, 0, CONFIG.width, CONFIG.height);
     this.wrapCamera.setVisible(false);
+
+    createBackground(this, player.x);
 
     enemies = this.physics.add.group();
     projectiles = this.physics.add.group();
@@ -77,6 +77,8 @@ function create() {
             particleManager.destroy();
             particleManager = null;
         }
+
+        destroyBackgroundLayers(this);
     });
 
     this.physics.add.overlap(projectiles, enemies, hitEnemy, null, this);
@@ -119,7 +121,7 @@ function update(time, delta) {
     if (particleManager) {
         particleManager.update(delta);
     }
-    
+
     // -- Seamless Infinite Loop Logic --
     
     // 1. Wrap Player Physics
@@ -128,6 +130,8 @@ function update(time, delta) {
     } else if (player.x >= CONFIG.worldWidth) {
         player.x -= CONFIG.worldWidth;
     }
+
+    updateBackgroundParallax();
 
     // 2. Manual Camera Positioning (Rigid Lock to match retro feel)
     const mainCam = this.cameras.main;

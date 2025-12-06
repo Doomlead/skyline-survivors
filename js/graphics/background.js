@@ -2,6 +2,93 @@
 // Background - DETAILED Post-Apocalyptic Cityscape
 // ------------------------
 
+const backgroundState = {
+    layers: [],
+    accumScrollX: 0,
+    prevX: null,
+    depthCounter: 0
+};
+
+function resetBackgroundState(initialX = 0) {
+    backgroundState.layers = [];
+    backgroundState.accumScrollX = 0;
+    backgroundState.prevX = initialX;
+    backgroundState.depthCounter = 0;
+}
+
+function destroyBackgroundLayers(scene) {
+    backgroundState.layers.forEach(({ sprite, textureKey }) => {
+        if (sprite && sprite.destroy) {
+            sprite.destroy();
+        }
+        if (textureKey && scene.textures.exists(textureKey)) {
+            scene.textures.remove(textureKey);
+        }
+    });
+    backgroundState.layers = [];
+}
+
+function wrapGraphicsLayer(graphics, speedX, key) {
+    const scene = graphics.scene;
+    if (!scene) return;
+
+    const textureKey = `bg-${key}`;
+    if (scene.textures.exists(textureKey)) {
+        scene.textures.remove(textureKey);
+    }
+
+    const rt = scene.make.renderTexture({
+        x: 0,
+        y: 0,
+        width: CONFIG.worldWidth,
+        height: CONFIG.worldHeight,
+        add: false
+    });
+    rt.draw(graphics, 0, 0);
+    rt.saveTexture(textureKey);
+    rt.destroy();
+
+    graphics.destroy();
+
+    const cam = scene.cameras.main;
+    const tile = scene.add.tileSprite(0, 0, cam.width, CONFIG.worldHeight, textureKey)
+        .setOrigin(0, 0)
+        .setScrollFactor(0)
+        .setDepth(backgroundState.depthCounter++);
+
+    if (scene.wrapCamera) {
+        scene.wrapCamera.ignore(tile);
+    }
+
+    backgroundState.layers.push({ sprite: tile, speedX, textureKey });
+}
+
+function updateBackgroundParallax() {
+    if (!backgroundState.layers.length || typeof player === 'undefined' || !player) return;
+
+    const px = player.x;
+    if (backgroundState.prevX === null) {
+        backgroundState.prevX = px;
+        return;
+    }
+
+    let dx = px - backgroundState.prevX;
+    const half = CONFIG.worldWidth * 0.5;
+    if (dx > half) {
+        dx -= CONFIG.worldWidth;
+    } else if (dx < -half) {
+        dx += CONFIG.worldWidth;
+    }
+
+    backgroundState.accumScrollX += dx;
+    backgroundState.prevX = px;
+
+    const scroll = backgroundState.accumScrollX;
+    backgroundState.layers.forEach((layer) => {
+        layer.sprite.tilePositionX = scroll * layer.speedX;
+    });
+}
+
 function createRNG(seed) {
     let state = seed >>> 0;
     return function mulberry32() {
@@ -13,7 +100,10 @@ function createRNG(seed) {
     };
 }
 
-function createBackground(scene) {
+function createBackground(scene, initialPlayerX = 0) {
+    destroyBackgroundLayers(scene);
+    resetBackgroundState(initialPlayerX);
+
     const rng = createRNG(CONFIG.backgroundSeed || 1337);
     const random = () => rng();
     const wrapOffsets = [0, CONFIG.worldWidth, -CONFIG.worldWidth];
