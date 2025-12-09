@@ -8,7 +8,7 @@ class MainMenuScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('ui-earth', 'assets/Art/U.I/Earth.png');
+        this.load.image('ui-earth', 'assets/Art/UI/Earth.png');
     }
 
     create() {
