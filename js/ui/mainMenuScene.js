@@ -9,15 +9,16 @@ class MainMenuScene extends Phaser.Scene {
     }
 
     preload() {
-        const earthUrl = new URL('assets/Art/UI/Earth.png', window.location.href).toString();
-        this.load.image('ui-earth', earthUrl);
-
-        this.load.on('loaderror', (file) => {
-            if (file?.key === 'ui-earth') {
-                this.earthTextureKey = 'ui-earth-fallback';
-            }
-        });
-    }
+    // Simple relative path from your HTML file
+    this.load.image('ui-earth', 'assets/Art/UI/Earth.png');
+    
+    this.load.on('loaderror', (file) => {
+        console.error('Failed to load:', file?.key, file?.src);
+        if (file?.key === 'ui-earth') {
+            this.earthTextureKey = 'ui-earth-fallback';
+        }
+    });
+}
 
     create() {
         const { width, height } = this.scale;
