@@ -3,8 +3,8 @@
 This repo contains a single Phaser 3 scene with two selectable modes (classic waves and timed survival), external HUD, and basic power-ups/enemy waves. The following high-level elements from the Skyline Survivors concept doc are not present in the current codebase:
 
 1. **System/Meta Layer**
-   - No system map or multi-node district selection; gameplay starts directly in the side-scrolling scene.
-   - No mothership timers, district destruction state, or weapons satellite/shop layer.
+   - Prototype meta-map UIs exist (MainMenuScene and BuildScene) with city rerolling, map markers, orbit nodes, and district timers, but they do not feed back into gameplay state or persistence.
+   - No mothership timers, district destruction state, or weapons satellite/shop layer beyond the visual mockups in BuildScene.
 
 2. **Co-op & Ship Forms**
    - Only one player ship is spawned and controlled (no second player, linked turret mode, or form switching between fighter/turret roles).
@@ -17,7 +17,7 @@ This repo contains a single Phaser 3 scene with two selectable modes (classic wa
    - Power-ups cover lasers, drones, shields, missiles, magnet, speed, overdrive, and fire-rate buffs, but there are no branching upgrade paths, satellite positioning, or shop-based build crafting.
 
 5. **Missions, Boss Structure, and Progression**
-   - Core loop is a single endless map; there are no district variations (Downtown/Industrial/etc.), challenge missions, boss rush, or endgame enemy-base assault.
+   - Core loop is a single endless map; UI hooks for city selection and mode toggles exist but there are no district variations (Downtown/Industrial/etc.), challenge missions, boss rush, or endgame enemy-base assault.
 
 6. **UI/UX & Meta Tracking**
    - HUD omits system-layer indicators (flashing threatened nodes, destroyed districts), and there is no meta persistence or cosmetic unlock scaffolding.

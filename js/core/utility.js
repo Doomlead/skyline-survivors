@@ -206,6 +206,9 @@ function getScreenPosition(scene, worldX, worldY) {
 
 function startGame(mode = 'classic') {
     gameState.mode = mode;
+    if (window.missionPlanner && typeof window.missionPlanner.getMission === 'function') {
+        gameState.currentMission = window.missionPlanner.getMission();
+    }
     if (mode === 'survival') gameState.timeRemaining = gameState.totalSurvivalDuration;
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';

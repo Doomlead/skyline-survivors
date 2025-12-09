@@ -11,6 +11,10 @@ class BuildScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('#050912');
         this.cameras.main.setZoom(1);
 
+        if (window.missionPlanner) {
+            window.missionPlanner.ensureMission();
+        }
+
         this.createStars();
         this.createBackdrop(width, height);
 
@@ -91,6 +95,7 @@ class BuildScene extends Phaser.Scene {
         ];
 
         sectorConfigs.forEach(config => {
+            const midAngle = (config.start + config.end) / 2;
             const sectorGraphics = this.add.graphics({ x: 0, y: 0 });
             sectorGraphics.fillStyle(config.color, 0.16);
             sectorGraphics.slice(0, 0, 138, Phaser.Math.DegToRad(config.start), Phaser.Math.DegToRad(config.end), false);
@@ -110,20 +115,20 @@ class BuildScene extends Phaser.Scene {
             selectionArc.setInteractive({ useHandCursor: true });
 
             const timerText = this.add.text(
-                Math.cos(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 95,
-                Math.sin(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 95,
+                Math.cos(Phaser.Math.DegToRad(midAngle)) * 95,
+                Math.sin(Phaser.Math.DegToRad(midAngle)) * 95,
                 this.formatTimer(config.timer),
                 { fontFamily: 'Orbitron', fontSize: '12px', color: '#d1f6ff' }
             ).setOrigin(0.5);
 
             const nameLabel = this.add.text(
-                Math.cos(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 70,
-                Math.sin(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 70,
+                Math.cos(Phaser.Math.DegToRad(midAngle)) * 70,
+                Math.sin(Phaser.Math.DegToRad(midAngle)) * 70,
                 config.name,
                 { fontFamily: 'Orbitron', fontSize: '11px', color: '#c3e8ff' }
             ).setOrigin(0.5);
 
-            const district = { config, sectorGraphics, glow, selectionArc, timer: config.timer, timerText, nameLabel };
+            const district = { config: { ...config, midAngle }, sectorGraphics, glow, selectionArc, timer: config.timer, timerText, nameLabel };
             this.planetContainer.add([glow, sectorGraphics, selectionArc, timerText, nameLabel]);
             this.enableDistrictInteractions(district);
             this.districts.push(district);
@@ -147,6 +152,9 @@ class BuildScene extends Phaser.Scene {
         this.selectedDistrict = district;
         this.children.bringToTop(this.detailCard);
 
+        const angle = district.config.midAngle ?? district.config.angle ?? 0;
+        const mission = window.missionPlanner ? window.missionPlanner.selectDistrict(district.config.name, angle) : null;
+
         this.tweens.add({
             targets: this.cameras.main,
             zoom: 1.12,
@@ -163,11 +171,13 @@ class BuildScene extends Phaser.Scene {
         });
 
         this.detailTitle.setText(`${district.config.name}`);
+        const latLon = mission ? `Lat ${mission.latitude.toFixed(1)} · Lon ${mission.longitude.toFixed(1)}\n` : '';
         this.detailBody.setText(
-            `Status: ${this.formatTimer(district.timer)} until destabilization\n` +
+            `${latLon}Status: ${this.formatTimer(district.timer)} until destabilization\n` +
             'View: 2D top-down telemetry with sector overlays\n' +
             'Action: Prep builds, reinforce nodes, shop for upgrades.'
         );
+        this.refreshSelectionSummary();
     }
 
     createOrbitNodes(width, height, centerX, centerY) {
@@ -217,7 +227,7 @@ class BuildScene extends Phaser.Scene {
             node.on('pointerdown', () => {
                 this.flashConnector(connector);
                 this.focusDistrict({
-                    config: { name: `${config.label} Sector` },
+                    config: { name: `${config.label} Sector`, angle: config.angle },
                     timer: config.timer
                 });
             });
@@ -284,6 +294,8 @@ class BuildScene extends Phaser.Scene {
                 fontSize: '11px',
                 color: '#9fb8d1'
             }).setOrigin(0.5);
+
+        this.refreshSelectionSummary();
     }
 
     startMode(mode) {
@@ -296,10 +308,26 @@ class BuildScene extends Phaser.Scene {
             });
             return;
         }
+        if (window.missionPlanner) {
+            window.missionPlanner.setMode(mode);
+        }
+        this.refreshSelectionSummary(mode);
         if (window.startGame) {
             startGame(mode);
         }
         this.scene.stop();
+    }
+
+    refreshSelectionSummary(modeOverride = null) {
+        if (!this.modeHint) return;
+        const mission = window.missionPlanner ? window.missionPlanner.getMission() : null;
+        if (!this.selectedDistrict || !mission) {
+            this.modeHint.setText('Select a district to deploy and then choose your mode.');
+            return;
+        }
+        const modeLabel = (modeOverride || mission.mode) === 'survival' ? 'Survival' : 'Wave';
+        const targetName = mission.district || this.selectedDistrict.config.name;
+        this.modeHint.setText(`Selected: ${targetName} • Mode: ${modeLabel}`);
     }
 
     flashConnector(connector) {
