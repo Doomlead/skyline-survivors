@@ -214,3 +214,11 @@ function getEnemyScore(type) {
 function getEnemyScale(type) {
     return ENEMY_SCALE_VALUES[type] || ENEMY_SCALE_VALUES.default;
 }
+
+if (typeof module !== 'undefined') {
+    module.exports = {
+        ENEMY_TYPES,
+        ENEMY_HP_VALUES,
+        ENEMY_SCORE_VALUES
+    };
+}
