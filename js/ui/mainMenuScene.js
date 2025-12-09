@@ -5,10 +5,18 @@ class MainMenuScene extends Phaser.Scene {
         this.mapMarker = null;
         this.mapImage = null;
         this.mapPing = null;
+        this.earthTextureKey = 'ui-earth';
     }
 
     preload() {
-        this.load.image('ui-earth', 'assets/Art/UI/Earth.png');
+        const earthUrl = new URL('assets/Art/UI/Earth.png', window.location.href).toString();
+        this.load.image('ui-earth', earthUrl);
+
+        this.load.on('loaderror', (file) => {
+            if (file?.key === 'ui-earth') {
+                this.earthTextureKey = 'ui-earth-fallback';
+            }
+        });
     }
 
     create() {
@@ -81,7 +89,9 @@ class MainMenuScene extends Phaser.Scene {
         const panel = this.createPanel(width / 2, panelY, panelWidth, panelHeight, 0x0c1e34, 0x33c0ff);
         panel.container.setDepth(2);
 
-        this.mapImage = this.add.image(width / 2, panelY, 'ui-earth');
+        this.ensureEarthTexture(panelWidth - 40, panelHeight - 40);
+
+        this.mapImage = this.add.image(width / 2, panelY, this.earthTextureKey);
         this.mapImage.setDisplaySize(panelWidth - 40, panelHeight - 40);
         this.mapImage.setBlendMode(Phaser.BlendModes.NORMAL);
         this.mapImage.setDepth(3);
@@ -99,6 +109,32 @@ class MainMenuScene extends Phaser.Scene {
             duration: 900,
             repeat: -1
         });
+    }
+
+    ensureEarthTexture(targetWidth, targetHeight) {
+        if (this.textures.exists('ui-earth')) {
+            this.earthTextureKey = 'ui-earth';
+            return;
+        }
+
+        const fallbackKey = 'ui-earth-fallback';
+        if (!this.textures.exists(fallbackKey)) {
+            const g = this.make.graphics({ x: 0, y: 0, add: false });
+            g.fillStyle(0x0c1e34, 1);
+            g.fillRect(0, 0, targetWidth, targetHeight);
+
+            g.fillStyle(0x163b64, 0.9);
+            g.fillEllipse(targetWidth / 2, targetHeight / 2, targetWidth * 0.9, targetHeight * 0.9);
+            g.fillStyle(0x1b7fcc, 0.45);
+            g.fillEllipse(targetWidth / 2 - 10, targetHeight / 2 - 8, targetWidth * 0.7, targetHeight * 0.65);
+            g.lineStyle(3, 0x33c0ff, 0.6);
+            g.strokeEllipse(targetWidth / 2, targetHeight / 2, targetWidth * 0.92, targetHeight * 0.92);
+
+            g.generateTexture(fallbackKey, targetWidth, targetHeight);
+            g.destroy();
+        }
+
+        this.earthTextureKey = fallbackKey;
     }
 
     createLowerPanels(width, height) {
