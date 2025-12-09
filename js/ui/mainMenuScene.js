@@ -1,6 +1,7 @@
 class MainMenuScene extends Phaser.Scene {
     constructor() {
         super({ key: SCENE_KEYS.menu, active: true });
+        this.mission = null;
         this.mapMarker = null;
         this.mapImage = null;
         this.mapPing = null;
@@ -28,14 +29,14 @@ class MainMenuScene extends Phaser.Scene {
 
         this.layoutFrame(width, height);
 
-        if (window.missionPlanner) {
-            window.missionPlanner.ensureMission();
-        }
+        this.mission = this.generateMission();
         this.createWorldMap(width, height * 0.46);
         this.createLowerPanels(width, height);
         this.updateMissionUi();
 
-        this.input.keyboard.once('keydown-SPACE', () => this.launchMission());
+        this.input.keyboard.once('keydown-SPACE', () => {
+            this.launchMission();
+        });
 
         this.input.keyboard.on('keydown-R', () => this.rollMission());
     }
@@ -221,49 +222,54 @@ class MainMenuScene extends Phaser.Scene {
         return { button, text };
     }
 
+    generateMission() {
+        const cities = [
+            'Neo Seattle', 'Skyline Prime', 'Aurora City', 'Nightfall Bay', 'Nova Odessa',
+            'Celestia Station', 'Obsidian Ridge', 'Atlas Spire', 'Horizon Arc', 'Lumen Harbor'
+        ];
+
+        return {
+            city: Phaser.Utils.Array.GetRandom(cities),
+            latitude: Phaser.Math.FloatBetween(-70, 70),
+            longitude: Phaser.Math.FloatBetween(-170, 170),
+            mode: Phaser.Utils.Array.GetRandom(['classic', 'survival']),
+            seed: Phaser.Math.RND.uuid()
+        };
+    }
+
     rollMission() {
-        if (window.missionPlanner) {
-            window.missionPlanner.rerollCity();
-        }
+        this.mission = this.generateMission();
         this.updateMissionUi();
     }
 
     toggleMode() {
-        if (!window.missionPlanner) return;
-        const mission = window.missionPlanner.getMission();
-        const nextMode = mission.mode === 'survival' ? 'classic' : 'survival';
-        window.missionPlanner.setMode(nextMode);
+        if (!this.mission) return;
+        this.mission.mode = this.mission.mode === 'survival' ? 'classic' : 'survival';
         this.updateMissionUi();
     }
 
     launchMission() {
-        const mission = window.missionPlanner ? window.missionPlanner.getMission() : null;
-        const mode = mission?.mode || 'classic';
-        if (window.startGame) startGame(mode);
+        if (window.startGame) startGame(this.mission.mode);
     }
 
     updateMissionUi() {
-        if (!this.mapImage || !window.missionPlanner) return;
-
-        const mission = window.missionPlanner.getMission();
-        if (!mission) return;
+        if (!this.mission || !this.mapImage) return;
 
         this.positionMarkerOnMap();
 
-        const { city, latitude, longitude, seed, district } = mission;
+        const { city, latitude, longitude, seed } = this.mission;
         this.cityTitle.setText('Target City');
-        const districtLine = district ? `District: ${district}\n` : '';
-        this.cityBody.setText(`${city}\n${districtLine}Lat ${latitude.toFixed(1)} · Lon ${longitude.toFixed(1)}\nMap Seed ${seed.slice(0, 5)}`);
+        this.cityBody.setText(`${city}\nLat ${latitude.toFixed(1)} · Lon ${longitude.toFixed(1)}\nMap Seed ${seed.slice(0, 5)}`);
 
-        const modeLabel = mission.mode === 'survival' ? 'Survival' : 'Wave';
+        const modeLabel = this.mission.mode === 'survival' ? 'Survival' : 'Wave';
         const headline = `${modeLabel} Deployment`;
-        const detail = mission.mode === 'survival'
+        const detail = this.mission.mode === 'survival'
             ? 'Timed endurance · Evac as many civilians as possible while timer drains.'
             : 'Escalating enemy waves · Clear the zone to advance and fight bosses.';
         this.modeTitle.setText(`${modeLabel} Mode`);
         this.modeBody.setText(`${headline}\n${detail}`);
 
-        const launchLabel = mission.mode === 'survival' ? 'Launch Survival Run (Space)' : 'Launch Wave Run (Space)';
+        const launchLabel = this.mission.mode === 'survival' ? 'Launch Survival Run (Space)' : 'Launch Wave Run (Space)';
         if (this.launchButton?.text) {
             this.launchButton.text.setText(launchLabel);
         }
@@ -271,9 +277,7 @@ class MainMenuScene extends Phaser.Scene {
 
     positionMarkerOnMap() {
         const map = this.mapImage;
-        const mission = window.missionPlanner ? window.missionPlanner.getMission() : null;
-        if (!mission) return;
-        const { longitude, latitude } = mission;
+        const { longitude, latitude } = this.mission;
         const displayW = map.displayWidth;
         const displayH = map.displayHeight;
 
