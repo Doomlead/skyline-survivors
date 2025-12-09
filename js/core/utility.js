@@ -219,6 +219,9 @@ function startGame(mode = 'classic') {
             } else {
                 game.scene.start(SCENE_KEYS.game);
             }
+        } else if (game.scene) {
+            resetGameState();
+            game.scene.start(SCENE_KEYS.game);
         }
         if (game.scene.isActive(SCENE_KEYS.build)) {
             game.scene.stop(SCENE_KEYS.build);
@@ -226,6 +229,9 @@ function startGame(mode = 'classic') {
             const returnBtn = document.getElementById('build-return');
             if (toggleBtn) toggleBtn.classList.remove('hidden');
             if (returnBtn) returnBtn.classList.add('hidden');
+        }
+        if (game.scene.isActive(SCENE_KEYS.menu)) {
+            game.scene.stop(SCENE_KEYS.menu);
         }
     }
 
@@ -237,7 +243,22 @@ function startGame(mode = 'classic') {
 // Make startGame available globally
 window.startGame = startGame;
 
-function openBuildView() {
+function enterMainMenu() {
+    const menu = document.getElementById('menu-overlay');
+    if (menu) menu.style.display = 'none';
+
+    if (window.game && game.scene) {
+        if (game.scene.isActive(SCENE_KEYS.build)) {
+            game.scene.stop(SCENE_KEYS.build);
+        }
+        if (game.scene.isActive(SCENE_KEYS.game)) {
+            game.scene.stop(SCENE_KEYS.game);
+        }
+        game.scene.start(SCENE_KEYS.menu);
+    }
+}
+
+function enterDistrictMap(fromOverlay = false) {
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
 
@@ -246,16 +267,24 @@ function openBuildView() {
         if (mainScene && mainScene.scene.isActive()) {
             mainScene.scene.pause();
         }
-        if (!game.scene.isActive(SCENE_KEYS.build)) {
-            game.scene.launch(SCENE_KEYS.build);
+        if (game.scene.isActive(SCENE_KEYS.menu)) {
+            game.scene.stop(SCENE_KEYS.menu);
         }
+        game.scene.start(SCENE_KEYS.build);
         game.scene.bringToTop(SCENE_KEYS.build);
     }
 
     const toggleBtn = document.getElementById('build-toggle');
     const returnBtn = document.getElementById('build-return');
-    if (toggleBtn) toggleBtn.classList.add('hidden');
+    if (!fromOverlay && toggleBtn) toggleBtn.classList.add('hidden');
     if (returnBtn) returnBtn.classList.remove('hidden');
+}
+
+function openBuildView() {
+    const menu = document.getElementById('menu-overlay');
+    if (menu) menu.style.display = 'none';
+
+    enterDistrictMap();
 }
 
 function closeBuildView() {
@@ -277,3 +306,5 @@ function closeBuildView() {
 
 window.openBuildView = openBuildView;
 window.closeBuildView = closeBuildView;
+window.enterMainMenu = enterMainMenu;
+window.enterDistrictMap = enterDistrictMap;
