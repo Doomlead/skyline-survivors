@@ -196,6 +196,8 @@ function update(time, delta) {
 
 const dimensions = getResponsiveScale();
 
+const mainSceneConfig = { key: SCENE_KEYS.game, preload, create, update };
+
 const config = {
     type: Phaser.AUTO,
     width: dimensions.width,
@@ -215,7 +217,7 @@ const config = {
             debug: false
         }
     },
-    scene: { preload, create, update }
+    scene: [mainSceneConfig, BuildScene]
 };
 
 const game = new Phaser.Game(config);
@@ -258,7 +260,7 @@ function applyResponsiveResize() {
         } else if (action === 'fire') {
             window.virtualInput.fire = isDown;
         } else if (action === 'bomb' && isDown) {
-            const scene = game.scene.scenes && game.scene.scenes[0];
+            const scene = game.scene.getScene(SCENE_KEYS.game);
             if (scene && scene.scene.isActive()) useSmartBomb(scene);
         }
     }

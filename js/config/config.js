@@ -2,6 +2,11 @@
 // Game configuration and state
 // ------------------------
 
+const SCENE_KEYS = {
+    game: 'GameScene',
+    build: 'BuildScene'
+};
+
 const CONFIG = {
     width: 1000,
     height: 500,

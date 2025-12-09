@@ -169,6 +169,7 @@ function getResponsiveScale() {
     const controls = document.getElementById('controls-text');
     const touchControls = document.getElementById('touch-controls');
     const footer = document.getElementById('footer-note');
+    const buildControls = document.getElementById('build-controls');
 
     const getOuterHeight = (el) => {
         if (!el) return 0;
@@ -178,7 +179,7 @@ function getResponsiveScale() {
         return el.offsetHeight + marginTop + marginBottom;
     };
 
-    const reservedHeight = getOuterHeight(hud) + getOuterHeight(controls) + getOuterHeight(touchControls) + getOuterHeight(footer) + 16;
+    const reservedHeight = getOuterHeight(hud) + getOuterHeight(controls) + getOuterHeight(buildControls) + getOuterHeight(touchControls) + getOuterHeight(footer) + 16;
     const maxWidth = Math.max(320, window.innerWidth - 24);
     let maxHeight = Math.max(180, window.innerHeight - reservedHeight);
 
@@ -209,11 +210,22 @@ function startGame(mode = 'classic') {
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
 
-    if (window.Phaser && window.game && game.scene && game.scene.scenes && game.scene.scenes.length) {
-        const scene = game.scene.scenes[0];
-        if (scene && scene.scene && scene.scene.isActive()) {
+    if (window.Phaser && window.game && game.scene) {
+        const scene = game.scene.getScene(SCENE_KEYS.game);
+        if (scene && scene.scene) {
             resetGameState();
-            scene.scene.restart();
+            if (scene.scene.isActive()) {
+                scene.scene.restart();
+            } else {
+                game.scene.start(SCENE_KEYS.game);
+            }
+        }
+        if (game.scene.isActive(SCENE_KEYS.build)) {
+            game.scene.stop(SCENE_KEYS.build);
+            const toggleBtn = document.getElementById('build-toggle');
+            const returnBtn = document.getElementById('build-return');
+            if (toggleBtn) toggleBtn.classList.remove('hidden');
+            if (returnBtn) returnBtn.classList.add('hidden');
         }
     }
 
@@ -224,3 +236,44 @@ function startGame(mode = 'classic') {
 
 // Make startGame available globally
 window.startGame = startGame;
+
+function openBuildView() {
+    const menu = document.getElementById('menu-overlay');
+    if (menu) menu.style.display = 'none';
+
+    if (window.game && game.scene) {
+        const mainScene = game.scene.getScene(SCENE_KEYS.game);
+        if (mainScene && mainScene.scene.isActive()) {
+            mainScene.scene.pause();
+        }
+        if (!game.scene.isActive(SCENE_KEYS.build)) {
+            game.scene.launch(SCENE_KEYS.build);
+        }
+        game.scene.bringToTop(SCENE_KEYS.build);
+    }
+
+    const toggleBtn = document.getElementById('build-toggle');
+    const returnBtn = document.getElementById('build-return');
+    if (toggleBtn) toggleBtn.classList.add('hidden');
+    if (returnBtn) returnBtn.classList.remove('hidden');
+}
+
+function closeBuildView() {
+    if (window.game && game.scene) {
+        if (game.scene.isActive(SCENE_KEYS.build)) {
+            game.scene.stop(SCENE_KEYS.build);
+        }
+        const mainScene = game.scene.getScene(SCENE_KEYS.game);
+        if (mainScene && mainScene.scene.isPaused()) {
+            mainScene.scene.resume();
+        }
+    }
+
+    const toggleBtn = document.getElementById('build-toggle');
+    const returnBtn = document.getElementById('build-return');
+    if (toggleBtn) toggleBtn.classList.remove('hidden');
+    if (returnBtn) returnBtn.classList.add('hidden');
+}
+
+window.openBuildView = openBuildView;
+window.closeBuildView = closeBuildView;
