@@ -237,7 +237,8 @@ function createGraphics(scene) {
     createOriginalEnemyGraphics(scene);
     createNewEnemyGraphics(scene);
 
-    // createBossGraphics(scene); // Call this if you have the function
+    // Boss sprites for boss waves
+    createBossGraphics(scene);
     
     createHumanGraphics(scene);
     createPowerUpGraphics(scene);
