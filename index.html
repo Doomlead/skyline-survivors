@@ -58,6 +58,14 @@
                 <span class="text-cyan-300">Q</span> = Hyperspace,
                 <span class="text-cyan-300">P</span> = Pause.
             </p>
+            <div id="build-controls" class="flex flex-wrap justify-center gap-2 text-[10px] md:text-xs">
+                <button id="build-toggle" onclick="openBuildView()" class="px-3 py-2 rounded bg-slate-800/90 border border-cyan-700 text-cyan-200 uppercase tracking-[0.15em] shadow-lg hover:border-cyan-400">
+                    Open Build / Map
+                </button>
+                <button id="build-return" onclick="closeBuildView()" class="px-3 py-2 rounded bg-emerald-800/90 border border-emerald-500 text-emerald-100 uppercase tracking-[0.15em] shadow-lg hidden">
+                    Return to Battle
+                </button>
+            </div>
         </main>
 
         <!-- Simple on-screen controls for touch devices -->
@@ -135,6 +143,7 @@
     <script src="js/graphics/background.js"></script>
     <!-- 11. UI and HUD -->
     <script src="js/ui/ui.js"></script>
+    <script src="js/ui/buildScene.js"></script>
     <!-- 12. Power-up system -->
     <script src="js/entities/powerups.js"></script>
     <!-- 13. Player mechanics -->
