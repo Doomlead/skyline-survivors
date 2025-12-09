@@ -221,6 +221,8 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+// Expose the Phaser game instance for UI helpers (startGame, enterMainMenu, etc.)
+window.game = game;
 applyResponsiveResize();
 
 window.addEventListener('resize', () => {
