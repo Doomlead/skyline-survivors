@@ -203,6 +203,15 @@ const ENEMY_TYPES = [
     'shielder', 'bouncer', 'sniper', 'swarmLeader', 'regenerator'
 ];
 
+// Export for testing environments while remaining safe for browser usage.
+if (typeof module !== 'undefined') {
+    module.exports = {
+        ENEMY_TYPES,
+        ENEMY_HP_VALUES,
+        ENEMY_SCORE_VALUES
+    };
+}
+
 function getEnemyHP(type) {
     return ENEMY_HP_VALUES[type] || 1;
 }
