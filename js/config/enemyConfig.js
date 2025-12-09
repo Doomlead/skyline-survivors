@@ -149,6 +149,7 @@ const ENEMY_HP_VALUES = {
     bomber: 3,
     pod: 2,
     swarmer: 1,
+    baiter: 2,
     kamikaze: 1,
     turret: 4,
     shield: 5,
