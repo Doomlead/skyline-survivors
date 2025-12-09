@@ -21,6 +21,7 @@ class BuildScene extends Phaser.Scene {
         this.createDistricts();
         this.createOrbitNodes(width, height, centerX, centerY);
         this.createUiOverlay(width);
+        this.createModeButtons(width);
 
         this.input.on('pointermove', pointer => {
             this.planetContainer.rotation = Phaser.Math.DegToRad((pointer.x - centerX) * 0.01);
@@ -243,11 +244,62 @@ class BuildScene extends Phaser.Scene {
             color: '#c7e3ff'
         });
         this.detailBody = this.add.text(width / 2 - 180, 90,
-            'Hover or click a glowing sector to zoom in.\nNodes carry timers—stabilize the most critical threats first.', {
+            'Hover or click a glowing sector to zoom in.\nNodes carry timers—stabilize the most critical threats first.\nChoose a mode below to deploy to the selected district.', {
                 fontFamily: 'Orbitron',
                 fontSize: '11px',
                 color: '#9fb8d1'
             });
+    }
+
+    createModeButtons(width) {
+        this.modeButtons = this.add.container(width / 2, 150);
+
+        const createButton = (offsetX, label, color, handler) => {
+            const rect = this.add.rectangle(offsetX, 0, 150, 38, 0x0f172a, 0.85)
+                .setStrokeStyle(2, color, 0.7)
+                .setInteractive({ useHandCursor: true });
+            const text = this.add.text(offsetX, 0, label, {
+                fontFamily: 'Orbitron',
+                fontSize: '12px',
+                color: '#d1f6ff'
+            }).setOrigin(0.5);
+
+            rect.on('pointerover', () => {
+                this.tweens.add({ targets: rect, alpha: 1, duration: 120 });
+            });
+            rect.on('pointerout', () => {
+                this.tweens.add({ targets: rect, alpha: 0.85, duration: 160 });
+            });
+            rect.on('pointerdown', () => handler());
+
+            this.modeButtons.add([rect, text]);
+        };
+
+        createButton(-90, 'Wave Mode', 0x7dd3fc, () => this.startMode('classic'));
+        createButton(90, 'Survival Mode', 0x22d3ee, () => this.startMode('survival'));
+
+        this.modeHint = this.add.text(width / 2, 185,
+            'Select a district to deploy and then choose your mode.', {
+                fontFamily: 'Orbitron',
+                fontSize: '11px',
+                color: '#9fb8d1'
+            }).setOrigin(0.5);
+    }
+
+    startMode(mode) {
+        if (!this.selectedDistrict) {
+            this.tweens.add({
+                targets: this.detailCard,
+                alpha: { from: 0.7, to: 1 },
+                duration: 140,
+                yoyo: true
+            });
+            return;
+        }
+        if (window.startGame) {
+            startGame(mode);
+        }
+        this.scene.stop();
     }
 
     flashConnector(connector) {

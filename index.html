@@ -97,11 +97,11 @@
             </p>
 
             <div class="flex flex-col gap-2 mb-4">
-                <button onclick="startGame('classic')" class="w-full py-2 rounded bg-cyan-600 hover:bg-cyan-500 border border-cyan-300 text-xs font-semibold tracking-widest uppercase">
-                    Start Classic Mode
+                <button onclick="enterMainMenu()" class="w-full py-2 rounded bg-cyan-600 hover:bg-cyan-500 border border-cyan-300 text-xs font-semibold tracking-widest uppercase">
+                    Enter Main Menu
                 </button>
-                <button onclick="startGame('survival')" class="w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 border border-emerald-300 text-xs font-semibold tracking-widest uppercase">
-                    Start Survival Mode
+                <button onclick="enterDistrictMap(true)" class="w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 border border-emerald-300 text-xs font-semibold tracking-widest uppercase">
+                    Jump to District Map
                 </button>
             </div>
 
@@ -113,7 +113,7 @@
             </div>
 
             <p class="text-[10px] text-slate-500 leading-relaxed">
-                Tip: Rescue abducted humans mid-air for big bonuses and power-ups. Use smart bombs sparingly.
+                From the Command Deck you can open the district map, pick a sector, and choose between wave (classic) or survival deployments. Rescue abducted humans mid-air for big bonuses and power-ups.
             </p>
         </div>
     </div>
@@ -143,6 +143,7 @@
     <script src="js/graphics/background.js"></script>
     <!-- 11. UI and HUD -->
     <script src="js/ui/ui.js"></script>
+    <script src="js/ui/mainMenuScene.js"></script>
     <script src="js/ui/buildScene.js"></script>
     <!-- 12. Power-up system -->
     <script src="js/entities/powerups.js"></script>

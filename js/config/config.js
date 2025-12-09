@@ -3,6 +3,7 @@
 // ------------------------
 
 const SCENE_KEYS = {
+    menu: 'MainMenuScene',
     game: 'GameScene',
     build: 'BuildScene'
 };

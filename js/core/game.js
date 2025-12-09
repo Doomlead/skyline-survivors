@@ -196,7 +196,7 @@ function update(time, delta) {
 
 const dimensions = getResponsiveScale();
 
-const mainSceneConfig = { key: SCENE_KEYS.game, preload, create, update };
+const mainSceneConfig = { key: SCENE_KEYS.game, active: false, preload, create, update };
 
 const config = {
     type: Phaser.AUTO,
@@ -217,7 +217,7 @@ const config = {
             debug: false
         }
     },
-    scene: [mainSceneConfig, BuildScene]
+    scene: [MainMenuScene, BuildScene, mainSceneConfig]
 };
 
 const game = new Phaser.Game(config);
