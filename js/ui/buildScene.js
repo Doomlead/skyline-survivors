@@ -59,8 +59,7 @@ class BuildScene extends Phaser.Scene {
         g.generateTexture('build-star', 4, 4);
         g.destroy();
 
-        const particles = this.add.particles('build-star');
-        particles.createEmitter({
+        this.add.particles(0, 0, 'build-star', {
             x: { min: 0, max: this.scale.width },
             y: { min: 0, max: this.scale.height },
             quantity: 2,
