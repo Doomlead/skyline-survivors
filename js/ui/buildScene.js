@@ -194,9 +194,10 @@ class BuildScene extends Phaser.Scene {
             });
         }
 
+        const destabilizationStatus = `${this.formatTimer(district.state.timer)} until destabilization`;
         const statusLabel = district.state.status === 'destroyed'
             ? 'Destroyed: no civilian comms'
-            : `${this.formatTimer(district.state.timer)} until destabilization`;
+            : destabilizationStatus;
         this.detailTitle.setText(`${district.config.name}`);
         this.detailBody.setText(
             `Status: ${statusLabel}\n` +
