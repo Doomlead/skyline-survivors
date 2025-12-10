@@ -250,10 +250,12 @@ function applyMissionPayload(missionPayload) {
         gameState.missionDirectives = null;
         gameState.rewardMultiplier = 1;
         gameState.spawnMultiplier = 1;
+        gameState.missionDistrictState = null;
         return;
     }
     gameState.missionContext = missionPayload;
     gameState.missionDirectives = missionPayload.directives;
+    gameState.missionDistrictState = missionPayload.districtState || missionPayload.directives?.districtState || null;
     gameState.rewardMultiplier = missionPayload?.directives?.rewardMultiplier || 1;
     gameState.spawnMultiplier = missionPayload?.directives?.spawnMultiplier || 1;
     if (missionPayload?.directives?.humans) {

@@ -16,6 +16,7 @@
 
     let mission = null;
     let districtState = null;
+    const mapState = { nodes: {} };
 
     function getDefaultDistrictState(config) {
         return {
@@ -117,14 +118,15 @@
         return DISTRICT_CONFIGS.find(d => d.id === id);
     }
 
-    function selectDistrict(name, angleDegrees = null) {
+    function selectDistrict(name, angleDegrees = null, providedState = null) {
         const current = ensureMission();
         const config = DISTRICT_CONFIGS.find(d => d.name === name || d.id === name);
         const angle = angleDegrees !== null ? angleDegrees : (config?.angle ?? Phaser.Math.FloatBetween(-180, 180));
         const longitude = Phaser.Math.Wrap(angle, -180, 180);
         const latitude = Phaser.Math.Clamp(Math.sin(Phaser.Math.DegToRad(angle)) * 80, -80, 80);
         const districtId = config?.id || name;
-        const directives = config ? buildMissionDirectives(config, getDistrictState(districtId), current.mode) : current.directives;
+        const state = providedState ? updateDistrictState(districtId, providedState) : getDistrictState(districtId);
+        const directives = config ? buildMissionDirectives(config, state, current.mode) : current.directives;
         mission = {
             ...current,
             city: config?.name || name,
@@ -132,7 +134,8 @@
             longitude,
             latitude,
             seed: current.seed || Phaser.Math.RND.uuid(),
-            directives
+            directives,
+            districtState: state
         };
         return mission;
     }
@@ -143,6 +146,15 @@
             const cfg = getDistrictConfigById(id);
             state.districts[id] = cfg ? getDefaultDistrictState(cfg) : { id, status: 'threatened', timer: 90 };
         }
+        return state.districts[id];
+    }
+
+    function updateDistrictState(id, patch) {
+        const state = safeLoadState();
+        const existing = getDistrictState(id);
+        state.districts[id] = { ...existing, ...patch };
+        state.lastUpdated = Date.now();
+        persistState();
         return state.districts[id];
     }
 
@@ -181,6 +193,7 @@
             timer: state.timer,
             status: state.status,
             mode: modeOverride,
+            districtState: { ...state },
             threatMix
         };
     }
@@ -229,7 +242,11 @@
 
         districtState.lastUpdated = Date.now();
         persistState();
-        mission = { ...currentMission, directives: buildMissionDirectives(cfg, state, currentMission.mode) };
+        mission = {
+            ...currentMission,
+            directives: buildMissionDirectives(cfg, state, currentMission.mode),
+            districtState: { ...state }
+        };
     }
 
     function prepareLaunchPayload(mode) {
@@ -238,8 +255,41 @@
         const state = cfg ? getDistrictState(cfg.id) : null;
         return {
             ...current,
-            directives: cfg ? buildMissionDirectives(cfg, state, mode) : current.directives
+            directives: cfg ? buildMissionDirectives(cfg, state, mode) : current.directives,
+            districtState: state ? { ...state } : null,
+            mapState
         };
+    }
+
+    function ensureMapNodeState(config) {
+        const existing = mapState.nodes[config.id];
+        if (existing) return existing;
+        const status = config.timer > 0 ? 'threatened' : 'stable';
+        mapState.nodes[config.id] = {
+            id: config.id,
+            label: config.label,
+            timer: config.timer || 0,
+            status,
+            rewardModifier: config.rewardModifier || 1,
+            spawnModifier: config.spawnModifier || 1,
+            lastUpdated: Date.now()
+        };
+        return mapState.nodes[config.id];
+    }
+
+    function updateMapNodeState(id, patch = {}) {
+        const node = mapState.nodes[id];
+        if (!node) return null;
+        mapState.nodes[id] = { ...node, ...patch, lastUpdated: Date.now() };
+        return mapState.nodes[id];
+    }
+
+    function getMapNodeState(id) {
+        return mapState.nodes[id] || null;
+    }
+
+    function getMapState() {
+        return mapState;
     }
 
     window.missionPlanner = {
@@ -251,9 +301,14 @@
         getDistrictConfigs: () => DISTRICT_CONFIGS,
         getAllDistrictStates,
         getDistrictState,
+        updateDistrictState,
         buildMissionDirectives,
         recordMissionOutcome,
         prepareLaunchPayload,
-        tickDistricts
+        tickDistricts,
+        ensureMapNodeState,
+        updateMapNodeState,
+        getMapNodeState,
+        getMapState
     };
 })();

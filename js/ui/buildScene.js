@@ -12,6 +12,7 @@ class BuildScene extends Phaser.Scene {
         this.selectedMode = 'classic';
         this.districtStates = [];
         this._persistAccumulator = 0;
+        this.mapNodeStates = missionPlanner?.getMapState ? missionPlanner.getMapState() : { nodes: {} };
     }
 
     preload() {
@@ -173,7 +174,8 @@ class BuildScene extends Phaser.Scene {
         }
         this.selectedDistrict = district;
         const centerAngle = (district.config.start + district.config.end) / 2;
-        this.mission = missionPlanner.selectDistrict(district.config.id, centerAngle);
+        missionPlanner.updateDistrictState(district.config.id, district.state);
+        this.mission = missionPlanner.selectDistrict(district.config.id, centerAngle, district.state);
         this.updateMissionUi();
         this.children.bringToTop(this.detailCard);
 
@@ -197,7 +199,9 @@ class BuildScene extends Phaser.Scene {
         const destabilizationStatus = `${this.formatTimer(district.state.timer)} until destabilization`;
         const statusLabel = district.state.status === 'destroyed'
             ? 'Destroyed: no civilian comms'
-            : destabilizationStatus;
+            : district.state.status === 'cleared'
+                ? 'Stabilized after last run'
+                : `Threatened — ${destabilizationStatus}`;
         this.detailTitle.setText(`${district.config.name}`);
         this.detailBody.setText(
             `Status: ${statusLabel}\n` +
@@ -208,10 +212,10 @@ class BuildScene extends Phaser.Scene {
 
     createOrbitNodes(width, height, centerX, centerY) {
         const nodeConfigs = [
-            { label: 'Mothership', angle: -40, radius: 230, color: 0xf472b6, timer: 65 },
-            { label: 'Shop', angle: 70, radius: 250, color: 0x22d3ee, timer: 0 },
-            { label: 'Relay', angle: 160, radius: 240, color: 0x93c5fd, timer: 45 },
-            { label: 'Distress Node', angle: 240, radius: 210, color: 0xfacc15, timer: 30 }
+            { id: 'mothership', label: 'Mothership', angle: -40, radius: 230, color: 0xf472b6, timer: 65, rewardModifier: 1.15, spawnModifier: 1.15 },
+            { id: 'shop', label: 'Shop', angle: 70, radius: 250, color: 0x22d3ee, timer: 0, rewardModifier: 1.05, spawnModifier: 1 },
+            { id: 'relay', label: 'Relay', angle: 160, radius: 240, color: 0x93c5fd, timer: 45, rewardModifier: 1.1, spawnModifier: 1.05 },
+            { id: 'distress', label: 'Distress Node', angle: 240, radius: 210, color: 0xfacc15, timer: 30, rewardModifier: 1.2, spawnModifier: 1.2 }
         ];
 
         const orbitLines = this.add.graphics();
@@ -234,6 +238,8 @@ class BuildScene extends Phaser.Scene {
 
             const pulse = this.tweens.add({ targets: node, scale: 1.25, duration: 700, yoyo: true, repeat: -1 });
 
+            const nodeState = missionPlanner.ensureMapNodeState(config);
+
             const label = this.add.text(x, y - 22, config.label, {
                 fontFamily: 'Orbitron',
                 fontSize: '11px',
@@ -241,21 +247,35 @@ class BuildScene extends Phaser.Scene {
                 align: 'center'
             }).setOrigin(0.5);
 
-            const timerText = this.add.text(x, y + 16, config.timer > 0 ? this.formatTimer(config.timer) : 'STABLE', {
+            const timerLabel = nodeState.status === 'destroyed'
+                ? 'DESTROYED'
+                : nodeState.timer > 0
+                    ? this.formatTimer(nodeState.timer)
+                    : 'STABLE';
+            const timerColor = nodeState.status === 'destroyed' ? '#f87171' : (nodeState.timer > 0 ? '#fef08a' : '#a7f3d0');
+
+            const timerText = this.add.text(x, y + 16, timerLabel, {
                 fontFamily: 'Orbitron',
                 fontSize: '10px',
-                color: '#fef08a'
+                color: timerColor
             }).setOrigin(0.5);
 
-            this.mapNodes.push({ node, label, timer: config.timer, timerText, pulse, connector });
+            this.mapNodes.push({ id: config.id, config, node, label, timerText, pulse, connector, state: nodeState });
 
             node.setInteractive({ useHandCursor: true });
             node.on('pointerdown', () => {
+                const liveState = missionPlanner.getMapNodeState(config.id) || nodeState;
                 this.flashConnector(connector);
                 this.detailTitle.setText(`${config.label} Node`);
+                const nodeStatus = liveState.status === 'destroyed'
+                    ? 'Destroyed — comms offline'
+                    : liveState.timer > 0
+                        ? `Threatened — event in ${this.formatTimer(liveState.timer)}`
+                        : 'Stable';
                 this.detailBody.setText(
-                    `Status: ${config.timer > 0 ? this.formatTimer(config.timer) + ' until event' : 'Stable'}\n` +
-                    'Tap a district sector to deploy, or stabilize nearby threats first.'
+                    `Status: ${nodeStatus}\n` +
+                    'Tap a district sector to deploy, or stabilize nearby threats first.\n' +
+                    `Rewards: x${(liveState.rewardModifier || 1).toFixed(2)} · Spawn: x${(liveState.spawnModifier || 1).toFixed(2)}`
                 );
             });
         });
@@ -463,7 +483,11 @@ class BuildScene extends Phaser.Scene {
             return;
         }
         const mode = this.mission?.mode || this.selectedMode;
-        missionPlanner.selectDistrict(this.selectedDistrict.config.id, (this.selectedDistrict.config.start + this.selectedDistrict.config.end) / 2);
+        missionPlanner.selectDistrict(
+            this.selectedDistrict.config.id,
+            (this.selectedDistrict.config.start + this.selectedDistrict.config.end) / 2,
+            this.selectedDistrict.state
+        );
         missionPlanner.setMode(mode);
         if (window.startGame) {
             startGame(mode);
@@ -531,10 +555,12 @@ class BuildScene extends Phaser.Scene {
             if (state.status === 'destroyed') {
                 district.timerText.setText('DESTROYED');
                 district.timerText.setColor('#f87171');
+                district.nameLabel.setColor('#fca5a5');
                 district.glow.alpha = 0.02;
             } else {
                 district.timerText.setText(this.formatTimer(state.timer));
                 district.timerText.setColor(state.timer < 30 ? '#f97316' : '#d1f6ff');
+                district.nameLabel.setColor(state.timer < 30 ? '#fcd34d' : '#c3e8ff');
                 const pulse = 0.5 + Math.abs(Math.sin(time / 400)) * 0.4;
                 district.glow.alpha = 0.05 + pulse * 0.08;
             }
@@ -547,13 +573,42 @@ class BuildScene extends Phaser.Scene {
         }
 
         this.mapNodes.forEach(node => {
-            if (node.timer > 0) {
-                node.timer = Math.max(0, node.timer - dt);
-                node.timerText.setText(this.formatTimer(node.timer));
-                node.timerText.setColor(node.timer < 20 ? '#f97316' : '#fef08a');
-                if (node.timer < 15) {
-                    node.node.setFillStyle(node.node.fillColor, 0.8 + Math.sin(time / 60) * 0.2);
+            const stored = missionPlanner.getMapNodeState(node.id) || node.state;
+            node.state = stored;
+            if (stored.status !== 'destroyed' && stored.timer > 0) {
+                const newTimer = Math.max(0, stored.timer - dt);
+                if (newTimer !== stored.timer) {
+                    node.state = missionPlanner.updateMapNodeState(node.id, { timer: newTimer });
                 }
+            }
+
+            if (node.state.timer === 0 && node.state.status !== 'stable' && node.state.status !== 'destroyed') {
+                node.state = missionPlanner.updateMapNodeState(node.id, { status: 'destroyed' });
+            }
+
+            const labelColor = node.state.status === 'destroyed'
+                ? '#fca5a5'
+                : node.state.timer > 0
+                    ? '#fef3c7'
+                    : '#a7f3d0';
+            const timerLabel = node.state.status === 'destroyed'
+                ? 'DESTROYED'
+                : node.state.timer > 0
+                    ? this.formatTimer(node.state.timer)
+                    : 'STABLE';
+            node.timerText.setText(timerLabel);
+            node.timerText.setColor(labelColor);
+            node.label.setColor(labelColor);
+
+            if (node.state.status === 'destroyed') {
+                node.node.setFillStyle(node.node.fillColor, 0.35);
+                node.connector.alpha = 0.15;
+            } else if (node.state.timer > 0) {
+                node.node.setFillStyle(node.node.fillColor, 0.8 + Math.sin(time / 60) * 0.2);
+                node.connector.alpha = 0.4;
+            } else {
+                node.node.setFillStyle(node.node.fillColor, 0.9);
+                node.connector.alpha = 0.3;
             }
         });
 
