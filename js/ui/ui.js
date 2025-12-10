@@ -408,7 +408,26 @@ function cleanupPauseUI(scene) {
 function returnToMainMenu(scene) {
     cleanupPauseUI(scene);
     resetGameState();
+
+    if (window.game && game.scene) {
+        if (game.scene.isActive(SCENE_KEYS.build)) {
+            game.scene.stop(SCENE_KEYS.build);
+        }
+        if (game.scene.isActive(SCENE_KEYS.game)) {
+            game.scene.stop(SCENE_KEYS.game);
+        }
+        if (!game.scene.isActive(SCENE_KEYS.menu)) {
+            game.scene.start(SCENE_KEYS.menu);
+        } else {
+            game.scene.bringToTop(SCENE_KEYS.menu);
+        }
+    }
+
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'flex';
-    scene.scene.restart();
+
+    const toggleBtn = document.getElementById('build-toggle');
+    const returnBtn = document.getElementById('build-return');
+    if (toggleBtn) toggleBtn.classList.remove('hidden');
+    if (returnBtn) returnBtn.classList.add('hidden');
 }
