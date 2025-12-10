@@ -278,11 +278,12 @@ function destroyBoss(scene, boss) {
     }
 
     const score = getBossScore(boss.bossType);
-    gameState.score += score * 2;  // Double score for bosses
+    const scaledReward = getMissionScaledReward(score) * 2;
+    gameState.score += scaledReward;  // Double score for bosses
 
     const scorePopup = scene.add.text(
         boss.x, boss.y - 40,
-        '★ BOSS DOWN ★\n+' + (score * 2),
+        '★ BOSS DOWN ★\n+' + (scaledReward),
         {
             fontSize: '24px',
             fontFamily: 'Orbitron',
@@ -326,13 +327,14 @@ function destroyBoss(scene, boss) {
 
 function completeBossWave(scene) {
     const completedWave = gameState.wave;
-    gameState.score += 3000;  // Large bonus for beating boss
+    const bossReward = getMissionScaledReward(3000);
+    gameState.score += bossReward;  // Large bonus for beating boss
     if (audioManager) audioManager.playSound('waveComplete');
 
     const bossWaveText = scene.add.text(
         CONFIG.width / 2,
         CONFIG.height / 2,
-        `BOSS DEFEATED!\nWAVE ${completedWave} COMPLETE!\nBonus: 3000 points`,
+        `BOSS DEFEATED!\nWAVE ${completedWave} COMPLETE!\nBonus: ${bossReward} points`,
         {
             fontSize: '32px',
             fontFamily: 'Orbitron',

@@ -3,6 +3,7 @@
 // ------------------------
 
 let scoreEl, waveEl, timerEl, bombsEl, livesEl, powerupsEl;
+let districtEl, threatEl, rewardEl;
 let radarCanvas, radarCtx;
 
 function createUI(scene) {
@@ -13,6 +14,9 @@ function createUI(scene) {
     bombsEl = document.getElementById('bombs-el');
     livesEl = document.getElementById('lives-el');
     powerupsEl = document.getElementById('powerups-el');
+    districtEl = document.getElementById('district-el');
+    threatEl = document.getElementById('threat-el');
+    rewardEl = document.getElementById('reward-el');
     
     radarCanvas = document.getElementById('radar-canvas');
     if (radarCanvas) {
@@ -69,6 +73,29 @@ function updateUI() {
     if (p.timeSlow > 0) powerUpText += `[SLOW:${Math.ceil(p.timeSlow/1000)}s] `;
 
     powerupsEl.innerText = powerUpText || '[NORMAL FIRE]';
+
+    if (districtEl && threatEl && rewardEl) {
+        const directives = gameState.missionDirectives;
+        if (directives) {
+            const timerLabel = typeof directives.timer === 'number'
+                ? formatMetaTimer(directives.timer)
+                : 'N/A';
+            districtEl.innerText = `DISTRICT: ${directives.districtName || directives.districtId || 'Unknown'} (${directives.status || 'unknown'})`;
+            threatEl.innerText = `THREAT: ${directives.urgency ? directives.urgency.toUpperCase() : 'STABLE'} · T-${timerLabel}`;
+            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}`;
+        } else {
+            districtEl.innerText = 'DISTRICT: Free Patrol';
+            threatEl.innerText = 'THREAT: Neutral';
+            rewardEl.innerText = 'REWARDS: x1.00 standard loot';
+        }
+    }
+}
+
+function formatMetaTimer(seconds) {
+    const clamped = Math.max(0, Math.floor(seconds));
+    const mins = String(Math.floor(clamped / 60)).padStart(2, '0');
+    const secs = String(clamped % 60).padStart(2, '0');
+    return `${mins}:${secs}`;
 }
 
 function updateRadar(scene) {
@@ -177,6 +204,7 @@ function updateRadar(scene) {
 
 function gameOver(scene) {
     gameState.gameOver = true;
+    if (window.missionPlanner) missionPlanner.recordMissionOutcome(false);
     scene.physics.pause();
     if (audioManager) {
         audioManager.playSound('gameOver');
@@ -225,6 +253,7 @@ function gameOver(scene) {
 
 function winGame(scene) {
     gameState.gameOver = true;
+    if (window.missionPlanner) missionPlanner.recordMissionOutcome(true);
     scene.physics.pause();
     if (audioManager) {
         audioManager.playSound('waveComplete');

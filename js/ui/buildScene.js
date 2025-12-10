@@ -10,6 +10,8 @@ class BuildScene extends Phaser.Scene {
         this.mapPing = null;
         this.earthTextureKey = 'ui-earth';
         this.selectedMode = 'classic';
+        this.districtStates = [];
+        this._persistAccumulator = 0;
     }
 
     preload() {
@@ -40,7 +42,8 @@ class BuildScene extends Phaser.Scene {
         this.createUiOverlay(width);
         this.createModeButtons(width);
 
-        this.mission = this.generateMission();
+        this.mission = missionPlanner.ensureMission();
+        this.selectedMode = this.mission.mode || this.selectedMode;
         this.createMissionConsole(width, height);
         this.updateMissionUi();
 
@@ -105,15 +108,11 @@ class BuildScene extends Phaser.Scene {
     }
 
     createDistricts() {
-        const sectorConfigs = [
-            { name: 'North Spire', start: -100, end: -20, color: 0x22e0ff, timer: 120 },
-            { name: 'Eastern Reach', start: -10, end: 70, color: 0x7c3aed, timer: 150 },
-            { name: 'Sunward Forge', start: 80, end: 140, color: 0xfbbf24, timer: 90 },
-            { name: 'Southern Bastion', start: 150, end: 220, color: 0x10b981, timer: 180 },
-            { name: 'Shadow Belt', start: 230, end: 320, color: 0xef4444, timer: 200 }
-        ];
+        const sectorConfigs = missionPlanner.getDistrictConfigs();
+        this.districtStates = missionPlanner.getAllDistrictStates();
 
         sectorConfigs.forEach(config => {
+            const state = missionPlanner.getDistrictState(config.id);
             const sectorGraphics = this.add.graphics({ x: 0, y: 0 });
             sectorGraphics.fillStyle(config.color, 0.16);
             sectorGraphics.slice(0, 0, 138, Phaser.Math.DegToRad(config.start), Phaser.Math.DegToRad(config.end), false);
@@ -132,11 +131,13 @@ class BuildScene extends Phaser.Scene {
             const selectionArc = this.add.arc(0, 0, 142, Phaser.Math.DegToRad(config.start), Phaser.Math.DegToRad(config.end), false, 0xffffff, 0.01);
             selectionArc.setInteractive({ useHandCursor: true });
 
+            const timerLabel = state.status === 'destroyed' ? 'DESTROYED' : this.formatTimer(state.timer);
+            const timerColor = state.status === 'destroyed' ? '#f87171' : '#d1f6ff';
             const timerText = this.add.text(
                 Math.cos(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 95,
                 Math.sin(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 95,
-                this.formatTimer(config.timer),
-                { fontFamily: 'Orbitron', fontSize: '12px', color: '#d1f6ff' }
+                timerLabel,
+                { fontFamily: 'Orbitron', fontSize: '12px', color: timerColor }
             ).setOrigin(0.5);
 
             const nameLabel = this.add.text(
@@ -146,10 +147,13 @@ class BuildScene extends Phaser.Scene {
                 { fontFamily: 'Orbitron', fontSize: '11px', color: '#c3e8ff' }
             ).setOrigin(0.5);
 
-            const district = { config, sectorGraphics, glow, selectionArc, timer: config.timer, timerText, nameLabel };
+            const district = { config, sectorGraphics, glow, selectionArc, timerText, nameLabel, state };
             this.planetContainer.add([glow, sectorGraphics, selectionArc, timerText, nameLabel]);
             this.enableDistrictInteractions(district);
             this.districts.push(district);
+            if (this.mission?.district === config.id) {
+                this.focusDistrict(district, true);
+            }
         });
     }
 
@@ -163,36 +167,40 @@ class BuildScene extends Phaser.Scene {
         district.selectionArc.on('pointerdown', () => this.focusDistrict(district));
     }
 
-    focusDistrict(district) {
+    focusDistrict(district, skipTweens = false) {
         if (this.selectedDistrict === district) {
             return;
         }
         this.selectedDistrict = district;
-        if (this.mission) {
-            this.mission.city = district.config.name;
-            this.updateMissionUi();
-        }
+        const centerAngle = (district.config.start + district.config.end) / 2;
+        this.mission = missionPlanner.selectDistrict(district.config.id, centerAngle);
+        this.updateMissionUi();
         this.children.bringToTop(this.detailCard);
 
-        this.tweens.add({
-            targets: this.cameras.main,
-            zoom: 1.12,
-            duration: 240,
-            yoyo: true,
-            ease: 'Sine.easeInOut'
-        });
-        this.tweens.add({
-            targets: this.planetContainer,
-            scale: 1.05,
-            duration: 200,
-            yoyo: true,
-            ease: 'Sine.easeOut'
-        });
+        if (!skipTweens) {
+            this.tweens.add({
+                targets: this.cameras.main,
+                zoom: 1.12,
+                duration: 240,
+                yoyo: true,
+                ease: 'Sine.easeInOut'
+            });
+            this.tweens.add({
+                targets: this.planetContainer,
+                scale: 1.05,
+                duration: 200,
+                yoyo: true,
+                ease: 'Sine.easeOut'
+            });
+        }
 
+        const statusLabel = district.state.status === 'destroyed'
+            ? 'Destroyed: no civilian comms'
+            : `${this.formatTimer(district.state.timer)} until destabilization`;
         this.detailTitle.setText(`${district.config.name}`);
         this.detailBody.setText(
-            `Status: ${this.formatTimer(district.timer)} until destabilization\n` +
-            'View: 2D top-down telemetry with sector overlays\n' +
+            `Status: ${statusLabel}\n` +
+            `Urgency: ${this.mission?.directives?.urgency || 'unknown'} \u2022 Reward focus: ${district.config.reward}\n` +
             'Action: Prep builds, reinforce nodes, shop for upgrades.'
         );
     }
@@ -243,10 +251,11 @@ class BuildScene extends Phaser.Scene {
             node.setInteractive({ useHandCursor: true });
             node.on('pointerdown', () => {
                 this.flashConnector(connector);
-                this.focusDistrict({
-                    config: { name: `${config.label} Sector` },
-                    timer: config.timer
-                });
+                this.detailTitle.setText(`${config.label} Node`);
+                this.detailBody.setText(
+                    `Status: ${config.timer > 0 ? this.formatTimer(config.timer) + ' until event' : 'Stable'}\n` +
+                    'Tap a district sector to deploy, or stabilize nearby threats first.'
+                );
             });
         });
     }
@@ -319,9 +328,7 @@ class BuildScene extends Phaser.Scene {
 
     selectMode(mode) {
         this.selectedMode = mode;
-        if (this.mission) {
-            this.mission.mode = mode;
-        }
+        this.mission = missionPlanner.setMode(mode);
         this.updateModeButtonStyles();
         this.updateMissionUi();
     }
@@ -439,23 +446,8 @@ class BuildScene extends Phaser.Scene {
         this.earthTextureKey = fallbackKey;
     }
 
-    generateMission() {
-        const cities = [
-            'Neo Seattle', 'Skyline Prime', 'Aurora City', 'Nightfall Bay', 'Nova Odessa',
-            'Celestia Station', 'Obsidian Ridge', 'Atlas Spire', 'Horizon Arc', 'Lumen Harbor'
-        ];
-
-        return {
-            city: Phaser.Utils.Array.GetRandom(cities),
-            latitude: Phaser.Math.FloatBetween(-70, 70),
-            longitude: Phaser.Math.FloatBetween(-170, 170),
-            mode: this.selectedMode,
-            seed: Phaser.Math.RND.uuid()
-        };
-    }
-
     rollMission() {
-        this.mission = this.generateMission();
+        this.mission = missionPlanner.rerollCity();
         this.updateMissionUi();
     }
 
@@ -470,6 +462,8 @@ class BuildScene extends Phaser.Scene {
             return;
         }
         const mode = this.mission?.mode || this.selectedMode;
+        missionPlanner.selectDistrict(this.selectedDistrict.config.id, (this.selectedDistrict.config.start + this.selectedDistrict.config.end) / 2);
+        missionPlanner.setMode(mode);
         if (window.startGame) {
             startGame(mode);
         }
@@ -486,16 +480,15 @@ class BuildScene extends Phaser.Scene {
         }
         this.updateModeButtonStyles();
 
-        const { city, latitude, longitude, seed } = this.mission;
+        const { city, latitude, longitude, seed, directives } = this.mission;
         const mode = this.mission.mode || this.selectedMode;
         const modeLabel = mode === 'survival' ? 'Survival' : 'Wave';
-        const detail = mode === 'survival'
-            ? 'Timed endurance · Evac civilians before the timer drains.'
-            : 'Escalating enemy waves · Clear the zone to advance and face bosses.';
+        const directiveLabel = directives?.urgency ? `${directives.urgency.toUpperCase()} THREAT` : 'Threat mix pending';
+        const rewardLabel = directives?.rewardMultiplier ? `${directives.rewardMultiplier.toFixed(2)}x rewards · ${directives.reward}` : 'Standard rewards';
         const launchLabel = mode === 'survival' ? 'Launch Survival Run (Space)' : 'Launch Wave Run (Space)';
 
         this.missionDetails.setText(
-            `${city}\nLat ${latitude.toFixed(1)} · Lon ${longitude.toFixed(1)}\nSeed ${seed.slice(0, 6)}\n${modeLabel} Mode — ${detail}`
+            `${city}\nLat ${latitude.toFixed(1)} · Lon ${longitude.toFixed(1)}\nSeed ${seed.slice(0, 6)}\n${modeLabel} Mode — ${directiveLabel}\n${rewardLabel}`
         );
         if (this.launchButton?.text) {
             this.launchButton.text.setText(launchLabel);
@@ -528,14 +521,29 @@ class BuildScene extends Phaser.Scene {
 
     update(time, delta) {
         const dt = delta / 1000;
+        missionPlanner.tickDistricts(dt);
+        this._persistAccumulator += dt;
+
         this.districts.forEach(district => {
-            if (district.timer > 0) {
-                district.timer = Math.max(0, district.timer - dt);
-                district.timerText.setText(this.formatTimer(district.timer));
+            const state = missionPlanner.getDistrictState(district.config.id);
+            district.state = state;
+            if (state.status === 'destroyed') {
+                district.timerText.setText('DESTROYED');
+                district.timerText.setColor('#f87171');
+                district.glow.alpha = 0.02;
+            } else {
+                district.timerText.setText(this.formatTimer(state.timer));
+                district.timerText.setColor(state.timer < 30 ? '#f97316' : '#d1f6ff');
+                const pulse = 0.5 + Math.abs(Math.sin(time / 400)) * 0.4;
+                district.glow.alpha = 0.05 + pulse * 0.08;
             }
-            const pulse = 0.5 + Math.abs(Math.sin(time / 400)) * 0.4;
-            district.glow.alpha = 0.05 + pulse * 0.08;
         });
+
+        if (this.selectedDistrict && this.mission?.district === this.selectedDistrict.config.id && this._persistAccumulator > 1) {
+            const angle = (this.selectedDistrict.config.start + this.selectedDistrict.config.end) / 2;
+            this.mission = missionPlanner.selectDistrict(this.selectedDistrict.config.id, angle);
+            this.updateMissionUi();
+        }
 
         this.mapNodes.forEach(node => {
             if (node.timer > 0) {
@@ -547,6 +555,11 @@ class BuildScene extends Phaser.Scene {
                 }
             }
         });
+
+        if (this._persistAccumulator > 5) {
+            missionPlanner.tickDistricts(0);
+            this._persistAccumulator = 0;
+        }
     }
 
     formatTimer(seconds) {

@@ -35,7 +35,13 @@
                         <div class="text-fuchsia-400">LIVES: <span id="lives-el">3</span></div>
                     </div>
                 </div>
-                
+
+                <div class="flex flex-wrap justify-between items-center text-[10px] md:text-xs font-orbitron px-2 gap-2">
+                    <div id="district-el" class="text-sky-200 uppercase tracking-wider">DISTRICT: Free Patrol</div>
+                    <div id="threat-el" class="text-amber-200 uppercase tracking-wider flex-1 text-center">THREAT: Neutral</div>
+                    <div id="reward-el" class="text-emerald-200 uppercase tracking-wider text-right w-44">REWARDS: x1.00 standard loot</div>
+                </div>
+
                 <!-- Middle Row: Radar -->
                 <div class="w-full h-[40px] bg-black border border-cyan-900 relative overflow-hidden rounded">
                     <canvas id="radar-canvas" width="800" height="40" class="w-full h-full block"></canvas>
@@ -143,6 +149,7 @@
     <script src="js/graphics/background.js"></script>
     <!-- 11. UI and HUD -->
     <script src="js/ui/ui.js"></script>
+    <script src="js/ui/missionPlanner.js"></script>
     <script src="js/ui/mainMenuScene.js"></script>
     <script src="js/ui/buildScene.js"></script>
     <!-- 12. Power-up system -->

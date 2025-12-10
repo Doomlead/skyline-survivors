@@ -42,7 +42,7 @@ function updatePowerUps(scene) {
 
 
 function collectPowerUp(playerSprite, powerUp) {
-    gameState.score += 200;
+    gameState.score += getMissionScaledReward(200);
     if (audioManager) audioManager.playSound('powerUpCollect');
     const p = playerState.powerUps;
     const powerUpNames = {
