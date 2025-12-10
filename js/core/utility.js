@@ -282,14 +282,20 @@ function enterMainMenu() {
     }
 }
 
-function enterDistrictMap(fromOverlay = false) {
+function enterDistrictMap(options = false) {
+    const overlayLaunch = typeof options === 'object' ? !!options.fromOverlay : !!options;
+    const fromVictory = typeof options === 'object' ? !!options.fromVictory : false;
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
 
     if (window.game && game.scene) {
         const mainScene = game.scene.getScene(SCENE_KEYS.game);
         if (mainScene && mainScene.scene.isActive()) {
-            mainScene.scene.pause();
+            if (fromVictory) {
+                mainScene.scene.stop();
+            } else {
+                mainScene.scene.pause();
+            }
         }
         if (game.scene.isActive(SCENE_KEYS.menu)) {
             game.scene.stop(SCENE_KEYS.menu);
@@ -300,8 +306,13 @@ function enterDistrictMap(fromOverlay = false) {
 
     const toggleBtn = document.getElementById('build-toggle');
     const returnBtn = document.getElementById('build-return');
-    if (!fromOverlay && toggleBtn) toggleBtn.classList.add('hidden');
-    if (returnBtn) returnBtn.classList.remove('hidden');
+    if (overlayLaunch) {
+        if (toggleBtn) toggleBtn.classList.add('hidden');
+        if (returnBtn) returnBtn.classList.add('hidden');
+    } else {
+        if (toggleBtn) toggleBtn.classList.add('hidden');
+        if (returnBtn) returnBtn.classList.remove('hidden');
+    }
 }
 
 function openBuildView() {
