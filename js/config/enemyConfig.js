@@ -221,6 +221,10 @@ if (typeof module !== 'undefined') {
     module.exports = {
         ENEMY_TYPES,
         ENEMY_HP_VALUES,
-        ENEMY_SCORE_VALUES
+        ENEMY_SCORE_VALUES,
+        getEnemyHP,
+        getEnemyScore,
+        getEnemyScale,
+        ENEMY_TRAIL_CONFIGS
     };
 }
