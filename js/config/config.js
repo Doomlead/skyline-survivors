@@ -40,7 +40,11 @@ const gameState = {
     classicBossFlags: { 5: false, 10: false, 15: false },
     survivalBossFlags: { 5: false, 10: false, 15: false },
     survivalBossesDefeated: 0,
-    totalSurvivalDuration: 15 * 60 * 1000
+    totalSurvivalDuration: 15 * 60 * 1000,
+    missionContext: null,
+    missionDirectives: null,
+    rewardMultiplier: 1,
+    spawnMultiplier: 1
 };
 
 // Player state
@@ -157,4 +161,8 @@ function resetGameState() {
     gameState.classicBossFlags = { 5: false, 10: false, 15: false };
     gameState.survivalBossFlags = { 5: false, 10: false, 15: false };
     gameState.survivalBossesDefeated = 0;
+    gameState.missionContext = null;
+    gameState.missionDirectives = null;
+    gameState.rewardMultiplier = 1;
+    gameState.spawnMultiplier = 1;
 }

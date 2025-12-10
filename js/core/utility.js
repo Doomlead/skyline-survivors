@@ -205,7 +205,10 @@ function getScreenPosition(scene, worldX, worldY) {
 }
 
 function startGame(mode = 'classic') {
+    const missionPayload = window.missionPlanner ? missionPlanner.prepareLaunchPayload(mode) : null;
+    resetGameState();
     gameState.mode = mode;
+    applyMissionPayload(missionPayload);
     if (mode === 'survival') gameState.timeRemaining = gameState.totalSurvivalDuration;
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
@@ -213,14 +216,12 @@ function startGame(mode = 'classic') {
     if (window.Phaser && window.game && game.scene) {
         const scene = game.scene.getScene(SCENE_KEYS.game);
         if (scene && scene.scene) {
-            resetGameState();
             if (scene.scene.isActive()) {
                 scene.scene.restart();
             } else {
                 game.scene.start(SCENE_KEYS.game);
             }
         } else if (game.scene) {
-            resetGameState();
             game.scene.start(SCENE_KEYS.game);
         }
         if (game.scene.isActive(SCENE_KEYS.build)) {
@@ -242,6 +243,27 @@ function startGame(mode = 'classic') {
 
 // Make startGame available globally
 window.startGame = startGame;
+
+function applyMissionPayload(missionPayload) {
+    if (!missionPayload) {
+        gameState.missionContext = null;
+        gameState.missionDirectives = null;
+        gameState.rewardMultiplier = 1;
+        gameState.spawnMultiplier = 1;
+        return;
+    }
+    gameState.missionContext = missionPayload;
+    gameState.missionDirectives = missionPayload.directives;
+    gameState.rewardMultiplier = missionPayload?.directives?.rewardMultiplier || 1;
+    gameState.spawnMultiplier = missionPayload?.directives?.spawnMultiplier || 1;
+    if (missionPayload?.directives?.humans) {
+        gameState.humans = missionPayload.directives.humans;
+    }
+}
+
+function getMissionScaledReward(base) {
+    return Math.round(base * (gameState.rewardMultiplier || 1));
+}
 
 function enterMainMenu() {
     const menu = document.getElementById('menu-overlay');

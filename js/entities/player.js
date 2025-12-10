@@ -431,12 +431,13 @@ function spawnHuman(scene, x) {
 function rescueHuman(playerSprite, human) {
     if (!human.isAbducted) return;
     gameState.humansRescued++;
-    gameState.score += 1000;
+    const reward = getMissionScaledReward(1000);
+    gameState.score += reward;
     if (audioManager) audioManager.playSound('humanRescued');
     const rescueText = this.add.text(
         human.x,
         human.y - 20,
-        '+1000 RESCUED!',
+        `+${reward} RESCUED!`,
         {
             fontSize: '16px',
             fontFamily: 'Orbitron',

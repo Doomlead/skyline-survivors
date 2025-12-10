@@ -77,8 +77,25 @@ function spawnEnemy(scene, type, x, y) {
     return enemy;
 }
 
+function getMissionWeightedEnemyType() {
+    const mix = gameState.missionDirectives?.threatMix;
+    if (mix && mix.length > 0) {
+        const bag = [];
+        mix.forEach(entry => {
+            const weight = Math.max(1, entry.weight || 1);
+            for (let i = 0; i < weight; i++) {
+                bag.push(entry.type);
+            }
+        });
+        if (bag.length > 0) {
+            return Phaser.Utils.Array.GetRandom(bag);
+        }
+    }
+    return Phaser.Utils.Array.GetRandom(ENEMY_TYPES);
+}
+
 function spawnRandomEnemy(scene) {
-    const type = Phaser.Utils.Array.GetRandom(ENEMY_TYPES);
+    const type = getMissionWeightedEnemyType();
     let x, y;
     
     if (Math.random() < 0.7) {
@@ -281,7 +298,7 @@ function destroyEnemy(scene, enemy) {
         particleManager.enemyExplosion(enemy.x, enemy.y);
     }
     createEnhancedDeathEffect(scene, enemy.x, enemy.y, enemy.enemyType);
-    const score = getEnemyScore(enemy.enemyType);
+    const score = getMissionScaledReward(getEnemyScore(enemy.enemyType));
     gameState.score += score;
 
     if (enemy.enemyType === 'pod') {
@@ -293,7 +310,7 @@ function destroyEnemy(scene, enemy) {
     }
 
     const scorePopup = scene.add.text(
-        enemy.x, enemy.y - 20, 
+        enemy.x, enemy.y - 20,
         '+' + score,
         {
             fontSize: '16px',
@@ -329,13 +346,14 @@ function destroyEnemy(scene, enemy) {
 
 function completeWave(scene) {
     const completedWave = gameState.wave;
-    gameState.score += 1000 * completedWave;
+    const waveBonus = getMissionScaledReward(1000 * completedWave);
+    gameState.score += waveBonus;
     if (audioManager) audioManager.playSound('waveComplete');
 
     const waveText = scene.add.text(
         CONFIG.width / 2,
         CONFIG.height / 2,
-        `WAVE ${completedWave} COMPLETE!\nBonus: ${1000 * completedWave} points`,
+        `WAVE ${completedWave} COMPLETE!\nBonus: ${waveBonus} points`,
         {
             fontSize: '36px',
             fontFamily: 'Orbitron',
@@ -356,7 +374,8 @@ function completeWave(scene) {
 
     gameState.wave++;
     gameState.killsThisWave = 0;
-    gameState.enemiesToKillThisWave = 20 + (gameState.wave - 1) * 5;
+    const spawnScale = gameState.spawnMultiplier || 1;
+    gameState.enemiesToKillThisWave = Math.max(5, Math.round((20 + (gameState.wave - 1) * 5) * spawnScale));
     scene.time.delayedCall(2000, () => {
         spawnEnemyWave(scene);
     });
