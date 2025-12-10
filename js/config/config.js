@@ -43,6 +43,7 @@ const gameState = {
     totalSurvivalDuration: 15 * 60 * 1000,
     missionContext: null,
     missionDirectives: null,
+    missionDistrictState: null,
     rewardMultiplier: 1,
     spawnMultiplier: 1
 };
