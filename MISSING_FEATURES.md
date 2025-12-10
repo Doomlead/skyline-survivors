@@ -22,4 +22,7 @@ This repo now includes a menu scene and a system-map/build scene (district selec
 6. **UI/UX & Meta Tracking**
    - HUD omits system-layer indicators (flashing threatened nodes, destroyed districts), and there is no meta persistence, unlock scaffolding, or summary of district outcomes after missions.
 
+7. **Options & Accessibility**
+   - There are no volume sliders, key remapping, screen-flash reduction, or color-blind accessibility options to tailor the experience for different players.
+
 These gaps highlight where new systems would need to be introduced to align the prototype with the full design vision.

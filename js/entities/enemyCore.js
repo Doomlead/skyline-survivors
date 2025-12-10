@@ -2,6 +2,8 @@
 // Enemy Spawning, Combat, and Core Management
 // ------------------------
 
+// Creates and attaches a particle trail effect to a moving enemy (except landers)
+// so the enemies feel more dynamic on screen.
 function createEnemyTrail(scene, enemy) {
     if (!scene || !enemy) return;
     if (enemy.enemyType === 'lander') return;
@@ -35,7 +37,10 @@ function createEnemyTrail(scene, enemy) {
     });
 }
 
-function spawnEnemy(scene, type, x, y) {
+// Spawns a single enemy with the requested type at the given world coordinates.
+// The countsTowardsWave flag keeps track of whether this enemy should progress
+// wave objectives when destroyed (used to exclude spawned minions).
+function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     const edgePadding = 100;
     const clampedX = Phaser.Math.Clamp(x, edgePadding, CONFIG.worldWidth - edgePadding);
 
@@ -46,11 +51,12 @@ function spawnEnemy(scene, type, x, y) {
     const maxY = groundLevel - terrainVariation - minClearance;
     const spawnY = Phaser.Math.Clamp(y, topLimit, Math.max(topLimit + 10, maxY));
     const enemy = enemies.create(clampedX, spawnY, type);
-    
+
     const scale = getEnemyScale(type);
     enemy.setScale(scale);
     enemy.enemyType = type;
     enemy.hp = getEnemyHP(type);
+    enemy.countsTowardsWave = countsTowardsWave;
     enemy.lastShot = 0;
     enemy.patrolAngle = Math.random() * Math.PI * 2;
     enemy._topEscapeAt = null;
@@ -77,6 +83,8 @@ function spawnEnemy(scene, type, x, y) {
     return enemy;
 }
 
+// Picks an enemy type, honoring mission directive weights when provided
+// so districts can influence the composition of incoming threats.
 function getMissionWeightedEnemyType() {
     const mix = gameState.missionDirectives?.threatMix;
     if (mix && mix.length > 0) {
@@ -94,6 +102,7 @@ function getMissionWeightedEnemyType() {
     return Phaser.Utils.Array.GetRandom(ENEMY_TYPES);
 }
 
+// Spawns an enemy at a random edge or near a human to keep pressure on the player.
 function spawnRandomEnemy(scene) {
     const type = getMissionWeightedEnemyType();
     let x, y;
@@ -118,6 +127,8 @@ function spawnRandomEnemy(scene) {
     spawnEnemy(scene, type, x, y);
 }
 
+// Schedules a batch of enemies (or a boss) for the current wave based on the
+// active mode and wave number.
 function spawnEnemyWave(scene) {
     if (gameState.mode === 'classic') {
         const bossWaves = [5, 10, 15];
@@ -150,6 +161,8 @@ function spawnEnemyWave(scene) {
     }
 }
 
+// Creates an enemy projectile aimed at the player's current position, with
+// speed, visuals, and damage tuned to the firing enemy type.
 function shootAtPlayer(scene, enemy) {
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     
@@ -220,6 +233,7 @@ function shootAtPlayer(scene, enemy) {
     });
 }
 
+// Handles projectile/enemy overlap: apply damage, trigger effects, and remove.
 function hitEnemy(projectile, enemy) {
     enemy.hp -= projectile.damage || 1;
     if (audioManager) audioManager.playSound('hitEnemy');
@@ -230,6 +244,8 @@ function hitEnemy(projectile, enemy) {
     projectile.destroy();
 }
 
+// Fully resolves an enemy death: special effects, spawn logic, scoring, and
+// wave progression bookkeeping for classic mode.
 function destroyEnemy(scene, enemy) {
     if (!enemy || enemy.isBeingDestroyed) return;
     enemy.isBeingDestroyed = true;
@@ -255,7 +271,7 @@ function destroyEnemy(scene, enemy) {
                 const angle = Math.random() * Math.PI * 2;
                 const spawnX = enemy.x + Math.cos(angle) * 50;
                 const spawnY = enemy.y + Math.sin(angle) * 50;
-                spawnEnemy(scene, 'swarmer', spawnX, spawnY);
+                spawnEnemy(scene, 'swarmer', spawnX, spawnY, false);
             }
         }
     } else if (enemy.enemyType === 'swarmLeader') {
@@ -305,7 +321,7 @@ function destroyEnemy(scene, enemy) {
         for (let i = 0; i < 3; i++) {
             const offsetX = Phaser.Math.Between(-20, 20);
             const offsetY = Phaser.Math.Between(-20, 20);
-            spawnEnemy(scene, 'swarmer', enemy.x + offsetX, enemy.y + offsetY);
+            spawnEnemy(scene, 'swarmer', enemy.x + offsetX, enemy.y + offsetY, false);
         }
     }
 
@@ -333,7 +349,7 @@ function destroyEnemy(scene, enemy) {
     enemy.destroy();
 
     if (gameState.mode === 'classic') {
-        if (enemy.enemyType !== 'swarmer') {
+        if (enemy.countsTowardsWave !== false) {
             gameState.killsThisWave = (gameState.killsThisWave || 0) + 1;
         }
         
@@ -344,6 +360,7 @@ function destroyEnemy(scene, enemy) {
     }
 }
 
+// Awards bonuses and starts the next wave once a classic wave objective is met.
 function completeWave(scene) {
     const completedWave = gameState.wave;
     const waveBonus = getMissionScaledReward(1000 * completedWave);
