@@ -198,7 +198,7 @@ const ENEMY_SCALE_VALUES = {
 };
 
 const ENEMY_TYPES = [
-    'lander', 'mutant', 'drone', 'bomber', 'pod', 'baiter',
+    'lander', 'mutant', 'drone', 'bomber', 'pod', 'swarmer', 'baiter',
     'kamikaze', 'turret', 'shield', 'seeker', 'spawner',
     'shielder', 'bouncer', 'sniper', 'swarmLeader', 'regenerator'
 ];
