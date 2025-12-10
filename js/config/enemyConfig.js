@@ -1,6 +1,8 @@
-// ------------------------
-// Enemy Configuration and Constants
-// ------------------------
+// ---------------------------------------------------------
+// Enemy configuration constants
+//   Exports: ENEMY_TYPES, ENEMY_HP_VALUES, ENEMY_SCORE_VALUES
+//   Internal: ENEMY_TRAIL_CONFIGS, ENEMY_SCALE_VALUES, helpers
+// ---------------------------------------------------------
 
 const ENEMY_TRAIL_CONFIGS = {
     default: {
