@@ -2,6 +2,8 @@
 // Main game scene and initialization
 // ------------------------
 
+// Sets up per-run state including humans, boss queue, timers, and kicks off the
+// first wave or survival timer.
 function initializeGame(scene) {
     for (let i = 0; i < gameState.humans; i++) {
         spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
@@ -22,11 +24,13 @@ function initializeGame(scene) {
     updateUI();
 }
 
+// Loads all graphics before the scene is created.
 function preload() {
     createGraphics(this);
 }
 
 
+// Bootstraps the Phaser scene: world bounds, entities, input, UI, audio, and initial state.
 function create() {
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight);
     createBackground(this);
@@ -98,6 +102,8 @@ function create() {
 }
 
 
+// Core game loop that runs every frame to process input, enemies, projectiles,
+// timers, and HUD updates.
 function update(time, delta) {
     if (gameState.gameOver) {
         if (Phaser.Input.Keyboard.JustDown(rKey)) {

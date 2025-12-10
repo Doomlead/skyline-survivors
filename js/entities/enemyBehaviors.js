@@ -2,6 +2,7 @@
 // Enemy AI Behaviors and Update Functions
 // ------------------------
 
+// Handles landers hunting humans, abducting them, and mutating if they escape.
 function updateLanderBehavior(scene, enemy, time) {
     if (!enemy.targetHuman && !enemy.abductedHuman) {
         let nearestHuman = null;
@@ -53,11 +54,13 @@ function updateLanderBehavior(scene, enemy, time) {
     }
 }
 
+// Drives aggressive pursuit for mutants, constantly steering toward the player.
 function updateMutantBehavior(scene, enemy, time, timeSlowMultiplier) {
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     enemy.setVelocity(Math.cos(angle) * 150 * timeSlowMultiplier, Math.sin(angle) * 150 * timeSlowMultiplier);
 }
 
+// Gives drones a lazy patrol arc and opportunistic potshots at the player.
 function updateDroneBehavior(scene, enemy, time, timeSlowMultiplier) {
     enemy.patrolAngle += 0.02 * timeSlowMultiplier;
     enemy.setVelocity(Math.cos(enemy.patrolAngle) * 120 * timeSlowMultiplier, Math.sin(enemy.patrolAngle) * 120 * timeSlowMultiplier);
@@ -67,6 +70,7 @@ function updateDroneBehavior(scene, enemy, time, timeSlowMultiplier) {
     }
 }
 
+// Moves bombers horizontally while dropping timed mines and firing intermittently.
 function updateBomberBehavior(scene, enemy, time, timeSlowMultiplier) {
     if (!enemy.patrolDirection) {
         enemy.patrolDirection = Math.random() < 0.5 ? -1 : 1;
@@ -102,6 +106,7 @@ function updateBomberBehavior(scene, enemy, time, timeSlowMultiplier) {
     }
 }
 
+// Plants turrets after a short delay, then alternates cardinal/diagonal volleys.
 function updateTurretBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
     if (!enemy.isPlanted) {
         enemy.plantTimer += delta * timeSlowMultiplier;
@@ -145,6 +150,7 @@ function updateTurretBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
+// Pods drift with shield-like bursts and occasionally shoot at the player.
 function updatePodBehavior(scene, enemy, time, timeSlowMultiplier) {
     if (!enemy.movePattern) enemy.movePattern = Math.random() * Math.PI * 2;
     enemy.movePattern += 0.02;
@@ -152,6 +158,7 @@ function updatePodBehavior(scene, enemy, time, timeSlowMultiplier) {
     enemy.setVelocity(Math.cos(enemy.movePattern) * speed, Math.sin(enemy.movePattern) * speed * 0.5);
 }
 
+// Swarmer drones zig-zag toward the player and may fire quick shots.
 function updateSwarmerBehavior(scene, enemy, time, timeSlowMultiplier) {
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     const wobble = Math.sin(time * 0.01) * 0.5;
@@ -159,6 +166,7 @@ function updateSwarmerBehavior(scene, enemy, time, timeSlowMultiplier) {
     enemy.setVelocity(Math.cos(angle + wobble) * speed, Math.sin(angle + wobble) * speed);
 }
 
+// Baiters circle the player with erratic velocity changes and rapid fire.
 function updateBaiterBehavior(scene, enemy, time, timeSlowMultiplier) {
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     const speed = 180 * timeSlowMultiplier;
@@ -168,6 +176,7 @@ function updateBaiterBehavior(scene, enemy, time, timeSlowMultiplier) {
     }
 }
 
+// Kamikazes home in aggressively and occasionally juke before firing.
 function updateKamikazeBehavior(scene, enemy, time, timeSlowMultiplier) {
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     const speed = 250 * timeSlowMultiplier;
@@ -181,6 +190,7 @@ function updateKamikazeBehavior(scene, enemy, time, timeSlowMultiplier) {
     }
 }
 
+// Shields patrol in slow arcs and pepper the player with shots.
 function updateShieldBehavior(scene, enemy, time, timeSlowMultiplier) {
     enemy.patrolAngle += 0.01 * timeSlowMultiplier;
     enemy.setVelocity(Math.cos(enemy.patrolAngle) * 80 * timeSlowMultiplier, Math.sin(enemy.patrolAngle) * 80 * timeSlowMultiplier);
@@ -190,6 +200,7 @@ function updateShieldBehavior(scene, enemy, time, timeSlowMultiplier) {
     }
 }
 
+// Predicts the player's position and chases that future location before shooting.
 function updateSeekerBehavior(scene, enemy, time, timeSlowMultiplier) {
     const playerVelX = player.body.velocity.x;
     const playerVelY = player.body.velocity.y;
@@ -205,6 +216,7 @@ function updateSeekerBehavior(scene, enemy, time, timeSlowMultiplier) {
     }
 }
 
+// Periodically emits swarmer minions while pacing and shooting at the player.
 function updateSpawnerBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
     enemy.spawnTimer += delta * timeSlowMultiplier;
     if (enemy.spawnTimer > 3000 && enemy.minionsSpawned < 6) {
@@ -212,7 +224,7 @@ function updateSpawnerBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
             const angle = Math.random() * Math.PI * 2;
             const spawnX = enemy.x + Math.cos(angle) * 40;
             const spawnY = enemy.y + Math.sin(angle) * 40;
-            spawnEnemy(scene, 'swarmer', spawnX, spawnY);
+            spawnEnemy(scene, 'swarmer', spawnX, spawnY, false);
         }
         enemy.minionsSpawned++;
         enemy.spawnTimer = 0;
@@ -225,6 +237,7 @@ function updateSpawnerBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
+// Links nearby allies with protective tethers and throttles their speed to keep formation.
 function updateShielderBehavior(scene, enemy, time, timeSlowMultiplier) {
     if (!enemy.protectedAllies) enemy.protectedAllies = [];
     
@@ -275,6 +288,7 @@ function updateShielderBehavior(scene, enemy, time, timeSlowMultiplier) {
     }
 }
 
+// Makes bouncers ricochet vertically and fire when close to the player.
 function updateBouncerBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
     if (!enemy.bounceTimer) enemy.bounceTimer = 0;
     enemy.bounceTimer += delta * timeSlowMultiplier;
@@ -292,6 +306,7 @@ function updateBouncerBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
+// Snipers hover at range, taking aimed shots and repositioning when too close.
 function updateSniperBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
     if (!enemy.isPositioned) {
         if (!enemy.positionTimer) enemy.positionTimer = 0;
@@ -326,6 +341,7 @@ function updateSniperBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
+// Buffs nearby swarmers and sprays slowing fields while pursuing the player.
 function updateSwarmLeaderBehavior(scene, enemy, time, timeSlowMultiplier) {
     enemies.children.entries.forEach(ally => {
         if (ally !== enemy && ally.active && Phaser.Math.Distance.Between(enemy.x, enemy.y, ally.x, ally.y) < enemy.buffRadius) {
@@ -353,6 +369,7 @@ function updateSwarmLeaderBehavior(scene, enemy, time, timeSlowMultiplier) {
     }
 }
 
+// Allows regenerators to heal periodically while drifting in gentle arcs and firing.
 function updateRegeneratorBehavior(scene, enemy, time, timeSlowMultiplier) {
     enemy.lastHeal += timeSlowMultiplier;
     if (enemy.lastHeal > 5000 && enemy.hp < getEnemyHP('regenerator')) {
@@ -370,6 +387,8 @@ function updateRegeneratorBehavior(scene, enemy, time, timeSlowMultiplier) {
     }
 }
 
+// Main per-frame update loop that keeps every active enemy inside the play area
+// and delegates behavior logic to the appropriate handler for each enemy type.
 function updateEnemies(scene, time, delta) {
     const topLimit = 20;
     
@@ -458,7 +477,8 @@ function updateEnemies(scene, time, delta) {
             const camX = scene.cameras.main.scrollX;
             const rx = camX + Phaser.Math.Between(50, CONFIG.width - 50);
             const ry = Phaser.Math.Between(topLimit + 20, (scene.groundLevel || CONFIG.worldHeight - 80) - Math.sin(rx / 200) * 30 - 60);
-            spawnEnemy(scene, et, rx, ry);
+            const countsTowardsWave = enemy.countsTowardsWave !== false;
+            spawnEnemy(scene, et, rx, ry, countsTowardsWave);
         }
     });
 }
