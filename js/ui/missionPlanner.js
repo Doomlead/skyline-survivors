@@ -7,11 +7,87 @@
     const STORAGE_KEY = 'skyline_district_state';
 
     const DISTRICT_CONFIGS = [
-        { id: 'north-spire', name: 'North Spire', angle: -60, start: -100, end: -20, timer: 120, color: 0x22e0ff, threats: ['lander', 'mutant', 'drone'], reward: 'tech caches' },
-        { id: 'eastern-reach', name: 'Eastern Reach', angle: 30, start: -10, end: 70, timer: 150, color: 0x7c3aed, threats: ['lander', 'bomber', 'turret'], reward: 'energy cells' },
-        { id: 'sunward-forge', name: 'Sunward Forge', angle: 110, start: 80, end: 140, timer: 90, color: 0xfbbf24, threats: ['drone', 'kamikaze', 'seeker'], reward: 'forge alloys' },
-        { id: 'southern-bastion', name: 'Southern Bastion', angle: 180, start: 150, end: 220, timer: 180, color: 0x10b981, threats: ['lander', 'shield', 'shielder'], reward: 'defense cores' },
-        { id: 'shadow-belt', name: 'Shadow Belt', angle: 275, start: 230, end: 320, timer: 200, color: 0xef4444, threats: ['pod', 'swarmer', 'baiter'], reward: 'stealth intel' }
+        {
+            id: 'pacific-rim-bastion',
+            name: 'Pacific Rim Bastion',
+            center: { lat: 38, lon: -134 },
+            polygon: [
+                { lat: 62, lon: -155 },
+                { lat: 45, lon: -160 },
+                { lat: 32, lon: -140 },
+                { lat: 18, lon: -125 },
+                { lat: 28, lon: -105 },
+                { lat: 50, lon: -115 }
+            ],
+            timer: 120,
+            color: 0x22e0ff,
+            threats: ['lander', 'mutant', 'drone'],
+            reward: 'tech caches'
+        },
+        {
+            id: 'atlantic-arc',
+            name: 'Atlantic Arc',
+            center: { lat: 48, lon: -5 },
+            polygon: [
+                { lat: 65, lon: -30 },
+                { lat: 55, lon: -15 },
+                { lat: 48, lon: 10 },
+                { lat: 35, lon: -5 },
+                { lat: 42, lon: -40 }
+            ],
+            timer: 150,
+            color: 0x7c3aed,
+            threats: ['lander', 'bomber', 'turret'],
+            reward: 'energy cells'
+        },
+        {
+            id: 'sahara-gate',
+            name: 'Sahara Gate',
+            center: { lat: 18, lon: 15 },
+            polygon: [
+                { lat: 28, lon: -10 },
+                { lat: 25, lon: 20 },
+                { lat: 10, lon: 25 },
+                { lat: 5, lon: -5 },
+                { lat: 20, lon: -30 }
+            ],
+            timer: 180,
+            color: 0x10b981,
+            threats: ['lander', 'shield', 'shielder'],
+            reward: 'defense cores'
+        },
+        {
+            id: 'indus-line',
+            name: 'Indus Line',
+            center: { lat: 22, lon: 80 },
+            polygon: [
+                { lat: 35, lon: 60 },
+                { lat: 32, lon: 90 },
+                { lat: 15, lon: 105 },
+                { lat: 5, lon: 75 },
+                { lat: 20, lon: 55 }
+            ],
+            timer: 90,
+            color: 0xfbbf24,
+            threats: ['drone', 'kamikaze', 'seeker'],
+            reward: 'forge alloys'
+        },
+        {
+            id: 'austral-shield',
+            name: 'Austral Shield',
+            center: { lat: -22, lon: 135 },
+            polygon: [
+                { lat: -10, lon: 110 },
+                { lat: -35, lon: 115 },
+                { lat: -40, lon: 150 },
+                { lat: -15, lon: 160 },
+                { lat: -5, lon: 135 }
+            ],
+            timer: 200,
+            color: 0xef4444,
+            threats: ['pod', 'swarmer', 'baiter'],
+            reward: 'stealth intel'
+        }
     ];
 
     let mission = null;
@@ -73,9 +149,9 @@
     function randomCityMission() {
         const districtConfig = Phaser.Utils.Array.GetRandom(DISTRICT_CONFIGS);
         const district = getDistrictState(districtConfig.id);
-        const angle = districtConfig.angle;
-        const longitude = Phaser.Math.Wrap(angle, -180, 180);
-        const latitude = Phaser.Math.Clamp(Math.sin(Phaser.Math.DegToRad(angle)) * 80, -80, 80);
+        const center = getDistrictCenter(districtConfig);
+        const longitude = Phaser.Math.Wrap(center.lon || 0, -180, 180);
+        const latitude = Phaser.Math.Clamp(center.lat || 0, -85, 85);
         return {
             city: districtConfig.name,
             district: districtConfig.id,
@@ -118,12 +194,30 @@
         return DISTRICT_CONFIGS.find(d => d.id === id);
     }
 
-    function selectDistrict(name, angleDegrees = null, providedState = null) {
+    function getDistrictCenter(config) {
+        if (!config) return { lat: 0, lon: 0 };
+        if (config.center) return config.center;
+        if (config.polygon?.length) {
+            const sum = config.polygon.reduce((acc, point) => ({
+                lat: acc.lat + (point.lat || 0),
+                lon: acc.lon + (point.lon || 0)
+            }), { lat: 0, lon: 0 });
+            const count = config.polygon.length || 1;
+            return { lat: sum.lat / count, lon: sum.lon / count };
+        }
+        return { lat: 0, lon: 0 };
+    }
+
+    function selectDistrict(name, longitudeOverride = null, providedState = null) {
         const current = ensureMission();
         const config = DISTRICT_CONFIGS.find(d => d.name === name || d.id === name);
-        const angle = angleDegrees !== null ? angleDegrees : (config?.angle ?? Phaser.Math.FloatBetween(-180, 180));
-        const longitude = Phaser.Math.Wrap(angle, -180, 180);
-        const latitude = Phaser.Math.Clamp(Math.sin(Phaser.Math.DegToRad(angle)) * 80, -80, 80);
+        const center = getDistrictCenter(config);
+        const longitude = Phaser.Math.Wrap(
+            longitudeOverride !== null ? longitudeOverride : (center.lon || 0),
+            -180,
+            180
+        );
+        const latitude = Phaser.Math.Clamp(center.lat || 0, -85, 85);
         const districtId = config?.id || name;
         const state = providedState ? updateDistrictState(districtId, providedState) : getDistrictState(districtId);
         const directives = config ? buildMissionDirectives(config, state, current.mode) : current.directives;
