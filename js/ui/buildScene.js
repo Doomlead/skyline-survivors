@@ -556,7 +556,9 @@ class BuildScene extends Phaser.Scene {
     }
 
     ensureEarthTexture(targetWidth, targetHeight) {
-        if (this.textures.exists('ui-earth')) {
+        const hasEarthTexture = this.textures.exists('ui-earth')
+            && this.textures.get('ui-earth')?.getSourceImage()?.width > 1;
+        if (hasEarthTexture) {
             this.earthTextureKey = 'ui-earth';
             return;
         }
