@@ -46,6 +46,7 @@ class BuildScene extends Phaser.Scene {
         this.createModeButtons(width);
         this.createMissionConsole(width, height);
         this.updateMissionUi();
+        this.updateExternalLaunchButton();
 
         this.input.keyboard.once('keydown-SPACE', () => this.launchMission());
         this.input.keyboard.on('keydown-R', () => this.rollMission());
@@ -110,12 +111,43 @@ class BuildScene extends Phaser.Scene {
     createMapGlobe() {
         this.ensureEarthTexture(320, 320);
 
+        const maskCircle = this.add.circle(0, 0, 142, 0xffffff, 0.02);
+        maskCircle.setVisible(false);
+        this.mapMask = maskCircle.createGeometryMask();
+        this.mapBitmapMask = maskCircle.createBitmapMask();
+
+        const glow = this.add.ellipse(0, 0, 320, 320, 0x0ea5e9, 0.08);
+        glow.setBlendMode(Phaser.BlendModes.ADD);
+
         this.mapImage = this.add.image(0, 0, this.earthTextureKey);
         this.mapImage.setDisplaySize(280, 280);
-        this.mapImage.setAlpha(0.35);
-        this.mapImage.setBlendMode(Phaser.BlendModes.ADD);
+        this.mapImage.setAlpha(0.82);
+        this.mapImage.setBlendMode(Phaser.BlendModes.NORMAL);
+        this.mapImage.setMask(this.mapBitmapMask);
 
-        this.planetContainer.add(this.mapImage);
+        const grid = this.add.graphics({ x: -140, y: -140 });
+        grid.lineStyle(1, 0x22d3ee, 0.15);
+        for (let i = 0; i <= 6; i++) {
+            const x = (i / 6) * 280;
+            grid.lineBetween(x, 0, x, 280);
+        }
+        for (let j = 0; j <= 6; j++) {
+            const y = (j / 6) * 280;
+            grid.lineBetween(0, y, 280, y);
+        }
+        grid.setMask(this.mapMask);
+
+        this.districtLayer = this.add.container(0, 0);
+        this.districtLayer.setMask(this.mapMask);
+
+        const terminator = this.add.graphics();
+        terminator.fillStyle(0x040b1a, 0.45);
+        terminator.slice(0, 0, 150, Phaser.Math.DegToRad(45), Phaser.Math.DegToRad(225), true);
+        terminator.fillPath();
+        terminator.setBlendMode(Phaser.BlendModes.MULTIPLY);
+        terminator.setMask(this.mapMask);
+
+        this.planetContainer.add([glow, this.mapImage, grid, this.districtLayer, terminator]);
     }
 
     projectLatLon(lat, lon) {
@@ -207,7 +239,7 @@ class BuildScene extends Phaser.Scene {
             ).setOrigin(0.5);
 
             const district = { config, sectorGraphics, glow, selectionArea, timerText, nameLabel, state };
-            this.planetContainer.add([glow, sectorGraphics, selectionArea, timerText, nameLabel]);
+            (this.districtLayer || this.planetContainer).add([glow, sectorGraphics, selectionArea, timerText, nameLabel]);
             this.enableDistrictInteractions(district);
             this.districts.push(district);
             if (this.mission?.district === config.id) {
@@ -220,10 +252,12 @@ class BuildScene extends Phaser.Scene {
         this.mapMarker = this.add.circle(0, 0, 5, 0xff4d6d, 1);
         this.mapMarker.setStrokeStyle(2, 0xffffff, 0.8);
         this.mapMarker.setDepth(4);
+        if (this.mapMask) this.mapMarker.setMask(this.mapMask);
 
         this.mapPing = this.add.circle(0, 0, 8, 0xff8fab, 0.35);
         this.mapPing.setBlendMode(Phaser.BlendModes.ADD);
         this.mapPing.setDepth(3);
+        if (this.mapMask) this.mapPing.setMask(this.mapMask);
         this.tweens.add({
             targets: this.mapPing,
             scale: { from: 1, to: 2 },
@@ -285,6 +319,7 @@ class BuildScene extends Phaser.Scene {
             `Urgency: ${this.mission?.directives?.urgency || 'unknown'} \u2022 Reward focus: ${district.config.reward}\n` +
             'Action: Prep builds, reinforce nodes, shop for upgrades.'
         );
+        this.updateExternalLaunchButton();
     }
 
     createOrbitNodes(width, height, centerX, centerY) {
@@ -601,6 +636,7 @@ class BuildScene extends Phaser.Scene {
         if (this.launchButton?.text) {
             this.launchButton.text.setText(launchLabel);
         }
+        this.updateExternalLaunchButton();
     }
 
     positionMarkerOnMap() {
@@ -719,6 +755,21 @@ class BuildScene extends Phaser.Scene {
             district,
             ...lines
         ].join('\n'));
+    }
+
+    updateExternalLaunchButton() {
+        const btn = document.getElementById('build-launch');
+        if (!btn) return;
+        const hasSelection = !!this.selectedDistrict;
+        const mode = this.mission?.mode || this.selectedMode;
+        const labelMode = mode === 'survival' ? 'Survival' : 'Wave';
+        const districtName = this.selectedDistrict?.config?.name || 'mission';
+        btn.disabled = !hasSelection;
+        btn.textContent = hasSelection
+            ? `Launch ${labelMode} Run — ${districtName}`
+            : 'Select a district to launch';
+        btn.classList.toggle('opacity-50', !hasSelection);
+        btn.classList.toggle('cursor-not-allowed', !hasSelection);
     }
 
     formatTimer(seconds) {
