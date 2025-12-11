@@ -228,8 +228,10 @@ function startGame(mode = 'classic') {
             game.scene.stop(SCENE_KEYS.build);
             const toggleBtn = document.getElementById('build-toggle');
             const returnBtn = document.getElementById('build-return');
+            const launchBtn = document.getElementById('build-launch');
             if (toggleBtn) toggleBtn.classList.remove('hidden');
             if (returnBtn) returnBtn.classList.add('hidden');
+            if (launchBtn) launchBtn.classList.add('hidden');
         }
         if (game.scene.isActive(SCENE_KEYS.menu)) {
             game.scene.stop(SCENE_KEYS.menu);
@@ -306,12 +308,15 @@ function enterDistrictMap(options = false) {
 
     const toggleBtn = document.getElementById('build-toggle');
     const returnBtn = document.getElementById('build-return');
+    const launchBtn = document.getElementById('build-launch');
     if (overlayLaunch) {
         if (toggleBtn) toggleBtn.classList.add('hidden');
         if (returnBtn) returnBtn.classList.add('hidden');
+        if (launchBtn) launchBtn.classList.add('hidden');
     } else {
         if (toggleBtn) toggleBtn.classList.add('hidden');
         if (returnBtn) returnBtn.classList.remove('hidden');
+        if (launchBtn) launchBtn.classList.remove('hidden');
     }
 }
 
@@ -335,11 +340,29 @@ function closeBuildView() {
 
     const toggleBtn = document.getElementById('build-toggle');
     const returnBtn = document.getElementById('build-return');
+    const launchBtn = document.getElementById('build-launch');
     if (toggleBtn) toggleBtn.classList.remove('hidden');
     if (returnBtn) returnBtn.classList.add('hidden');
+    if (launchBtn) launchBtn.classList.add('hidden');
+}
+
+function launchSelectedMission() {
+    const launchBtn = document.getElementById('build-launch');
+    const buildScene = game?.scene?.getScene ? game.scene.getScene(SCENE_KEYS.build) : null;
+    if (buildScene && buildScene.scene && buildScene.scene.isActive()) {
+        buildScene.launchMission();
+        return;
+    }
+
+    const mission = missionPlanner?.getMission ? missionPlanner.getMission() : null;
+    if (mission) {
+        startGame(mission.mode || 'classic');
+        if (launchBtn) launchBtn.classList.add('hidden');
+    }
 }
 
 window.openBuildView = openBuildView;
 window.closeBuildView = closeBuildView;
 window.enterMainMenu = enterMainMenu;
 window.enterDistrictMap = enterDistrictMap;
+window.launchSelectedMission = launchSelectedMission;
