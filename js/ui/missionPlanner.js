@@ -16,7 +16,7 @@
 
     let mission = null;
     let districtState = null;
-    const mapState = { nodes: {} };
+    const mapState = { nodes: {}, hasTimerData: false };
 
     function getDefaultDistrictState(config) {
         return {
@@ -277,6 +277,11 @@
         return mapState.nodes[config.id];
     }
 
+    function setMapTimerDataAvailable(hasTimerData) {
+        mapState.hasTimerData = !!hasTimerData;
+        return mapState.hasTimerData;
+    }
+
     function updateMapNodeState(id, patch = {}) {
         const node = mapState.nodes[id];
         if (!node) return null;
@@ -290,6 +295,10 @@
 
     function getMapState() {
         return mapState;
+    }
+
+    function hasMapTimerData() {
+        return !!mapState.hasTimerData;
     }
 
     window.missionPlanner = {
@@ -309,6 +318,8 @@
         ensureMapNodeState,
         updateMapNodeState,
         getMapNodeState,
-        getMapState
+        getMapState,
+        hasMapTimerData,
+        setMapTimerDataAvailable
     };
 })();
