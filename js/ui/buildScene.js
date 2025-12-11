@@ -44,9 +44,6 @@ class BuildScene extends Phaser.Scene {
         this.createOrbitNodes(width, height, centerX, centerY);
         this.createUiOverlay(width);
         this.createModeButtons(width);
-
-        this.mission = missionPlanner.ensureMission();
-        this.selectedMode = this.mission.mode || this.selectedMode;
         this.createMissionConsole(width, height);
         this.updateMissionUi();
 
