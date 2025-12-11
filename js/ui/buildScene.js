@@ -39,10 +39,6 @@ class BuildScene extends Phaser.Scene {
         this.planetContainer = this.add.container(centerX, centerY);
         this.createPlanet();
         this.createMapGlobe();
-
-        this.mission = missionPlanner.ensureMission();
-        this.selectedMode = this.mission.mode || this.selectedMode;
-
         this.createDistricts();
         this.createMapMarkers();
         this.createOrbitNodes(width, height, centerX, centerY);
