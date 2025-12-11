@@ -43,7 +43,6 @@ class BuildScene extends Phaser.Scene {
         this.createMapMarkers();
         this.createOrbitNodes(width, height, centerX, centerY);
         this.createUiOverlay(width);
-        this.createModeButtons(width);
         this.createMissionConsole(width, height);
         this.updateMissionUi();
         this.updateExternalLaunchButton();
@@ -459,8 +458,6 @@ class BuildScene extends Phaser.Scene {
                 fontSize: '11px',
                 color: '#9fb8d1'
             }).setOrigin(0.5);
-
-        this.selectMode(this.selectedMode);
     }
 
     selectMode(mode) {
@@ -612,7 +609,7 @@ class BuildScene extends Phaser.Scene {
     }
 
     updateMissionUi() {
-        if (!this.mission || !this.mapImage) return;
+        if (!this.mission || !this.mapImage || !this.panelSummary || !this.missionDetails) return;
 
         this.positionMarkerOnMap();
         const modeToUse = this.mission.mode || this.selectedMode;
