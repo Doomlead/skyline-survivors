@@ -1,0 +1,241 @@
+class BuildMissionUi {
+    constructor(scene) {
+        this.scene = scene;
+        this.modeButtons = null;
+        this.modeButtonRefs = [];
+        this.modeHint = null;
+        this.detailCard = null;
+        this.detailTitle = null;
+        this.detailBody = null;
+        this.missionHeader = null;
+        this.panelSummary = null;
+        this.missionDetails = null;
+        this.nodeStatusText = null;
+        this.launchButton = null;
+        this.rollButton = null;
+        this.onModeSelected = null;
+    }
+
+    createOverlay(width) {
+        const header = this.scene.add.text(width / 2, 28, 'District + Build Map', {
+            fontFamily: 'Orbitron',
+            fontSize: '18px',
+            color: '#8bffff',
+            align: 'center'
+        }).setOrigin(0.5);
+        header.setShadow(0, 0, '#0ea5e9', 8, true, true);
+
+        this.detailCard = this.scene.add.rectangle(width / 2, 60, 420, 70, 0x0b1220, 0.7)
+            .setStrokeStyle(1, 0x1d4ed8, 0.8);
+        this.detailCard.setOrigin(0.5, 0);
+        this.detailCard.setScrollFactor(0);
+
+        this.detailTitle = this.scene.add.text(width / 2 - 180, 70, 'Select a district', {
+            fontFamily: 'Orbitron',
+            fontSize: '14px',
+            color: '#c7e3ff'
+        });
+    }
+
+    createModeButtons(width, selectedMode) {
+        this.modeButtons = this.scene.add.container(width * 0.35, 150);
+        this.modeButtonRefs = [];
+
+        const createButton = (offsetX, label, color, mode) => {
+            const rect = this.scene.add.rectangle(offsetX, 0, 150, 38, 0x0f172a, 0.85)
+                .setStrokeStyle(2, color, 0.7)
+                .setInteractive({ useHandCursor: true });
+            const text = this.scene.add.text(offsetX, 0, label, {
+                fontFamily: 'Orbitron',
+                fontSize: '12px',
+                color: '#d1f6ff'
+            }).setOrigin(0.5);
+
+            rect.on('pointerover', () => {
+                this.scene.tweens.add({ targets: rect, alpha: 1, duration: 120 });
+            });
+            rect.on('pointerout', () => {
+                this.scene.tweens.add({ targets: rect, alpha: 0.85, duration: 160 });
+            });
+            rect.on('pointerdown', () => this.onModeSelected?.(mode));
+
+            this.modeButtonRefs.push({ rect, text, mode, color });
+            this.modeButtons.add([rect, text]);
+        };
+
+        createButton(-90, 'Wave Mode', 0x7dd3fc, 'classic');
+        createButton(90, 'Survival Mode', 0x22d3ee, 'survival');
+
+        this.modeHint = this.scene.add.text(width * 0.35, 185,
+            'Select a district to deploy and then choose your mode.', {
+                fontFamily: 'Orbitron',
+                fontSize: '11px',
+                color: '#9fb8d1'
+            }).setOrigin(0.5);
+
+        this.updateModeButtonStyles(selectedMode);
+    }
+
+    createDetailBody(width, mapNodes) {
+        const hasTimedNodes = (typeof missionPlanner !== 'undefined' && missionPlanner.hasMapTimerData()) && mapNodes.some(
+            node => (node.state?.timer || 0) > 0);
+        const overlayDescription = hasTimedNodes
+            ? 'Hover or click a glowing sector to zoom in.\nNodes with active timers will destabilize—stabilize the most critical threats first.\nChoose a mode below to deploy to the selected district.'
+            : 'Hover or click a glowing sector to zoom in.\nThis map is static for now—select a sector and prep a deployment when ready.\nChoose a mode below to deploy to the selected district.';
+
+        this.detailBody = this.scene.add.text(width / 2 - 180, 90, overlayDescription, {
+            fontFamily: 'Orbitron',
+            fontSize: '11px',
+            color: '#9fb8d1'
+        });
+    }
+
+    createMissionConsole(width, height, { onLaunch, onReroute }) {
+        const panelWidth = width * 0.42;
+        const panelHeight = height * 0.62;
+        const panelX = width * 0.78;
+        const panelY = height * 0.48;
+
+        const panel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, 0x0c1e34, 0.85);
+        panel.setStrokeStyle(3, 0x33c0ff, 0.8);
+        const inner = this.scene.add.rectangle(panelX, panelY, panelWidth - 16, panelHeight - 16, 0x07162b, 0.9);
+        inner.setStrokeStyle(2, 0x0a85ff, 0.3);
+
+        this.missionHeader = this.scene.add.text(panelX, panelY - panelHeight / 2 + 18, 'Mission & Build Routing', {
+            fontFamily: 'Orbitron',
+            fontSize: '14px',
+            color: '#c7e3ff'
+        }).setOrigin(0.5);
+
+        this.panelSummary = this.scene.add.text(panelX, panelY - panelHeight * 0.05, '', {
+            fontFamily: 'Orbitron',
+            fontSize: '11px',
+            color: '#dceefb',
+            align: 'center',
+            wordWrap: { width: panelWidth - 30 }
+        }).setOrigin(0.5);
+
+        this.missionDetails = this.scene.add.text(panelX, panelY + panelHeight * 0.12, '', {
+            fontFamily: 'Orbitron',
+            fontSize: '11px',
+            color: '#dceefb',
+            align: 'center',
+            wordWrap: { width: panelWidth - 30 }
+        }).setOrigin(0.5);
+
+        this.nodeStatusText = this.scene.add.text(panelX, panelY + panelHeight * 0.29, '', {
+            fontFamily: 'Orbitron',
+            fontSize: '10px',
+            color: '#9fb8d1',
+            align: 'center',
+            lineSpacing: 2,
+            wordWrap: { width: panelWidth - 40 }
+        }).setOrigin(0.5);
+
+        this.launchButton = this.createMissionButton(panelX, panelY + panelHeight * 0.43, 'Launch Deployment (Space)', 0x22d3ee, onLaunch);
+        this.rollButton = this.createMissionButton(panelX, panelY + panelHeight * 0.55, 'Reroute to New City (R)', 0xf97316, onReroute);
+
+        this.scene.add.text(panelX, height - 24, 'Select a district, pick a mode, then launch.', {
+            fontFamily: 'Orbitron',
+            fontSize: '11px',
+            color: '#9fb8d1'
+        }).setOrigin(0.5);
+    }
+
+    createMissionButton(x, y, label, strokeColor, handler) {
+        const button = this.scene.add.rectangle(x, y, 240, 38, 0x0f172a, 0.9)
+            .setStrokeStyle(2, strokeColor, 0.8)
+            .setInteractive({ useHandCursor: true })
+            .setDepth(5);
+        const text = this.scene.add.text(x, y, label, {
+            fontFamily: 'Orbitron',
+            fontSize: '12px',
+            color: '#dceefb'
+        }).setOrigin(0.5).setDepth(5);
+
+        button.on('pointerover', () => {
+            this.scene.tweens.add({ targets: button, alpha: 1, duration: 120 });
+        });
+        button.on('pointerout', () => {
+            this.scene.tweens.add({ targets: button, alpha: 0.9, duration: 120 });
+        });
+        if (handler) {
+            button.on('pointerdown', () => handler());
+        }
+
+        return { button, text };
+    }
+
+    updateModeButtonStyles(selectedMode) {
+        if (!this.modeButtonRefs) return;
+        this.modeButtonRefs.forEach(({ rect, text, mode, color }) => {
+            const active = mode === selectedMode;
+            rect.setFillStyle(0x0f172a, active ? 1 : 0.85);
+            rect.setStrokeStyle(2, color, active ? 1 : 0.6);
+            rect.setScale(active ? 1.02 : 1);
+            text.setColor(active ? '#e0f2fe' : '#d1f6ff');
+        });
+    }
+
+    updateDetail(title, body) {
+        if (this.detailTitle) this.detailTitle.setText(title);
+        if (this.detailBody) this.detailBody.setText(body);
+    }
+
+    refreshNodeStatusText(mapNodes, selectedDistrict) {
+        if (!this.nodeStatusText) return;
+        const lines = mapNodes.map(node => {
+            const statusLabel = node.state.status === 'destroyed'
+                ? 'DOWN'
+                : node.state.timer > 0
+                    ? `T-${this.scene.formatTimer(node.state.timer)}`
+                    : 'STABLE';
+            return `${node.config.label}: ${statusLabel}`;
+        });
+        const district = selectedDistrict ? `${selectedDistrict.config.name}: ${selectedDistrict.state.status.toUpperCase()}` : 'No district selected';
+        this.nodeStatusText.setText([
+            'Unified Map Status',
+            district,
+            ...lines
+        ].join('\n'));
+    }
+
+    updateMissionUi(mission, selectedMode, selectedDistrict, mapNodes) {
+        if (!mission || !this.panelSummary) return;
+
+        const modeToUse = mission.mode || selectedMode;
+        const { city, latitude, longitude, seed, directives } = mission;
+        const mode = mission.mode || selectedMode;
+        const modeLabel = mode === 'survival' ? 'Survival' : 'Wave';
+        const directiveLabel = directives?.urgency ? `${directives.urgency.toUpperCase()} THREAT` : 'Threat mix pending';
+        const rewardLabel = directives?.rewardMultiplier ? `${directives.rewardMultiplier.toFixed(2)}x rewards · ${directives.reward}` : 'Standard rewards';
+        const launchLabel = mode === 'survival' ? 'Launch Survival Run (Space)' : 'Launch Wave Run (Space)';
+
+        this.panelSummary.setText(
+            `${city}\nLat ${latitude.toFixed(1)} · Lon ${longitude.toFixed(1)}\nSeed ${seed.slice(0, 6)}`
+        );
+        this.missionDetails.setText(
+            `${modeLabel} Mode — ${directiveLabel}\n${rewardLabel}`
+        );
+        this.refreshNodeStatusText(mapNodes, selectedDistrict);
+        if (this.launchButton?.text) {
+            this.launchButton.text.setText(launchLabel);
+        }
+        this.updateModeButtonStyles(modeToUse);
+    }
+
+    updateExternalLaunchButton(selectedDistrict, mission, selectedMode) {
+        const btn = document.getElementById('build-launch');
+        if (!btn) return;
+        const hasSelection = !!selectedDistrict;
+        const mode = mission?.mode || selectedMode;
+        const labelMode = mode === 'survival' ? 'Survival' : 'Wave';
+        const districtName = selectedDistrict?.config?.name || 'mission';
+        btn.disabled = !hasSelection;
+        btn.textContent = hasSelection
+            ? `Launch ${labelMode} Run — ${districtName}`
+            : 'Select a district to launch';
+        btn.classList.toggle('opacity-50', !hasSelection);
+        btn.classList.toggle('cursor-not-allowed', !hasSelection);
+    }
+}
