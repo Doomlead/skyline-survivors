@@ -38,13 +38,16 @@ class BuildScene extends Phaser.Scene {
         const centerY = height / 2 + 10;
         this.planetContainer = this.add.container(centerX, centerY);
         this.createPlanet();
-        this.createDistricts();
-        this.createOrbitNodes(width, height, centerX, centerY);
-        this.createUiOverlay(width);
-        this.createModeButtons(width);
+        this.createMapGlobe();
 
         this.mission = missionPlanner.ensureMission();
         this.selectedMode = this.mission.mode || this.selectedMode;
+
+        this.createDistricts();
+        this.createMapMarkers();
+        this.createOrbitNodes(width, height, centerX, centerY);
+        this.createUiOverlay(width);
+        this.createModeButtons(width);
         this.createMissionConsole(width, height);
         this.updateMissionUi();
 
@@ -108,6 +111,17 @@ class BuildScene extends Phaser.Scene {
         });
     }
 
+    createMapGlobe() {
+        this.ensureEarthTexture(320, 320);
+
+        this.mapImage = this.add.image(0, 0, this.earthTextureKey);
+        this.mapImage.setDisplaySize(280, 280);
+        this.mapImage.setAlpha(0.35);
+        this.mapImage.setBlendMode(Phaser.BlendModes.ADD);
+
+        this.planetContainer.add(this.mapImage);
+    }
+
     createDistricts() {
         const sectorConfigs = missionPlanner.getDistrictConfigs();
         this.districtStates = missionPlanner.getAllDistrictStates();
@@ -156,6 +170,25 @@ class BuildScene extends Phaser.Scene {
                 this.focusDistrict(district, true);
             }
         });
+    }
+
+    createMapMarkers() {
+        this.mapMarker = this.add.circle(0, 0, 5, 0xff4d6d, 1);
+        this.mapMarker.setStrokeStyle(2, 0xffffff, 0.8);
+        this.mapMarker.setDepth(4);
+
+        this.mapPing = this.add.circle(0, 0, 8, 0xff8fab, 0.35);
+        this.mapPing.setBlendMode(Phaser.BlendModes.ADD);
+        this.mapPing.setDepth(3);
+        this.tweens.add({
+            targets: this.mapPing,
+            scale: { from: 1, to: 2 },
+            alpha: { from: 0.5, to: 0 },
+            duration: 900,
+            repeat: -1
+        });
+
+        this.planetContainer.add([this.mapPing, this.mapMarker]);
     }
 
     enableDistrictInteractions(district) {
@@ -282,7 +315,7 @@ class BuildScene extends Phaser.Scene {
     }
 
     createUiOverlay(width) {
-        const header = this.add.text(width / 2, 28, 'System Map & Meta Layer', {
+        const header = this.add.text(width / 2, 28, 'District + Build Map', {
             fontFamily: 'Orbitron',
             fontSize: '18px',
             color: '#8bffff',
@@ -380,37 +413,35 @@ class BuildScene extends Phaser.Scene {
         const inner = this.add.rectangle(panelX, panelY, panelWidth - 16, panelHeight - 16, 0x07162b, 0.9);
         inner.setStrokeStyle(2, 0x0a85ff, 0.3);
 
-        this.missionHeader = this.add.text(panelX, panelY - panelHeight / 2 + 18, 'Mission Routing', {
+        this.missionHeader = this.add.text(panelX, panelY - panelHeight / 2 + 18, 'Mission & Build Routing', {
             fontFamily: 'Orbitron',
             fontSize: '14px',
             color: '#c7e3ff'
         }).setOrigin(0.5);
 
-        this.ensureEarthTexture(panelWidth - 30, panelHeight - 120);
-        this.mapImage = this.add.image(panelX, panelY - 10, this.earthTextureKey);
-        this.mapImage.setDisplaySize(panelWidth - 30, panelHeight - 120);
-        this.mapImage.setDepth(3);
-
-        this.mapMarker = this.add.circle(panelX, panelY - 10, 5, 0xff4d6d, 1);
-        this.mapMarker.setStrokeStyle(2, 0xffffff, 0.8);
-        this.mapMarker.setDepth(4);
-
-        this.mapPing = this.add.circle(panelX, panelY - 10, 8, 0xff8fab, 0.3);
-        this.mapPing.setDepth(3);
-        this.tweens.add({
-            targets: this.mapPing,
-            scale: { from: 1, to: 2 },
-            alpha: { from: 0.5, to: 0 },
-            duration: 900,
-            repeat: -1
-        });
-
-        this.missionDetails = this.add.text(panelX, panelY + panelHeight * 0.28, '', {
+        this.panelSummary = this.add.text(panelX, panelY - panelHeight * 0.05, '', {
             fontFamily: 'Orbitron',
             fontSize: '11px',
             color: '#dceefb',
             align: 'center',
             wordWrap: { width: panelWidth - 30 }
+        }).setOrigin(0.5);
+
+        this.missionDetails = this.add.text(panelX, panelY + panelHeight * 0.12, '', {
+            fontFamily: 'Orbitron',
+            fontSize: '11px',
+            color: '#dceefb',
+            align: 'center',
+            wordWrap: { width: panelWidth - 30 }
+        }).setOrigin(0.5);
+
+        this.nodeStatusText = this.add.text(panelX, panelY + panelHeight * 0.29, '', {
+            fontFamily: 'Orbitron',
+            fontSize: '10px',
+            color: '#9fb8d1',
+            align: 'center',
+            lineSpacing: 2,
+            wordWrap: { width: panelWidth - 40 }
         }).setOrigin(0.5);
 
         this.launchButton = this.createMissionButton(panelX, panelY + panelHeight * 0.43, 'Launch Deployment (Space)', 0x22d3ee, () => this.launchMission());
@@ -516,9 +547,13 @@ class BuildScene extends Phaser.Scene {
         const rewardLabel = directives?.rewardMultiplier ? `${directives.rewardMultiplier.toFixed(2)}x rewards · ${directives.reward}` : 'Standard rewards';
         const launchLabel = mode === 'survival' ? 'Launch Survival Run (Space)' : 'Launch Wave Run (Space)';
 
-        this.missionDetails.setText(
-            `${city}\nLat ${latitude.toFixed(1)} · Lon ${longitude.toFixed(1)}\nSeed ${seed.slice(0, 6)}\n${modeLabel} Mode — ${directiveLabel}\n${rewardLabel}`
+        this.panelSummary.setText(
+            `${city}\nLat ${latitude.toFixed(1)} · Lon ${longitude.toFixed(1)}\nSeed ${seed.slice(0, 6)}`
         );
+        this.missionDetails.setText(
+            `${modeLabel} Mode — ${directiveLabel}\n${rewardLabel}`
+        );
+        this.refreshNodeStatusText();
         if (this.launchButton?.text) {
             this.launchButton.text.setText(launchLabel);
         }
@@ -616,10 +651,30 @@ class BuildScene extends Phaser.Scene {
             }
         });
 
+        this.refreshNodeStatusText();
+
         if (this._persistAccumulator > 5) {
             missionPlanner.tickDistricts(0);
             this._persistAccumulator = 0;
         }
+    }
+
+    refreshNodeStatusText() {
+        if (!this.nodeStatusText) return;
+        const lines = this.mapNodes.map(node => {
+            const statusLabel = node.state.status === 'destroyed'
+                ? 'DOWN'
+                : node.state.timer > 0
+                    ? `T-${this.formatTimer(node.state.timer)}`
+                    : 'STABLE';
+            return `${node.config.label}: ${statusLabel}`;
+        });
+        const district = this.selectedDistrict ? `${this.selectedDistrict.config.name}: ${this.selectedDistrict.state.status.toUpperCase()}` : 'No district selected';
+        this.nodeStatusText.setText([
+            'Unified Map Status',
+            district,
+            ...lines
+        ].join('\n'));
     }
 
     formatTimer(seconds) {
