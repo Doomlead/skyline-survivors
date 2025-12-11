@@ -12,7 +12,10 @@ class BuildScene extends Phaser.Scene {
         this.selectedMode = 'classic';
         this.districtStates = [];
         this._persistAccumulator = 0;
-        this.mapNodeStates = missionPlanner?.getMapState ? missionPlanner.getMapState() : { nodes: {} };
+        // Safety check for missionPlanner existence
+        this.mapNodeStates = (typeof missionPlanner !== 'undefined' && missionPlanner?.getMapState) 
+            ? missionPlanner.getMapState() 
+            : { nodes: {} };
     }
 
     preload() {
@@ -43,7 +46,12 @@ class BuildScene extends Phaser.Scene {
         this.createMapMarkers();
         this.createOrbitNodes(width, height, centerX, centerY);
         this.createUiOverlay(width);
+
+        // --- FIX: Create the Console (text elements) BEFORE creating buttons that try to update them ---
         this.createMissionConsole(width, height);
+        this.createModeButtons(width);
+        // -------------------------------------------------------------------------------------------
+
         this.updateMissionUi();
         this.updateExternalLaunchButton();
 
@@ -51,7 +59,16 @@ class BuildScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-R', () => this.rollMission());
 
         this.input.on('pointermove', pointer => {
-            this.planetContainer.rotation = Phaser.Math.DegToRad((pointer.x - centerX) * 0.01);
+            if (this.planetContainer) {
+                this.planetContainer.rotation = Phaser.Math.DegToRad((pointer.x - centerX) * 0.01);
+            }
+        });
+        
+        // Fix for AudioContext warning: Resume audio on first interaction
+        this.input.once('pointerdown', () => {
+            if (this.sound.context.state === 'suspended') {
+                this.sound.context.resume();
+            }
         });
     }
 
@@ -193,6 +210,8 @@ class BuildScene extends Phaser.Scene {
     }
 
     createDistricts() {
+        if (typeof missionPlanner === 'undefined') return;
+
         const sectorConfigs = missionPlanner.getDistrictConfigs();
         this.districtStates = missionPlanner.getAllDistrictStates();
 
@@ -312,16 +331,21 @@ class BuildScene extends Phaser.Scene {
             : district.state.status === 'cleared'
                 ? 'Stabilized after last run'
                 : `Threatened — ${destabilizationStatus}`;
-        this.detailTitle.setText(`${district.config.name}`);
-        this.detailBody.setText(
-            `Status: ${statusLabel}\n` +
-            `Urgency: ${this.mission?.directives?.urgency || 'unknown'} \u2022 Reward focus: ${district.config.reward}\n` +
-            'Action: Prep builds, reinforce nodes, shop for upgrades.'
-        );
+        
+        if (this.detailTitle) this.detailTitle.setText(`${district.config.name}`);
+        if (this.detailBody) {
+            this.detailBody.setText(
+                `Status: ${statusLabel}\n` +
+                `Urgency: ${this.mission?.directives?.urgency || 'unknown'} \u2022 Reward focus: ${district.config.reward}\n` +
+                'Action: Prep builds, reinforce nodes, shop for upgrades.'
+            );
+        }
         this.updateExternalLaunchButton();
     }
 
     createOrbitNodes(width, height, centerX, centerY) {
+        if (typeof missionPlanner === 'undefined') return;
+
         const nodeConfigs = [
             { id: 'mothership', label: 'Mothership', angle: -40, radius: 230, color: 0xf472b6, timer: 65, rewardModifier: 1.15, spawnModifier: 1.15 },
             { id: 'shop', label: 'Shop', angle: 70, radius: 250, color: 0x22d3ee, timer: 0, rewardModifier: 1.05, spawnModifier: 1 },
@@ -377,17 +401,20 @@ class BuildScene extends Phaser.Scene {
             node.on('pointerdown', () => {
                 const liveState = missionPlanner.getMapNodeState(config.id) || nodeState;
                 this.flashConnector(connector);
-                this.detailTitle.setText(`${config.label} Node`);
+                if (this.detailTitle) this.detailTitle.setText(`${config.label} Node`);
                 const nodeStatus = liveState.status === 'destroyed'
                     ? 'Destroyed — comms offline'
                     : liveState.timer > 0
                         ? `Threatened — event in ${this.formatTimer(liveState.timer)}`
                         : 'Stable';
-                this.detailBody.setText(
-                    `Status: ${nodeStatus}\n` +
-                    'Tap a district sector to deploy, or stabilize nearby threats first.\n' +
-                    `Rewards: x${(liveState.rewardModifier || 1).toFixed(2)} · Spawn: x${(liveState.spawnModifier || 1).toFixed(2)}`
-                );
+                
+                if (this.detailBody) {
+                    this.detailBody.setText(
+                        `Status: ${nodeStatus}\n` +
+                        'Tap a district sector to deploy, or stabilize nearby threats first.\n' +
+                        `Rewards: x${(liveState.rewardModifier || 1).toFixed(2)} · Spawn: x${(liveState.spawnModifier || 1).toFixed(2)}`
+                    );
+                }
             });
         });
     }
@@ -411,7 +438,7 @@ class BuildScene extends Phaser.Scene {
             fontSize: '14px',
             color: '#c7e3ff'
         });
-        const hasTimedNodes = missionPlanner.hasMapTimerData() && this.mapNodes.some(node => (node.state?.timer || 0) > 0);
+        const hasTimedNodes = (typeof missionPlanner !== 'undefined' && missionPlanner.hasMapTimerData()) && this.mapNodes.some(node => (node.state?.timer || 0) > 0);
         const overlayDescription = hasTimedNodes
             ? 'Hover or click a glowing sector to zoom in.\nNodes with active timers will destabilize—stabilize the most critical threats first.\nChoose a mode below to deploy to the selected district.'
             : 'Hover or click a glowing sector to zoom in.\nThis map is static for now—select a sector and prep a deployment when ready.\nChoose a mode below to deploy to the selected district.';
@@ -458,11 +485,15 @@ class BuildScene extends Phaser.Scene {
                 fontSize: '11px',
                 color: '#9fb8d1'
             }).setOrigin(0.5);
+
+        this.selectMode(this.selectedMode);
     }
 
     selectMode(mode) {
         this.selectedMode = mode;
-        this.mission = missionPlanner.setMode(mode);
+        if (typeof missionPlanner !== 'undefined') {
+            this.mission = missionPlanner.setMode(mode);
+        }
         this.updateModeButtonStyles();
         this.updateMissionUi();
     }
@@ -587,12 +618,14 @@ class BuildScene extends Phaser.Scene {
 
     launchMission() {
         if (!this.selectedDistrict) {
-            this.tweens.add({
-                targets: this.detailCard,
-                alpha: { from: 0.7, to: 1 },
-                duration: 140,
-                yoyo: true
-            });
+            if (this.detailCard) {
+                this.tweens.add({
+                    targets: this.detailCard,
+                    alpha: { from: 0.7, to: 1 },
+                    duration: 140,
+                    yoyo: true
+                });
+            }
             return;
         }
         const mode = this.mission?.mode || this.selectedMode;
@@ -609,7 +642,8 @@ class BuildScene extends Phaser.Scene {
     }
 
     updateMissionUi() {
-        if (!this.mission || !this.mapImage || !this.panelSummary || !this.missionDetails) return;
+        // Fix: Added guard clause for panelSummary to prevent undefined error
+        if (!this.mission || !this.mapImage || !this.panelSummary) return;
 
         this.positionMarkerOnMap();
         const modeToUse = this.mission.mode || this.selectedMode;
@@ -648,8 +682,8 @@ class BuildScene extends Phaser.Scene {
         const x = map.x - displayW / 2 + ((longitude + 180) / 360) * displayW;
         const y = map.y - displayH / 2 + ((90 - latitude) / 180) * displayH;
 
-        this.mapMarker.setPosition(x, y);
-        this.mapPing.setPosition(x, y);
+        if (this.mapMarker) this.mapMarker.setPosition(x, y);
+        if (this.mapPing) this.mapPing.setPosition(x, y);
     }
 
     flashConnector(connector) {
@@ -663,6 +697,8 @@ class BuildScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        if (typeof missionPlanner === 'undefined') return;
+
         const dt = delta / 1000;
         missionPlanner.tickDistricts(dt);
         this._persistAccumulator += dt;
@@ -778,4 +814,3 @@ class BuildScene extends Phaser.Scene {
         return `${mins}:${secs}`;
     }
 }
-
