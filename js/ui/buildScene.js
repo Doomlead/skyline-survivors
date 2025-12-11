@@ -118,48 +118,96 @@ class BuildScene extends Phaser.Scene {
         this.planetContainer.add(this.mapImage);
     }
 
+    projectLatLon(lat, lon) {
+        const displayW = this.mapImage?.displayWidth || 280;
+        const displayH = this.mapImage?.displayHeight || 280;
+        const x = ((Phaser.Math.Wrap(lon, -180, 180) + 180) / 360) * displayW - displayW / 2;
+        const y = ((90 - Phaser.Math.Clamp(lat, -90, 90)) / 180) * displayH - displayH / 2;
+        return { x, y };
+    }
+
+    getDistrictCenterCoords(config) {
+        if (!config) return { lat: 0, lon: 0 };
+        if (config.center) return config.center;
+        if (config.polygon?.length) {
+            const sum = config.polygon.reduce((acc, point) => ({
+                lat: acc.lat + (point.lat || 0),
+                lon: acc.lon + (point.lon || 0)
+            }), { lat: 0, lon: 0 });
+            const count = config.polygon.length || 1;
+            return { lat: sum.lat / count, lon: sum.lon / count };
+        }
+        return { lat: 0, lon: 0 };
+    }
+
+    buildDistrictPolygon(config) {
+        const polygonPoints = (config?.polygon || []).map(point => this.projectLatLon(point.lat, point.lon));
+        if (polygonPoints.length >= 3) return polygonPoints;
+
+        const center = this.projectLatLon(this.getDistrictCenterCoords(config).lat, this.getDistrictCenterCoords(config).lon);
+        const padding = 12;
+        return [
+            { x: center.x - padding, y: center.y - padding * 0.8 },
+            { x: center.x + padding, y: center.y - padding * 0.6 },
+            { x: center.x + padding, y: center.y + padding * 0.8 },
+            { x: center.x - padding, y: center.y + padding * 0.6 }
+        ];
+    }
+
+    getPolygonCentroid(points) {
+        if (!points?.length) return { x: 0, y: 0 };
+        const sum = points.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
+        const count = points.length || 1;
+        return { x: sum.x / count, y: sum.y / count };
+    }
+
     createDistricts() {
         const sectorConfigs = missionPlanner.getDistrictConfigs();
         this.districtStates = missionPlanner.getAllDistrictStates();
 
         sectorConfigs.forEach(config => {
             const state = missionPlanner.getDistrictState(config.id);
+            const districtPoints = this.buildDistrictPolygon(config);
+            const centroid = this.getPolygonCentroid(districtPoints);
+            const flatPoints = districtPoints.flatMap(p => [p.x, p.y]);
+            const polygonShape = new Phaser.Geom.Polygon(flatPoints);
+
             const sectorGraphics = this.add.graphics({ x: 0, y: 0 });
             sectorGraphics.fillStyle(config.color, 0.16);
-            sectorGraphics.slice(0, 0, 138, Phaser.Math.DegToRad(config.start), Phaser.Math.DegToRad(config.end), false);
-            sectorGraphics.fillPath();
+            sectorGraphics.fillPoints(districtPoints, true);
             sectorGraphics.lineStyle(2, config.color, 0.5);
-            sectorGraphics.beginPath();
-            sectorGraphics.arc(0, 0, 141, Phaser.Math.DegToRad(config.start), Phaser.Math.DegToRad(config.end), false);
-            sectorGraphics.strokePath();
+            sectorGraphics.strokePoints(districtPoints, true);
+            sectorGraphics.alpha = 0.65;
 
             const glow = this.add.graphics({ x: 0, y: 0 });
-            glow.fillStyle(config.color, 0.05);
-            glow.slice(0, 0, 150, Phaser.Math.DegToRad(config.start - 4), Phaser.Math.DegToRad(config.end + 4), false);
-            glow.fillPath();
+            glow.fillStyle(config.color, 0.06);
+            glow.fillPoints(districtPoints, true);
             glow.setBlendMode(Phaser.BlendModes.ADD);
+            glow.alpha = 0.5;
 
-            const selectionArc = this.add.arc(0, 0, 142, Phaser.Math.DegToRad(config.start), Phaser.Math.DegToRad(config.end), false, 0xffffff, 0.01);
-            selectionArc.setInteractive({ useHandCursor: true });
+            const selectionArea = this.add.polygon(0, 0, flatPoints, 0xffffff, 0.01);
+            selectionArea.setInteractive(polygonShape, Phaser.Geom.Polygon.Contains);
+            selectionArea.setData('center', centroid);
+            if (selectionArea.input) selectionArea.input.cursor = 'pointer';
 
             const timerLabel = state.status === 'destroyed' ? 'DESTROYED' : this.formatTimer(state.timer);
             const timerColor = state.status === 'destroyed' ? '#f87171' : '#d1f6ff';
             const timerText = this.add.text(
-                Math.cos(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 95,
-                Math.sin(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 95,
+                centroid.x,
+                centroid.y - 14,
                 timerLabel,
                 { fontFamily: 'Orbitron', fontSize: '12px', color: timerColor }
             ).setOrigin(0.5);
 
             const nameLabel = this.add.text(
-                Math.cos(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 70,
-                Math.sin(Phaser.Math.DegToRad((config.start + config.end) / 2)) * 70,
+                centroid.x,
+                centroid.y + 6,
                 config.name,
                 { fontFamily: 'Orbitron', fontSize: '11px', color: '#c3e8ff' }
             ).setOrigin(0.5);
 
-            const district = { config, sectorGraphics, glow, selectionArc, timerText, nameLabel, state };
-            this.planetContainer.add([glow, sectorGraphics, selectionArc, timerText, nameLabel]);
+            const district = { config, sectorGraphics, glow, selectionArea, timerText, nameLabel, state };
+            this.planetContainer.add([glow, sectorGraphics, selectionArea, timerText, nameLabel]);
             this.enableDistrictInteractions(district);
             this.districts.push(district);
             if (this.mission?.district === config.id) {
@@ -188,13 +236,13 @@ class BuildScene extends Phaser.Scene {
     }
 
     enableDistrictInteractions(district) {
-        district.selectionArc.on('pointerover', () => {
+        district.selectionArea.on('pointerover', () => {
             this.tweens.add({ targets: [district.sectorGraphics, district.glow], alpha: 0.9, duration: 120 });
         });
-        district.selectionArc.on('pointerout', () => {
+        district.selectionArea.on('pointerout', () => {
             this.tweens.add({ targets: [district.sectorGraphics, district.glow], alpha: 0.5, duration: 160 });
         });
-        district.selectionArc.on('pointerdown', () => this.focusDistrict(district));
+        district.selectionArea.on('pointerdown', () => this.focusDistrict(district));
     }
 
     focusDistrict(district, skipTweens = false) {
@@ -202,9 +250,9 @@ class BuildScene extends Phaser.Scene {
             return;
         }
         this.selectedDistrict = district;
-        const centerAngle = (district.config.start + district.config.end) / 2;
+        const center = this.getDistrictCenterCoords(district.config);
         missionPlanner.updateDistrictState(district.config.id, district.state);
-        this.mission = missionPlanner.selectDistrict(district.config.id, centerAngle, district.state);
+        this.mission = missionPlanner.selectDistrict(district.config.id, center.lon, district.state);
         this.updateMissionUi();
         this.children.bringToTop(this.detailCard);
 
@@ -516,7 +564,7 @@ class BuildScene extends Phaser.Scene {
         const mode = this.mission?.mode || this.selectedMode;
         missionPlanner.selectDistrict(
             this.selectedDistrict.config.id,
-            (this.selectedDistrict.config.start + this.selectedDistrict.config.end) / 2,
+            this.getDistrictCenterCoords(this.selectedDistrict.config).lon,
             this.selectedDistrict.state
         );
         missionPlanner.setMode(mode);
@@ -602,8 +650,8 @@ class BuildScene extends Phaser.Scene {
         });
 
         if (this.selectedDistrict && this.mission?.district === this.selectedDistrict.config.id && this._persistAccumulator > 1) {
-            const angle = (this.selectedDistrict.config.start + this.selectedDistrict.config.end) / 2;
-            this.mission = missionPlanner.selectDistrict(this.selectedDistrict.config.id, angle);
+            const { lon } = this.getDistrictCenterCoords(this.selectedDistrict.config);
+            this.mission = missionPlanner.selectDistrict(this.selectedDistrict.config.id, lon);
             this.updateMissionUi();
         }
 
