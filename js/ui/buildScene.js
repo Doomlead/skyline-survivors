@@ -44,8 +44,7 @@ class BuildScene extends Phaser.Scene {
         this.createOrbitNodes(width, height, centerX, centerY);
         this.createUiOverlay(width);
         this.createMissionConsole(width, height);
-        this.createModeButtons(width);
-        this.selectMode(this.selectedMode);
+        this.updateMissionUi();
         this.updateExternalLaunchButton();
 
         this.input.keyboard.once('keydown-SPACE', () => this.launchMission());
