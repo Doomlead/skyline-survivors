@@ -1,3 +1,175 @@
+// World landmass data for 3D globe rendering
+const WORLD_DATA = {
+    northAmerica: [
+        [70, -141], [72, -150], [71, -160], [68, -166], [64, -168],
+        [60, -167], [57, -163], [55, -158], [54, -152], [53, -145],
+        [60, -140], [60, -139], [58, -137], [57, -135], [56, -132], 
+        [55, -130], [54, -130], [52, -128], [49, -125], [48, -124], 
+        [46, -124], [43, -124], [40, -124], [38, -123], [36, -122], 
+        [34, -120], [32, -117], [31, -116], [29, -114], [28, -112],
+        [26, -112], [24, -111], [23, -110], [22, -106], [20, -106], 
+        [19, -105], [18, -104], [17, -102], [16, -99], [15, -96], [15, -93],
+        [14, -91], [13, -90], [13, -88], [12, -87], [11, -85], [10, -84],
+        [9, -83], [9, -80], [8, -78], [8, -77], [9, -79], [10, -81], 
+        [11, -83], [13, -84], [15, -84], [16, -86], [18, -88], [20, -87], 
+        [21, -87], [21, -90], [23, -90], [22, -93], [21, -94], [20, -96], 
+        [19, -96], [20, -97], [22, -97], [24, -98], [26, -97], [28, -97],
+        [29, -95], [30, -94], [30, -92], [29, -90], [30, -88], [30, -86],
+        [30, -85], [29, -83], [27, -82], [25, -81], [24, -81], [25, -80],
+        [27, -80], [28, -80], [30, -81], [31, -81], [32, -80], [33, -79], 
+        [35, -76], [36, -76], [37, -76], [38, -75], [39, -74], [40, -74], 
+        [41, -71], [42, -70], [43, -70], [44, -67], [45, -67], [47, -68], 
+        [47, -70], [46, -64], [45, -61], [44, -64], [43, -66], [44, -67], 
+        [45, -64], [47, -62], [47, -59], [48, -59], [49, -58], [50, -56], 
+        [51, -56], [52, -56], [53, -57], [54, -59], [55, -60], [58, -62], 
+        [60, -64], [60, -65], [58, -67], [55, -68], [53, -67], [52, -66], 
+        [50, -64], [49, -65], [47, -70], [52, -80], [55, -82], [58, -88], 
+        [60, -90], [63, -92], [65, -90], [66, -86], [63, -82], [60, -78], 
+        [58, -77], [56, -79], [55, -80], [67, -86], [68, -90], [70, -100], 
+        [72, -110], [74, -120], [72, -130], [70, -141]
+    ],
+    eurasia: [
+        [37, -9], [38, -9], [39.5, -9], [41, -8.8], [42.5, -8.5], [43, -9],
+        [43.5, -3], [43, 3], [43, 5], [43, 7], [44, 9], [44, 12], [43.5, 13.5], 
+        [43, 15], [42, 16], [41.5, 17.5], [41, 19], [40.5, 20.5], [40, 22], 
+        [39, 23], [38, 23.5], [37, 24], [36.5, 25], [36, 26.5], [36.8, 28], 
+        [38, 28.5], [39.5, 27.5], [40.5, 27], [41.5, 28], [41, 30], [41, 32],
+        [40.5, 34], [40, 36], [39.5, 38], [39, 40], [38, 42], [37.5, 43.5], 
+        [37, 44], [36, 36], [35, 36], [34, 36], [33, 36.5], [32, 36], 
+        [31, 35.5], [30, 35], [29, 34.5], [27, 35.5], [25, 37], [23, 38.5], 
+        [20, 39.5], [18, 40.5], [16, 41.5], [14, 42.5], [12, 43], [13, 45], 
+        [14, 47], [15, 49], [16, 52], [17, 54], [18, 56], [20, 58], [22, 59],
+        [23, 59], [25, 58], [26, 57], [25.5, 55], [25, 52], [26, 51], [28, 50], 
+        [29, 49.5], [28, 48], [27, 47], [26, 47], [28, 45], [29, 47], [30.5, 48], 
+        [32, 47], [33, 45], [34, 43], [35.5, 41], [36.5, 39], [37, 38],
+        [36, 40], [34, 43], [32, 46], [30, 49], [29, 51], [28, 52], [29, 54], 
+        [27, 56], [25, 58], [26, 60], [27, 62], [28, 63], [29, 64], [30, 66], 
+        [29, 68], [27, 69], [24, 70], [22, 72], [20, 73], [18, 74], [15, 75], 
+        [12, 76], [9, 77], [8, 78], [7, 80], [8, 82], [10, 80], [13, 80], 
+        [16, 82], [19, 85], [21, 88], [22, 90], [23, 92], [22, 93], [20, 95], 
+        [18, 97], [15, 99], [12, 99], [9, 99], [7, 100], [5, 101], [3, 103], 
+        [1, 104], [2, 106], [4, 108], [6, 110], [8, 115], [10, 117], [14, 110], 
+        [18, 107], [21, 107], [23, 107], [25, 119], [28, 121], [31, 122], 
+        [34, 120], [37, 121], [39, 122], [40, 124], [41, 126], [42, 129], [43, 131],
+        [44, 135], [46, 138], [48, 140], [50, 142], [52, 143], [54, 143], 
+        [56, 140], [58, 140], [60, 143], [62, 150], [64, 160], [65, 165],
+        [66, 168], [65, 170], [64, 172], [63, 174], [62, 176], [61, 178], 
+        [60, 179], [60, -179], [61, -180], [62, -178], [63, -176], [64, -174], 
+        [65, -174], [66, -175], [67, -176], [70, 170], [72, 160], [74, 140], 
+        [76, 110], [76, 90], [74, 70], [72, 60], [70, 55], [68, 54], [66, 57],
+        [65, 24], [68, 20], [70, 26], [69, 28], [67, 26], [65, 22], [63, 18], 
+        [60, 18], [58, 22], [56, 20], [54, 19], [54, 15], [53, 18], [52, 20], 
+        [51, 23], [50, 25], [49, 27], [48, 28.5], [47, 29], [46, 28.5], 
+        [45, 28], [44, 27.5], [43, 27], [42, 27.5], [41, 28], [52, 14], 
+        [51, 10], [50, 7], [51, 4], [53, 5], [54, 7], [55, 8], [56, 9], 
+        [56, 10], [55, 11], [54, 10], [53, 8], [52, 4], [51, 3], [50, 3], 
+        [49, 0], [48, -2], [47, -2], [46, -1], [44, -2], [43, -3], [42.5, -6], 
+        [41.5, -8.5], [40, -9], [38.5, -9], [37, -9], [36.8, -7.5], [36.5, -6], 
+        [36.1, -5.4], [36.7, -4.4], [37.6, -2], [38.9, -0.8], [39.5, -0.3], 
+        [41.2, 1.8], [42.4, 3], [43, 5]
+    ],
+    southAmerica: [
+        [12, -72], [12, -70], [11, -67], [10, -65], [10, -62], [8, -60], 
+        [7, -58], [6, -57], [5, -54], [4, -52], [3, -51], [2, -50], [0, -50], 
+        [-1, -50], [-2, -44], [-3, -39], [-5, -35], [-7, -35], [-8, -35], 
+        [-10, -36], [-13, -39], [-15, -39], [-17, -39], [-20, -40], [-22, -41], 
+        [-23, -43], [-24, -46], [-26, -48], [-28, -49], [-30, -51], [-33, -53], 
+        [-35, -56], [-37, -57], [-38, -58], [-39, -62], [-41, -63], [-43, -65], 
+        [-45, -66], [-47, -66], [-49, -68], [-51, -69], [-53, -69], [-54, -69], 
+        [-55, -67], [-55, -66], [-54, -64], [-55, -65], [-56, -67], [-56, -70], 
+        [-55, -72], [-54, -72], [-52, -74], [-50, -75], [-48, -75], [-46, -75], 
+        [-44, -74], [-42, -73], [-40, -73], [-38, -74], [-36, -73], [-34, -72], 
+        [-32, -71], [-30, -71], [-28, -71], [-26, -70], [-24, -70], [-22, -70], 
+        [-20, -70], [-18, -70], [-16, -73], [-14, -76], [-12, -77], [-10, -78], 
+        [-8, -79], [-6, -81], [-4, -81], [-2, -80], [0, -80], [1, -79], [2, -78], 
+        [4, -77], [6, -77], [8, -77], [10, -75], [11, -74], [12, -72]
+    ],
+    africa: [
+        [36, -6], [35, -6], [34, -7], [32, -9], [30, -10], [28, -13], [26, -15], 
+        [24, -16], [22, -17], [20, -17], [18, -16], [16, -17], [14, -17], 
+        [12, -17], [12, -16], [11, -15], [10, -15], [9, -14], [8, -13], 
+        [7, -12], [6, -11], [5, -8], [5, -5], [5, -3], [5, 0], [6, 1], [6, 2], 
+        [5, 3], [6, 5], [5, 7], [4, 9], [3, 10], [2, 10], [1, 9], [0, 9], 
+        [-1, 9], [-2, 10], [-4, 11], [-5, 12], [-6, 12], [-8, 13], [-10, 14], 
+        [-12, 14], [-14, 12], [-16, 12], [-17, 12], [-18, 12], [-22, 14], 
+        [-25, 15], [-28, 16], [-30, 17], [-32, 18], [-34, 18], [-34, 20], 
+        [-34, 22], [-34, 26], [-33, 28], [-30, 31], [-28, 32], [-26, 33], 
+        [-24, 35], [-22, 35], [-20, 35], [-18, 38], [-16, 40], [-14, 41], 
+        [-12, 44], [-10, 40], [-8, 40], [-6, 39], [-4, 40], [-2, 41], [0, 42], 
+        [2, 42], [4, 42], [6, 43], [8, 47], [10, 51], [12, 51], [12, 48], 
+        [11, 44], [10, 43], [12, 43], [13, 43], [15, 42], [16, 40], [18, 38], 
+        [20, 37], [22, 37], [24, 35], [26, 34], [28, 34], [30, 32], [31, 32], 
+        [31, 34], [30, 33], [29, 33], [28, 34], [30, 32], [32, 25], [33, 22], 
+        [34, 20], [35, 15], [36, 11], [37, 10], [37, 9], [37, 8], [36, 6], 
+        [36, 3], [36, 0], [35, -2], [36, -5], [36, -6]
+    ],
+    australia: [
+        [-11, 131], [-12, 132], [-12, 136], [-14, 136], [-15, 130], [-14, 127], 
+        [-15, 124], [-18, 122], [-20, 119], [-22, 114], [-24, 114], [-26, 113], 
+        [-28, 114], [-30, 115], [-32, 116], [-34, 116], [-35, 117], [-35, 118], 
+        [-34, 119], [-34, 122], [-34, 127], [-33, 132], [-35, 135], [-36, 137], 
+        [-37, 140], [-39, 144], [-39, 146], [-38, 148], [-37, 150], [-35, 151], 
+        [-33, 152], [-31, 153], [-29, 153], [-27, 153], [-25, 153], [-23, 151], 
+        [-21, 149], [-19, 147], [-17, 146], [-15, 145], [-13, 143], [-11, 142], 
+        [-10, 142], [-11, 136], [-11, 131]
+    ],
+    greatBritain: [
+        [50, -5], [50, 0], [51, 1], [52, 2], [53, 0], [54, -1], [55, -2], 
+        [56, -3], [57, -2], [58, -3], [59, -3], [58, -5], [57, -6], [56, -6], 
+        [55, -5], [54, -5], [53, -4], [52, -5], [51, -5], [50, -5]
+    ],
+    ireland: [
+        [52, -10], [53, -10], [54, -10], [55, -8], [55, -6], [54, -6], 
+        [53, -6], [52, -6], [51, -9], [52, -10]
+    ],
+    iceland: [
+        [64, -22], [65, -18], [66, -16], [66, -14], [65, -14], [64, -16], 
+        [63, -18], [63, -22], [64, -24], [65, -24], [64, -22]
+    ],
+    japan: [
+        [36, 140], [37, 141], [39, 140], [41, 141], [42, 140], [41, 139], 
+        [40, 140], [38, 138], [36, 137], [35, 135], [34, 135], [33, 132], 
+        [34, 131], [35, 134], [35, 137], [36, 140]
+    ],
+    greenland: [
+        [60, -43], [62, -42], [64, -40], [66, -35], [68, -30], [70, -25], 
+        [72, -20], [74, -18], [76, -20], [78, -20], [80, -25], [82, -30], 
+        [83, -35], [83, -45], [82, -55], [80, -65], [78, -70], [76, -70], 
+        [74, -58], [72, -55], [70, -52], [68, -52], [66, -45], [64, -42], 
+        [62, -43], [60, -43]
+    ],
+    madagascar: [
+        [-12, 49], [-14, 50], [-16, 50], [-18, 49], [-20, 48], [-22, 47], 
+        [-24, 47], [-26, 45], [-24, 44], [-22, 44], [-20, 44], [-18, 44], 
+        [-16, 46], [-14, 48], [-12, 49]
+    ],
+    newZealandNorth: [
+        [-35, 173], [-36, 175], [-37, 176], [-38, 178], [-39, 177], [-41, 175], 
+        [-41, 173], [-39, 174], [-37, 175], [-36, 174], [-35, 173]
+    ],
+    newZealandSouth: [
+        [-41, 174], [-42, 172], [-44, 169], [-46, 167], [-47, 168], [-46, 170], 
+        [-44, 172], [-43, 173], [-42, 174], [-41, 174]
+    ]
+};
+
+// Land colors for continents
+const LAND_COLORS = {
+    northAmerica: { fill: 0x2d5a27, stroke: 0x1e3d1a },
+    southAmerica: { fill: 0x3d7a37, stroke: 0x2d5a27 },
+    eurasia: { fill: 0x4a7c3f, stroke: 0x3d6633 },
+    africa: { fill: 0xc4a35a, stroke: 0xa68b4a },
+    australia: { fill: 0xd4a55a, stroke: 0xb8934a },
+    greatBritain: { fill: 0x4a7c3f, stroke: 0x3d6633 },
+    ireland: { fill: 0x4a7c3f, stroke: 0x3d6633 },
+    iceland: { fill: 0x6a8c6f, stroke: 0x5a7c5f },
+    japan: { fill: 0x5a8c4f, stroke: 0x4a7c3f },
+    greenland: { fill: 0xf0f8ff, stroke: 0xe0e8ef },
+    madagascar: { fill: 0xb4934a, stroke: 0x9a7d3a },
+    newZealandNorth: { fill: 0x3d7a37, stroke: 0x2d5a27 },
+    newZealandSouth: { fill: 0x3d7a37, stroke: 0x2d5a27 }
+};
+
 class BuildMapView {
     constructor(scene) {
         this.scene = scene;
@@ -5,41 +177,77 @@ class BuildMapView {
         this.mapNodes = [];
         this.selectedDistrict = null;
         this.mapMarker = null;
-        this.mapImage = null;
         this.mapPing = null;
-        this.mapMask = null;
-        this.mapBitmapMask = null;
         this.planetContainer = null;
         this.onDistrictFocused = null;
         this.onNodeDetailsRequested = null;
         this._persistAccumulator = 0;
-        this.earthTextureKey = 'ui-earth';
+
+        // 3D Globe state
+        this.rotationX = 0.3;
+        this.rotationY = 0;
+        this.globeRadius = 140;
+        this.isDragging = false;
+        this.lastPointer = { x: 0, y: 0 };
+        this.autoRotate = true;
+        this.autoRotateSpeed = 0.002;
+        this.centerX = 0;
+        this.centerY = 0;
+
+        // Graphics layers for globe
+        this.oceanGraphics = null;
+        this.landGraphics = null;
+        this.borderGraphics = null;
+        this.gridGraphics = null;
+        this.atmosphereGraphics = null;
+        this.districtGraphics = null;
+        this.markerGraphics = null;
     }
 
     preload() {
-        this.scene.load.image('ui-earth', 'assets/Art/UI/Earth.png');
-
-        this.scene.load.on('loaderror', (file) => {
-            console.error('Failed to load:', file?.key, file?.src);
-            if (file?.key === 'ui-earth') {
-                this.earthTextureKey = 'ui-earth-fallback';
-            }
-        });
+        // No texture needed for 3D globe - it's all procedural
     }
 
     build(width, height) {
-        const centerX = width * 0.35;
-        const centerY = height / 2 + 10;
+        this.centerX = width * 0.35;
+        this.centerY = height / 2 + 10;
 
         this.createStars();
         this.createBackdrop(width, height);
 
-        this.planetContainer = this.scene.add.container(centerX, centerY);
-        this.createPlanet();
-        this.createMapGlobe();
-        this.createDistricts();
+        // Create planet container at globe center
+        this.planetContainer = this.scene.add.container(this.centerX, this.centerY);
+
+        // Create graphics layers for globe rendering
+        this.atmosphereGraphics = this.scene.add.graphics();
+        this.oceanGraphics = this.scene.add.graphics();
+        this.gridGraphics = this.scene.add.graphics();
+        this.landGraphics = this.scene.add.graphics();
+        this.borderGraphics = this.scene.add.graphics();
+        this.districtGraphics = this.scene.add.graphics();
+        this.markerGraphics = this.scene.add.graphics();
+
+        // Add graphics to container (order matters for layering)
+        this.planetContainer.add([
+            this.atmosphereGraphics,
+            this.oceanGraphics,
+            this.gridGraphics,
+            this.landGraphics,
+            this.borderGraphics,
+            this.districtGraphics,
+            this.markerGraphics
+        ]);
+
+        // Create district data (but don't render yet - that happens in renderGlobe)
+        this.initializeDistricts();
         this.createMapMarkers();
-        this.createOrbitNodes(width, height, centerX, centerY);
+        this.createOrbitNodes(width, height, this.centerX, this.centerY);
+
+        // Set up input handlers for globe rotation
+        this.setupGlobeInput();
+
+        // Initial render
+        this.renderGlobe();
     }
 
     createStars() {
@@ -77,99 +285,272 @@ class BuildMapView {
         centerGlow.setBlendMode(Phaser.BlendModes.ADD);
     }
 
-    createPlanet() {
-        const base = this.scene.add.circle(0, 0, 140, 0x0f1a3a, 1);
-        const haze = this.scene.add.circle(0, 0, 158, 0x1e9bff, 0.1);
-        const rim = this.scene.add.circle(0, 0, 148);
-        rim.setStrokeStyle(3, 0x4ade80, 0.6);
-        rim.setBlendMode(Phaser.BlendModes.ADD);
+    setupGlobeInput() {
+        // Drag to rotate
+        this.scene.input.on('pointerdown', (pointer) => {
+            const dist = Phaser.Math.Distance.Between(
+                pointer.x, pointer.y,
+                this.centerX, this.centerY
+            );
+            if (dist < this.globeRadius + 50) {
+                this.isDragging = true;
+                this.autoRotate = false;
+                this.lastPointer = { x: pointer.x, y: pointer.y };
+            }
+        });
 
-        this.planetContainer.add([haze, base, rim]);
-        this.scene.tweens.add({
-            targets: rim,
-            angle: 360,
-            duration: 8000,
-            repeat: -1,
-            ease: 'Linear'
+        this.scene.input.on('pointermove', (pointer) => {
+            if (this.isDragging) {
+                const deltaX = pointer.x - this.lastPointer.x;
+                const deltaY = pointer.y - this.lastPointer.y;
+
+                this.rotationY += deltaX * 0.005;
+                this.rotationX -= deltaY * 0.005;
+                this.rotationX = Phaser.Math.Clamp(this.rotationX, -Math.PI / 2, Math.PI / 2);
+
+                this.lastPointer = { x: pointer.x, y: pointer.y };
+            }
+        });
+
+        this.scene.input.on('pointerup', () => {
+            this.isDragging = false;
+        });
+
+        // Scroll to zoom
+        this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            const dist = Phaser.Math.Distance.Between(
+                pointer.x, pointer.y,
+                this.centerX, this.centerY
+            );
+            if (dist < this.globeRadius + 100) {
+                this.globeRadius -= deltaY * 0.1;
+                this.globeRadius = Phaser.Math.Clamp(this.globeRadius, 100, 200);
+            }
+        });
+
+        // Keyboard controls
+        this.scene.input.keyboard.on('keydown-SPACE', () => {
+            // Don't toggle auto-rotate on space if it's used for launching
         });
     }
 
-    ensureEarthTexture(targetWidth, targetHeight) {
-        const hasEarthTexture = this.scene.textures.exists('ui-earth')
-            && this.scene.textures.get('ui-earth')?.getSourceImage()?.width > 1;
-        if (hasEarthTexture) {
-            this.earthTextureKey = 'ui-earth';
-            return;
-        }
+    // 3D projection: lat/lon to screen coordinates
+    project3D(lat, lon) {
+        const latRad = lat * Math.PI / 180;
+        const lonRad = lon * Math.PI / 180;
 
-        const fallbackKey = 'ui-earth-fallback';
-        if (!this.scene.textures.exists(fallbackKey)) {
-            const g = this.scene.make.graphics({ x: 0, y: 0, add: false });
-            g.fillStyle(0x0c1e34, 1);
-            g.fillRect(0, 0, targetWidth, targetHeight);
+        let x = Math.cos(latRad) * Math.sin(lonRad);
+        let y = Math.sin(latRad);
+        let z = Math.cos(latRad) * Math.cos(lonRad);
 
-            g.fillStyle(0x163b64, 0.9);
-            g.fillEllipse(targetWidth / 2, targetHeight / 2, targetWidth * 0.9, targetHeight * 0.9);
-            g.fillStyle(0x1b7fcc, 0.45);
-            g.fillEllipse(targetWidth / 2 - 10, targetHeight / 2 - 8, targetWidth * 0.7, targetHeight * 0.65);
-            g.lineStyle(3, 0x33c0ff, 0.6);
-            g.strokeEllipse(targetWidth / 2, targetHeight / 2, targetWidth * 0.92, targetHeight * 0.92);
+        // Rotate around Y axis
+        const cosY = Math.cos(this.rotationY);
+        const sinY = Math.sin(this.rotationY);
+        let newX = x * cosY - z * sinY;
+        let newZ = x * sinY + z * cosY;
+        x = newX;
+        z = newZ;
 
-            g.generateTexture(fallbackKey, targetWidth, targetHeight);
-            g.destroy();
-        }
+        // Rotate around X axis
+        const cosX = Math.cos(this.rotationX);
+        const sinX = Math.sin(this.rotationX);
+        const newY = y * cosX - z * sinX;
+        const finalZ = y * sinX + z * cosX;
+        y = newY;
+        z = finalZ;
 
-        this.earthTextureKey = fallbackKey;
+        return {
+            x: x * this.globeRadius,
+            y: -y * this.globeRadius,
+            z: z,
+            visible: z > 0
+        };
     }
 
-    createMapGlobe() {
-        this.ensureEarthTexture(320, 320);
+    renderGlobe() {
+        // Clear all graphics
+        this.atmosphereGraphics.clear();
+        this.oceanGraphics.clear();
+        this.gridGraphics.clear();
+        this.landGraphics.clear();
+        this.borderGraphics.clear();
+        this.districtGraphics.clear();
+        this.markerGraphics.clear();
 
-        const maskCircle = this.scene.add.circle(0, 0, 142, 0xffffff, 0.02);
-        maskCircle.setVisible(false);
-        this.mapMask = maskCircle.createGeometryMask();
-        this.mapBitmapMask = maskCircle.createBitmapMask();
-
-        const glow = this.scene.add.ellipse(0, 0, 320, 320, 0x0ea5e9, 0.08);
-        glow.setBlendMode(Phaser.BlendModes.ADD);
-
-        this.mapImage = this.scene.add.image(0, 0, this.earthTextureKey);
-        this.mapImage.setDisplaySize(280, 280);
-        this.mapImage.setAlpha(0.82);
-        this.mapImage.setBlendMode(Phaser.BlendModes.NORMAL);
-        this.mapImage.setMask(this.mapBitmapMask);
-
-        const grid = this.scene.add.graphics({ x: -140, y: -140 });
-        grid.lineStyle(1, 0x22d3ee, 0.15);
-        for (let i = 0; i <= 6; i++) {
-            const x = (i / 6) * 280;
-            grid.lineBetween(x, 0, x, 280);
-        }
-        for (let j = 0; j <= 6; j++) {
-            const y = (j / 6) * 280;
-            grid.lineBetween(0, y, 280, y);
-        }
-        grid.setMask(this.mapMask);
-
-        this.districtLayer = this.scene.add.container(0, 0);
-        this.districtLayer.setMask(this.mapMask);
-
-        const terminator = this.scene.add.graphics();
-        terminator.fillStyle(0x040b1a, 0.45);
-        terminator.slice(0, 0, 150, Phaser.Math.DegToRad(45), Phaser.Math.DegToRad(225), true);
-        terminator.fillPath();
-        terminator.setBlendMode(Phaser.BlendModes.MULTIPLY);
-        terminator.setMask(this.mapMask);
-
-        this.planetContainer.add([glow, this.mapImage, grid, this.districtLayer, terminator]);
+        this.drawAtmosphere();
+        this.drawOcean();
+        this.drawGrid();
+        this.drawAllLand();
+        this.drawDistricts();
+        this.drawMarkers();
+        this.drawGlobeRim();
     }
 
-    projectLatLon(lat, lon) {
-        const displayW = this.mapImage?.displayWidth || 280;
-        const displayH = this.mapImage?.displayHeight || 280;
-        const x = ((Phaser.Math.Wrap(lon, -180, 180) + 180) / 360) * displayW - displayW / 2;
-        const y = ((90 - Phaser.Math.Clamp(lat, -90, 90)) / 180) * displayH - displayH / 2;
-        return { x, y };
+    drawAtmosphere() {
+        for (let i = 5; i > 0; i--) {
+            this.atmosphereGraphics.lineStyle(3, 0x4ade80, 0.03 * i);
+            this.atmosphereGraphics.strokeCircle(0, 0, this.globeRadius + i * 4);
+        }
+    }
+
+    drawOcean() {
+        // Main ocean
+        this.oceanGraphics.fillStyle(0x0a3d62, 1);
+        this.oceanGraphics.fillCircle(0, 0, this.globeRadius);
+
+        // Light reflection
+        this.oceanGraphics.fillStyle(0x1a5276, 0.5);
+        this.oceanGraphics.fillCircle(-this.globeRadius * 0.2, -this.globeRadius * 0.2, this.globeRadius * 0.7);
+
+        this.oceanGraphics.fillStyle(0x2874a6, 0.3);
+        this.oceanGraphics.fillCircle(-this.globeRadius * 0.3, -this.globeRadius * 0.3, this.globeRadius * 0.4);
+    }
+
+    drawGrid() {
+        this.gridGraphics.lineStyle(0.5, 0x3498db, 0.12);
+
+        // Latitude lines
+        for (let lat = -80; lat <= 80; lat += 20) {
+            this.drawLatLine(lat);
+        }
+
+        // Longitude lines
+        for (let lon = -180; lon < 180; lon += 20) {
+            this.drawLonLine(lon);
+        }
+
+        // Equator
+        this.gridGraphics.lineStyle(1, 0x22d3ee, 0.25);
+        this.drawLatLine(0);
+    }
+
+    drawLatLine(lat) {
+        const points = [];
+        for (let lon = -180; lon <= 180; lon += 5) {
+            const p = this.project3D(lat, lon);
+            if (p.visible) {
+                points.push(p);
+            } else if (points.length > 1) {
+                this.strokePoints(points, this.gridGraphics);
+                points.length = 0;
+            } else {
+                points.length = 0;
+            }
+        }
+        if (points.length > 1) this.strokePoints(points, this.gridGraphics);
+    }
+
+    drawLonLine(lon) {
+        const points = [];
+        for (let lat = -90; lat <= 90; lat += 5) {
+            const p = this.project3D(lat, lon);
+            if (p.visible) {
+                points.push(p);
+            } else if (points.length > 1) {
+                this.strokePoints(points, this.gridGraphics);
+                points.length = 0;
+            } else {
+                points.length = 0;
+            }
+        }
+        if (points.length > 1) this.strokePoints(points, this.gridGraphics);
+    }
+
+    strokePoints(points, graphics) {
+        if (points.length < 2) return;
+        graphics.beginPath();
+        graphics.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+            graphics.lineTo(points[i].x, points[i].y);
+        }
+        graphics.strokePath();
+    }
+
+    drawAllLand() {
+        // Sort landmasses by average Z for proper depth ordering
+        const landMasses = Object.entries(WORLD_DATA).map(([name, coords]) => {
+            const projected = coords.map(([lat, lon]) => this.project3D(lat, lon));
+            const avgZ = projected.reduce((sum, p) => sum + p.z, 0) / projected.length;
+            return { name, coords, projected, avgZ };
+        }).sort((a, b) => a.avgZ - b.avgZ);
+
+        for (const { name, projected } of landMasses) {
+            const colors = LAND_COLORS[name] || { fill: 0x2d5a27, stroke: 0x1e3d1a };
+            this.drawLandMass(projected, colors);
+        }
+    }
+
+    drawLandMass(projectedPoints, colors) {
+        const visiblePoints = projectedPoints.filter(p => p.visible);
+        if (visiblePoints.length < 3) return;
+
+        // Find continuous visible segments
+        const segments = [];
+        let current = [];
+
+        for (let i = 0; i < projectedPoints.length; i++) {
+            const p = projectedPoints[i];
+            if (p.visible) {
+                current.push(p);
+            } else {
+                if (current.length > 0) {
+                    segments.push([...current]);
+                    current = [];
+                }
+            }
+        }
+        if (current.length > 0) segments.push(current);
+
+        // Connect first and last segments if both end visible
+        if (segments.length > 1 &&
+            projectedPoints[0].visible &&
+            projectedPoints[projectedPoints.length - 1].visible) {
+            const first = segments.shift();
+            const last = segments[segments.length - 1];
+            segments[segments.length - 1] = [...last, ...first];
+        }
+
+        for (const segment of segments) {
+            if (segment.length < 3) continue;
+
+            // Fill
+            this.landGraphics.fillStyle(colors.fill, 0.9);
+            this.landGraphics.beginPath();
+            this.landGraphics.moveTo(segment[0].x, segment[0].y);
+            for (let i = 1; i < segment.length; i++) {
+                this.landGraphics.lineTo(segment[i].x, segment[i].y);
+            }
+            this.landGraphics.closePath();
+            this.landGraphics.fillPath();
+
+            // Border
+            this.borderGraphics.lineStyle(1.2, colors.stroke, 0.9);
+            this.borderGraphics.beginPath();
+            this.borderGraphics.moveTo(segment[0].x, segment[0].y);
+            for (let i = 1; i < segment.length; i++) {
+                this.borderGraphics.lineTo(segment[i].x, segment[i].y);
+            }
+            this.borderGraphics.closePath();
+            this.borderGraphics.strokePath();
+        }
+    }
+
+    drawGlobeRim() {
+        this.atmosphereGraphics.lineStyle(2, 0x0ea5e9, 0.6);
+        this.atmosphereGraphics.strokeCircle(0, 0, this.globeRadius);
+    }
+
+    // District management
+    initializeDistricts() {
+        if (typeof missionPlanner === 'undefined') return;
+
+        const sectorConfigs = missionPlanner.getDistrictConfigs();
+        this.districtStates = missionPlanner.getAllDistrictStates();
+
+        sectorConfigs.forEach(config => {
+            const state = missionPlanner.getDistrictState(config.id);
+            this.districts.push({ config, state });
+        });
     }
 
     getDistrictCenterCoords(config) {
@@ -186,135 +567,134 @@ class BuildMapView {
         return { lat: 0, lon: 0 };
     }
 
-    buildDistrictPolygon(config) {
-        const polygonPoints = (config?.polygon || []).map(point => this.projectLatLon(point.lat, point.lon));
-        if (polygonPoints.length >= 3) return polygonPoints;
+    drawDistricts() {
+        if (!this.districts.length) return;
 
-        const center = this.projectLatLon(this.getDistrictCenterCoords(config).lat, this.getDistrictCenterCoords(config).lon);
-        const padding = 12;
-        return [
-            { x: center.x - padding, y: center.y - padding * 0.8 },
-            { x: center.x + padding, y: center.y - padding * 0.6 },
-            { x: center.x + padding, y: center.y + padding * 0.8 },
-            { x: center.x - padding, y: center.y + padding * 0.6 }
-        ];
-    }
+        this.districts.forEach(district => {
+            const center = this.getDistrictCenterCoords(district.config);
+            const projected = this.project3D(center.lat, center.lon);
 
-    getPolygonCentroid(points) {
-        if (!points?.length) return { x: 0, y: 0 };
-        const sum = points.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
-        const count = points.length || 1;
-        return { x: sum.x / count, y: sum.y / count };
-    }
+            if (!projected.visible) return;
 
-    createDistricts() {
-        if (typeof missionPlanner === 'undefined') return;
+            const state = district.state;
+            const isSelected = this.selectedDistrict === district;
+            const isDestroyed = state.status === 'destroyed';
 
-        const sectorConfigs = missionPlanner.getDistrictConfigs();
-        this.districtStates = missionPlanner.getAllDistrictStates();
+            // District marker circle
+            const baseRadius = 8;
+            const radius = isSelected ? baseRadius * 1.3 : baseRadius;
+            const alpha = isDestroyed ? 0.4 : 0.8;
 
-        sectorConfigs.forEach(config => {
-            const state = missionPlanner.getDistrictState(config.id);
-            const districtPoints = this.buildDistrictPolygon(config);
-            const centroid = this.getPolygonCentroid(districtPoints);
-            const flatPoints = districtPoints.flatMap(p => [p.x, p.y]);
-            const polygonShape = new Phaser.Geom.Polygon(flatPoints);
+            // Glow
+            this.districtGraphics.fillStyle(district.config.color, alpha * 0.3);
+            this.districtGraphics.fillCircle(projected.x, projected.y, radius * 2);
 
-            const sectorGraphics = this.scene.add.graphics({ x: 0, y: 0 });
-            sectorGraphics.fillStyle(config.color, 0.16);
-            sectorGraphics.fillPoints(districtPoints, true);
-            sectorGraphics.lineStyle(2, config.color, 0.5);
-            sectorGraphics.strokePoints(districtPoints, true);
-            sectorGraphics.alpha = 0.65;
+            // Main circle
+            this.districtGraphics.fillStyle(district.config.color, alpha);
+            this.districtGraphics.fillCircle(projected.x, projected.y, radius);
 
-            const glow = this.scene.add.graphics({ x: 0, y: 0 });
-            glow.fillStyle(config.color, 0.06);
-            glow.fillPoints(districtPoints, true);
-            glow.setBlendMode(Phaser.BlendModes.ADD);
-            glow.alpha = 0.5;
+            // Border
+            this.districtGraphics.lineStyle(isSelected ? 2.5 : 1.5, 0xffffff, alpha * 0.8);
+            this.districtGraphics.strokeCircle(projected.x, projected.y, radius);
 
-            const selectionArea = this.scene.add.polygon(0, 0, flatPoints, 0xffffff, 0.01);
-            selectionArea.setInteractive(polygonShape, Phaser.Geom.Polygon.Contains);
-            selectionArea.setData('center', centroid);
-            if (selectionArea.input) selectionArea.input.cursor = 'pointer';
-
-            const timerLabel = state.status === 'destroyed' ? 'DESTROYED' : this.scene.formatTimer(state.timer);
-            const timerColor = state.status === 'destroyed' ? '#f87171' : '#d1f6ff';
-            const timerText = this.scene.add.text(
-                centroid.x,
-                centroid.y - 14,
-                timerLabel,
-                { fontFamily: 'Orbitron', fontSize: '12px', color: timerColor }
-            ).setOrigin(0.5);
-
-            const nameLabel = this.scene.add.text(
-                centroid.x,
-                centroid.y + 6,
-                config.name,
-                { fontFamily: 'Orbitron', fontSize: '11px', color: '#c3e8ff' }
-            ).setOrigin(0.5);
-
-            const district = { config, sectorGraphics, glow, selectionArea, timerText, nameLabel, state };
-            (this.districtLayer || this.planetContainer).add([glow, sectorGraphics, selectionArea, timerText, nameLabel]);
-            this.enableDistrictInteractions(district);
-            this.districts.push(district);
+            // Store projected position for hit testing
+            district.projectedX = projected.x;
+            district.projectedY = projected.y;
+            district.projectedRadius = radius * 2; // Hit area
         });
+
+        // Set up click detection for districts
+        this.setupDistrictInteraction();
+    }
+
+    setupDistrictInteraction() {
+        // Remove previous listener if exists
+        if (this._districtClickHandler) {
+            this.scene.input.off('pointerdown', this._districtClickHandler);
+        }
+
+        this._districtClickHandler = (pointer) => {
+            // Convert pointer to container-local coordinates
+            const localX = pointer.x - this.centerX;
+            const localY = pointer.y - this.centerY;
+
+            // Check if we clicked on a district
+            for (const district of this.districts) {
+                if (district.projectedX === undefined) continue;
+
+                const dist = Phaser.Math.Distance.Between(
+                    localX, localY,
+                    district.projectedX, district.projectedY
+                );
+
+                if (dist < district.projectedRadius) {
+                    this.focusDistrict(district);
+                    return;
+                }
+            }
+        };
+
+        this.scene.input.on('pointerdown', this._districtClickHandler);
+    }
+
+    drawMarkers() {
+        if (!this.selectedDistrict) return;
+
+        const center = this.getDistrictCenterCoords(this.selectedDistrict.config);
+        const projected = this.project3D(center.lat, center.lon);
+
+        if (!projected.visible) return;
+
+        // Ping effect
+        const pingRadius = 12 + Math.sin(this.scene.time.now / 200) * 4;
+        this.markerGraphics.fillStyle(0xff8fab, 0.3);
+        this.markerGraphics.fillCircle(projected.x, projected.y, pingRadius);
+
+        // Main marker
+        this.markerGraphics.fillStyle(0xff4d6d, 1);
+        this.markerGraphics.fillCircle(projected.x, projected.y, 5);
+        this.markerGraphics.lineStyle(2, 0xffffff, 0.9);
+        this.markerGraphics.strokeCircle(projected.x, projected.y, 5);
     }
 
     createMapMarkers() {
-        this.mapMarker = this.scene.add.circle(0, 0, 5, 0xff4d6d, 1);
-        this.mapMarker.setStrokeStyle(2, 0xffffff, 0.8);
-        this.mapMarker.setDepth(4);
-        if (this.mapMask) this.mapMarker.setMask(this.mapMask);
-
-        this.mapPing = this.scene.add.circle(0, 0, 8, 0xff8fab, 0.35);
-        this.mapPing.setBlendMode(Phaser.BlendModes.ADD);
-        this.mapPing.setDepth(3);
-        if (this.mapMask) this.mapPing.setMask(this.mapMask);
-        this.scene.tweens.add({
-            targets: this.mapPing,
-            scale: { from: 1, to: 2 },
-            alpha: { from: 0.5, to: 0 },
-            duration: 900,
-            repeat: -1
-        });
-
-        this.planetContainer.add([this.mapPing, this.mapMarker]);
-    }
-
-    enableDistrictInteractions(district) {
-        district.selectionArea.on('pointerover', () => {
-            this.scene.tweens.add({ targets: [district.sectorGraphics, district.glow], alpha: 0.9, duration: 120 });
-        });
-        district.selectionArea.on('pointerout', () => {
-            this.scene.tweens.add({ targets: [district.sectorGraphics, district.glow], alpha: 0.5, duration: 160 });
-        });
-        district.selectionArea.on('pointerdown', () => this.focusDistrict(district));
+        // Markers are now drawn in drawMarkers() as part of the render loop
     }
 
     focusDistrict(district, skipTweens = false) {
-        if (this.selectedDistrict === district) {
-            return;
-        }
+        if (this.selectedDistrict === district) return;
+
         this.selectedDistrict = district;
         this.onDistrictFocused?.(district);
 
+        // Rotate globe to center on district
+        const center = this.getDistrictCenterCoords(district.config);
+        const targetRotY = -center.lon * Math.PI / 180;
+        const targetRotX = center.lat * Math.PI / 180 * 0.5;
+
         if (!skipTweens) {
             this.scene.tweens.add({
-                targets: this.scene.cameras.main,
-                zoom: 1.12,
-                duration: 240,
-                yoyo: true,
+                targets: this,
+                rotationY: targetRotY,
+                rotationX: targetRotX,
+                duration: 600,
                 ease: 'Sine.easeInOut'
             });
+
             this.scene.tweens.add({
-                targets: this.planetContainer,
-                scale: 1.05,
-                duration: 200,
+                targets: this.scene.cameras.main,
+                zoom: 1.08,
+                duration: 300,
                 yoyo: true,
                 ease: 'Sine.easeOut'
             });
         }
+
+        this.autoRotate = false;
+    }
+
+    enableDistrictInteractions(district) {
+        // Handled in setupDistrictInteraction
     }
 
     createOrbitNodes(width, height, centerX, centerY) {
@@ -408,21 +788,18 @@ class BuildMapView {
         missionPlanner.tickDistricts(dt);
         this._persistAccumulator += dt;
 
+        // Auto-rotate globe
+        if (this.autoRotate && !this.isDragging) {
+            this.rotationY += this.autoRotateSpeed;
+        }
+
+        // Re-render the globe
+        this.renderGlobe();
+
+        // Update district states
         this.districts.forEach(district => {
             const state = missionPlanner.getDistrictState(district.config.id);
             district.state = state;
-            if (state.status === 'destroyed') {
-                district.timerText.setText('DESTROYED');
-                district.timerText.setColor('#f87171');
-                district.nameLabel.setColor('#fca5a5');
-                district.glow.alpha = 0.02;
-            } else {
-                district.timerText.setText(this.scene.formatTimer(state.timer));
-                district.timerText.setColor(state.timer < 30 ? '#f97316' : '#d1f6ff');
-                district.nameLabel.setColor(state.timer < 30 ? '#fcd34d' : '#c3e8ff');
-                const pulse = 0.5 + Math.abs(Math.sin(time / 400)) * 0.4;
-                district.glow.alpha = 0.05 + pulse * 0.08;
-            }
         });
 
         if (this.selectedDistrict && mission?.district === this.selectedDistrict.config.id && this._persistAccumulator > 1) {
@@ -430,6 +807,7 @@ class BuildMapView {
             mission = missionPlanner.selectDistrict(this.selectedDistrict.config.id, lon);
         }
 
+        // Update orbit nodes
         this.mapNodes.forEach(node => {
             const stored = missionPlanner.getMapNodeState(node.id) || node.state;
             node.state = stored;
@@ -479,17 +857,10 @@ class BuildMapView {
     }
 
     positionMarkerOnMap(mission) {
-        if (!this.mapImage || !mission) return;
-        const map = this.mapImage;
-        const { longitude, latitude } = mission;
-        const displayW = map.displayWidth;
-        const displayH = map.displayHeight;
-
-        const x = map.x - displayW / 2 + ((longitude + 180) / 360) * displayW;
-        const y = map.y - displayH / 2 + ((90 - latitude) / 180) * displayH;
-
-        if (this.mapMarker) this.mapMarker.setPosition(x, y);
-        if (this.mapPing) this.mapPing.setPosition(x, y);
+        // Markers are now positioned in drawMarkers() based on 3D projection
+        if (mission && this.selectedDistrict) {
+            // Update selected district if mission has a district
+        }
     }
 }
 
