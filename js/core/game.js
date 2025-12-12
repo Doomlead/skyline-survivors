@@ -26,6 +26,49 @@ function preload() {
     createGraphics(this);
 }
 
+function setupWrapCamera(scene) {
+    const mainCam = scene.cameras.main;
+
+    if (wrapCamera) {
+        wrapCamera.destroy();
+    }
+
+    wrapCamera = scene.cameras.add(0, 0, mainCam.width, mainCam.height);
+    wrapCamera.setZoom(mainCam.zoom);
+    wrapCamera.setBackgroundColor('rgba(0,0,0,0)');
+    wrapCamera.setVisible(false);
+}
+
+function updateWrapCamera(scene) {
+    if (!wrapCamera || !player) return;
+
+    const mainCam = scene.cameras.main;
+    const worldWidth = CONFIG.worldWidth;
+    const camWidth = mainCam.width;
+    const camHeight = mainCam.height;
+
+    // Keep wrap camera aligned with main camera sizing/zoom in case of resize
+    wrapCamera.setSize(camWidth, camHeight);
+    wrapCamera.setZoom(mainCam.zoom);
+
+    const viewLeft = player.x - camWidth / 2;
+    const viewRight = player.x + camWidth / 2;
+
+    if (viewLeft < 0) {
+        const width = Math.min(-viewLeft, camWidth);
+        wrapCamera.setViewport(0, 0, width, camHeight);
+        wrapCamera.setScroll(viewLeft + worldWidth, mainCam.scrollY);
+        wrapCamera.setVisible(true);
+    } else if (viewRight > worldWidth) {
+        const width = Math.min(viewRight - worldWidth, camWidth);
+        wrapCamera.setViewport(camWidth - width, 0, width, camHeight);
+        wrapCamera.setScroll(viewLeft - worldWidth, mainCam.scrollY);
+        wrapCamera.setVisible(true);
+    } else {
+        wrapCamera.setVisible(false);
+    }
+}
+
 function create() {
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
@@ -81,6 +124,10 @@ function create() {
             particleManager = null;
         }
         destroyParallax();
+        if (wrapCamera) {
+            wrapCamera.destroy();
+            wrapCamera = null;
+        }
     });
 
     // Physics overlaps
@@ -102,6 +149,8 @@ function create() {
 
     // Initialize parallax tracking AFTER player is created
     initParallaxTracking(player.x);
+
+    setupWrapCamera(this);
 }
 
 function update(time, delta) {
@@ -143,6 +192,8 @@ function update(time, delta) {
 
     // Update parallax backgrounds
     updateParallax(player.x);
+
+    updateWrapCamera(this);
 
     updateEnemies(this, time, delta);
     updateProjectiles(this);
