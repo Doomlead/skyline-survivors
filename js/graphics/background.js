@@ -2,7 +2,7 @@
 // background.js - Procedural Background Generation with Seamless Parallax
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Foreground depth base - all game objects should be above this
+// Foreground depth base - gameplay sprites should stay at or above this; background layers remain below
 var FG_DEPTH_BASE = 100;
 
 // ------------------------

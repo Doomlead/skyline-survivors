@@ -51,7 +51,7 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     const maxY = groundLevel - terrainVariation - minClearance;
     const spawnY = Phaser.Math.Clamp(y, topLimit, Math.max(topLimit + 10, maxY));
     const enemy = enemies.create(clampedX, spawnY, type);
-    enemy.setDepth(FG_DEPTH_BASE + 2);
+    enemy.setDepth(FG_DEPTH_BASE + 2); // Gameplay sprites stay above the base foreground depth
 
     const scale = getEnemyScale(type);
     enemy.setScale(scale);
