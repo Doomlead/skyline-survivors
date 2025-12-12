@@ -40,31 +40,25 @@ function setupWrapCamera(scene) {
 }
 
 function updateWrapCamera(scene) {
-    if (!wrapCamera || !player) return;
+    if (!wrapCamera) return;
 
     const mainCam = scene.cameras.main;
     const worldWidth = CONFIG.worldWidth;
     const camWidth = mainCam.width;
     const camHeight = mainCam.height;
-    const zoom = mainCam.zoom;
 
-    // Keep wrap camera aligned with main camera sizing/zoom in case of resize
-    wrapCamera.setSize(camWidth, camHeight);
-    wrapCamera.setZoom(zoom);
-
-    const view = mainCam.worldView;
-    const overlapLeft = Math.max(0, -view.x);
-    const overlapRight = Math.max(0, view.right - worldWidth);
+    const overlapLeft = Math.max(0, -mainCam.scrollX);
+    const overlapRight = Math.max(0, (mainCam.scrollX + camWidth) - worldWidth);
 
     if (overlapLeft > 0) {
-        const viewportWidth = Math.min(overlapLeft * zoom, camWidth);
-        wrapCamera.setViewport(0, 0, viewportWidth, camHeight);
-        wrapCamera.setScroll(view.x + worldWidth, mainCam.scrollY);
+        const width = Math.min(overlapLeft, camWidth);
+        wrapCamera.setViewport(0, 0, width, camHeight);
+        wrapCamera.setScroll(mainCam.scrollX + worldWidth, mainCam.scrollY);
         wrapCamera.setVisible(true);
     } else if (overlapRight > 0) {
-        const viewportWidth = Math.min(overlapRight * zoom, camWidth);
-        wrapCamera.setViewport(camWidth - viewportWidth, 0, viewportWidth, camHeight);
-        wrapCamera.setScroll(view.x - worldWidth, mainCam.scrollY);
+        const width = Math.min(overlapRight, camWidth);
+        wrapCamera.setViewport(camWidth - width, 0, width, camHeight);
+        wrapCamera.setScroll(mainCam.scrollX - worldWidth, mainCam.scrollY);
         wrapCamera.setVisible(true);
     } else {
         wrapCamera.setVisible(false);
