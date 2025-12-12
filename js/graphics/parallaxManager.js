@@ -29,11 +29,7 @@ class ParallaxManager {
 
             tileSprite.setOrigin(0, 0);
             tileSprite.setScrollFactor(0);
-
-            // Keep all background layers behind gameplay objects. Gameplay sprites
-            // default to depth 0, so give parallax layers a negative offset while
-            // preserving their relative ordering.
-            tileSprite.setDepth(-1000 + layerConfig.depth);
+            tileSprite.setDepth(layerConfig.depth);
 
             const scaleY = camHeight / texHeight;
             tileSprite.setScale(1, scaleY);

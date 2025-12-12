@@ -2,8 +2,6 @@
 // Main game scene and initialization
 // ------------------------
 
-// Sets up per-run state including humans, boss queue, timers, and kicks off the
-// first wave or survival timer.
 function initializeGame(scene) {
     for (let i = 0; i < gameState.humans; i++) {
         spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
@@ -24,23 +22,25 @@ function initializeGame(scene) {
     updateUI();
 }
 
-// Loads all graphics before the scene is created.
 function preload() {
     createGraphics(this);
 }
 
-
-// Bootstraps the Phaser scene: world bounds, entities, input, UI, audio, and initial state.
 function create() {
+    // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
+    
+    // Generate backgrounds FIRST
     createBackground(this);
 
+    // Player - MUST have depth above backgrounds
     player = this.physics.add.sprite(100, 300, 'player');
     player.setCollideWorldBounds(false);
     player.setScale(1.25);
     player.body.setSize(25, 10);
-    player.setDepth(1000);
+    player.setDepth(FG_DEPTH_BASE + 10); // Above all backgrounds
 
+    // Game object groups
     enemies = this.physics.add.group();
     projectiles = this.physics.add.group();
     enemyProjectiles = this.physics.add.group();
@@ -52,6 +52,7 @@ function create() {
 
     particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
 
+    // Input
     cursors = this.input.keyboard.createCursorKeys();
     spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
@@ -69,20 +70,20 @@ function create() {
         }
     };
     this.input.keyboard.on('keydown-R', this._restartHandler);
+    
     this.events.once('shutdown', () => {
         if (this._restartHandler) {
             this.input.keyboard.off('keydown-R', this._restartHandler);
             this._restartHandler = null;
         }
-
         if (particleManager) {
             particleManager.destroy();
             particleManager = null;
         }
-
         destroyParallax();
     });
 
+    // Physics overlaps
     this.physics.add.overlap(projectiles, enemies, hitEnemy, null, this);
     this.physics.add.overlap(projectiles, bosses, hitBoss, null, this);
     this.physics.add.overlap(player, enemies, playerHitEnemy, null, this);
@@ -99,12 +100,10 @@ function create() {
     initializeGame(this);
     this.gameScene = this;
 
+    // Initialize parallax tracking AFTER player is created
     initParallaxTracking(player.x);
 }
 
-
-// Core game loop that runs every frame to process input, enemies, projectiles,
-// timers, and HUD updates.
 function update(time, delta) {
     if (gameState.gameOver) {
         if (Phaser.Input.Keyboard.JustDown(rKey)) {
@@ -130,21 +129,19 @@ function update(time, delta) {
     if (particleManager) {
         particleManager.update(delta);
     }
-    
-    // -- Seamless Infinite Loop Logic --
 
-    // 1. Wrap Player Physics
+    // Wrap player
     if (player.x < 0) {
         player.x += CONFIG.worldWidth;
     } else if (player.x >= CONFIG.worldWidth) {
         player.x -= CONFIG.worldWidth;
     }
 
-    // 2. Manual Camera Positioning (Rigid Lock to match retro feel)
+    // Camera positioning
     const mainCam = this.cameras.main;
     mainCam.scrollX = player.x - mainCam.width / 2;
 
-    // 3. Parallax backgrounds driven by accumulated scroll
+    // Update parallax backgrounds
     updateParallax(player.x);
 
     updateEnemies(this, time, delta);
@@ -172,14 +169,13 @@ function update(time, delta) {
     updateUI();
 
     if (!gameState.gameOver && typeof gameState.nextExtraLife === 'number') {
-        // Extra life thresholds: 10k, 30k, 70k, 150k, ...
-        // Recurrence: next = next * 2 + 10000
         while (gameState.score >= gameState.nextExtraLife) {
             gameState.lives++;
             gameState.nextExtraLife = gameState.nextExtraLife * 2 + 10000;
         }
     }
 }
+
 
 // ------------------------
 // Phaser game setup
