@@ -1,25 +1,44 @@
 // ------------------------
-// Background - DETAILED Post-Apocalyptic Cityscape
+// Background - Procedural textures with parallax tiling
 // ------------------------
 
+let backgroundGeneratorInstance;
+let parallaxManagerInstance;
+
 function createBackground(scene) {
-    const rng = createBackgroundRNG(CONFIG.backgroundSeed || 1337);
-    const random = () => rng();
-    const { withWrappedX } = createBackgroundWrapHelpers(CONFIG);
-    const groundY = CONFIG.worldHeight - 80;
-    const EXTENDED_WIDTH = CONFIG.worldWidth + 200;
+    const generatorConfig = {
+        worldWidth: CONFIG.worldWidth,
+        worldHeight: CONFIG.worldHeight,
+        width: CONFIG.width,
+        height: CONFIG.height,
+        backgroundSeed: CONFIG.backgroundSeed || 1337,
+    };
 
-    createSkyAndCityLayers(scene, {
-        random,
-        withWrappedX,
-        extendedWidth: EXTENDED_WIDTH,
-    });
+    backgroundGeneratorInstance = new BackgroundGenerator(scene, generatorConfig);
+    backgroundGeneratorInstance.generateAllTextures();
 
-    createForegroundTerrain(scene, {
-        random,
-        withWrappedX,
-        groundY,
-    });
+    parallaxManagerInstance = new ParallaxManager(scene, generatorConfig);
+    parallaxManagerInstance.createLayers();
 
-    scene.groundLevel = groundY;
+    scene.groundLevel = generatorConfig.worldHeight - 80;
+}
+
+function initParallaxTracking(playerX) {
+    if (parallaxManagerInstance) {
+        parallaxManagerInstance.initTracking(playerX);
+    }
+}
+
+function updateParallax(playerX) {
+    if (parallaxManagerInstance) {
+        parallaxManagerInstance.update(playerX);
+    }
+}
+
+function destroyParallax() {
+    if (parallaxManagerInstance) {
+        parallaxManagerInstance.destroy();
+        parallaxManagerInstance = null;
+    }
+    backgroundGeneratorInstance = null;
 }
