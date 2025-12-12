@@ -26,6 +26,45 @@ function preload() {
     createGraphics(this);
 }
 
+function setupWrapCamera(scene) {
+    const mainCam = scene.cameras.main;
+
+    if (wrapCamera) {
+        wrapCamera.destroy();
+    }
+
+    wrapCamera = scene.cameras.add(0, 0, mainCam.width, mainCam.height);
+    wrapCamera.setZoom(mainCam.zoom);
+    wrapCamera.setBackgroundColor('rgba(0,0,0,0)');
+    wrapCamera.setVisible(false);
+}
+
+function updateWrapCamera(scene) {
+    if (!wrapCamera) return;
+
+    const mainCam = scene.cameras.main;
+    const worldWidth = CONFIG.worldWidth;
+    const camWidth = mainCam.width;
+    const camHeight = mainCam.height;
+
+    const overlapLeft = Math.max(0, -mainCam.scrollX);
+    const overlapRight = Math.max(0, (mainCam.scrollX + camWidth) - worldWidth);
+
+    if (overlapLeft > 0) {
+        const width = Math.min(overlapLeft, camWidth);
+        wrapCamera.setViewport(0, 0, width, camHeight);
+        wrapCamera.setScroll(mainCam.scrollX + worldWidth, mainCam.scrollY);
+        wrapCamera.setVisible(true);
+    } else if (overlapRight > 0) {
+        const width = Math.min(overlapRight, camWidth);
+        wrapCamera.setViewport(camWidth - width, 0, width, camHeight);
+        wrapCamera.setScroll(mainCam.scrollX - worldWidth, mainCam.scrollY);
+        wrapCamera.setVisible(true);
+    } else {
+        wrapCamera.setVisible(false);
+    }
+}
+
 function create() {
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
@@ -81,6 +120,10 @@ function create() {
             particleManager = null;
         }
         destroyParallax();
+        if (wrapCamera) {
+            wrapCamera.destroy();
+            wrapCamera = null;
+        }
     });
 
     // Physics overlaps
@@ -102,6 +145,8 @@ function create() {
 
     // Initialize parallax tracking AFTER player is created
     initParallaxTracking(player.x);
+
+    setupWrapCamera(this);
 }
 
 function update(time, delta) {
@@ -143,6 +188,8 @@ function update(time, delta) {
 
     // Update parallax backgrounds
     updateParallax(player.x);
+
+    updateWrapCamera(this);
 
     updateEnemies(this, time, delta);
     updateProjectiles(this);
