@@ -72,12 +72,12 @@ function create() {
     // Generate backgrounds FIRST
     createBackground(this);
 
-    // Player - MUST have depth above backgrounds
+    // Player - keep at/above FG_DEPTH_BASE so gameplay renders over backgrounds
     player = this.physics.add.sprite(100, 300, 'player');
     player.setCollideWorldBounds(false);
     player.setScale(1.25);
     player.body.setSize(25, 10);
-    player.setDepth(FG_DEPTH_BASE + 10); // Above all backgrounds
+    player.setDepth(FG_DEPTH_BASE + 10); // Anchor main sprite well above the base foreground depth
 
     // Game object groups
     enemies = this.physics.add.group();

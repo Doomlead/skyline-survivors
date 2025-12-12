@@ -9,7 +9,7 @@ function spawnPowerUp(scene, x, y) {
     const type = Phaser.Utils.Array.GetRandom(powerUpPool);
     const powerUp = powerUps.create(x, y, 'powerup_' + type);
     powerUp.setScale(1.25);
-    powerUp.setDepth(FG_DEPTH_BASE + 3);
+    powerUp.setDepth(FG_DEPTH_BASE + 3); // Keep collectibles on the gameplay layer or above
     powerUp.powerUpType = type;
     powerUp.birthTime = scene.time.now;
     scene.tweens.add({
