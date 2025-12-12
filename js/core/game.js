@@ -30,13 +30,22 @@ function setupWrapCamera(scene) {
     const mainCam = scene.cameras.main;
 
     if (wrapCamera) {
-        wrapCamera.destroy();
+        wrapCamera.left?.destroy();
+        wrapCamera.right?.destroy();
     }
 
-    wrapCamera = scene.cameras.add(0, 0, mainCam.width, mainCam.height);
-    wrapCamera.setZoom(mainCam.zoom);
-    wrapCamera.setBackgroundColor('rgba(0,0,0,0)');
-    wrapCamera.setVisible(false);
+    const createWrapCam = () => {
+        const cam = scene.cameras.add(0, 0, mainCam.width, mainCam.height);
+        cam.setZoom(mainCam.zoom);
+        cam.setBackgroundColor('rgba(0,0,0,0)');
+        cam.setVisible(false);
+        return cam;
+    };
+
+    wrapCamera = {
+        left: createWrapCam(),
+        right: createWrapCam()
+    };
 }
 
 function updateWrapCamera(scene) {
@@ -50,18 +59,31 @@ function updateWrapCamera(scene) {
     const overlapLeft = Math.max(0, -mainCam.scrollX);
     const overlapRight = Math.max(0, (mainCam.scrollX + camWidth) - worldWidth);
 
-    if (overlapLeft > 0) {
-        const width = Math.min(overlapLeft, camWidth);
-        wrapCamera.setViewport(0, 0, width, camHeight);
-        wrapCamera.setScroll(mainCam.scrollX + worldWidth, mainCam.scrollY);
-        wrapCamera.setVisible(true);
-    } else if (overlapRight > 0) {
-        const width = Math.min(overlapRight, camWidth);
-        wrapCamera.setViewport(camWidth - width, 0, width, camHeight);
-        wrapCamera.setScroll(mainCam.scrollX - worldWidth, mainCam.scrollY);
-        wrapCamera.setVisible(true);
-    } else {
-        wrapCamera.setVisible(false);
+    const leftCamera = wrapCamera.left;
+    const rightCamera = wrapCamera.right;
+
+    if (leftCamera) {
+        if (overlapLeft > 0) {
+            const width = Math.min(overlapLeft, camWidth);
+            leftCamera.setViewport(0, 0, width, camHeight);
+            leftCamera.setScroll(mainCam.scrollX + worldWidth, mainCam.scrollY);
+            leftCamera.setZoom(mainCam.zoom);
+            leftCamera.setVisible(true);
+        } else {
+            leftCamera.setVisible(false);
+        }
+    }
+
+    if (rightCamera) {
+        if (overlapRight > 0) {
+            const width = Math.min(overlapRight, camWidth);
+            rightCamera.setViewport(camWidth - width, 0, width, camHeight);
+            rightCamera.setScroll(mainCam.scrollX - worldWidth, mainCam.scrollY);
+            rightCamera.setZoom(mainCam.zoom);
+            rightCamera.setVisible(true);
+        } else {
+            rightCamera.setVisible(false);
+        }
     }
 }
 
@@ -121,7 +143,8 @@ function create() {
         }
         destroyParallax();
         if (wrapCamera) {
-            wrapCamera.destroy();
+            wrapCamera.left?.destroy();
+            wrapCamera.right?.destroy();
             wrapCamera = null;
         }
     });
