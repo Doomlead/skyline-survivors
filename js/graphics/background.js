@@ -829,31 +829,37 @@ var ParallaxManager = (function() {
     };
 
     ParallaxManager.prototype.update = function(playerX) {
-        var worldWidth = this.config.worldWidth;
-        var dx = playerX - this._prevPlayerX;
-        var halfWorld = worldWidth * 0.5;
+    // REMOVED: Manual wrap detection logic
+    // Instead, use the CAMERA's actual scroll position which handles wrapping naturally
+    
+    var scene = this.scene;
+    var mainCam = scene.cameras.main;
+    
+    // Use camera scroll instead of player position
+    // Camera scrollX can go negative or past worldWidth, creating smooth continuity
+    var currentScrollX = mainCam.scrollX;
+    
+    // Calculate actual delta from camera movement
+    var dx = currentScrollX - this._prevPlayerX;
+    
+    // Update tracking
+    this._accumScrollX += dx;
+    this._prevPlayerX = currentScrollX;
+    
+    // Apply parallax speeds
+    for (var i = 0; i < this.layers.length; i++) {
+        var layer = this.layers[i];
+        layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
+    }
+};
 
-        if (dx > halfWorld) {
-            dx -= worldWidth;
-        } else if (dx < -halfWorld) {
-            dx += worldWidth;
-        }
-
-        this._accumScrollX += dx;
-        this._prevPlayerX = playerX;
-
-        for (var i = 0; i < this.layers.length; i++) {
-            var layer = this.layers[i];
-            layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
-        }
-    };
-
-    ParallaxManager.prototype.refresh = function() {
-        for (var i = 0; i < this.layers.length; i++) {
-            var layer = this.layers[i];
-            layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
-        }
-    };
+    ParallaxManager.prototype.initTracking = function(playerX) {
+    // Initialize with camera scroll position instead of player position
+    var scene = this.scene;
+    var mainCam = scene.cameras.main;
+    this._prevPlayerX = mainCam.scrollX;
+    this._accumScrollX = 0;
+};;
 
     ParallaxManager.prototype.destroy = function() {
         for (var i = 0; i < this.layers.length; i++) {

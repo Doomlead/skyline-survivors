@@ -55,18 +55,20 @@ function updateWrapCamera(scene) {
     const worldWidth = CONFIG.worldWidth;
     const camWidth = mainCam.width;
     const camHeight = mainCam.height;
-
-    const overlapLeft = Math.max(0, -mainCam.scrollX);
-    const overlapRight = Math.max(0, (mainCam.scrollX + camWidth) - worldWidth);
+    const scrollX = mainCam.scrollX;
 
     const leftCamera = wrapCamera.left;
     const rightCamera = wrapCamera.right;
 
+    // Left edge: camera sees past the left boundary (scrollX < 0)
     if (leftCamera) {
-        if (overlapLeft > 0) {
+        if (scrollX < 0) {
+            // Add 2px buffer to prevent sub-pixel gaps
+            const overlapLeft = Math.abs(scrollX) + 2;
             const width = Math.min(overlapLeft, camWidth);
             leftCamera.setViewport(0, 0, width, camHeight);
-            leftCamera.setScroll(mainCam.scrollX + worldWidth, mainCam.scrollY);
+            // Show the END of the world (right edge wraps to left screen edge)
+            leftCamera.setScroll(worldWidth + scrollX - 2, mainCam.scrollY);
             leftCamera.setZoom(mainCam.zoom);
             leftCamera.setVisible(true);
         } else {
@@ -74,11 +76,15 @@ function updateWrapCamera(scene) {
         }
     }
 
+    // Right edge: camera sees past the right boundary
     if (rightCamera) {
-        if (overlapRight > 0) {
+        if (scrollX + camWidth > worldWidth) {
+            // Add 2px buffer to prevent sub-pixel gaps
+            const overlapRight = (scrollX + camWidth) - worldWidth + 2;
             const width = Math.min(overlapRight, camWidth);
             rightCamera.setViewport(camWidth - width, 0, width, camHeight);
-            rightCamera.setScroll(mainCam.scrollX - worldWidth, mainCam.scrollY);
+            // Show the START of the world (left edge wraps to right screen edge)
+            rightCamera.setScroll(-2, mainCam.scrollY);  // <-- THE FIX: was mainCam.scrollX - worldWidth
             rightCamera.setZoom(mainCam.zoom);
             rightCamera.setVisible(true);
         } else {
@@ -86,7 +92,6 @@ function updateWrapCamera(scene) {
         }
     }
 }
-
 function create() {
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
@@ -167,7 +172,7 @@ function create() {
     this.gameScene = this;
 
     // Initialize parallax tracking AFTER player is created
-    initParallaxTracking(player.x);
+    initParallaxTracking();
 
     setupWrapCamera(this);
 }
