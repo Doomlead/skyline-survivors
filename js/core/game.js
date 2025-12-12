@@ -32,17 +32,14 @@ function preload() {
 
 // Bootstraps the Phaser scene: world bounds, entities, input, UI, audio, and initial state.
 function create() {
-    this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight);
+    this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
     createBackground(this);
 
     player = this.physics.add.sprite(100, 300, 'player');
     player.setCollideWorldBounds(false);
     player.setScale(1.25);
     player.body.setSize(25, 10);
-
-    // Secondary "Wrap Camera" to show the other side of the world seamlessly
-    this.wrapCamera = this.cameras.add(0, 0, CONFIG.width, CONFIG.height);
-    this.wrapCamera.setVisible(false);
+    player.setDepth(1000);
 
     enemies = this.physics.add.group();
     projectiles = this.physics.add.group();
@@ -82,6 +79,8 @@ function create() {
             particleManager.destroy();
             particleManager = null;
         }
+
+        destroyParallax();
     });
 
     this.physics.add.overlap(projectiles, enemies, hitEnemy, null, this);
@@ -99,6 +98,8 @@ function create() {
 
     initializeGame(this);
     this.gameScene = this;
+
+    initParallaxTracking(player.x);
 }
 
 
@@ -131,7 +132,7 @@ function update(time, delta) {
     }
     
     // -- Seamless Infinite Loop Logic --
-    
+
     // 1. Wrap Player Physics
     if (player.x < 0) {
         player.x += CONFIG.worldWidth;
@@ -143,29 +144,8 @@ function update(time, delta) {
     const mainCam = this.cameras.main;
     mainCam.scrollX = player.x - mainCam.width / 2;
 
-    // 3. Visual Seam Wrapping (Dual Camera)
-    const wrapCam = this.wrapCamera;
-    if (wrapCam) {
-        const scrollX = mainCam.scrollX;
-        const camW = mainCam.width;
-        
-        // Add 2px safety buffer to prevent sub-pixel gaps
-        if (scrollX < 0) {
-            // Viewing Left Void -> Render World End
-            wrapCam.setVisible(true);
-            const gap = Math.abs(scrollX) + 2;
-            wrapCam.setViewport(0, 0, Math.min(gap, camW), mainCam.height);
-            wrapCam.scrollX = CONFIG.worldWidth + scrollX - 2;
-        } else if (scrollX + camW > CONFIG.worldWidth) {
-            // Viewing Right Void -> Render World Start
-            wrapCam.setVisible(true);
-            const overshot = (scrollX + camW) - CONFIG.worldWidth + 2;
-            wrapCam.setViewport(camW - overshot, 0, Math.min(overshot, camW), mainCam.height);
-            wrapCam.scrollX = -2;
-        } else {
-            wrapCam.setVisible(false);
-        }
-    }
+    // 3. Parallax backgrounds driven by accumulated scroll
+    updateParallax(player.x);
 
     updateEnemies(this, time, delta);
     updateProjectiles(this);
