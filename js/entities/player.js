@@ -41,7 +41,7 @@ function updatePlayer(scene, time) {
     if (playerState.powerUps.shield > 0 && !player.shieldSprite) {
         player.shieldSprite = scene.add.sprite(player.x, player.y, 'shield');
         player.shieldSprite.setAlpha(0.7);
-        player.shieldSprite.setDepth(10);
+        player.shieldSprite.setDepth(FG_DEPTH_BASE + 11);
         player.shieldSprite.setScale(1.2);
     } else if (playerState.powerUps.shield <= 0 && player.shieldSprite) {
         const shieldSprite = player.shieldSprite;
@@ -150,6 +150,7 @@ function fireWeapon(scene) {
     drones.children.entries.forEach(drone => {
         const dProj = projectiles.create(drone.x, drone.y, 'projectile_drone');
         dProj.setScale(1.25);
+        dProj.setDepth(FG_DEPTH_BASE + 6);
         dProj.setVelocity(velocityX, 0);
         dProj.damage = damage;
         dProj.projectileType = 'drone';
@@ -179,6 +180,7 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, pier
     
     proj = projectiles.create(x, y, textureName);
     proj.setScale(1.25);
+    proj.setDepth(FG_DEPTH_BASE + 6);
     proj.setVelocity(vx, vy);
     proj.projectileType = type;
     proj.damage = damage;
@@ -388,7 +390,7 @@ function useSmartBomb(scene) {
         CONFIG.height,
         0xffffff,
         0.8
-    ).setScrollFactor(0).setDepth(99);
+    ).setScrollFactor(0).setDepth(FG_DEPTH_BASE + 90);
     scene.tweens.add({
         targets: flash,
         alpha: 0,
@@ -422,6 +424,7 @@ function spawnHuman(scene, x) {
     const y = groundLevel - terrainVariation - 15;
     const human = humans.create(x, y, 'human');
     human.setScale(1.25);
+    human.setDepth(FG_DEPTH_BASE + 1);
     human.setCollideWorldBounds(false);
     human.body.setSize(8, 12);
     human.isAbducted = false;

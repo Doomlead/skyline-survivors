@@ -145,6 +145,7 @@ function startBossEncounter(scene, triggerInfo = {}) {
 
 function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngle) {
     const proj = enemyProjectiles.create(sourceX, sourceY, shotConfig.projectileType);
+    proj.setDepth(FG_DEPTH_BASE + 4);
     proj.setScale(1.5);
     
     // Calculate actual fire direction

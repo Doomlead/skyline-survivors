@@ -81,6 +81,7 @@ function updateBomberBehavior(scene, enemy, time, timeSlowMultiplier) {
     
     if (time > enemy.lastMineDrop + 3000) {
         const mine = enemyProjectiles.create(enemy.x, enemy.y + 10, 'mine');
+        mine.setDepth(FG_DEPTH_BASE + 4);
         mine.setScale(1.25);
         mine.setVelocityY(50);
         mine.isMine = true;
@@ -132,6 +133,7 @@ function updateTurretBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
             
             directions.forEach(dir => {
                 const proj = enemyProjectiles.create(enemy.x, enemy.y, 'enemyProjectile');
+                proj.setDepth(FG_DEPTH_BASE + 4);
                 proj.setScale(2.0);
                 proj.setVelocity(Math.cos(dir) * 200, Math.sin(dir) * 200);
                 proj.rotation = dir;
@@ -325,6 +327,7 @@ function updateSniperBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
         if (time > enemy.lastShot + 2500) {
             const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
             const proj = enemyProjectiles.create(enemy.x, enemy.y, 'enemyProjectile_baiter');
+            proj.setDepth(FG_DEPTH_BASE + 4);
             proj.setScale(2.0);
             proj.setVelocity(Math.cos(angle) * 450, Math.sin(angle) * 450);
             proj.damage = 2;
