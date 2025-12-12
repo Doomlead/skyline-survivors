@@ -98,6 +98,7 @@ function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultipli
         for (let i = 0; i < 3; i++) {
             const bayX = boss.x + (i - 1) * 30;
             const mine = enemyProjectiles.create(bayX, boss.y + 20, 'mine');
+            mine.setDepth(FG_DEPTH_BASE + 4);
             mine.setScale(1.5);
             mine.setVelocityY(80);
             mine.isMine = true;
@@ -237,6 +238,7 @@ function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
             const sourceY = boss.y + Math.sin(dir) * 40;
             
             const proj = enemyProjectiles.create(sourceX, sourceY, 'enemyProjectile');
+            proj.setDepth(FG_DEPTH_BASE + 4);
             proj.setScale(1.5);
             proj.setVelocity(Math.cos(dir) * 250, Math.sin(dir) * 250);
             proj.rotation = dir;

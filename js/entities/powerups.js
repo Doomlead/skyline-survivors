@@ -9,6 +9,7 @@ function spawnPowerUp(scene, x, y) {
     const type = Phaser.Utils.Array.GetRandom(powerUpPool);
     const powerUp = powerUps.create(x, y, 'powerup_' + type);
     powerUp.setScale(1.25);
+    powerUp.setDepth(FG_DEPTH_BASE + 3);
     powerUp.powerUpType = type;
     powerUp.birthTime = scene.time.now;
     scene.tweens.add({
@@ -93,7 +94,7 @@ function collectPowerUp(playerSprite, powerUp) {
             p.drone = Math.min((p.drone || 0) + 1, 3);
             const drone = drones.create(player.x, player.y, 'forceDrone');
             drone.setScale(1.25);
-            drone.setDepth(5);
+            drone.setDepth(FG_DEPTH_BASE + 8);
             break;
         }
         case 'shield':
