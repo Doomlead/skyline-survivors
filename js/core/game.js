@@ -26,6 +26,51 @@ function preload() {
     createGraphics(this);
 }
 
+function setupWrapCamera(scene) {
+    const mainCam = scene.cameras.main;
+
+    if (wrapCamera) {
+        wrapCamera.destroy();
+    }
+
+    wrapCamera = scene.cameras.add(0, 0, mainCam.width, mainCam.height);
+    wrapCamera.setZoom(mainCam.zoom);
+    wrapCamera.setBackgroundColor('rgba(0,0,0,0)');
+    wrapCamera.setVisible(false);
+}
+
+function updateWrapCamera(scene) {
+    if (!wrapCamera || !player) return;
+
+    const mainCam = scene.cameras.main;
+    const worldWidth = CONFIG.worldWidth;
+    const camWidth = mainCam.width;
+    const camHeight = mainCam.height;
+    const zoom = mainCam.zoom;
+
+    // Keep wrap camera aligned with main camera sizing/zoom in case of resize
+    wrapCamera.setSize(camWidth, camHeight);
+    wrapCamera.setZoom(zoom);
+
+    const scrollX = mainCam.scrollX;
+    const overlapLeft = Math.max(0, -scrollX);
+    const overlapRight = Math.max(0, scrollX + mainCam.displayWidth - worldWidth);
+
+    if (overlapLeft > 0) {
+        const viewportWidth = Math.min(overlapLeft * zoom, camWidth);
+        wrapCamera.setViewport(0, 0, viewportWidth, camHeight);
+        wrapCamera.setScroll(scrollX + worldWidth, mainCam.scrollY);
+        wrapCamera.setVisible(true);
+    } else if (overlapRight > 0) {
+        const viewportWidth = Math.min(overlapRight * zoom, camWidth);
+        wrapCamera.setViewport(camWidth - viewportWidth, 0, viewportWidth, camHeight);
+        wrapCamera.setScroll(scrollX - worldWidth, mainCam.scrollY);
+        wrapCamera.setVisible(true);
+    } else {
+        wrapCamera.setVisible(false);
+    }
+}
+
 function create() {
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
@@ -81,6 +126,10 @@ function create() {
             particleManager = null;
         }
         destroyParallax();
+        if (wrapCamera) {
+            wrapCamera.destroy();
+            wrapCamera = null;
+        }
     });
 
     // Physics overlaps
@@ -102,6 +151,8 @@ function create() {
 
     // Initialize parallax tracking AFTER player is created
     initParallaxTracking(player.x);
+
+    setupWrapCamera(this);
 }
 
 function update(time, delta) {
@@ -143,6 +194,8 @@ function update(time, delta) {
 
     // Update parallax backgrounds
     updateParallax(player.x);
+
+    updateWrapCamera(this);
 
     updateEnemies(this, time, delta);
     updateProjectiles(this);
