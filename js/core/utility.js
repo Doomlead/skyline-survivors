@@ -1,13 +1,13 @@
 // ------------------------
 // Utility functions
 // ------------------------
-/*
+
 function wrapWorldBounds(sprite) {
     if (sprite.x < 0) sprite.x = CONFIG.worldWidth;
     else if (sprite.x > CONFIG.worldWidth) sprite.x = 0;
 }
 
-*/
+
 function createExplosion(scene, x, y, color = 0xffff00) {
     if (audioManager) audioManager.playSound('explosion');
     // ENHANCED: 8 particles for dramatic effect

@@ -2,9 +2,6 @@
 // Enemy Spawning, Combat, and Core Management
 // ------------------------
 
-// Depth helpers keep gameplay sprites above the parallax city/ground.
-const ENEMY_DEPTH = FG_DEPTH_BASE + 2;
-
 // Creates and attaches a particle trail effect to a moving enemy (except landers)
 // so the enemies feel more dynamic on screen.
 function createEnemyTrail(scene, enemy) {
@@ -54,7 +51,7 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     const maxY = groundLevel - terrainVariation - minClearance;
     const spawnY = Phaser.Math.Clamp(y, topLimit, Math.max(topLimit + 10, maxY));
     const enemy = enemies.create(clampedX, spawnY, type);
-    enemy.setDepth(ENEMY_DEPTH); // Gameplay sprites stay above the base foreground depth
+    enemy.setDepth(FG_DEPTH_BASE + 2); // Gameplay sprites stay above the base foreground depth
 
     const scale = getEnemyScale(type);
     enemy.setScale(scale);
@@ -198,9 +195,9 @@ function shootAtPlayer(scene, enemy) {
     textureName = config.texture || textureName;
     speed = config.speed || speed;
     damage = config.damage || damage;
-
+    
     const proj = enemyProjectiles.create(enemy.x, enemy.y, textureName);
-    proj.setDepth(ENEMY_PROJECTILE_DEPTH);
+    proj.setDepth(FG_DEPTH_BASE + 4);
     proj.setScale(1.25);
     proj.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
     proj.rotation = angle;

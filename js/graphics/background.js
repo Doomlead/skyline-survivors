@@ -853,28 +853,6 @@ var ParallaxManager = (function() {
     }
 };
 
-	ParallaxManager.prototype.update = function(cameraScrollX) {
-    // Camera scrollX is now INFINITE (can be negative or exceed worldWidth)
-    // No need to detect wrapping - just track delta
-    
-    var dx = cameraScrollX - this._prevScrollX;
-    
-    // Update tracking
-    this._accumScrollX += dx;
-    this._prevScrollX = cameraScrollX;
-    
-    // Apply parallax speeds (TileSprite handles seamless tiling automatically)
-    for (var i = 0; i < this.layers.length; i++) {
-        var layer = this.layers[i];
-        layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
-    }
-};
-
-ParallaxManager.prototype.initTracking = function(cameraScrollX) {
-    this._prevScrollX = cameraScrollX || 0;
-    this._accumScrollX = 0;
-};
-
     ParallaxManager.prototype.initTracking = function(playerX) {
     // Initialize with camera scroll position instead of player position
     var scene = this.scene;

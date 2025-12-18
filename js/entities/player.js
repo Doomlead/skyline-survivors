@@ -2,10 +2,6 @@
 // Player mechanics and controls
 // ------------------------
 
-const PLAYER_PROJECTILE_DEPTH = FG_DEPTH_BASE + 6;
-const DRONE_PROJECTILE_DEPTH = FG_DEPTH_BASE + 6;
-const HUMAN_DEPTH = FG_DEPTH_BASE + 1;
-
 function updatePlayer(scene, time) {
     let speed = playerState.powerUps.speed > 0 ? 400 : playerState.baseSpeed;
     player.setVelocity(0, 0);
@@ -154,7 +150,7 @@ function fireWeapon(scene) {
     drones.children.entries.forEach(drone => {
         const dProj = projectiles.create(drone.x, drone.y, 'projectile_drone');
         dProj.setScale(1.25);
-        dProj.setDepth(DRONE_PROJECTILE_DEPTH);
+        dProj.setDepth(FG_DEPTH_BASE + 6);
         dProj.setVelocity(velocityX, 0);
         dProj.damage = damage;
         dProj.projectileType = 'drone';
@@ -181,10 +177,10 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, pier
         case 'normal':
         default: textureName = 'projectile'; break;
     }
-
+    
     proj = projectiles.create(x, y, textureName);
     proj.setScale(1.25);
-    proj.setDepth(PLAYER_PROJECTILE_DEPTH);
+    proj.setDepth(FG_DEPTH_BASE + 6);
     proj.setVelocity(vx, vy);
     proj.projectileType = type;
     proj.damage = damage;
@@ -428,7 +424,7 @@ function spawnHuman(scene, x) {
     const y = groundLevel - terrainVariation - 15;
     const human = humans.create(x, y, 'human');
     human.setScale(1.25);
-    human.setDepth(HUMAN_DEPTH);
+    human.setDepth(FG_DEPTH_BASE + 1);
     human.setCollideWorldBounds(false);
     human.body.setSize(8, 12);
     human.isAbducted = false;
