@@ -177,11 +177,16 @@ function create() {
     initializeGame(this);
     this.gameScene = this;
 
+<<<<<<< HEAD
+    // Initialize parallax tracking AFTER player is created
+    initParallaxTracking(player.x);
+=======
         // Camera setup - INFINITE bounds
     this.cameras.main.setBounds(-100000, 0, 200000, CONFIG.worldHeight);
     
     // Initialize parallax with camera scroll position
     initParallaxTracking(this.cameras.main.scrollX);
+>>>>>>> 0e9d34c3b4dffe95b3b9756ce402434d36347dda
 
     setupWrapCamera(this);
 }
