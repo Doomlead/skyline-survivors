@@ -2,8 +2,6 @@
 // Boss Spawning, Combat, and Core Management
 // ------------------------
 
-const BOSS_PROJECTILE_DEPTH = FG_DEPTH_BASE + 4;
-
 function createBossTrail(scene, boss) {
     if (!scene || !boss) return;
     if (boss.bossType === 'fortressTurret') return; // Stationary bosses have no trail

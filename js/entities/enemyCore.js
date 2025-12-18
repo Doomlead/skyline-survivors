@@ -4,7 +4,6 @@
 
 // Depth helpers keep gameplay sprites above the parallax city/ground.
 const ENEMY_DEPTH = FG_DEPTH_BASE + 2;
-const ENEMY_PROJECTILE_DEPTH = FG_DEPTH_BASE + 4;
 
 // Creates and attaches a particle trail effect to a moving enemy (except landers)
 // so the enemies feel more dynamic on screen.
