@@ -63,12 +63,12 @@ function updateWrapCamera(scene) {
     // Left edge: camera sees past the left boundary (scrollX < 0)
     if (leftCamera) {
         if (scrollX < 0) {
-            // Add 2px buffer to prevent sub-pixel gaps
-            const overlapLeft = Math.abs(scrollX) + 2;
+            // Add minimal buffer to prevent sub-pixel gaps
+            const overlapLeft = Math.abs(scrollX) + 0.05;
             const width = Math.min(overlapLeft, camWidth);
             leftCamera.setViewport(0, 0, width, camHeight);
             // Show the END of the world (right edge wraps to left screen edge)
-            leftCamera.setScroll(worldWidth + scrollX - 2, mainCam.scrollY);
+            leftCamera.setScroll(worldWidth + scrollX - 0.05, mainCam.scrollY);
             leftCamera.setZoom(mainCam.zoom);
             leftCamera.setVisible(true);
         } else {
@@ -79,12 +79,12 @@ function updateWrapCamera(scene) {
     // Right edge: camera sees past the right boundary
     if (rightCamera) {
         if (scrollX + camWidth > worldWidth) {
-            // Add 2px buffer to prevent sub-pixel gaps
-            const overlapRight = (scrollX + camWidth) - worldWidth + 2;
+            // Add minimal buffer to prevent sub-pixel gaps
+            const overlapRight = (scrollX + camWidth) - worldWidth + 0.05;
             const width = Math.min(overlapRight, camWidth);
             rightCamera.setViewport(camWidth - width, 0, width, camHeight);
             // Show the START of the world (left edge wraps to right screen edge)
-            rightCamera.setScroll(-2, mainCam.scrollY);  // <-- THE FIX: was mainCam.scrollX - worldWidth
+            rightCamera.setScroll(-0.05, mainCam.scrollY);  // <-- THE FIX: was mainCam.scrollX - worldWidth
             rightCamera.setZoom(mainCam.zoom);
             rightCamera.setVisible(true);
         } else {
