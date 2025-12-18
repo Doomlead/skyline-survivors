@@ -25,7 +25,7 @@ function initializeGame(scene) {
 function preload() {
     createGraphics(this);
 }
-
+/*
 function setupWrapCamera(scene) {
     const mainCam = scene.cameras.main;
 
@@ -92,19 +92,25 @@ function updateWrapCamera(scene) {
         }
     }
 }
+*/
 function create() {
-    // World bounds - disable left/right for wrapping
-    this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
+        // ✅ INFINITE horizontal bounds (only enforce top/bottom)
+    this.physics.world.setBounds(
+        -100000, 0,           // x, y
+        200000, CONFIG.worldHeight, // width, height
+        false, false,         // ❌ No left/right bounds
+        true, true            // ✅ Enforce top/bottom bounds
+    );
     
     // Generate backgrounds FIRST
     createBackground(this);
 
-    // Player - keep at/above FG_DEPTH_BASE so gameplay renders over backgrounds
+    // Player
     player = this.physics.add.sprite(100, 300, 'player');
-    player.setCollideWorldBounds(false);
+    player.setCollideWorldBounds(false); // ✅ Allow horizontal freedom
     player.setScale(1.25);
     player.body.setSize(25, 10);
-    player.setDepth(FG_DEPTH_BASE + 10); // Anchor main sprite well above the base foreground depth
+    player.setDepth(FG_DEPTH_BASE + 10);
 
     // Game object groups
     enemies = this.physics.add.group();
@@ -171,8 +177,16 @@ function create() {
     initializeGame(this);
     this.gameScene = this;
 
+<<<<<<< HEAD
     // Initialize parallax tracking AFTER player is created
     initParallaxTracking(player.x);
+=======
+        // Camera setup - INFINITE bounds
+    this.cameras.main.setBounds(-100000, 0, 200000, CONFIG.worldHeight);
+    
+    // Initialize parallax with camera scroll position
+    initParallaxTracking(this.cameras.main.scrollX);
+>>>>>>> 0e9d34c3b4dffe95b3b9756ce402434d36347dda
 
     setupWrapCamera(this);
 }
@@ -203,22 +217,69 @@ function update(time, delta) {
         particleManager.update(delta);
     }
 
-    // Wrap player
-    if (player.x < 0) {
-        player.x += CONFIG.worldWidth;
-    } else if (player.x >= CONFIG.worldWidth) {
-        player.x -= CONFIG.worldWidth;
+    // ═══════════════════════════════════════════════════════════════
+    // ✅ NEW WRAPPING SYSTEM - Infinite world with synchronized wrap
+    // ═══════════════════════════════════════════════════════════════
+    
+    // 1. Camera follows player horizontally only
+    this.cameras.main.scrollX = player.x - this.cameras.main.width / 2;
+    
+    // 2. Wrap player when crossing world boundaries
+    const normalizedX = ((player.x % CONFIG.worldWidth) + CONFIG.worldWidth) % CONFIG.worldWidth;
+    if (Math.abs(normalizedX - player.x) > 1) { // Threshold to prevent float errors
+        const offset = player.x - normalizedX;
+        player.x = normalizedX;
+        
+        // Shift ALL entities by the same offset to maintain relative positions
+        const shiftGroup = (group) => {
+            if (!group || !group.children) return;
+            group.children.entries.forEach(entity => {
+                if (entity && entity.active) {
+                    entity.x -= offset;
+                }
+            });
+        };
+        
+        shiftGroup(enemies);
+        shiftGroup(projectiles);
+        shiftGroup(enemyProjectiles);
+        shiftGroup(powerUps);
+        shiftGroup(humans);
+        shiftGroup(drones);
+        shiftGroup(bosses);
+        
+        // Update camera to match
+        this.cameras.main.scrollX -= offset;
     }
-
-    // Camera positioning
-    const mainCam = this.cameras.main;
-    mainCam.scrollX = player.x - mainCam.width / 2;
-
-    // Update parallax backgrounds
-    updateParallax(player.x);
-
-    updateWrapCamera(this);
-
+    
+    // 3. Wrap entities to keep them near player (prevents far-off entities)
+    const wrapToPlayer = (group) => {
+        if (!group || !group.children) return;
+        group.children.entries.forEach(entity => {
+            if (entity && entity.active) {
+                const distToPlayer = entity.x - player.x;
+                
+                // If entity is more than half-world away, wrap it closer
+                if (distToPlayer > CONFIG.worldWidth / 2) {
+                    entity.x -= CONFIG.worldWidth;
+                } else if (distToPlayer < -CONFIG.worldWidth / 2) {
+                    entity.x += CONFIG.worldWidth;
+                }
+            }
+        });
+    };
+    
+    wrapToPlayer(enemies);
+    wrapToPlayer(projectiles);
+    wrapToPlayer(enemyProjectiles);
+    wrapToPlayer(powerUps);
+    wrapToPlayer(humans);
+    wrapToPlayer(drones);
+    wrapToPlayer(bosses);
+    
+    // 4. Update parallax with infinite camera scroll
+    updateParallax(this.cameras.main.scrollX);
+    
     updateEnemies(this, time, delta);
     updateProjectiles(this);
     updatePowerUps(this);

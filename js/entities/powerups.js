@@ -2,6 +2,9 @@
 // Power-up system - All 16 power-up types
 // ------------------------
 
+const POWERUP_DEPTH = FG_DEPTH_BASE + 3;
+const DRONE_DEPTH = FG_DEPTH_BASE + 8;
+
 function spawnPowerUp(scene, x, y) {
     const powerUpPool = [
         'laser','drone','shield','missile','overdrive','rear','side','rapid','multi','piercing','speed','magnet','bomb','double','invincibility','timeSlow'
@@ -9,7 +12,7 @@ function spawnPowerUp(scene, x, y) {
     const type = Phaser.Utils.Array.GetRandom(powerUpPool);
     const powerUp = powerUps.create(x, y, 'powerup_' + type);
     powerUp.setScale(1.25);
-    powerUp.setDepth(FG_DEPTH_BASE + 3); // Keep collectibles on the gameplay layer or above
+    powerUp.setDepth(POWERUP_DEPTH); // Keep collectibles on the gameplay layer or above
     powerUp.powerUpType = type;
     powerUp.birthTime = scene.time.now;
     scene.tweens.add({
@@ -94,7 +97,7 @@ function collectPowerUp(playerSprite, powerUp) {
             p.drone = Math.min((p.drone || 0) + 1, 3);
             const drone = drones.create(player.x, player.y, 'forceDrone');
             drone.setScale(1.25);
-            drone.setDepth(FG_DEPTH_BASE + 8);
+            drone.setDepth(DRONE_DEPTH);
             break;
         }
         case 'shield':
