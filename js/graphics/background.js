@@ -857,6 +857,10 @@ var ParallaxManager = (function() {
         }
     };
 
+    ParallaxManager.prototype.syncToCamera = function(scrollX) {
+        this._prevPlayerX = scrollX;
+    };
+
     ParallaxManager.prototype.destroy = function() {
         for (var i = 0; i < this.layers.length; i++) {
             if (this.layers[i].sprite) {
@@ -903,6 +907,12 @@ function initParallaxTracking(playerX) {
 function updateParallax(playerX) {
     if (parallaxManagerInstance) {
         parallaxManagerInstance.update(playerX);
+    }
+}
+
+function syncParallaxToCamera(scrollX) {
+    if (parallaxManagerInstance && parallaxManagerInstance.syncToCamera) {
+        parallaxManagerInstance.syncToCamera(scrollX);
     }
 }
 
