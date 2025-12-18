@@ -791,7 +791,6 @@ var ParallaxManager = (function() {
         this.config = config;
         this.layers = [];
         this._prevPlayerX = 0;
-        this._accumScrollX = 0;
     }
 
     ParallaxManager.prototype.createLayers = function() {
@@ -824,42 +823,39 @@ var ParallaxManager = (function() {
     };
 
     ParallaxManager.prototype.initTracking = function(playerX) {
-        this._prevPlayerX = playerX;
-        this._accumScrollX = 0;
+        // Initialize with camera scroll position instead of player position
+        var scene = this.scene;
+        var mainCam = scene.cameras.main;
+        this._prevPlayerX = mainCam.scrollX;
     };
 
     ParallaxManager.prototype.update = function(playerX) {
-    // REMOVED: Manual wrap detection logic
-    // Instead, use the CAMERA's actual scroll position which handles wrapping naturally
-    
-    var scene = this.scene;
-    var mainCam = scene.cameras.main;
-    
-    // Use camera scroll instead of player position
-    // Camera scrollX can go negative or past worldWidth, creating smooth continuity
-    var currentScrollX = mainCam.scrollX;
-    
-    // Calculate actual delta from camera movement
-    var dx = currentScrollX - this._prevPlayerX;
-    
-    // Update tracking
-    this._accumScrollX += dx;
-    this._prevPlayerX = currentScrollX;
-    
-    // Apply parallax speeds
-    for (var i = 0; i < this.layers.length; i++) {
-        var layer = this.layers[i];
-        layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
-    }
-};
+        var scene = this.scene;
+        var mainCam = scene.cameras.main;
 
-    ParallaxManager.prototype.initTracking = function(playerX) {
-    // Initialize with camera scroll position instead of player position
-    var scene = this.scene;
-    var mainCam = scene.cameras.main;
-    this._prevPlayerX = mainCam.scrollX;
-    this._accumScrollX = 0;
-};;
+        // Use camera scroll instead of player position
+        // Camera scrollX can go negative or past worldWidth, creating smooth continuity
+        var currentScrollX = mainCam.scrollX;
+
+        // Calculate actual delta from camera movement
+        var dx = currentScrollX - this._prevPlayerX;
+        this._prevPlayerX = currentScrollX;
+
+        // Apply parallax speeds with wrap to align perfectly when the camera loops
+        var wrapWidth = this.config.worldWidth;
+
+        for (var i = 0; i < this.layers.length; i++) {
+            var layer = this.layers[i];
+            var sprite = layer.sprite;
+            var textureWidth = (sprite.texture && sprite.texture.getSourceImage()) ? sprite.texture.getSourceImage().width : wrapWidth;
+            var effectiveWidth = textureWidth || wrapWidth || 1;
+
+            var nextPos = sprite.tilePositionX + dx * layer.speedX;
+            nextPos = ((nextPos % effectiveWidth) + effectiveWidth) % effectiveWidth;
+
+            sprite.tilePositionX = nextPos;
+        }
+    };
 
     ParallaxManager.prototype.destroy = function() {
         for (var i = 0; i < this.layers.length; i++) {
