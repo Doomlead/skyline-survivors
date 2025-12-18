@@ -172,7 +172,7 @@ function create() {
     this.gameScene = this;
 
     // Initialize parallax tracking AFTER player is created
-    initParallaxTracking();
+    initParallaxTracking(player.x);
 
     setupWrapCamera(this);
 }
