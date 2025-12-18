@@ -26,71 +26,43 @@ function preload() {
     createGraphics(this);
 }
 
-function setupWrapCamera(scene) {
-    const mainCam = scene.cameras.main;
-
-    if (wrapCamera) {
-        wrapCamera.left?.destroy();
-        wrapCamera.right?.destroy();
-    }
-
-    const createWrapCam = () => {
-        const cam = scene.cameras.add(0, 0, mainCam.width, mainCam.height);
-        cam.setZoom(mainCam.zoom);
-        cam.setBackgroundColor('rgba(0,0,0,0)');
-        cam.setVisible(false);
-        return cam;
-    };
-
-    wrapCamera = {
-        left: createWrapCam(),
-        right: createWrapCam()
-    };
+function wrapX(x, worldWidth) {
+    return ((x % worldWidth) + worldWidth) % worldWidth;
 }
 
-function updateWrapCamera(scene) {
-    if (!wrapCamera) return;
-
-    const mainCam = scene.cameras.main;
+function renormalizeWorldIfNeeded(scene) {
     const worldWidth = CONFIG.worldWidth;
-    const camWidth = mainCam.width;
-    const camHeight = mainCam.height;
-    const scrollX = mainCam.scrollX;
+    const normalizedPlayerX = wrapX(player.x, worldWidth);
+    const offset = player.x - normalizedPlayerX;
 
-    const leftCamera = wrapCamera.left;
-    const rightCamera = wrapCamera.right;
+    if (offset === 0) return false;
 
-    // Left edge: camera sees past the left boundary (scrollX < 0)
-    if (leftCamera) {
-        if (scrollX < 0) {
-            // Add minimal buffer to prevent sub-pixel gaps
-            const overlapLeft = Math.abs(scrollX) + 0.05;
-            const width = Math.min(overlapLeft, camWidth);
-            leftCamera.setViewport(0, 0, width, camHeight);
-            // Show the END of the world (right edge wraps to left screen edge)
-            leftCamera.setScroll(worldWidth + scrollX - 0.05, mainCam.scrollY);
-            leftCamera.setZoom(mainCam.zoom);
-            leftCamera.setVisible(true);
-        } else {
-            leftCamera.setVisible(false);
-        }
-    }
+    player.x = normalizedPlayerX;
 
-    // Right edge: camera sees past the right boundary
-    if (rightCamera) {
-        if (scrollX + camWidth > worldWidth) {
-            // Add minimal buffer to prevent sub-pixel gaps
-            const overlapRight = (scrollX + camWidth) - worldWidth + 0.05;
-            const width = Math.min(overlapRight, camWidth);
-            rightCamera.setViewport(camWidth - width, 0, width, camHeight);
-            // Show the START of the world (left edge wraps to right screen edge)
-            rightCamera.setScroll(-0.05, mainCam.scrollY);  // <-- THE FIX: was mainCam.scrollX - worldWidth
-            rightCamera.setZoom(mainCam.zoom);
-            rightCamera.setVisible(true);
-        } else {
-            rightCamera.setVisible(false);
-        }
-    }
+    const renormalizeGroup = group => {
+        if (!group || !group.children || !group.children.entries) return;
+        group.children.entries.forEach(child => {
+            if (child && typeof child.x === 'number') {
+                child.x = wrapX(child.x - offset, worldWidth);
+            }
+        });
+    };
+
+    renormalizeGroup(enemies);
+    renormalizeGroup(projectiles);
+    renormalizeGroup(enemyProjectiles);
+    renormalizeGroup(powerUps);
+    renormalizeGroup(humans);
+    renormalizeGroup(drones);
+    renormalizeGroup(explosions);
+    renormalizeGroup(bosses);
+
+    const cam = scene.cameras.main;
+    cam.scrollX = wrapX(cam.scrollX - offset, worldWidth);
+
+    syncParallaxToCamera(cam.scrollX);
+
+    return true;
 }
 function create() {
     // World bounds - disable left/right for wrapping
@@ -147,11 +119,6 @@ function create() {
             particleManager = null;
         }
         destroyParallax();
-        if (wrapCamera) {
-            wrapCamera.left?.destroy();
-            wrapCamera.right?.destroy();
-            wrapCamera = null;
-        }
     });
 
     // Physics overlaps
@@ -173,8 +140,6 @@ function create() {
 
     // Initialize parallax tracking AFTER player is created
     initParallaxTracking();
-
-    setupWrapCamera(this);
 }
 
 function update(time, delta) {
@@ -203,21 +168,19 @@ function update(time, delta) {
         particleManager.update(delta);
     }
 
-    // Wrap player
-    if (player.x < 0) {
-        player.x += CONFIG.worldWidth;
-    } else if (player.x >= CONFIG.worldWidth) {
-        player.x -= CONFIG.worldWidth;
-    }
+    const wrapped = renormalizeWorldIfNeeded(this);
 
     // Camera positioning
     const mainCam = this.cameras.main;
-    mainCam.scrollX = player.x - mainCam.width / 2;
+    const maxScroll = Math.max(0, CONFIG.worldWidth - mainCam.width);
+    mainCam.scrollX = Phaser.Math.Clamp(player.x - mainCam.width / 2, 0, maxScroll);
+
+    if (wrapped) {
+        syncParallaxToCamera(mainCam.scrollX);
+    }
 
     // Update parallax backgrounds
     updateParallax(player.x);
-
-    updateWrapCamera(this);
 
     updateEnemies(this, time, delta);
     updateProjectiles(this);
