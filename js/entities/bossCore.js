@@ -49,11 +49,10 @@ function initializeBossQueue() {
 }
 
 function spawnBoss(scene, type, x, y) {
-    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
-    const terrainVariation = Math.sin(x / 200) * 30;
     const minClearance = 60;
     const topLimit = 30;
-    const maxY = groundLevel - terrainVariation - minClearance;
+    const groundY = scene.getGroundY ? scene.getGroundY(x) : getGroundY(x);
+    const maxY = groundY - minClearance;
     const spawnY = Phaser.Math.Clamp(y, topLimit, Math.max(topLimit + 20, maxY));
     
     const boss = bosses.create(x, spawnY, type);
@@ -405,4 +404,3 @@ function checkSurvivalBosses(scene) {
         }
     });
 }
-

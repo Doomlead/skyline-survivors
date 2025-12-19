@@ -2,9 +2,38 @@
 // Utility functions
 // ------------------------
 
+const TERRAIN_PROFILE = {
+    baseHeight: 110,
+    waves: [
+        { freq: 0.011, amp: 32 },
+        { freq: 0.0055, amp: 52 },
+        { freq: 0.0025, amp: 22 }
+    ]
+};
+
+function wrapX(x, worldWidth = CONFIG.worldWidth) {
+    return ((x % worldWidth) + worldWidth) % worldWidth;
+}
+
+function getTerrainHeightAt(worldX) {
+    const x = wrapX(worldX, CONFIG.worldWidth);
+    let height = TERRAIN_PROFILE.baseHeight;
+
+    for (let i = 0; i < TERRAIN_PROFILE.waves.length; i++) {
+        const wave = TERRAIN_PROFILE.waves[i];
+        height += Math.sin(x * wave.freq) * wave.amp;
+    }
+
+    return height;
+}
+
+function getGroundY(worldX) {
+    return CONFIG.worldHeight - getTerrainHeightAt(worldX);
+}
+
 function wrapWorldBounds(sprite) {
-    if (sprite.x < 0) sprite.x = CONFIG.worldWidth;
-    else if (sprite.x > CONFIG.worldWidth) sprite.x = 0;
+    if (!sprite || typeof sprite.x !== 'number') return;
+    sprite.x = wrapX(sprite.x, CONFIG.worldWidth);
 }
 
 

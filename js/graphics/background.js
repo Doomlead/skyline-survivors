@@ -572,135 +572,70 @@ var BackgroundGenerator = (function() {
     BackgroundGenerator.prototype.generateTerrainLayer = function(graphics, random) {
         var worldWidth = this.config.worldWidth;
         var worldHeight = this.config.worldHeight;
-        var groundY = worldHeight - 80;
+        var step = 8;
 
-        var baseNoise = this.generateLoopingNoise(worldWidth, 35, 28, 0.5);
-        var midNoise = this.generateLoopingNoise(worldWidth, 25, 18, 1.2);
-        var topNoise = this.generateLoopingNoise(worldWidth, 28, 14, 2.1);
-
-        // Base terrain
+        // Base terrain aligned with the gameplay ground function
         graphics.fillStyle(0x1a1210, 1);
         graphics.beginPath();
         graphics.moveTo(0, worldHeight);
-        for (var i = 0; i < baseNoise.length; i++) {
-            var x = i * 35;
-            if (x > worldWidth) break;
-            graphics.lineTo(x, groundY - baseNoise[i] - 18);
+        for (var wx = 0; wx <= worldWidth; wx += step) {
+            graphics.lineTo(wx, getGroundY(wx) + 14);
         }
         graphics.lineTo(worldWidth, worldHeight);
         graphics.closePath();
         graphics.fillPath();
 
-        // Mid terrain
+        // Mid layer
         graphics.fillStyle(0x252018, 1);
         graphics.beginPath();
         graphics.moveTo(0, worldHeight);
-        for (var i = 0; i < midNoise.length; i++) {
-            var x = i * 25;
-            if (x > worldWidth) break;
-            graphics.lineTo(x, groundY - midNoise[i] - 10);
+        for (var mx = 0; mx <= worldWidth; mx += step) {
+            graphics.lineTo(mx, getGroundY(mx) + 6);
         }
         graphics.lineTo(worldWidth, worldHeight);
         graphics.closePath();
         graphics.fillPath();
 
-        // Top terrain
+        // Top edge
         graphics.fillStyle(0x352a20, 1);
         graphics.beginPath();
         graphics.moveTo(0, worldHeight);
-        for (var i = 0; i < topNoise.length; i++) {
-            var x = i * 28;
-            if (x > worldWidth) break;
-            graphics.lineTo(x, groundY - topNoise[i] - 4);
+        for (var tx = 0; tx <= worldWidth; tx += step) {
+            graphics.lineTo(tx, getGroundY(tx));
         }
         graphics.lineTo(worldWidth, worldHeight);
         graphics.closePath();
         graphics.fillPath();
 
-        // Craters
-        for (var i = 0; i < 12; i++) {
-            var cx = random() * worldWidth;
-            var cy = groundY + 5 + random() * 20;
-            var cw = 20 + random() * 40;
-            var ch = 8 + random() * 15;
-
-            graphics.fillStyle(0x3a3028, 1);
-            graphics.fillEllipse(cx, cy, cw + 6, ch + 3);
-            graphics.fillStyle(0x151210, 1);
-            graphics.fillEllipse(cx, cy + 2, cw, ch);
-        }
-
-        // Wrecked vehicles
-        for (var i = 0; i < 8; i++) {
-            var vx = random() * worldWidth;
-            var vy = groundY + random() * 15;
-            var flipped = random() > 0.5;
-
-            graphics.fillStyle(0x2a2520, 1);
-            if (flipped) {
-                graphics.fillRect(vx, vy, 25, 8);
-                graphics.fillRect(vx + 3, vy - 5, 18, 5);
-            } else {
-                graphics.fillRect(vx, vy, 25, 10);
-                graphics.fillRect(vx + 4, vy - 6, 16, 6);
-            }
-
-            graphics.fillStyle(0x151512, 1);
-            graphics.fillCircle(vx + 5, vy + 10, 4);
-            if (!flipped) {
-                graphics.fillCircle(vx + 20, vy + 10, 4);
-            }
-        }
-
-        // Dead trees
-        for (var i = 0; i < 10; i++) {
-            var tx = random() * worldWidth;
-            var noiseIdx = Math.floor(tx / 28) % topNoise.length;
-            var ty = groundY - topNoise[noiseIdx];
-
-            graphics.fillStyle(0x1a1815, 1);
-            graphics.fillRect(tx - 2, ty - 35, 4, 35);
-
-            graphics.lineStyle(2, 0x1a1815, 1);
-            graphics.beginPath();
-            graphics.moveTo(tx, ty - 30);
-            graphics.lineTo(tx - 15, ty - 45);
-            graphics.strokePath();
-            graphics.beginPath();
-            graphics.moveTo(tx, ty - 25);
-            graphics.lineTo(tx + 12, ty - 38);
-            graphics.strokePath();
-            graphics.lineStyle(0);
-        }
-
-        // Scattered debris
+        // Rubble and debris along the terrain crest
         graphics.fillStyle(0x4a3a2a, 0.8);
-        for (var i = 0; i < 100; i++) {
-            var rx = random() * worldWidth;
-            var ry = groundY - 3 - random() * 35;
-            graphics.fillRect(rx, ry, 3 + random() * 10, 2 + random() * 5);
+        for (var rx = 0; rx <= worldWidth; rx += 35) {
+            var crestY = getGroundY(rx);
+            for (var i = 0; i < 3; i++) {
+                var jitterX = rx + random() * 18;
+                var jitterY = crestY + random() * 18;
+                graphics.fillRect(jitterX, jitterY, 3 + random() * 10, 2 + random() * 5);
+            }
         }
 
-        // Toxic puddles
-        for (var i = 0; i < 5; i++) {
-            var px = random() * worldWidth;
-            var py = groundY + 10 + random() * 15;
-            var pw = 20 + random() * 30;
-            var ph = 5 + random() * 8;
-
-            graphics.fillStyle(0x2a4a30, 0.4);
-            graphics.fillEllipse(px, py, pw + 4, ph + 2);
-            graphics.fillStyle(0x3a6a40, 0.6);
-            graphics.fillEllipse(px, py, pw, ph);
+        // Scars and impact craters
+        for (var cx = 0; cx < 12; cx++) {
+            var craterX = random() * worldWidth;
+            var craterY = getGroundY(craterX) + 10 + random() * 12;
+            var cw = 20 + random() * 40;
+            var ch = 6 + random() * 14;
+            graphics.fillStyle(0x3a3028, 1);
+            graphics.fillEllipse(craterX, craterY, cw + 6, ch + 3);
+            graphics.fillStyle(0x151210, 1);
+            graphics.fillEllipse(craterX, craterY + 2, cw, ch);
         }
 
-        // Foreground buildings
-        for (var i = 0; i < 18; i++) {
-            var bx = i * (worldWidth / 18) + random() * 80;
+        // Foreground ruins that roughly follow the new terrain slope
+        for (var bi = 0; bi < 18; bi++) {
+            var bx = bi * (worldWidth / 18) + random() * 80;
             var bWidth = 45 + random() * 70;
             var bHeight = 110 + random() * 150;
-            var noiseIdx = Math.floor((bx / worldWidth) * topNoise.length) % topNoise.length;
-            var by = groundY - topNoise[noiseIdx];
+            var by = getGroundY(bx);
             var left = bx - bWidth / 2;
             var top = by - bHeight;
 
@@ -721,7 +656,7 @@ var BackgroundGenerator = (function() {
 
             // Rubble pile
             graphics.fillStyle(0x161620, 1);
-            for (var r = 0; r < 12; r++) {
+            for (var r = 0; r < 10; r++) {
                 graphics.fillRect(
                     left - 18 + random() * (bWidth + 36),
                     by - 4 + random() * 25,
@@ -730,51 +665,18 @@ var BackgroundGenerator = (function() {
                 );
             }
 
-            // Windows
-            for (var fy = 20; fy < bHeight * 0.45; fy += 20) {
-                for (var wx = 10; wx < bWidth - 15; wx += 16) {
-                    if (random() > 0.28) {
-                        var state = random();
-                        if (state > 0.9) {
-                            graphics.fillStyle(0xff2200, 0.9);
-                        } else if (state > 0.65) {
-                            graphics.fillStyle(0xaaccee, 0.7);
-                        } else {
-                            graphics.fillStyle(0x0e0e18, 0.95);
-                        }
-                        graphics.fillRect(left + wx, top + fy, 12, 14);
-                    }
-                }
-            }
-
-            // Fire
-            if (random() > 0.25) {
+            // Fires
+            if (random() > 0.3) {
                 var fx = left + bWidth * 0.2 + random() * bWidth * 0.6;
                 var fy = top + bHeight * 0.12 + random() * bHeight * 0.4;
 
                 graphics.fillStyle(0xff1100, 0.15);
-                graphics.fillCircle(fx, fy, 35);
+                graphics.fillCircle(fx, fy, 28);
                 graphics.fillStyle(0xff5500, 0.55);
-                graphics.fillCircle(fx, fy, 16);
+                graphics.fillCircle(fx, fy, 14);
                 graphics.fillStyle(0xff8800, 0.75);
-                graphics.fillCircle(fx, fy - 4, 10);
-
-                // Smoke
-                graphics.fillStyle(0x1a1a1a, 0.2);
-                graphics.fillCircle(fx - 8, fy - 40, 18);
-                graphics.fillCircle(fx + 5, fy - 60, 22);
+                graphics.fillCircle(fx, fy - 3, 8);
             }
-        }
-
-        // Warning signs
-        for (var i = 0; i < 4; i++) {
-            var sx = random() * worldWidth;
-            var sy = groundY - 5;
-
-            graphics.fillStyle(0x3a3530, 1);
-            graphics.fillRect(sx - 1, sy - 25, 3, 25);
-            graphics.fillStyle(0xaaaa30, 0.8);
-            graphics.fillRect(sx - 10, sy - 35, 20, 12);
         }
     };
 
@@ -889,7 +791,9 @@ function createBackground(scene) {
     parallaxManagerInstance = new ParallaxManager(scene, generatorConfig);
     parallaxManagerInstance.createLayers();
 
-    scene.groundLevel = generatorConfig.worldHeight - 80;
+    scene.getGroundY = getGroundY;
+    scene.getTerrainHeightAt = getTerrainHeightAt;
+    scene.groundLevel = generatorConfig.worldHeight - TERRAIN_PROFILE.baseHeight;
 }
 
 function initParallaxTracking(playerX) {
