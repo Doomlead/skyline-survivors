@@ -189,6 +189,7 @@ function update(time, delta) {
     if (wrapped) {
         // After renormalization, keep the camera anchored to the player's actual wrapped position
         // instead of wrapping the camera to the opposite edge.
+        mainCam.scrollX = desiredScrollX;
         syncParallaxToCamera(mainCam.scrollX);
     }
 
