@@ -169,17 +169,20 @@ function update(time, delta) {
     // Camera positioning
     const mainCam = this.cameras.main;
     const desiredScrollX = player.x - mainCam.width / 2;
-    const scrollDelta = desiredScrollX - mainCam.scrollX;
-    if (scrollDelta > CONFIG.worldWidth / 2) {
-        mainCam.scrollX += scrollDelta - CONFIG.worldWidth;
-    } else if (scrollDelta < -CONFIG.worldWidth / 2) {
-        mainCam.scrollX += scrollDelta + CONFIG.worldWidth;
-    } else {
-        mainCam.scrollX = desiredScrollX;
-    }
 
     if (wrapped) {
+        // After renormalization, re-anchor the camera to the normalized player position so the ship stays centered.
+        mainCam.scrollX = wrapX(desiredScrollX, CONFIG.worldWidth);
         syncParallaxToCamera(mainCam.scrollX);
+    } else {
+        const scrollDelta = desiredScrollX - mainCam.scrollX;
+        if (scrollDelta > CONFIG.worldWidth / 2) {
+            mainCam.scrollX += scrollDelta - CONFIG.worldWidth;
+        } else if (scrollDelta < -CONFIG.worldWidth / 2) {
+            mainCam.scrollX += scrollDelta + CONFIG.worldWidth;
+        } else {
+            mainCam.scrollX = desiredScrollX;
+        }
     }
 
     // Update parallax backgrounds
