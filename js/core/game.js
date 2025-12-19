@@ -61,6 +61,20 @@ function renormalizeWorldIfNeeded(scene) {
 
     return true;
 }
+
+function alignToNearestWrap(target, reference, worldWidth) {
+    const halfWorld = worldWidth / 2;
+    let adjusted = target;
+    let delta = adjusted - reference;
+
+    if (delta > halfWorld) {
+        adjusted -= worldWidth;
+    } else if (delta < -halfWorld) {
+        adjusted += worldWidth;
+    }
+
+    return adjusted;
+}
 function create() {
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
@@ -170,21 +184,13 @@ function update(time, delta) {
     // Camera positioning
     const mainCam = this.cameras.main;
     const desiredScrollX = player.x - mainCam.width / 2;
+    mainCam.scrollX = alignToNearestWrap(desiredScrollX, mainCam.scrollX, CONFIG.worldWidth);
 
     if (wrapped) {
         // After renormalization, keep the camera anchored to the player's actual wrapped position
         // instead of wrapping the camera to the opposite edge.
         mainCam.scrollX = desiredScrollX;
         syncParallaxToCamera(mainCam.scrollX);
-    } else {
-        const scrollDelta = desiredScrollX - mainCam.scrollX;
-        if (scrollDelta > CONFIG.worldWidth / 2) {
-            mainCam.scrollX += scrollDelta - CONFIG.worldWidth;
-        } else if (scrollDelta < -CONFIG.worldWidth / 2) {
-            mainCam.scrollX += scrollDelta + CONFIG.worldWidth;
-        } else {
-            mainCam.scrollX = desiredScrollX;
-        }
     }
 
     // Update parallax backgrounds
