@@ -110,18 +110,23 @@ function updateRadar(scene) {
     
     // Scale: Minimap width covers the whole World Width
     const scaleX = width / CONFIG.worldWidth;
+    const terrainScaleY = height * 0.7;
     
     // 1. Draw Terrain line (approximate)
     radarCtx.strokeStyle = '#443322';
     radarCtx.lineWidth = 2;
     radarCtx.beginPath();
-    radarCtx.moveTo(0, height - 5);
-    radarCtx.lineTo(width, height - 5);
+    for (let wx = 0; wx <= CONFIG.worldWidth; wx += 60) {
+        const terrainHeight = getTerrainHeightAt(wx);
+        const y = height - 4 - (terrainHeight / CONFIG.worldHeight) * terrainScaleY;
+        if (wx === 0) radarCtx.moveTo(0, y);
+        else radarCtx.lineTo(wx * scaleX, y);
+    }
     radarCtx.stroke();
     
     // 2. Draw Camera Viewport Box
     const cam = scene.cameras.main;
-    let viewX = cam.scrollX * scaleX;
+    let viewX = wrapX(cam.scrollX, CONFIG.worldWidth) * scaleX;
     const viewW = cam.width * scaleX;
     
     radarCtx.strokeStyle = '#006666';
@@ -139,7 +144,7 @@ function updateRadar(scene) {
     if (enemies) {
         enemies.children.entries.forEach(enemy => {
             if (!enemy.active) return;
-            const ex = enemy.x * scaleX;
+            const ex = wrapX(enemy.x, CONFIG.worldWidth) * scaleX;
             const ey = (enemy.y / CONFIG.worldHeight) * height;
             
             // Radar Colors for ALL enemy types
@@ -180,7 +185,7 @@ function updateRadar(scene) {
         radarCtx.fillStyle = '#ffaa00';
         humans.children.entries.forEach(human => {
             if (!human.active) return;
-            const hx = human.x * scaleX;
+            const hx = wrapX(human.x, CONFIG.worldWidth) * scaleX;
             const hy = (human.y / CONFIG.worldHeight) * height;
             radarCtx.beginPath();
             radarCtx.arc(hx, hy, 2, 0, Math.PI * 2);
@@ -190,7 +195,7 @@ function updateRadar(scene) {
 
     // 5. Draw Player
     if (player && player.active) {
-        const px = player.x * scaleX;
+        const px = wrapX(player.x, CONFIG.worldWidth) * scaleX;
         const py = (player.y / CONFIG.worldHeight) * height;
         
         radarCtx.fillStyle = '#ffffff';

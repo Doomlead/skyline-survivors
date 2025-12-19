@@ -398,10 +398,8 @@ function updateEnemies(scene, time, delta) {
     enemies.children.entries.forEach(enemy => {
         wrapWorldBounds(enemy);
         
-        const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
-        const terrainVariation = Math.sin(enemy.x / 200) * 30;
         const minClearance = 40;
-        const enemyGroundY = groundLevel - terrainVariation - minClearance;
+        const enemyGroundY = (scene.getGroundY ? scene.getGroundY(enemy.x) : getGroundY(enemy.x)) - minClearance;
         
         if (enemy.y > enemyGroundY) {
             enemy.y = enemyGroundY;
@@ -479,7 +477,8 @@ function updateEnemies(scene, time, delta) {
             enemy.destroy();
             const camX = scene.cameras.main.scrollX;
             const rx = camX + Phaser.Math.Between(50, CONFIG.width - 50);
-            const ry = Phaser.Math.Between(topLimit + 20, (scene.groundLevel || CONFIG.worldHeight - 80) - Math.sin(rx / 200) * 30 - 60);
+            const groundCap = (scene.getGroundY ? scene.getGroundY(rx) : getGroundY(rx)) - 60;
+            const ry = Phaser.Math.Between(topLimit + 20, Math.max(topLimit + 25, groundCap));
             const countsTowardsWave = enemy.countsTowardsWave !== false;
             spawnEnemy(scene, et, rx, ry, countsTowardsWave);
         }

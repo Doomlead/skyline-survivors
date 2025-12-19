@@ -26,10 +26,6 @@ function preload() {
     createGraphics(this);
 }
 
-function wrapX(x, worldWidth) {
-    return ((x % worldWidth) + worldWidth) % worldWidth;
-}
-
 function renormalizeWorldIfNeeded(scene) {
     const worldWidth = CONFIG.worldWidth;
     const normalizedPlayerX = wrapX(player.x, worldWidth);
@@ -172,15 +168,22 @@ function update(time, delta) {
 
     // Camera positioning
     const mainCam = this.cameras.main;
-    const maxScroll = Math.max(0, CONFIG.worldWidth - mainCam.width);
-    mainCam.scrollX = Phaser.Math.Clamp(player.x - mainCam.width / 2, 0, maxScroll);
+    const desiredScrollX = player.x - mainCam.width / 2;
+    const scrollDelta = desiredScrollX - mainCam.scrollX;
+    if (scrollDelta > CONFIG.worldWidth / 2) {
+        mainCam.scrollX += scrollDelta - CONFIG.worldWidth;
+    } else if (scrollDelta < -CONFIG.worldWidth / 2) {
+        mainCam.scrollX += scrollDelta + CONFIG.worldWidth;
+    } else {
+        mainCam.scrollX = desiredScrollX;
+    }
 
     if (wrapped) {
         syncParallaxToCamera(mainCam.scrollX);
     }
 
     // Update parallax backgrounds
-    updateParallax(player.x);
+    updateParallax(mainCam.scrollX);
 
     updateEnemies(this, time, delta);
     updateProjectiles(this);

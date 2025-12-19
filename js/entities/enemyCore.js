@@ -44,11 +44,10 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     const edgePadding = 100;
     const clampedX = Phaser.Math.Clamp(x, edgePadding, CONFIG.worldWidth - edgePadding);
 
-    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
-    const terrainVariation = Math.sin(clampedX / 200) * 30;
     const minClearance = 40;
     const topLimit = 20;
-    const maxY = groundLevel - terrainVariation - minClearance;
+    const groundY = scene.getGroundY ? scene.getGroundY(clampedX) : getGroundY(clampedX);
+    const maxY = groundY - minClearance;
     const spawnY = Phaser.Math.Clamp(y, topLimit, Math.max(topLimit + 10, maxY));
     const enemy = enemies.create(clampedX, spawnY, type);
     enemy.setDepth(FG_DEPTH_BASE + 2); // Gameplay sprites stay above the base foreground depth
