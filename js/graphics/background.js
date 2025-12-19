@@ -44,7 +44,7 @@ var BACKGROUND_LAYERS = {
     },
     terrain: {
         key: 'bg_terrain',
-        speedX: 0.85,
+        speedX: 1,
         depth: 5,
         generator: 'generateTerrainLayer',
     },
@@ -787,7 +787,7 @@ function createBackground(scene) {
 
     scene.getGroundY = getGroundY;
     scene.getTerrainHeightAt = getTerrainHeightAt;
-    scene.groundLevel = generatorConfig.worldHeight - TERRAIN_PROFILE.baseHeight;
+    scene.groundLevel = generatorConfig.worldHeight - (TERRAIN_PROFILE.baseHeight + (typeof TERRAIN_HEIGHT_OFFSET === 'number' ? TERRAIN_HEIGHT_OFFSET : 0));
 }
 
 function initParallaxTracking(playerX) {

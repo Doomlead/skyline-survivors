@@ -10,6 +10,7 @@ const TERRAIN_PROFILE = {
         { freq: 0.0025, amp: 22 }
     ]
 };
+const TERRAIN_HEIGHT_OFFSET = -3; // Slightly lower the maximum crest so on-screen peaks sit ~3px below visuals
 
 function wrapX(x, worldWidth = CONFIG.worldWidth) {
     return ((x % worldWidth) + worldWidth) % worldWidth;
@@ -24,7 +25,7 @@ function getTerrainHeightAt(worldX) {
         height += Math.sin(x * wave.freq) * wave.amp;
     }
 
-    return height;
+    return height + TERRAIN_HEIGHT_OFFSET;
 }
 
 function getGroundY(worldX) {
