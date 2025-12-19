@@ -28,34 +28,24 @@ var BACKGROUND_LAYERS = {
         depth: 2,
         generator: 'generateStarsLayer',
     },
-    horizonCity: {
-        key: 'bg_horizon_city',
-        speedX: 0.1,
-        depth: 3,
-        generator: 'generateHorizonCityLayer',
-    },
     distantCity: {
         key: 'bg_distant_city',
-        speedX: 0.2,
-        depth: 4,
+        speedX: 0.25,
+        depth: 3,
         generator: 'generateDistantCityLayer',
+        widthScale: 0.25,
     },
     midCity: {
         key: 'bg_mid_city',
-        speedX: 0.4,
-        depth: 5,
+        speedX: 0.5,
+        depth: 4,
         generator: 'generateMidCityLayer',
-    },
-    nearCity: {
-        key: 'bg_near_city',
-        speedX: 0.6,
-        depth: 6,
-        generator: 'generateNearCityLayer',
+        widthScale: 0.5,
     },
     terrain: {
         key: 'bg_terrain',
         speedX: 0.85,
-        depth: 7,
+        depth: 5,
         generator: 'generateTerrainLayer',
     },
 };
@@ -64,10 +54,8 @@ var LAYER_ORDER = [
     'sky',
     'atmosphere',
     'stars',
-    'horizonCity',
     'distantCity',
     'midCity',
-    'nearCity',
     'terrain',
 ];
 
@@ -121,11 +109,14 @@ var BackgroundGenerator = (function() {
     };
 
     BackgroundGenerator.prototype.generateLayerTexture = function(layerName, layerConfig) {
-        var worldWidth = this.config.worldWidth;
+        var originalWidth = this.config.worldWidth;
+        var worldWidth = originalWidth * (layerConfig.widthScale || 1);
         var worldHeight = this.config.worldHeight;
         
         var graphics = this.scene.add.graphics();
         var rng = this.createRNG((this.config.backgroundSeed || 1337) + layerConfig.depth * 1000);
+        var prevWidth = this.config.worldWidth;
+        this.config.worldWidth = worldWidth;
         
         if (typeof this[layerConfig.generator] === 'function') {
             this[layerConfig.generator](graphics, rng);
@@ -136,6 +127,8 @@ var BackgroundGenerator = (function() {
         // KEY: Use generateTexture() - creates static texture TileSprite can use
         graphics.generateTexture(layerConfig.key, worldWidth, worldHeight);
         graphics.destroy();
+
+        this.config.worldWidth = prevWidth;
         
         this.generatedTextures.set(layerName, layerConfig.key);
         console.log('[BackgroundGenerator] Generated: ' + layerConfig.key);
@@ -717,7 +710,8 @@ var ParallaxManager = (function() {
             this.layers.push({
                 sprite: tileSprite,
                 speedX: layerConfig.speedX,
-                name: layerName
+                name: layerName,
+                effectiveWidth: (this.config.worldWidth || 1) * (layerConfig.widthScale || 1),
             });
         }
 
@@ -744,7 +738,7 @@ var ParallaxManager = (function() {
             var layer = this.layers[i];
             var sprite = layer.sprite;
             var textureWidth = (sprite.texture && sprite.texture.getSourceImage()) ? sprite.texture.getSourceImage().width : wrapWidth;
-            var effectiveWidth = wrapWidth || textureWidth || 1;
+            var effectiveWidth = layer.effectiveWidth || wrapWidth || textureWidth || 1;
 
             var nextPos = (normalizedScrollX * layer.speedX) % effectiveWidth;
             nextPos = ((nextPos % effectiveWidth) + effectiveWidth) % effectiveWidth;
