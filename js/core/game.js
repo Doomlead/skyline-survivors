@@ -54,11 +54,26 @@ function renormalizeWorldIfNeeded(scene) {
     renormalizeGroup(bosses);
 
     const cam = scene.cameras.main;
-    cam.scrollX = wrapX(cam.scrollX - offset, worldWidth);
+    // Keep the camera aligned with the player's new wrapped position so the ship doesn't vanish off-screen
+    cam.scrollX -= offset;
 
     syncParallaxToCamera(cam.scrollX);
 
     return true;
+}
+
+function alignToNearestWrap(target, reference, worldWidth) {
+    const halfWorld = worldWidth / 2;
+    let adjusted = target;
+    let delta = adjusted - reference;
+
+    if (delta > halfWorld) {
+        adjusted -= worldWidth;
+    } else if (delta < -halfWorld) {
+        adjusted += worldWidth;
+    }
+
+    return adjusted;
 }
 function create() {
     // World bounds - disable left/right for wrapping
@@ -169,20 +184,12 @@ function update(time, delta) {
     // Camera positioning
     const mainCam = this.cameras.main;
     const desiredScrollX = player.x - mainCam.width / 2;
+    mainCam.scrollX = alignToNearestWrap(desiredScrollX, mainCam.scrollX, CONFIG.worldWidth);
 
     if (wrapped) {
-        // After renormalization, re-anchor the camera to the normalized player position so the ship stays centered.
-        mainCam.scrollX = wrapX(desiredScrollX, CONFIG.worldWidth);
+        // After renormalization, keep the camera anchored to the player's actual wrapped position
+        // instead of wrapping the camera to the opposite edge.
         syncParallaxToCamera(mainCam.scrollX);
-    } else {
-        const scrollDelta = desiredScrollX - mainCam.scrollX;
-        if (scrollDelta > CONFIG.worldWidth / 2) {
-            mainCam.scrollX += scrollDelta - CONFIG.worldWidth;
-        } else if (scrollDelta < -CONFIG.worldWidth / 2) {
-            mainCam.scrollX += scrollDelta + CONFIG.worldWidth;
-        } else {
-            mainCam.scrollX = desiredScrollX;
-        }
     }
 
     // Update parallax backgrounds
