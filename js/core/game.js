@@ -2,6 +2,9 @@
 // Main game scene and initialization
 // ------------------------
 
+// Store canonical positions separately from render positions
+// This is the key to making wrap-around work properly
+
 function initializeGame(scene) {
     for (let i = 0; i < gameState.humans; i++) {
         spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
@@ -26,101 +29,186 @@ function preload() {
     createGraphics(this);
 }
 
-function ensureCoreTextures(scene) {
-    const requiredKeys = ['player', 'human', 'lander', 'projectile', 'enemyProjectile'];
-    if (!scene.textures) return;
-    const missing = requiredKeys.filter(key => !scene.textures.exists(key));
-    if (missing.length > 0) {
-        console.warn('[GameScene] Missing core textures, regenerating:', missing.join(', '));
-        createGraphics(scene);
+// ------------------------
+// Wrap-around rendering system
+// ------------------------
+
+// Ghost sprites for entities that need to appear on both sides of the wrap boundary
+let ghostSprites = new Map();
+
+function wrapValue(x, worldWidth) {
+    x = x % worldWidth;
+    if (x < 0) x += worldWidth;
+    return x;
+}
+
+// Calculate shortest distance between two points in a wrapped world
+function wrappedDistance(x1, x2, worldWidth) {
+    const direct = x2 - x1;
+    const wrapped = direct > 0 ? direct - worldWidth : direct + worldWidth;
+    return Math.abs(direct) < Math.abs(wrapped) ? direct : wrapped;
+}
+
+// Get the render X position for an entity relative to camera
+function getRenderX(entityX, cameraX, worldWidth) {
+    // entityX should be canonical (0 to worldWidth)
+    // cameraX is the camera scrollX
+    const camCenter = cameraX + CONFIG.width / 2;
+    
+    // Find the position closest to camera center
+    let renderX = entityX;
+    const dist = wrappedDistance(camCenter, entityX, worldWidth);
+    
+    if (dist > 0) {
+        // Entity is to the right (in wrapped terms)
+        renderX = camCenter + dist;
+    } else {
+        // Entity is to the left (in wrapped terms)
+        renderX = camCenter + dist;
+    }
+    
+    return renderX;
+}
+
+// Create or update a ghost sprite for an entity near the boundary
+function updateGhostSprite(scene, entity, ghostX) {
+    let ghost = ghostSprites.get(entity);
+    
+    if (!ghost) {
+        // Create ghost sprite matching the original
+        ghost = scene.add.sprite(ghostX, entity.y, entity.texture.key);
+        ghost.setScale(entity.scaleX, entity.scaleY);
+        ghost.setDepth(entity.depth);
+        ghost.setAlpha(entity.alpha);
+        ghost.setTint(entity.tintTopLeft);
+        ghost.isGhost = true;
+        ghostSprites.set(entity, ghost);
+    }
+    
+    // Update ghost position and properties
+    ghost.setPosition(ghostX, entity.y);
+    ghost.setScale(entity.scaleX, entity.scaleY);
+    ghost.setFlipX(entity.flipX);
+    ghost.setFlipY(entity.flipY);
+    ghost.setVisible(entity.visible && entity.active);
+    ghost.setAlpha(entity.alpha);
+    
+    if (entity.anims && entity.anims.currentAnim) {
+        ghost.anims.play(entity.anims.currentAnim.key, true);
+        ghost.anims.setCurrentFrame(entity.anims.currentFrame);
     }
 }
 
-function applyWorldOffset(scene, offset) {
+function removeGhostSprite(entity) {
+    const ghost = ghostSprites.get(entity);
+    if (ghost) {
+        ghost.destroy();
+        ghostSprites.delete(entity);
+    }
+}
+
+// Main function to handle entity visibility across wrap boundaries
+function updateEntityWrapping(scene) {
+    const mainCam = scene.cameras.main;
+    const scrollX = mainCam.scrollX;
+    const camWidth = mainCam.width;
     const worldWidth = CONFIG.worldWidth;
-
-    if (offset === 0) return false;
-
-    player.x = wrapX(player.x - offset, worldWidth);
-
-    const renormalizeGroup = group => {
-        if (!group || !group.children || !group.children.entries) return;
-        group.children.entries.forEach(child => {
-            if (child && typeof child.x === 'number') {
-                child.x = wrapX(child.x - offset, worldWidth);
-            }
-        });
+    
+    // Boundary threshold - how close to edge before we need a ghost
+    const boundaryThreshold = camWidth;
+    
+    const processEntity = (entity) => {
+        if (!entity || !entity.active) {
+            removeGhostSprite(entity);
+            return;
+        }
+        
+        // Get canonical position
+        const canonicalX = wrapValue(entity.x, worldWidth);
+        
+        // Check if entity is near a boundary AND camera can see across that boundary
+        const nearLeftEdge = canonicalX < boundaryThreshold;
+        const nearRightEdge = canonicalX > worldWidth - boundaryThreshold;
+        
+        const cameraSeesLeftEdge = scrollX < boundaryThreshold;
+        const cameraSeesRightEdge = scrollX + camWidth > worldWidth - boundaryThreshold;
+        
+        let needsGhost = false;
+        let ghostX = canonicalX;
+        
+        if (nearRightEdge && cameraSeesLeftEdge) {
+            // Entity is on right side, camera sees left side - ghost on left
+            needsGhost = true;
+            ghostX = canonicalX - worldWidth;
+        } else if (nearLeftEdge && cameraSeesRightEdge) {
+            // Entity is on left side, camera sees right side - ghost on right
+            needsGhost = true;
+            ghostX = canonicalX + worldWidth;
+        }
+        
+        if (needsGhost) {
+            updateGhostSprite(scene, entity, ghostX);
+        } else {
+            removeGhostSprite(entity);
+        }
+        
+        // Keep entity at canonical position
+        entity.x = canonicalX;
     };
-
-    renormalizeGroup(enemies);
-    renormalizeGroup(projectiles);
-    renormalizeGroup(enemyProjectiles);
-    renormalizeGroup(powerUps);
-    renormalizeGroup(humans);
-    renormalizeGroup(drones);
-    renormalizeGroup(explosions);
-    renormalizeGroup(bosses);
-
-    const cam = scene.cameras.main;
-    // Keep the camera aligned with the player's new wrapped position so the ship doesn't vanish off-screen
-    cam.scrollX -= offset;
-
-    syncParallaxToCamera(cam.scrollX);
-
-    return true;
-}
-
-function renormalizeWorldIfNeeded(scene) {
-    const worldWidth = CONFIG.worldWidth;
-    const normalizedPlayerX = wrapX(player.x, worldWidth);
-    const offset = player.x - normalizedPlayerX;
-
-    return applyWorldOffset(scene, offset);
-}
-
-function recenterWorldIfCameraWraps(scene, desiredScrollX) {
-    const cam = scene.cameras.main;
-    const worldWidth = CONFIG.worldWidth;
-
-    const wouldWrapLeft = desiredScrollX < 0;
-    const wouldWrapRight = desiredScrollX + cam.width > worldWidth;
-
-    if (!wouldWrapLeft && !wouldWrapRight) return false;
-
-    // Shift by a full world length so world objects keep their wrapped positions while
-    // the camera hops to the opposite edge instead of recentering on the midpoint.
-    const offset = wouldWrapLeft ? -worldWidth : worldWidth;
-    return applyWorldOffset(scene, offset);
-}
-
-function alignToNearestWrap(target, reference, worldWidth) {
-    const halfWorld = worldWidth / 2;
-    let adjusted = target;
-    let delta = adjusted - reference;
-
-    if (delta > halfWorld) {
-        adjusted -= worldWidth;
-    } else if (delta < -halfWorld) {
-        adjusted += worldWidth;
+    
+    const processGroup = (group) => {
+        if (!group || !group.children || !group.children.entries) return;
+        group.children.entries.forEach(processEntity);
+    };
+    
+    // IMPORTANT: Process the player first (standalone sprite, not in a group)
+    if (player && player.active) {
+        processEntity(player);
     }
-
-    return adjusted;
+    
+    // Process all entity groups
+    processGroup(enemies);
+    processGroup(projectiles);
+    processGroup(enemyProjectiles);
+    processGroup(powerUps);
+    processGroup(humans);
+    processGroup(drones);
+    processGroup(bosses);
+    
+    if (explosions && explosions.children) {
+        explosions.children.entries.forEach(processEntity);
+    }
+    
+    // Clean up ghosts for destroyed entities
+    ghostSprites.forEach((ghost, entity) => {
+        if (!entity.active) {
+            ghost.destroy();
+            ghostSprites.delete(entity);
+        }
+    });
 }
-function create() {
-    ensureCoreTextures(this);
 
+// Clean up all ghost sprites
+function destroyAllGhosts() {
+    ghostSprites.forEach((ghost) => {
+        if (ghost) ghost.destroy();
+    });
+    ghostSprites.clear();
+}
+
+function create() {
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
     
     // Generate backgrounds FIRST
     createBackground(this);
 
-    // Player - keep at/above FG_DEPTH_BASE so gameplay renders over backgrounds
+    // Player
     player = this.physics.add.sprite(100, 300, 'player');
     player.setCollideWorldBounds(false);
     player.setScale(1.25);
     player.body.setSize(25, 10);
-    player.setDepth(FG_DEPTH_BASE + 10); // Anchor main sprite well above the base foreground depth
+    player.setDepth(FG_DEPTH_BASE + 10);
 
     // Game object groups
     enemies = this.physics.add.group();
@@ -162,6 +250,7 @@ function create() {
             particleManager.destroy();
             particleManager = null;
         }
+        destroyAllGhosts();
         destroyParallax();
     });
 
@@ -182,7 +271,6 @@ function create() {
     initializeGame(this);
     this.gameScene = this;
 
-    // Initialize parallax tracking AFTER player is created
     initParallaxTracking();
 }
 
@@ -212,29 +300,33 @@ function update(time, delta) {
         particleManager.update(delta);
     }
 
-    const wrapped = renormalizeWorldIfNeeded(this);
+    // Wrap player to canonical position
+    player.x = wrapValue(player.x, CONFIG.worldWidth);
 
-    // Camera positioning
+    // Camera positioning - clamp scrollX to prevent negative values
+    // This keeps the camera within valid world coordinates
     const mainCam = this.cameras.main;
     let desiredScrollX = player.x - mainCam.width / 2;
-    const recentered = recenterWorldIfCameraWraps(this, desiredScrollX);
-    if (recentered) {
-        desiredScrollX = player.x - mainCam.width / 2;
+    
+    // Clamp camera to world bounds (this is key!)
+    // We allow some overflow for smooth transitions at boundaries
+    const maxScroll = CONFIG.worldWidth - mainCam.width;
+    
+    // Handle wrap-around camera positioning
+    if (desiredScrollX < 0) {
+        // Player is near left edge - camera would go negative
+        // Shift camera to equivalent position on right side
+        desiredScrollX = CONFIG.worldWidth + desiredScrollX;
+    } else if (desiredScrollX > maxScroll) {
+        // Player is near right edge - camera exceeds world
+        // Shift camera to equivalent position on left side  
+        desiredScrollX = desiredScrollX - CONFIG.worldWidth;
     }
-    if (this._cameraResetPending) {
-        mainCam.scrollX = desiredScrollX;
-        syncParallaxToCamera(mainCam.scrollX);
-        this._cameraResetPending = false;
-    } else {
-        mainCam.scrollX = alignToNearestWrap(desiredScrollX, mainCam.scrollX, CONFIG.worldWidth);
-    }
+    
+    mainCam.scrollX = desiredScrollX;
 
-    if (wrapped) {
-        // After renormalization, keep the camera anchored to the player's actual wrapped position
-        // instead of wrapping the camera to the opposite edge.
-        mainCam.scrollX = desiredScrollX;
-        syncParallaxToCamera(mainCam.scrollX);
-    }
+    // Wrap all entities and create ghosts for boundary visibility
+    updateEntityWrapping(this);
 
     // Update parallax backgrounds
     updateParallax(mainCam.scrollX);

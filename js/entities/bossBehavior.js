@@ -287,8 +287,10 @@ function updateBosses(scene, time, delta) {
     bosses.children.entries.forEach(boss => {
         wrapWorldBounds(boss);
         
+        const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+        const terrainVariation = Math.sin(boss.x / 200) * 30;
         const minClearance = 60;
-        const bossGroundY = (scene.getGroundY ? scene.getGroundY(boss.x) : getGroundY(boss.x)) - minClearance;
+        const bossGroundY = groundLevel - terrainVariation - minClearance;
         
         if (boss.y > bossGroundY) {
             boss.y = bossGroundY;

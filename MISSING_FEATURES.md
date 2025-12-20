@@ -3,9 +3,9 @@
 Scope: Differences between the playable prototype and the core goals outlined in `DesignDocument.txt` (system map + Defender-style loop, co-op turret play, meta progression, branching upgrades, accessibility).
 
 1. **System/Meta Layer & District Stakes**
-   - A live district/state pipeline exists (missionPlanner + build scene) with timers, urgency-based directives, and localStorage persistence, but the system map still lacks mothership movement, branching threat routes, or consequences beyond static timers/destroyed status.
-   - District selection already seeds mission directives and rewards based on urgency, yet there is no longer-range escalation loop (roaming threats, node-to-node incursions) or unlock path toward the enemy base assault.
-   - The build layer provides mission prep and orbit-node callouts, but there is no shop/meta economy or persistence of resources and fallout across districts.
+   - System map is static: district timers, mothership movement, node threat escalation, and persistent destruction states are absent.
+   - District selection does not seed mission parameters (threat level, objectives, rewards) or unlock paths toward the enemy base assault.
+   - No between-mission build/shop layer or meta persistence to track cleared districts and fallout from failures.
 
 2. **Co-op, Ship Forms, and Survival Loops**
    - Only single-ship play exists; there is no two-player flow, shared resources, or revive/pilot-pod mechanics.

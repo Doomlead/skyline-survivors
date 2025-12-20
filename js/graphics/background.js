@@ -28,25 +28,26 @@ var BACKGROUND_LAYERS = {
         depth: 2,
         generator: 'generateStarsLayer',
     },
-    distantCity: {
-        key: 'bg_distant_city',
+    horizonCity: {
+        key: 'bg_horizon_city',
         speedX: 0.25,
         depth: 3,
-        generator: 'generateDistantCityLayer',
-        widthScale: 0.25,
+        generator: 'generateHorizonCityLayer',
+        widthMultiplier: 0.25,  // 4 maps at 25% width each
     },
     midCity: {
         key: 'bg_mid_city',
         speedX: 0.5,
         depth: 4,
         generator: 'generateMidCityLayer',
-        widthScale: 0.5,
+        widthMultiplier: 0.5,   // 2 maps at 50% width each
     },
     terrain: {
         key: 'bg_terrain',
         speedX: 1,
         depth: 5,
         generator: 'generateTerrainLayer',
+        widthMultiplier: 0.333,  // 3 maps at 33% width each for seamless wrapping
     },
 };
 
@@ -54,7 +55,7 @@ var LAYER_ORDER = [
     'sky',
     'atmosphere',
     'stars',
-    'distantCity',
+    'horizonCity',
     'midCity',
     'terrain',
 ];
@@ -81,6 +82,7 @@ var BackgroundGenerator = (function() {
         };
     };
 
+    // Generate seamlessly looping noise for a given texture width
     BackgroundGenerator.prototype.generateLoopingNoise = function(length, step, magnitude, seed) {
         var values = [];
         var numSteps = Math.ceil(length / step);
@@ -89,7 +91,7 @@ var BackgroundGenerator = (function() {
             var val = Math.sin(angle + seed) * magnitude;
             val += Math.sin(angle * 2.3 + seed * 1.5) * (magnitude * 0.5);
             val += Math.sin(angle * 4.7 + seed * 2.1) * (magnitude * 0.25);
-            if (i === numSteps) val = values[0];
+            if (i === numSteps) val = values[0]; // Ensure perfect loop
             values.push(val);
         }
         return values;
@@ -109,29 +111,40 @@ var BackgroundGenerator = (function() {
     };
 
     BackgroundGenerator.prototype.generateLayerTexture = function(layerName, layerConfig) {
-        var originalWidth = this.config.worldWidth;
-        var worldWidth = originalWidth * (layerConfig.widthScale || 1);
+        var worldWidth = this.config.worldWidth;
         var worldHeight = this.config.worldHeight;
+        
+        // Calculate texture width based on widthMultiplier for seamless parallax looping
+        // horizonCity: 0.25 = generates at 1/4 width, tiles 4 times
+        // midCity: 0.5 = generates at 1/2 width, tiles 2 times
+        // terrain: 0.333 = generates at 1/3 width, tiles 3 times
+        var textureWidth = worldWidth;
+        if (layerConfig.widthMultiplier && layerConfig.widthMultiplier < 1) {
+            textureWidth = Math.ceil(worldWidth * layerConfig.widthMultiplier);
+        }
         
         var graphics = this.scene.add.graphics();
         var rng = this.createRNG((this.config.backgroundSeed || 1337) + layerConfig.depth * 1000);
-        var prevWidth = this.config.worldWidth;
-        this.config.worldWidth = worldWidth;
+        
+        // Pass texture dimensions to generator for proper sizing
+        var dims = {
+            width: textureWidth,
+            height: worldHeight,
+            worldWidth: worldWidth,  // Original world width for reference
+            worldHeight: worldHeight
+        };
         
         if (typeof this[layerConfig.generator] === 'function') {
-            this[layerConfig.generator](graphics, rng);
+            this[layerConfig.generator](graphics, rng, dims);
         } else {
             console.warn('[BackgroundGenerator] Generator "' + layerConfig.generator + '" not found');
         }
         
-        // KEY: Use generateTexture() - creates static texture TileSprite can use
-        graphics.generateTexture(layerConfig.key, worldWidth, worldHeight);
+        graphics.generateTexture(layerConfig.key, textureWidth, worldHeight);
         graphics.destroy();
-
-        this.config.worldWidth = prevWidth;
         
         this.generatedTextures.set(layerName, layerConfig.key);
-        console.log('[BackgroundGenerator] Generated: ' + layerConfig.key);
+        console.log('[BackgroundGenerator] Generated: ' + layerConfig.key + ' (' + textureWidth + 'x' + worldHeight + ') - Tiles ' + Math.round(worldWidth / textureWidth) + 'x');
         
         return layerConfig.key;
     };
@@ -140,9 +153,9 @@ var BackgroundGenerator = (function() {
     // LAYER GENERATORS
     // ═══════════════════════════════════════════════════════════════════════
 
-    BackgroundGenerator.prototype.generateSkyLayer = function(graphics, random) {
-        var worldWidth = this.config.worldWidth;
-        var worldHeight = this.config.worldHeight;
+    BackgroundGenerator.prototype.generateSkyLayer = function(graphics, random, dims) {
+        var textureWidth = dims ? dims.width : this.config.worldWidth;
+        var worldHeight = dims ? dims.height : this.config.worldHeight;
         var bandHeight = 20;
 
         for (var y = 0; y < worldHeight; y += bandHeight) {
@@ -176,16 +189,16 @@ var BackgroundGenerator = (function() {
             }
 
             graphics.fillStyle(Phaser.Display.Color.GetColor(r, g, b), 1);
-            graphics.fillRect(0, y, worldWidth, bandHeight + 1);
+            graphics.fillRect(0, y, textureWidth, bandHeight + 1);
         }
     };
 
-    BackgroundGenerator.prototype.generateAtmosphereLayer = function(graphics, random) {
-        var worldWidth = this.config.worldWidth;
-        var worldHeight = this.config.worldHeight;
+    BackgroundGenerator.prototype.generateAtmosphereLayer = function(graphics, random, dims) {
+        var textureWidth = dims ? dims.width : this.config.worldWidth;
+        var worldHeight = dims ? dims.height : this.config.worldHeight;
 
         for (var i = 0; i < 8; i++) {
-            var px = random() * worldWidth;
+            var px = random() * textureWidth;
             var py = worldHeight * 0.3 + random() * worldHeight * 0.3;
 
             for (var s = 0; s < 6; s++) {
@@ -198,7 +211,7 @@ var BackgroundGenerator = (function() {
 
         graphics.fillStyle(0x443355, 0.06);
         for (var i = 0; i < 12; i++) {
-            var cx = random() * worldWidth;
+            var cx = random() * textureWidth;
             var cy = worldHeight * 0.15 + random() * worldHeight * 0.25;
             var width = 100 + random() * 200;
             var height = 30 + random() * 60;
@@ -208,16 +221,16 @@ var BackgroundGenerator = (function() {
         for (var i = 0; i < 5; i++) {
             var by = worldHeight * 0.4 + i * 50;
             graphics.fillStyle(0x4a3a30, 0.04);
-            graphics.fillRect(0, by, worldWidth, 30 + random() * 40);
+            graphics.fillRect(0, by, textureWidth, 30 + random() * 40);
         }
     };
 
-    BackgroundGenerator.prototype.generateStarsLayer = function(graphics, random) {
-        var worldWidth = this.config.worldWidth;
-        var worldHeight = this.config.worldHeight;
+    BackgroundGenerator.prototype.generateStarsLayer = function(graphics, random, dims) {
+        var textureWidth = dims ? dims.width : this.config.worldWidth;
+        var worldHeight = dims ? dims.height : this.config.worldHeight;
 
         for (var i = 0; i < 180; i++) {
-            var x = random() * worldWidth;
+            var x = random() * textureWidth;
             var y = random() * (worldHeight * 0.45);
             var brightness = 0.2 + random() * 0.8;
 
@@ -240,7 +253,7 @@ var BackgroundGenerator = (function() {
         }
 
         for (var i = 0; i < 5; i++) {
-            var dx = random() * worldWidth;
+            var dx = random() * textureWidth;
             var dy = random() * (worldHeight * 0.3);
             graphics.fillStyle(0xffffff, 0.7);
             graphics.fillRect(dx, dy, 3, 1);
@@ -249,7 +262,7 @@ var BackgroundGenerator = (function() {
         }
 
         for (var i = 0; i < 3; i++) {
-            var fx = random() * worldWidth;
+            var fx = random() * textureWidth;
             var fy = worldHeight * 0.5 + random() * worldHeight * 0.2;
             graphics.fillStyle(0xff8844, 0.15);
             graphics.fillCircle(fx, fy, 25);
@@ -258,125 +271,116 @@ var BackgroundGenerator = (function() {
         }
     };
 
-    BackgroundGenerator.prototype.generateHorizonCityLayer = function(graphics, random) {
-        var worldWidth = this.config.worldWidth;
-        var worldHeight = this.config.worldHeight;
+    // ═══════════════════════════════════════════════════════════════════════
+    // HORIZON CITY - Generates 4 seamless maps at 25% terrain width each
+    // ═══════════════════════════════════════════════════════════════════════
+    BackgroundGenerator.prototype.generateHorizonCityLayer = function(graphics, random, dims) {
+        var textureWidth = dims ? dims.width : this.config.worldWidth;
+        var worldHeight = dims ? dims.height : this.config.worldHeight;
         var horizonY = worldHeight - 120;
-        var self = this;
-        var buildingRng = this.createRNG((this.config.backgroundSeed || 1337) + 100);
-        var buildingRandom = function() { return buildingRng(); };
-
+        var seed = (this.config.backgroundSeed || 1337) + 100;
+        
+        // Use looping noise for seamless skyline that tiles perfectly
+        var noiseStep = 12;
+        var skylineNoise = this.generateLoopingNoise(textureWidth, noiseStep, 40, seed * 0.7);
+        var detailNoise = this.generateLoopingNoise(textureWidth, noiseStep * 0.5, 15, seed * 1.3);
+        
+        // Draw main city silhouette with seamless tiling
         graphics.fillStyle(0x060608, 1);
         graphics.beginPath();
         graphics.moveTo(0, worldHeight);
-
-        var hx = 0;
-        while (hx < worldWidth + 50) {
-            var buildingWidth = 8 + buildingRandom() * 25;
-            var buildingHeight = 20 + buildingRandom() * 70;
-            var destroyed = buildingRandom() > 0.6;
-
-            if (destroyed) {
-                graphics.lineTo(hx, horizonY - buildingHeight * 0.3);
-                graphics.lineTo(hx + buildingWidth * 0.3, horizonY - buildingHeight);
-                graphics.lineTo(hx + buildingWidth * 0.6, horizonY - buildingHeight * 0.5);
-                graphics.lineTo(hx + buildingWidth, horizonY - buildingHeight * 0.7);
+        
+        var buildingRng = this.createRNG(seed);
+        var buildingRandom = function() { return buildingRng(); };
+        
+        for (var i = 0; i < skylineNoise.length; i++) {
+            var x = i * noiseStep;
+            if (x > textureWidth) break;
+            
+            // Combine noises for varied but seamless height
+            var detailIdx = Math.min(i * 2, detailNoise.length - 1);
+            var baseHeight = 25 + Math.abs(skylineNoise[i]) + Math.abs(detailNoise[detailIdx]) * 0.5;
+            
+            var destroyed = buildingRandom() > 0.55;
+            
+            if (destroyed && i > 0 && i < skylineNoise.length - 1) {
+                // Jagged destroyed building silhouette
+                graphics.lineTo(x, horizonY - baseHeight * 0.4);
+                graphics.lineTo(x + noiseStep * 0.25, horizonY - baseHeight);
+                graphics.lineTo(x + noiseStep * 0.5, horizonY - baseHeight * 0.55);
+                graphics.lineTo(x + noiseStep * 0.75, horizonY - baseHeight * 0.85);
             } else {
-                graphics.lineTo(hx, horizonY - buildingHeight);
-                graphics.lineTo(hx + buildingWidth, horizonY - buildingHeight);
+                // Intact building silhouette
+                graphics.lineTo(x, horizonY - baseHeight);
+                if (buildingRandom() > 0.7) {
+                    // Add antenna/spire
+                    graphics.lineTo(x + noiseStep * 0.4, horizonY - baseHeight);
+                    graphics.lineTo(x + noiseStep * 0.5, horizonY - baseHeight - 15);
+                    graphics.lineTo(x + noiseStep * 0.6, horizonY - baseHeight);
+                }
             }
-
-            hx += buildingWidth + buildingRandom() * 5;
         }
-
-        graphics.lineTo(worldWidth, worldHeight);
+        
+        // Close the path seamlessly
+        graphics.lineTo(textureWidth, horizonY - 25 - Math.abs(skylineNoise[0]));
+        graphics.lineTo(textureWidth, worldHeight);
         graphics.closePath();
         graphics.fillPath();
-
-        for (var i = 0; i < 10; i++) {
-            var fx = random() * worldWidth;
+        
+        // Add some variation with secondary silhouette layer
+        graphics.fillStyle(0x080810, 1);
+        graphics.beginPath();
+        graphics.moveTo(0, worldHeight);
+        
+        for (var i = 0; i < skylineNoise.length; i++) {
+            var x = i * noiseStep + noiseStep * 0.5;
+            if (x > textureWidth) break;
+            var height = 15 + Math.abs(detailNoise[i % detailNoise.length]) * 0.8;
+            graphics.lineTo(x, horizonY - height);
+        }
+        
+        graphics.lineTo(textureWidth, worldHeight);
+        graphics.closePath();
+        graphics.fillPath();
+        
+        // Fire/glow effects - scale count based on texture width
+        var fireCount = Math.max(2, Math.ceil(10 * (textureWidth / dims.worldWidth)));
+        for (var i = 0; i < fireCount; i++) {
+            var fx = random() * textureWidth;
             graphics.fillStyle(0xff3300, 0.2);
-            graphics.fillCircle(fx, horizonY - 20, 12);
+            graphics.fillCircle(fx, horizonY - 15 - random() * 30, 10 + random() * 8);
             graphics.fillStyle(0xff6600, 0.35);
-            graphics.fillCircle(fx, horizonY - 20, 6);
+            graphics.fillCircle(fx, horizonY - 15 - random() * 25, 5 + random() * 4);
         }
-    };
-
-    BackgroundGenerator.prototype.generateDistantCityLayer = function(graphics, random) {
-        var worldWidth = this.config.worldWidth;
-        var worldHeight = this.config.worldHeight;
-
-        for (var i = 0; i < 35; i++) {
-            var bx = i * (worldWidth / 35) + random() * 40;
-            var bWidth = 18 + random() * 35;
-            var bHeight = 50 + random() * 100;
-            var by = worldHeight - 105;
-            var left = bx - bWidth / 2;
-            var top = by - bHeight;
-
-            var buildingType = random();
-            graphics.fillStyle(0x0c0c14, 1);
-
-            if (buildingType > 0.8) {
-                graphics.beginPath();
-                graphics.moveTo(left + bWidth * 0.3, by);
-                graphics.lineTo(left + bWidth * 0.3, top + bHeight * 0.3);
-                graphics.lineTo(left + bWidth * 0.5, top);
-                graphics.lineTo(left + bWidth * 0.7, top + bHeight * 0.3);
-                graphics.lineTo(left + bWidth * 0.7, by);
-                graphics.closePath();
-                graphics.fillPath();
-            } else if (buildingType > 0.5) {
-                graphics.beginPath();
-                graphics.moveTo(left, by);
-                graphics.lineTo(left, top + bHeight * 0.2);
-                var segs = 2 + Math.floor(random() * 3);
-                for (var s = 0; s <= segs; s++) {
-                    graphics.lineTo(left + (bWidth / segs) * s, top + random() * bHeight * 0.25);
-                }
-                graphics.lineTo(left + bWidth, top + bHeight * 0.15);
-                graphics.lineTo(left + bWidth, by);
-                graphics.closePath();
-                graphics.fillPath();
-            } else {
-                graphics.fillRect(left, top, bWidth, bHeight);
-                if (random() > 0.7) {
-                    graphics.fillRect(left + bWidth / 2 - 1, top - 15, 2, 15);
-                }
-            }
-
-            if (random() > 0.4) {
-                graphics.fillStyle(0x4488aa, 0.3);
-                for (var wy = 10; wy < bHeight - 8; wy += 14) {
-                    graphics.fillRect(left + 3, top + wy, bWidth - 6, 2);
-                }
-            }
-
-            if (random() > 0.75) {
-                graphics.fillStyle(0xff4400, 0.25);
-                graphics.fillCircle(left + bWidth / 2, top + bHeight * 0.3, 8);
-            }
-        }
-
-        for (var i = 0; i < 6; i++) {
-            var sx = random() * worldWidth;
-            var sy = worldHeight - 130;
-            graphics.fillStyle(0x222228, 0.3);
-            for (var s = 0; s < 5; s++) {
-                graphics.fillCircle(sx + s * 4, sy - s * 25, 12 + s * 4);
+        
+        // Distant window lights
+        for (var i = 0; i < fireCount * 3; i++) {
+            var wx = random() * textureWidth;
+            var wy = horizonY - 20 - random() * 50;
+            if (random() > 0.7) {
+                graphics.fillStyle(0xffaa44, 0.3 + random() * 0.2);
+                graphics.fillRect(wx, wy, 2, 2);
             }
         }
     };
 
-    BackgroundGenerator.prototype.generateMidCityLayer = function(graphics, random) {
-        var worldWidth = this.config.worldWidth;
-        var worldHeight = this.config.worldHeight;
+    // ═══════════════════════════════════════════════════════════════════════
+    // MID CITY - Generates 2 seamless maps at 50% terrain width each
+    // ═══════════════════════════════════════════════════════════════════════
+    BackgroundGenerator.prototype.generateMidCityLayer = function(graphics, random, dims) {
+        var textureWidth = dims ? dims.width : this.config.worldWidth;
+        var worldHeight = dims ? dims.height : this.config.worldHeight;
+        var worldWidthRef = dims ? dims.worldWidth : this.config.worldWidth;
         var bridgeY = worldHeight - 100;
+        var widthRatio = textureWidth / worldWidthRef;
+        var seed = (this.config.backgroundSeed || 1337) + 200;
 
         graphics.fillStyle(0x181820, 1);
 
-        for (var i = 0; i < 8; i++) {
-            var px = i * (worldWidth / 8) + 50;
+        // Bridge pillars - scaled count for texture width
+        var pillarCount = Math.max(2, Math.ceil(8 * widthRatio));
+        for (var i = 0; i < pillarCount; i++) {
+            var px = i * (textureWidth / pillarCount) + (textureWidth / pillarCount) * 0.5;
             var collapsed = random() > 0.6;
 
             if (collapsed) {
@@ -393,10 +397,12 @@ var BackgroundGenerator = (function() {
             }
         }
 
-        for (var i = 0; i < 6; i++) {
-            var segX = i * (worldWidth / 6) + random() * 100;
+        // Bridge segments - scaled count
+        var segmentCount = Math.max(2, Math.ceil(6 * widthRatio));
+        for (var i = 0; i < segmentCount; i++) {
+            var segX = i * (textureWidth / segmentCount) + random() * 50 * widthRatio;
             var segY = bridgeY - 55 + random() * 30;
-            var segWidth = 60 + random() * 80;
+            var segWidth = (40 + random() * 60) * Math.min(1, widthRatio * 1.5);
             var angle = -0.1 + random() * 0.2;
 
             graphics.fillStyle(0x1a1a24, 1);
@@ -409,17 +415,30 @@ var BackgroundGenerator = (function() {
             graphics.fillPath();
 
             graphics.fillStyle(0xffff00, 0.3);
-            graphics.fillRect(segX + 10, segY + 3, 15, 2);
-            graphics.fillRect(segX + 35, segY + 3, 15, 2);
+            graphics.fillRect(segX + 10, segY + 3, 12, 2);
+            graphics.fillRect(segX + 28, segY + 3, 12, 2);
         }
 
-        for (var i = 0; i < 28; i++) {
-            var bx = i * (worldWidth / 28) + random() * 50;
-            var bWidth = 28 + random() * 50;
-            var bHeight = 70 + random() * 110;
+        // Buildings - use looping noise for seamless building heights
+        var buildingNoise = this.generateLoopingNoise(textureWidth, 30, 60, seed * 0.5);
+        var buildingCount = Math.max(4, Math.ceil(28 * widthRatio));
+        
+        for (var i = 0; i < buildingCount; i++) {
+            var bx = i * (textureWidth / buildingCount) + random() * 30 * widthRatio;
+            var bWidth = 25 + random() * 45;
+            
+            // Use looping noise for height to ensure seamless tiling
+            var noiseIdx = Math.floor((bx / textureWidth) * buildingNoise.length) % buildingNoise.length;
+            var bHeight = 70 + Math.abs(buildingNoise[noiseIdx]) + random() * 50;
+            
             var by = worldHeight - 92;
             var left = bx - bWidth / 2;
             var top = by - bHeight;
+            
+            // Ensure buildings don't extend past texture edges in a jarring way
+            if (left < 0) left = 0;
+            if (left + bWidth > textureWidth) bWidth = textureWidth - left;
+            if (bWidth < 10) continue;
 
             var destroyed = random() > 0.35;
             var buildingType = random();
@@ -445,13 +464,14 @@ var BackgroundGenerator = (function() {
                     var fx = left + bWidth / 2;
                     var fy = top + bHeight * 0.35;
                     graphics.fillStyle(0xff4400, 0.3);
-                    graphics.fillCircle(fx, fy, 18);
+                    graphics.fillCircle(fx, fy, 16);
                     graphics.fillStyle(0xff7700, 0.5);
-                    graphics.fillCircle(fx, fy, 10);
+                    graphics.fillCircle(fx, fy, 8);
                 }
             } else {
                 graphics.fillRect(left, top, bWidth, bHeight);
 
+                // Windows
                 graphics.fillStyle(0x6699bb, 0.5);
                 for (var fy = 12; fy < bHeight - 10; fy += 15) {
                     for (var wx = 5; wx < bWidth - 8; wx += 11) {
@@ -464,173 +484,192 @@ var BackgroundGenerator = (function() {
                             } else {
                                 graphics.fillStyle(0x101018, 0.8);
                             }
-                            graphics.fillRect(left + wx, top + fy, 7, 9);
+                            graphics.fillRect(left + wx, top + fy, 6, 8);
                         }
                     }
                 }
             }
         }
 
-        var craneX = worldWidth * 0.3;
+        // Crane - positioned relative to texture width
+        var craneX = textureWidth * 0.3;
         var craneY = worldHeight - 100;
         graphics.fillStyle(0x222230, 1);
         graphics.fillRect(craneX, craneY - 80, 6, 80);
         graphics.beginPath();
         graphics.moveTo(craneX + 3, craneY - 80);
-        graphics.lineTo(craneX + 80, craneY - 40);
-        graphics.lineTo(craneX + 80, craneY - 35);
+        graphics.lineTo(craneX + 60, craneY - 40);
+        graphics.lineTo(craneX + 60, craneY - 35);
         graphics.lineTo(craneX + 3, craneY - 75);
         graphics.closePath();
         graphics.fillPath();
-    };
-
-    BackgroundGenerator.prototype.generateNearCityLayer = function(graphics, random) {
-        var worldWidth = this.config.worldWidth;
-        var worldHeight = this.config.worldHeight;
-
-        for (var i = 0; i < 6; i++) {
-            var poleX = i * (worldWidth / 6) + 80;
-            var poleY = worldHeight - 88;
-            var fallen = random() > 0.5;
-
-            if (fallen) {
-                graphics.fillStyle(0x1c1c28, 1);
-                graphics.beginPath();
-                graphics.moveTo(poleX, poleY);
-                graphics.lineTo(poleX + 40, poleY - 15);
-                graphics.lineTo(poleX + 42, poleY - 12);
-                graphics.lineTo(poleX + 3, poleY + 3);
-                graphics.closePath();
-                graphics.fillPath();
-
-                if (random() > 0.5) {
-                    graphics.fillStyle(0x44aaff, 0.6);
-                    graphics.fillCircle(poleX + 35, poleY - 10, 3);
-                }
-            } else {
-                graphics.fillStyle(0x1c1c28, 1);
-                graphics.fillRect(poleX - 3, poleY - 70, 6, 70);
-                graphics.fillRect(poleX - 20, poleY - 65, 40, 4);
-            }
-        }
-
-        for (var i = 0; i < 18; i++) {
-            var rx = i * (worldWidth / 18) + random() * 60;
-            var ry = worldHeight - 85 + random() * 20;
-            graphics.fillStyle(0x1e1e28, 1);
-            graphics.fillRect(rx - 25, ry - 15, 50 + random() * 30, 10 + random() * 8);
-        }
-
-        for (var i = 0; i < 14; i++) {
-            var bx = i * (worldWidth / 14) + random() * 50;
-            var bWidth = 36 + random() * 60;
-            var bHeight = 80 + random() * 140;
-            var by = worldHeight - 85;
-            var left = bx - bWidth / 2;
-            var top = by - bHeight;
-
-            graphics.fillStyle(0x22222c, 1);
+        
+        // Second crane on other side for visual balance
+        if (widthRatio >= 0.5) {
+            var crane2X = textureWidth * 0.75;
+            graphics.fillStyle(0x222230, 1);
+            graphics.fillRect(crane2X, craneY - 65, 5, 65);
             graphics.beginPath();
-            graphics.moveTo(left, by);
-            graphics.lineTo(left, top + bHeight * 0.08);
-
-            var segs = 4 + Math.floor(random() * 4);
-            for (var s = 0; s <= segs; s++) {
-                graphics.lineTo(left + (bWidth / segs) * s, top + random() * bHeight * 0.3);
-            }
-
-            graphics.lineTo(left + bWidth, top + bHeight * 0.05);
-            graphics.lineTo(left + bWidth, by);
+            graphics.moveTo(crane2X + 2, craneY - 65);
+            graphics.lineTo(crane2X - 45, craneY - 35);
+            graphics.lineTo(crane2X - 45, craneY - 30);
+            graphics.lineTo(crane2X + 2, craneY - 60);
             graphics.closePath();
             graphics.fillPath();
-
-            if (random() > 0.35) {
-                var fx = left + bWidth * 0.2 + random() * bWidth * 0.6;
-                var fy = top + bHeight * 0.15 + random() * bHeight * 0.4;
-
-                graphics.fillStyle(0xff2200, 0.35);
-                graphics.fillCircle(fx, fy, 22);
-                graphics.fillStyle(0xff5500, 0.55);
-                graphics.fillCircle(fx, fy, 14);
-                graphics.fillStyle(0xff8800, 0.75);
-                graphics.fillCircle(fx, fy - 3, 8);
-
-                graphics.fillStyle(0x1a1a1a, 0.25);
-                graphics.fillCircle(fx - 6, fy - 35, 20);
-                graphics.fillCircle(fx + 4, fy - 55, 24);
-            }
         }
     };
 
-    BackgroundGenerator.prototype.generateTerrainLayer = function(graphics, random) {
-        var worldWidth = this.config.worldWidth;
-        var worldHeight = this.config.worldHeight;
-        var step = 8;
+    // ═══════════════════════════════════════════════════════════════════════
+    // TERRAIN - Generates 3 seamless maps at 33% terrain width each
+    // ═══════════════════════════════════════════════════════════════════════
+    BackgroundGenerator.prototype.generateTerrainLayer = function(graphics, random, dims) {
+        var textureWidth = dims ? dims.width : this.config.worldWidth;
+        var worldHeight = dims ? dims.height : this.config.worldHeight;
+        var worldWidthRef = dims ? dims.worldWidth : this.config.worldWidth;
+        var widthRatio = textureWidth / worldWidthRef;
+        var groundY = worldHeight - 80;
 
-        // Base terrain aligned with the gameplay ground function
+        // Generate seamless looping noise for terrain contours
+        var baseNoise = this.generateLoopingNoise(textureWidth, 35, 28, 0.5);
+        var midNoise = this.generateLoopingNoise(textureWidth, 25, 18, 1.2);
+        var topNoise = this.generateLoopingNoise(textureWidth, 28, 14, 2.1);
+
+        // Base terrain
         graphics.fillStyle(0x1a1210, 1);
         graphics.beginPath();
         graphics.moveTo(0, worldHeight);
-        for (var wx = 0; wx <= worldWidth; wx += step) {
-            graphics.lineTo(wx, getGroundY(wx) + 14);
+        for (var i = 0; i < baseNoise.length; i++) {
+            var x = i * 35;
+            if (x > textureWidth) break;
+            graphics.lineTo(x, groundY - baseNoise[i] - 18);
         }
-        graphics.lineTo(worldWidth, worldHeight);
+        graphics.lineTo(textureWidth, worldHeight);
         graphics.closePath();
         graphics.fillPath();
 
-        // Mid layer
+        // Mid terrain
         graphics.fillStyle(0x252018, 1);
         graphics.beginPath();
         graphics.moveTo(0, worldHeight);
-        for (var mx = 0; mx <= worldWidth; mx += step) {
-            graphics.lineTo(mx, getGroundY(mx) + 6);
+        for (var i = 0; i < midNoise.length; i++) {
+            var x = i * 25;
+            if (x > textureWidth) break;
+            graphics.lineTo(x, groundY - midNoise[i] - 10);
         }
-        graphics.lineTo(worldWidth, worldHeight);
+        graphics.lineTo(textureWidth, worldHeight);
         graphics.closePath();
         graphics.fillPath();
 
-        // Top edge
+        // Top terrain
         graphics.fillStyle(0x352a20, 1);
         graphics.beginPath();
         graphics.moveTo(0, worldHeight);
-        for (var tx = 0; tx <= worldWidth; tx += step) {
-            graphics.lineTo(tx, getGroundY(tx));
+        for (var i = 0; i < topNoise.length; i++) {
+            var x = i * 28;
+            if (x > textureWidth) break;
+            graphics.lineTo(x, groundY - topNoise[i] - 4);
         }
-        graphics.lineTo(worldWidth, worldHeight);
+        graphics.lineTo(textureWidth, worldHeight);
         graphics.closePath();
         graphics.fillPath();
 
-        // Rubble and debris along the terrain crest
-        graphics.fillStyle(0x4a3a2a, 0.8);
-        for (var rx = 0; rx <= worldWidth; rx += 35) {
-            var crestY = getGroundY(rx);
-            for (var i = 0; i < 3; i++) {
-                var jitterX = rx + random() * 18;
-                var jitterY = crestY + random() * 18;
-                graphics.fillRect(jitterX, jitterY, 3 + random() * 10, 2 + random() * 5);
+        // Craters - scale count based on width ratio
+        var craterCount = Math.max(2, Math.ceil(12 * widthRatio));
+        for (var i = 0; i < craterCount; i++) {
+            var cx = random() * textureWidth;
+            var cy = groundY + 5 + random() * 20;
+            var cw = 20 + random() * 40;
+            var ch = 8 + random() * 15;
+
+            graphics.fillStyle(0x3a3028, 1);
+            graphics.fillEllipse(cx, cy, cw + 6, ch + 3);
+            graphics.fillStyle(0x151210, 1);
+            graphics.fillEllipse(cx, cy + 2, cw, ch);
+        }
+
+        // Wrecked vehicles - scale count
+        var vehicleCount = Math.max(2, Math.ceil(8 * widthRatio));
+        for (var i = 0; i < vehicleCount; i++) {
+            var vx = random() * textureWidth;
+            var vy = groundY + random() * 15;
+            var flipped = random() > 0.5;
+
+            graphics.fillStyle(0x2a2520, 1);
+            if (flipped) {
+                graphics.fillRect(vx, vy, 25, 8);
+                graphics.fillRect(vx + 3, vy - 5, 18, 5);
+            } else {
+                graphics.fillRect(vx, vy, 25, 10);
+                graphics.fillRect(vx + 4, vy - 6, 16, 6);
+            }
+
+            graphics.fillStyle(0x151512, 1);
+            graphics.fillCircle(vx + 5, vy + 10, 4);
+            if (!flipped) {
+                graphics.fillCircle(vx + 20, vy + 10, 4);
             }
         }
 
-        // Scars and impact craters
-        for (var cx = 0; cx < 12; cx++) {
-            var craterX = random() * worldWidth;
-            var craterY = getGroundY(craterX) + 10 + random() * 12;
-            var cw = 20 + random() * 40;
-            var ch = 6 + random() * 14;
-            graphics.fillStyle(0x3a3028, 1);
-            graphics.fillEllipse(craterX, craterY, cw + 6, ch + 3);
-            graphics.fillStyle(0x151210, 1);
-            graphics.fillEllipse(craterX, craterY + 2, cw, ch);
+        // Dead trees - scale count
+        var treeCount = Math.max(2, Math.ceil(10 * widthRatio));
+        for (var i = 0; i < treeCount; i++) {
+            var tx = random() * textureWidth;
+            var noiseIdx = Math.floor(tx / 28) % topNoise.length;
+            var ty = groundY - topNoise[noiseIdx];
+
+            graphics.fillStyle(0x1a1815, 1);
+            graphics.fillRect(tx - 2, ty - 35, 4, 35);
+
+            graphics.lineStyle(2, 0x1a1815, 1);
+            graphics.beginPath();
+            graphics.moveTo(tx, ty - 30);
+            graphics.lineTo(tx - 15, ty - 45);
+            graphics.strokePath();
+            graphics.beginPath();
+            graphics.moveTo(tx, ty - 25);
+            graphics.lineTo(tx + 12, ty - 38);
+            graphics.strokePath();
+            graphics.lineStyle(0);
         }
 
-        // Foreground ruins that roughly follow the new terrain slope
-        for (var bi = 0; bi < 18; bi++) {
-            var bx = bi * (worldWidth / 18) + random() * 80;
+        // Scattered debris - scale count
+        var debrisCount = Math.max(20, Math.ceil(100 * widthRatio));
+        graphics.fillStyle(0x4a3a2a, 0.8);
+        for (var i = 0; i < debrisCount; i++) {
+            var rx = random() * textureWidth;
+            var ry = groundY - 3 - random() * 35;
+            graphics.fillRect(rx, ry, 3 + random() * 10, 2 + random() * 5);
+        }
+
+        // Toxic puddles - scale count
+        var puddleCount = Math.max(1, Math.ceil(5 * widthRatio));
+        for (var i = 0; i < puddleCount; i++) {
+            var px = random() * textureWidth;
+            var py = groundY + 10 + random() * 15;
+            var pw = 20 + random() * 30;
+            var ph = 5 + random() * 8;
+
+            graphics.fillStyle(0x2a4a30, 0.4);
+            graphics.fillEllipse(px, py, pw + 4, ph + 2);
+            graphics.fillStyle(0x3a6a40, 0.6);
+            graphics.fillEllipse(px, py, pw, ph);
+        }
+
+        // Foreground buildings - scale count for 1/3 width
+        var buildingCount = Math.max(3, Math.ceil(18 * widthRatio));
+        for (var i = 0; i < buildingCount; i++) {
+            var bx = i * (textureWidth / buildingCount) + random() * 80 * widthRatio;
             var bWidth = 45 + random() * 70;
             var bHeight = 110 + random() * 150;
-            var by = getGroundY(bx);
+            var noiseIdx = Math.floor((bx / textureWidth) * topNoise.length) % topNoise.length;
+            var by = groundY - topNoise[noiseIdx];
             var left = bx - bWidth / 2;
             var top = by - bHeight;
+            
+            // Clamp to texture bounds
+            if (left < 0) left = 0;
+            if (left + bWidth > textureWidth) bWidth = textureWidth - left;
+            if (bWidth < 20) continue;
 
             graphics.fillStyle(0x1e1e2a, 1);
             graphics.beginPath();
@@ -649,27 +688,65 @@ var BackgroundGenerator = (function() {
 
             // Rubble pile
             graphics.fillStyle(0x161620, 1);
-            for (var r = 0; r < 10; r++) {
+            for (var r = 0; r < 12; r++) {
+                var rubbleX = left - 18 + random() * (bWidth + 36);
+                if (rubbleX < 0) rubbleX = 0;
+                if (rubbleX > textureWidth - 8) continue;
+                
                 graphics.fillRect(
-                    left - 18 + random() * (bWidth + 36),
+                    rubbleX,
                     by - 4 + random() * 25,
                     8 + random() * 18,
                     4 + random() * 12
                 );
             }
 
-            // Fires
-            if (random() > 0.3) {
+            // Windows
+            for (var fy = 20; fy < bHeight * 0.45; fy += 20) {
+                for (var wx = 10; wx < bWidth - 15; wx += 16) {
+                    if (random() > 0.28) {
+                        var state = random();
+                        if (state > 0.9) {
+                            graphics.fillStyle(0xff2200, 0.9);
+                        } else if (state > 0.65) {
+                            graphics.fillStyle(0xaaccee, 0.7);
+                        } else {
+                            graphics.fillStyle(0x0e0e18, 0.95);
+                        }
+                        graphics.fillRect(left + wx, top + fy, 12, 14);
+                    }
+                }
+            }
+
+            // Fire
+            if (random() > 0.25) {
                 var fx = left + bWidth * 0.2 + random() * bWidth * 0.6;
                 var fy = top + bHeight * 0.12 + random() * bHeight * 0.4;
 
                 graphics.fillStyle(0xff1100, 0.15);
-                graphics.fillCircle(fx, fy, 28);
+                graphics.fillCircle(fx, fy, 35);
                 graphics.fillStyle(0xff5500, 0.55);
-                graphics.fillCircle(fx, fy, 14);
+                graphics.fillCircle(fx, fy, 16);
                 graphics.fillStyle(0xff8800, 0.75);
-                graphics.fillCircle(fx, fy - 3, 8);
+                graphics.fillCircle(fx, fy - 4, 10);
+
+                // Smoke
+                graphics.fillStyle(0x1a1a1a, 0.2);
+                graphics.fillCircle(fx - 8, fy - 40, 18);
+                graphics.fillCircle(fx + 5, fy - 60, 22);
             }
+        }
+
+        // Warning signs - scale count
+        var signCount = Math.max(1, Math.ceil(4 * widthRatio));
+        for (var i = 0; i < signCount; i++) {
+            var sx = random() * textureWidth;
+            var sy = groundY - 5;
+
+            graphics.fillStyle(0x3a3530, 1);
+            graphics.fillRect(sx - 1, sy - 25, 3, 25);
+            graphics.fillStyle(0xaaaa30, 0.8);
+            graphics.fillRect(sx - 10, sy - 35, 20, 12);
         }
     };
 
@@ -686,6 +763,7 @@ var ParallaxManager = (function() {
         this.config = config;
         this.layers = [];
         this._prevPlayerX = 0;
+        this._accumScrollX = 0;
     }
 
     ParallaxManager.prototype.createLayers = function() {
@@ -710,8 +788,7 @@ var ParallaxManager = (function() {
             this.layers.push({
                 sprite: tileSprite,
                 speedX: layerConfig.speedX,
-                name: layerName,
-                effectiveWidth: (this.config.worldWidth || 1) * (layerConfig.widthScale || 1),
+                name: layerName
             });
         }
 
@@ -720,35 +797,29 @@ var ParallaxManager = (function() {
 
     ParallaxManager.prototype.initTracking = function(playerX) {
         // Initialize with camera scroll position instead of player position
-        var scene = this.scene;
-        var mainCam = scene.cameras.main;
+        var mainCam = this.scene.cameras.main;
         this._prevPlayerX = mainCam.scrollX;
+        this._accumScrollX = 0;
     };
 
     ParallaxManager.prototype.update = function(playerX) {
-        var scene = this.scene;
-        var mainCam = scene.cameras.main;
-
-        // Always lock parallax offsets to the camera's scroll position so they realign perfectly when the
-        // world recenters itself. This avoids tiny seams when the wrap math lands between texture pixels.
-        var wrapWidth = this.config.worldWidth || 1;
-        var normalizedScrollX = ((mainCam.scrollX % wrapWidth) + wrapWidth) % wrapWidth;
-
+        // Use camera scroll instead of player position
+        // Camera scrollX handles wrapping naturally
+        var mainCam = this.scene.cameras.main;
+        var currentScrollX = mainCam.scrollX;
+        
+        // Calculate actual delta from camera movement
+        var dx = currentScrollX - this._prevPlayerX;
+        
+        // Update tracking
+        this._accumScrollX += dx;
+        this._prevPlayerX = currentScrollX;
+        
+        // Apply parallax speeds
         for (var i = 0; i < this.layers.length; i++) {
             var layer = this.layers[i];
-            var sprite = layer.sprite;
-            var textureWidth = (sprite.texture && sprite.texture.getSourceImage()) ? sprite.texture.getSourceImage().width : wrapWidth;
-            var effectiveWidth = layer.effectiveWidth || wrapWidth || textureWidth || 1;
-
-            var nextPos = (normalizedScrollX * layer.speedX) % effectiveWidth;
-            nextPos = ((nextPos % effectiveWidth) + effectiveWidth) % effectiveWidth;
-
-            sprite.tilePositionX = nextPos;
+            layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
         }
-    };
-
-    ParallaxManager.prototype.syncToCamera = function(scrollX) {
-        this._prevPlayerX = scrollX;
     };
 
     ParallaxManager.prototype.destroy = function() {
@@ -785,9 +856,7 @@ function createBackground(scene) {
     parallaxManagerInstance = new ParallaxManager(scene, generatorConfig);
     parallaxManagerInstance.createLayers();
 
-    scene.getGroundY = getGroundY;
-    scene.getTerrainHeightAt = getTerrainHeightAt;
-    scene.groundLevel = generatorConfig.worldHeight - (TERRAIN_PROFILE.baseHeight + (typeof TERRAIN_HEIGHT_OFFSET === 'number' ? TERRAIN_HEIGHT_OFFSET : 0));
+    scene.groundLevel = generatorConfig.worldHeight - 80;
 }
 
 function initParallaxTracking(playerX) {
@@ -799,12 +868,6 @@ function initParallaxTracking(playerX) {
 function updateParallax(playerX) {
     if (parallaxManagerInstance) {
         parallaxManagerInstance.update(playerX);
-    }
-}
-
-function syncParallaxToCamera(scrollX) {
-    if (parallaxManagerInstance && parallaxManagerInstance.syncToCamera) {
-        parallaxManagerInstance.syncToCamera(scrollX);
     }
 }
 

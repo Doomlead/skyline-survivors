@@ -107,6 +107,9 @@ let audioManager;
 // Global particle manager instance
 let particleManager;
 
+// Secondary cameras used to display wrapped world edges
+let wrapCamera;
+
 // Virtual input for touch controls
 window.virtualInput = {
     left: false,

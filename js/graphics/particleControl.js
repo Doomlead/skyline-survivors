@@ -1,22 +1,52 @@
-// ParticleControl.js - Phaser-equivalent particle controller
+// ParticleControl.js - Wrap-aware particle controller
 class ParticleControl {
-    constructor(sprite, velocity, lifespan, color, screenWidth, screenHeight) {
+    constructor(sprite, velocity, lifespan, color, worldWidth, worldHeight) {
         this.sprite = sprite;
         this.velocity = velocity; // {x, y}
         this.lifespan = lifespan;
         this.color = color;
-        this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
+        this.worldWidth = worldWidth;
+        this.worldHeight = worldHeight;
         this.spawnTime = Date.now();
         this.affectedByGravity = sprite.getData('affectedByGravity') || false;
+        
+        // Store canonical X position (always 0 to worldWidth)
+        this.canonicalX = sprite.x;
     }
 
-    update(delta) {
+    // Wrap value to 0-worldWidth range
+    wrapX(x) {
+        x = x % this.worldWidth;
+        if (x < 0) x += this.worldWidth;
+        return x;
+    }
+
+    update(delta, cameraScrollX, cameraWidth) {
         const tpf = delta / 1000; // Convert milliseconds to seconds
 
-        // Movement
-        this.sprite.x += this.velocity.x * tpf * 3;
+        // Movement - update canonical position
+        this.canonicalX += this.velocity.x * tpf * 3;
         this.sprite.y += this.velocity.y * tpf * 3;
+
+        // Wrap canonical X to world bounds
+        this.canonicalX = this.wrapX(this.canonicalX);
+
+        // Calculate render position relative to camera
+        // This ensures particles are visible at wrap boundaries
+        const cameraCenterX = cameraScrollX + cameraWidth / 2;
+        const halfWorld = this.worldWidth / 2;
+        
+        let renderX = this.canonicalX;
+        let delta_x = this.canonicalX - cameraCenterX;
+        
+        // Adjust render position if particle is on "wrong side" of wrap
+        if (delta_x > halfWorld) {
+            renderX = this.canonicalX - this.worldWidth;
+        } else if (delta_x < -halfWorld) {
+            renderX = this.canonicalX + this.worldWidth;
+        }
+        
+        this.sprite.x = renderX;
 
         // Apply friction
         this.velocity.x *= (1 - 3 * tpf);
@@ -27,16 +57,10 @@ class ParticleControl {
             this.velocity.y = 0;
         }
 
-        // Bounce off screen edges
-        if (this.sprite.x < 0) {
-            this.velocity.x = Math.abs(this.velocity.x);
-        } else if (this.sprite.x > this.screenWidth) {
-            this.velocity.x = -Math.abs(this.velocity.x);
-        }
-
+        // Bounce off vertical screen edges (Y axis - no wrapping)
         if (this.sprite.y < 0) {
             this.velocity.y = Math.abs(this.velocity.y);
-        } else if (this.sprite.y > this.screenHeight) {
+        } else if (this.sprite.y > this.worldHeight) {
             this.velocity.y = -Math.abs(this.velocity.y);
         }
 
@@ -64,6 +88,9 @@ class ParticleControl {
 
         const scale = 0.3 + this.lesserValue(this.lesserValue(1.5, 0.02 * speed + 0.1), alpha);
         this.sprite.setScale(scale * 0.65);
+
+        // Set depth to render above backgrounds
+        this.sprite.setDepth(FG_DEPTH_BASE + 20);
 
         // Check if particle has expired
         if (difTime > this.lifespan) {

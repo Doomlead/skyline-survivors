@@ -19,10 +19,12 @@ function updatePlayer(scene, time) {
     if (cursors.up.isDown || vInput.up) player.setVelocityY(-speed);
     else if (cursors.down.isDown || vInput.down) player.setVelocityY(speed);
 
-    const groundY = scene.getGroundY ? scene.getGroundY(player.x) : getGroundY(player.x);
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(player.x / 200) * 30;
     const minY = 20;
-    const maxY = groundY - 20;
-    player.y = Phaser.Math.Clamp(player.y, minY, maxY);
+    const maxY = groundLevel - terrainVariation - 20;
+    if (player.y < minY) player.y = minY;
+    if (player.y > maxY) player.y = maxY;
 
     if ((spaceKey.isDown || vInput.fire) && time > playerState.lastFire + playerState.fireRate) {
         fireWeapon(scene);
@@ -246,8 +248,10 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, pier
 }
 
 function updateProjectiles(scene) {
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const destroyIfGrounded = (proj) => {
-        const groundY = scene.getGroundY ? scene.getGroundY(proj.x) : getGroundY(proj.x);
+        const terrainVariation = Math.sin(proj.x / 200) * 30;
+        const groundY = groundLevel - terrainVariation - 15;
         if (proj.y >= groundY) {
             proj.destroy();
             return true;
@@ -363,7 +367,6 @@ function playerDie(scene) {
             player.y = 300;
             player.setActive(true).setVisible(true);
             player.body.enable = true;
-            scene._cameraResetPending = true;
             playerState.powerUps.invincibility = 2000;
             scene._isRespawning = false;
         });
@@ -416,8 +419,9 @@ function updateDrones(scene, time) {
 }
 
 function spawnHuman(scene, x) {
-    const groundY = scene.getGroundY ? scene.getGroundY(x) : getGroundY(x);
-    const y = groundY - 15;
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(x / 200) * 30;
+    const y = groundLevel - terrainVariation - 15;
     const human = humans.create(x, y, 'human');
     human.setScale(1.25);
     human.setDepth(FG_DEPTH_BASE + 1);
@@ -460,7 +464,9 @@ function rescueHuman(playerSprite, human) {
 function updateHumans(scene) {
     humans.children.entries.forEach(human => {
         if (human.body && human.body.gravity && human.body.gravity.y > 0) {
-            const groundY = scene.getGroundY ? scene.getGroundY(human.x) : getGroundY(human.x);
+            const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+            const terrainVariation = Math.sin(human.x / 200) * 30;
+            const groundY = groundLevel - terrainVariation - 15;
             if (human.y >= groundY) {
                 human.y = groundY;
                 human.setGravityY(0);
@@ -472,3 +478,4 @@ function updateHumans(scene) {
         wrapWorldBounds(human);
     });
 }
+

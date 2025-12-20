@@ -1,9 +1,9 @@
-// ParticleManager.js - Phaser-equivalent particle manager
+// ParticleManager.js - Wrap-aware particle manager
 class ParticleManager {
-    constructor(scene, screenWidth, screenHeight) {
+    constructor(scene, worldWidth, worldHeight) {
         this.scene = scene;
-        this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
+        this.worldWidth = worldWidth;
+        this.worldHeight = worldHeight;
         this.spawnTime = Date.now();
         this.particles = [];
         this.lastTrailPosition = null;
@@ -30,16 +30,29 @@ class ParticleManager {
         }
     }
 
+    // Wrap value to 0-worldWidth range
+    wrapX(x) {
+        x = x % this.worldWidth;
+        if (x < 0) x += this.worldWidth;
+        return x;
+    }
+
     update(delta) {
+        // Get camera info for wrap-aware rendering
+        const mainCam = this.scene.cameras.main;
+        const cameraScrollX = mainCam ? mainCam.scrollX : 0;
+        const cameraWidth = mainCam ? mainCam.width : CONFIG.width;
+
         this.particles = this.particles.filter(particleControl => {
-            return particleControl.update(delta);
+            return particleControl.update(delta, cameraScrollX, cameraWidth);
         });
     }
 
     applyGravityToParticles(gravitySourceX, gravitySourceY) {
         this.particles.forEach(particleControl => {
             if (particleControl.affectedByGravity) {
-                const dx = gravitySourceX - particleControl.sprite.x;
+                // Use canonical X for gravity calculations
+                const dx = gravitySourceX - particleControl.canonicalX;
                 const dy = gravitySourceY - particleControl.sprite.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
@@ -54,6 +67,9 @@ class ParticleManager {
     }
 
     enemyExplosion(x, y) {
+        // Wrap the spawn position to canonical coordinates
+        x = this.wrapX(x);
+        
         const hue1 = Math.random() * 6;
         const hue2 = (Math.random() * 2) % 6;
         const color1 = this.hsvToColor(hue1, 0.5, 1);
@@ -62,6 +78,7 @@ class ParticleManager {
         for (let i = 0; i < 120; i++) {
             const velocity = this.getRandomVelocity(250);
             const sprite = this.scene.add.sprite(x, y, 'particle');
+            sprite.setDepth(FG_DEPTH_BASE + 20);
 
             const color = {
                 r: color1.r + (color2.r - color1.r) * Math.random() * 0.5,
@@ -70,31 +87,35 @@ class ParticleManager {
             };
 
             sprite.setData('affectedByGravity', true);
-            const control = new ParticleControl(sprite, velocity, 3100, color, this.screenWidth, this.screenHeight);
+            const control = new ParticleControl(sprite, velocity, 3100, color, this.worldWidth, this.worldHeight);
             this.particles.push(control);
         }
     }
 
     bulletExplosion(x, y) {
+        x = this.wrapX(x);
         const color = { r: 0.676, g: 0.844, b: 0.898 };
 
         for (let i = 0; i < 30; i++) {
             const velocity = this.getRandomVelocity(175);
             const sprite = this.scene.add.sprite(x, y, 'particle');
+            sprite.setDepth(FG_DEPTH_BASE + 20);
 
             sprite.setData('affectedByGravity', true);
-            const control = new ParticleControl(sprite, velocity, 1000, color, this.screenWidth, this.screenHeight);
+            const control = new ParticleControl(sprite, velocity, 1000, color, this.worldWidth, this.worldHeight);
             this.particles.push(control);
         }
     }
 
     playerExplosion(x, y) {
+        x = this.wrapX(x);
         const color1 = { r: 1, g: 1, b: 1 };
         const color2 = { r: 1, g: 1, b: 0 };
 
         for (let i = 0; i < 1200; i++) {
             const velocity = this.getRandomVelocity(1000);
             const sprite = this.scene.add.sprite(x, y, 'particle');
+            sprite.setDepth(FG_DEPTH_BASE + 20);
 
             const t = Math.random();
             const color = {
@@ -104,22 +125,25 @@ class ParticleManager {
             };
 
             sprite.setData('affectedByGravity', true);
-            const control = new ParticleControl(sprite, velocity, 2800, color, this.screenWidth, this.screenHeight);
+            const control = new ParticleControl(sprite, velocity, 2800, color, this.worldWidth, this.worldHeight);
             this.particles.push(control);
         }
     }
 
     sprayParticle(x, y, sprayVelX, sprayVelY) {
+        x = this.wrapX(x);
         const sprite = this.scene.add.sprite(x, y, 'particle');
+        sprite.setDepth(FG_DEPTH_BASE + 20);
         const color = { r: 0.8, g: 0.4, b: 0.8 };
         const velocity = { x: sprayVelX, y: sprayVelY };
 
         sprite.setData('affectedByGravity', true);
-        const control = new ParticleControl(sprite, velocity, 3500, color, this.screenWidth, this.screenHeight);
+        const control = new ParticleControl(sprite, velocity, 3500, color, this.worldWidth, this.worldHeight);
         this.particles.push(control);
     }
 
     blackHoleExplosion(x, y) {
+        x = this.wrapX(x);
         const hue = ((Date.now() - this.spawnTime) * 0.003) % 6;
         const numParticles = 150;
         const color = this.hsvToColor(hue, 0.25, 1);
@@ -137,13 +161,15 @@ class ParticleManager {
             const posY = y + velocity.y * 0.1;
 
             const sprite = this.scene.add.sprite(posX, posY, 'particle');
+            sprite.setDepth(FG_DEPTH_BASE + 20);
             sprite.setData('affectedByGravity', true);
-            const control = new ParticleControl(sprite, velocity, 1000, color, this.screenWidth, this.screenHeight);
+            const control = new ParticleControl(sprite, velocity, 1000, color, this.worldWidth, this.worldHeight);
             this.particles.push(control);
         }
     }
 
     makeExhaustFire(x, y, rotation) {
+        x = this.wrapX(x);
         const midColor = { r: 1, g: 0.73, b: 0.12 };
         const sideColor = { r: 0.78, g: 0.15, b: 0.04 };
 
@@ -156,7 +182,7 @@ class ParticleManager {
             y: -baseVel.x * 2 * Math.sin(t * 10)
         };
 
-        const posX = x + direction.x * -25;
+        const posX = this.wrapX(x + direction.x * -25);
         const posY = y + direction.y * -25;
 
         // Middle stream
@@ -195,7 +221,7 @@ class ParticleManager {
     makeExhaustTrail(x, y, rotation, speed) {
         const direction = { x: Math.cos(rotation), y: Math.sin(rotation) };
         const trailOrigin = {
-            x: x + direction.x * -20,
+            x: this.wrapX(x + direction.x * -20),
             y: y + direction.y * -20
         };
 
@@ -206,7 +232,16 @@ class ParticleManager {
             return;
         }
 
-        const deltaX = trailOrigin.x - this.lastTrailPosition.x;
+        // Calculate wrapped distance for trail
+        let deltaX = trailOrigin.x - this.lastTrailPosition.x;
+        
+        // Handle wrap-around distance
+        if (deltaX > this.worldWidth / 2) {
+            deltaX -= this.worldWidth;
+        } else if (deltaX < -this.worldWidth / 2) {
+            deltaX += this.worldWidth;
+        }
+        
         const deltaY = trailOrigin.y - this.lastTrailPosition.y;
         const distance = Math.hypot(deltaX, deltaY);
 
@@ -219,7 +254,7 @@ class ParticleManager {
         const color = { r: 0.55, g: 0.82, b: 1 };
 
         for (let i = 1; i <= steps; i++) {
-            const posX = this.lastTrailPosition.x + normal.x * spacing * i;
+            const posX = this.wrapX(this.lastTrailPosition.x + normal.x * spacing * i);
             const posY = this.lastTrailPosition.y + normal.y * spacing * i;
             const wobble = (Math.random() - 0.5) * 12;
             const sideways = { x: -direction.y * wobble, y: direction.x * wobble };
@@ -239,16 +274,18 @@ class ParticleManager {
 
     createTrailParticle(x, y, velocity, color) {
         const sprite = this.scene.add.sprite(x, y, 'glowParticle');
+        sprite.setDepth(FG_DEPTH_BASE + 15);
         const lifespan = 500 + Math.random() * 350;
         sprite.setData('affectedByGravity', false);
-        const control = new ParticleControl(sprite, velocity, lifespan, color, this.screenWidth, this.screenHeight);
+        const control = new ParticleControl(sprite, velocity, lifespan, color, this.worldWidth, this.worldHeight);
         this.particles.push(control);
     }
 
     createExhaustParticle(x, y, velocity, color, texture) {
         const sprite = this.scene.add.sprite(x, y, texture);
+        sprite.setDepth(FG_DEPTH_BASE + 15);
         sprite.setData('affectedByGravity', true);
-        const control = new ParticleControl(sprite, velocity, 800, color, this.screenWidth, this.screenHeight);
+        const control = new ParticleControl(sprite, velocity, 800, color, this.worldWidth, this.worldHeight);
         this.particles.push(control);
     }
 
@@ -282,7 +319,9 @@ class ParticleManager {
 
     destroy() {
         this.particles.forEach(control => {
-            control.sprite.destroy();
+            if (control.sprite && !control.sprite.destroyed) {
+                control.sprite.destroy();
+            }
         });
         this.particles = [];
     }
