@@ -77,7 +77,9 @@ function recenterWorldIfCameraWraps(scene, desiredScrollX) {
 
     if (!wouldWrapLeft && !wouldWrapRight) return false;
 
-    const offset = player.x - worldWidth / 2;
+    // Shift by a full world length so world objects keep their wrapped positions while
+    // the camera hops to the opposite edge instead of recentering on the midpoint.
+    const offset = wouldWrapLeft ? -worldWidth : worldWidth;
     return applyWorldOffset(scene, offset);
 }
 
