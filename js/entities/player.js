@@ -363,6 +363,7 @@ function playerDie(scene) {
             player.y = 300;
             player.setActive(true).setVisible(true);
             player.body.enable = true;
+            scene._cameraResetPending = true;
             playerState.powerUps.invincibility = 2000;
             scene._isRespawning = false;
         });
