@@ -184,7 +184,13 @@ function update(time, delta) {
     // Camera positioning
     const mainCam = this.cameras.main;
     const desiredScrollX = player.x - mainCam.width / 2;
-    mainCam.scrollX = alignToNearestWrap(desiredScrollX, mainCam.scrollX, CONFIG.worldWidth);
+    if (this._cameraResetPending) {
+        mainCam.scrollX = desiredScrollX;
+        syncParallaxToCamera(mainCam.scrollX);
+        this._cameraResetPending = false;
+    } else {
+        mainCam.scrollX = alignToNearestWrap(desiredScrollX, mainCam.scrollX, CONFIG.worldWidth);
+    }
 
     if (wrapped) {
         // After renormalization, keep the camera anchored to the player's actual wrapped position
