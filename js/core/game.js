@@ -26,6 +26,16 @@ function preload() {
     createGraphics(this);
 }
 
+function ensureCoreTextures(scene) {
+    const requiredKeys = ['player', 'human', 'lander', 'projectile', 'enemyProjectile'];
+    if (!scene.textures) return;
+    const missing = requiredKeys.filter(key => !scene.textures.exists(key));
+    if (missing.length > 0) {
+        console.warn('[GameScene] Missing core textures, regenerating:', missing.join(', '));
+        createGraphics(scene);
+    }
+}
+
 function applyWorldOffset(scene, offset) {
     const worldWidth = CONFIG.worldWidth;
 
@@ -97,6 +107,8 @@ function alignToNearestWrap(target, reference, worldWidth) {
     return adjusted;
 }
 function create() {
+    ensureCoreTextures(this);
+
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
     
