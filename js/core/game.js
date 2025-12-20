@@ -26,14 +26,12 @@ function preload() {
     createGraphics(this);
 }
 
-function renormalizeWorldIfNeeded(scene) {
+function applyWorldOffset(scene, offset) {
     const worldWidth = CONFIG.worldWidth;
-    const normalizedPlayerX = wrapX(player.x, worldWidth);
-    const offset = player.x - normalizedPlayerX;
 
     if (offset === 0) return false;
 
-    player.x = normalizedPlayerX;
+    player.x = wrapX(player.x - offset, worldWidth);
 
     const renormalizeGroup = group => {
         if (!group || !group.children || !group.children.entries) return;
@@ -60,6 +58,27 @@ function renormalizeWorldIfNeeded(scene) {
     syncParallaxToCamera(cam.scrollX);
 
     return true;
+}
+
+function renormalizeWorldIfNeeded(scene) {
+    const worldWidth = CONFIG.worldWidth;
+    const normalizedPlayerX = wrapX(player.x, worldWidth);
+    const offset = player.x - normalizedPlayerX;
+
+    return applyWorldOffset(scene, offset);
+}
+
+function recenterWorldIfCameraWraps(scene, desiredScrollX) {
+    const cam = scene.cameras.main;
+    const worldWidth = CONFIG.worldWidth;
+
+    const wouldWrapLeft = desiredScrollX < 0;
+    const wouldWrapRight = desiredScrollX + cam.width > worldWidth;
+
+    if (!wouldWrapLeft && !wouldWrapRight) return false;
+
+    const offset = player.x - worldWidth / 2;
+    return applyWorldOffset(scene, offset);
 }
 
 function alignToNearestWrap(target, reference, worldWidth) {
@@ -183,7 +202,11 @@ function update(time, delta) {
 
     // Camera positioning
     const mainCam = this.cameras.main;
-    const desiredScrollX = player.x - mainCam.width / 2;
+    let desiredScrollX = player.x - mainCam.width / 2;
+    const recentered = recenterWorldIfCameraWraps(this, desiredScrollX);
+    if (recentered) {
+        desiredScrollX = player.x - mainCam.width / 2;
+    }
     if (this._cameraResetPending) {
         mainCam.scrollX = desiredScrollX;
         syncParallaxToCamera(mainCam.scrollX);
