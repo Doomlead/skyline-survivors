@@ -6,9 +6,9 @@ class AudioManager {
     constructor(scene) {
         this.scene = scene;
         this.sounds = {};
-        this.musicVolume = 0.6;
-        this.sfxVolume = 0.7;
-        this.isMuted = false;
+        this.musicVolume = userSettings.musicVolume;
+        this.sfxVolume = userSettings.sfxVolume;
+        this.isMuted = userSettings.muted;
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.musicSource = null;
         this.musicGain = null;
@@ -237,6 +237,8 @@ class AudioManager {
 
     toggleMute() {
         this.isMuted = !this.isMuted;
+        userSettings.muted = this.isMuted;
+        persistUserSettings();
         if (this.isMuted) this.stopMusic();
         else this.playAmbientMusic();
         return this.isMuted;
@@ -244,6 +246,8 @@ class AudioManager {
 
     setMusicVolume(value) {
         this.musicVolume = Math.max(0, Math.min(1, value));
+        userSettings.musicVolume = this.musicVolume;
+        persistUserSettings();
         if (this.musicGain) {
             this.musicGain.gain.value = this.musicVolume;
         }
@@ -251,6 +255,8 @@ class AudioManager {
 
     setSFXVolume(value) {
         this.sfxVolume = Math.max(0, Math.min(1, value));
+        userSettings.sfxVolume = this.sfxVolume;
+        persistUserSettings();
     }
 
     dispose() {

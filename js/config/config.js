@@ -15,6 +15,44 @@ const CONFIG = {
     worldHeight: 500
 };
 
+// Player-facing settings (audio + accessibility)
+const SETTINGS_STORAGE_KEY = 'skyline_user_settings_v1';
+const userSettings = {
+    musicVolume: 0.6,
+    sfxVolume: 0.7,
+    reduceFlashes: false,
+    muted: false
+};
+
+function loadUserSettings() {
+    if (typeof localStorage === 'undefined') return;
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (!stored) return;
+
+    try {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+            if (typeof parsed.musicVolume === 'number') userSettings.musicVolume = Phaser.Math.Clamp(parsed.musicVolume, 0, 1);
+            if (typeof parsed.sfxVolume === 'number') userSettings.sfxVolume = Phaser.Math.Clamp(parsed.sfxVolume, 0, 1);
+            if (typeof parsed.reduceFlashes === 'boolean') userSettings.reduceFlashes = parsed.reduceFlashes;
+            if (typeof parsed.muted === 'boolean') userSettings.muted = parsed.muted;
+        }
+    } catch (err) {
+        // Ignore malformed storage
+    }
+}
+
+function persistUserSettings() {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(userSettings));
+}
+
+function isFlashReductionEnabled() {
+    return !!userSettings.reduceFlashes;
+}
+
+loadUserSettings();
+
 // Game state
 const gameState = {
     score: 0,

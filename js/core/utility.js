@@ -10,8 +10,12 @@ function wrapWorldBounds(sprite) {
 
 function createExplosion(scene, x, y, color = 0xffff00) {
     if (audioManager) audioManager.playSound('explosion');
+    const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
+    const particleScale = reduceFlashes ? 0.35 : 0.5;
+    const flashAlpha = reduceFlashes ? 0.45 : 0.7;
+    const particleCount = reduceFlashes ? 4 : 8;
     // ENHANCED: 8 particles for dramatic effect
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < particleCount; i++) {
         const particle = scene.add.sprite(x, y, 'explosion');
         particle.setTint(color);
         const angle = (Math.PI * 2 / 8) * i;
@@ -20,7 +24,7 @@ function createExplosion(scene, x, y, color = 0xffff00) {
             x: x + Math.cos(angle) * 30,
             y: y + Math.sin(angle) * 30,
             alpha: 0,
-            scale: 0.5,
+            scale: particleScale,
             duration: 300,
             onComplete: () => particle.destroy()
         });
@@ -37,12 +41,16 @@ function createSpawnEffect(scene, x, y, enemyType) {
         'swarmer': 0x00ff00,
         'baiter': 0xff00ff
     };
+    const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const color = colors[enemyType] || 0xff4444;
+    const particleCount = reduceFlashes ? 6 : 12;
+    const particleScale = reduceFlashes ? 0.5 : 0.8;
+    const flashAlpha = reduceFlashes ? 0.4 : 0.7;
     // ENHANCED: 12 particles with spread patterns
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < particleCount; i++) {
         const particle = scene.add.sprite(x, y, 'explosion');
         particle.setTint(color);
-        particle.setScale(0.8);
+        particle.setScale(particleScale);
         const angle = (Math.PI * 2 / 12) * i;
         const startX = x + Math.cos(angle) * 5;
         const startY = y + Math.sin(angle) * 5;
@@ -60,7 +68,7 @@ function createSpawnEffect(scene, x, y, enemyType) {
     const flash = scene.add.sprite(x, y, 'explosion');
     flash.setTint(color);
     flash.setScale(2);
-    flash.setAlpha(0.7);
+    flash.setAlpha(flashAlpha);
     scene.tweens.add({
         targets: flash,
         scale: 0.5,
@@ -90,7 +98,8 @@ function screenShake(scene, intensity = 10, duration = 200) {
 }
 
 function createPowerUpCollectionEffect(scene, x, y, powerUpType) {
-    const flash = scene.add.circle(x, y, 30, 0xffffff, 0.8);
+    const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
+    const flash = scene.add.circle(x, y, 30, 0xffffff, reduceFlashes ? 0.4 : 0.8);
     flash.setDepth(50);
     scene.tweens.add({
         targets: flash,
@@ -100,13 +109,15 @@ function createPowerUpCollectionEffect(scene, x, y, powerUpType) {
         ease: 'Power2.easeOut',
         onComplete: () => flash.destroy()
     });
-    for (let i = 0; i < 6; i++) {
+    const particleCount = reduceFlashes ? 4 : 6;
+    const particleDistance = reduceFlashes ? 30 : 40;
+    for (let i = 0; i < particleCount; i++) {
         const particle = scene.add.circle(x, y, 3, 0x00ff00, 1);
         const angle = (Math.PI * 2 / 6) * i;
         scene.tweens.add({
             targets: particle,
-            x: x + Math.cos(angle) * 40,
-            y: y + Math.sin(angle) * 40,
+            x: x + Math.cos(angle) * particleDistance,
+            y: y + Math.sin(angle) * particleDistance,
             alpha: 0,
             scale: 0.2,
             duration: 500,
@@ -116,7 +127,8 @@ function createPowerUpCollectionEffect(scene, x, y, powerUpType) {
     }
     const powerfulTypes = ['double', 'invincibility', 'timeSlow', 'overdrive'];
     if (powerfulTypes.includes(powerUpType)) {
-        screenShake(scene, 8, 150);
+        const shakeIntensity = reduceFlashes ? 4 : 8;
+        screenShake(scene, shakeIntensity, 150);
     }
 }
 
@@ -130,14 +142,18 @@ function createEnhancedDeathEffect(scene, x, y, enemyType) {
         'swarmer': 0x00ff00,
         'baiter': 0xff00ff
     };
+    const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const color = deathColors[enemyType] || 0xff4444;
+    const ringCount = reduceFlashes ? 1 : 2;
+    const blastRadius = reduceFlashes ? 25 : 40;
+    const particleDistanceBase = reduceFlashes ? 40 : 60;
     // ENHANCED: 2 expanding rings for dramatic effect
-    for (let ring = 0; ring < 2; ring++) {
+    for (let ring = 0; ring < ringCount; ring++) {
         setTimeout(() => {
             for (let i = 0; i < 16; i++) {
                 const particle = scene.add.circle(x, y, 2 + ring, color, 1);
                 const angle = (Math.PI * 2 / 16) * i;
-                const distance = 60 + (ring * 20);
+                const distance = particleDistanceBase + (ring * 20);
                 scene.tweens.add({
                     targets: particle,
                     x: x + Math.cos(angle) * distance,
@@ -154,7 +170,7 @@ function createEnhancedDeathEffect(scene, x, y, enemyType) {
     const blast = scene.add.circle(x, y, 8, color, 1);
     scene.tweens.add({
         targets: blast,
-        radius: 40,
+        radius: blastRadius,
         alpha: 0,
         duration: 400,
         ease: 'Power2.easeOut',
