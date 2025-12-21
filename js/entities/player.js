@@ -383,13 +383,14 @@ function useSmartBomb(scene) {
         destroyEnemy(scene, enemy);
     });
     enemyProjectiles.clear(true);
+    const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const flash = scene.add.rectangle(
         scene.cameras.main.scrollX + CONFIG.width / 2,
         CONFIG.height / 2,
         CONFIG.width,
         CONFIG.height,
         0xffffff,
-        0.8
+        reduceFlashes ? 0.4 : 0.8
     ).setScrollFactor(0).setDepth(FG_DEPTH_BASE + 90);
     scene.tweens.add({
         targets: flash,
@@ -478,4 +479,3 @@ function updateHumans(scene) {
         wrapWorldBounds(human);
     });
 }
-

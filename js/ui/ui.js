@@ -342,9 +342,29 @@ function togglePause(scene) {
             centerY + 90, 12, 0x00ff00, 1
         ).setScrollFactor(0).setDepth(1000).setInteractive();
 
+        // Flash reduction toggle
+        const flashLabel = scene.add.text(centerX - 150, centerY + 125, 'Reduce Screen Flashes', { fontSize: '16px', fontFamily: 'Orbitron', color: '#00ffff' }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(999);
+        const flashToggle = scene.add.rectangle(centerX + 40, centerY + 125, 32, 18, 0x111827, 1)
+            .setStrokeStyle(2, 0x00ffff, 0.7)
+            .setScrollFactor(0)
+            .setDepth(999)
+            .setInteractive({ useHandCursor: true });
+        const flashThumb = scene.add.circle(
+            centerX + 32 + (userSettings.reduceFlashes ? 14 : 0),
+            centerY + 125,
+            8,
+            userSettings.reduceFlashes ? 0x22c55e : 0x0ea5e9,
+            1
+        ).setScrollFactor(0).setDepth(1000).setInteractive({ useHandCursor: true });
+        flashThumb._baseX = centerX + 32;
+        const flashText = scene.add.text(centerX + 65, centerY + 125, userSettings.reduceFlashes ? 'On' : 'Off', {
+            fontSize: '14px', fontFamily: 'Orbitron', color: userSettings.reduceFlashes ? '#22c55e' : '#38bdf8'
+        }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(999);
+
         scene.pauseUI = { 
             overlay, pauseTitle, resumeText, menuText, 
-            volumeTitle, musicLabel, musicSlider, musicKnob, sfxLabel, sfxSlider, sfxKnob 
+            volumeTitle, musicLabel, musicSlider, musicKnob, sfxLabel, sfxSlider, sfxKnob,
+            flashLabel, flashToggle, flashThumb, flashText
         };
 
         resumeText.on('pointerdown', () => togglePause(scene));
@@ -353,7 +373,9 @@ function togglePause(scene) {
         let dragTarget = null;
         musicKnob.on('pointerdown', () => { dragTarget = 'music'; });
         sfxKnob.on('pointerdown', () => { dragTarget = 'sfx'; });
-        
+        flashToggle.on('pointerdown', () => toggleFlashReduction(flashThumb, flashText));
+        flashThumb.on('pointerdown', () => toggleFlashReduction(flashThumb, flashText));
+
         const onPointerUp = () => { dragTarget = null; };
         const onPointerMove = (pointer) => {
             if (!dragTarget || !audioManager) return;
@@ -402,6 +424,21 @@ function cleanupPauseUI(scene) {
     if (scene.menuKeyHandler) {
         scene.input.keyboard.off('keydown-M', scene.menuKeyHandler);
         scene.menuKeyHandler = null;
+    }
+}
+
+function toggleFlashReduction(thumb, label) {
+    userSettings.reduceFlashes = !userSettings.reduceFlashes;
+    persistUserSettings();
+    const isOn = userSettings.reduceFlashes;
+    if (thumb) {
+        const baseX = thumb._baseX || thumb.x - (isOn ? 14 : 0);
+        thumb.x = baseX + (isOn ? 14 : 0);
+        thumb.fillColor = isOn ? 0x22c55e : 0x0ea5e9;
+    }
+    if (label) {
+        label.setText(isOn ? 'On' : 'Off');
+        label.setColor(isOn ? '#22c55e' : '#38bdf8');
     }
 }
 
