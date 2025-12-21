@@ -29,6 +29,7 @@ Scope: Differences between the playable prototype and the core goals outlined in
    - No persistence scaffolding for unlocks, cosmetics, or difficulty modifiers tied to system performance.
 
 7. **Options & Accessibility**
-   - Prototype has no volume sliders, key remapping, screen-flash reduction, or color-blind options described in the design document.
+   - Added main-menu volume sliders (music/SFX), mute toggle wiring, and a persistent reduce-screen-flashes toggle saved to local storage.
+   - Still missing: key remapping, color-blind palettes, subtitle/captioning, and in-game quick-accessibility presets.
 
 These gaps remain the highest-impact areas to build toward the full Strike Force–inspired design vision.

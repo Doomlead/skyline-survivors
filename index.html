@@ -114,6 +114,34 @@
                 </button>
             </div>
 
+            <div class="bg-slate-900/60 border border-slate-700 rounded-lg p-3 text-left mb-4 flex flex-col gap-3">
+                <div class="flex items-center justify-between text-[11px] text-slate-200">
+                    <div class="flex items-center gap-2">
+                        <span class="text-cyan-300 font-semibold uppercase tracking-wide">Music Volume</span>
+                    </div>
+                    <span id="music-volume-value" class="text-[11px] text-slate-300">60%</span>
+                </div>
+                <input id="music-volume-slider" type="range" min="0" max="100" step="1" value="60"
+                    class="w-full accent-cyan-400 cursor-pointer">
+
+                <div class="flex items-center justify-between text-[11px] text-slate-200">
+                    <div class="flex items-center gap-2">
+                        <span class="text-cyan-300 font-semibold uppercase tracking-wide">SFX Volume</span>
+                    </div>
+                    <span id="sfx-volume-value" class="text-[11px] text-slate-300">70%</span>
+                </div>
+                <input id="sfx-volume-slider" type="range" min="0" max="100" step="1" value="70"
+                    class="w-full accent-emerald-400 cursor-pointer">
+
+                <label for="reduce-flash-toggle" class="flex items-center justify-between text-[11px] text-slate-200 mt-1">
+                    <span class="text-cyan-300 font-semibold uppercase tracking-wide">Reduce Screen Flashes</span>
+                    <div class="flex items-center gap-2">
+                        <span id="reduce-flash-label" class="text-[11px] text-slate-300">Off</span>
+                        <input id="reduce-flash-toggle" type="checkbox" class="accent-cyan-400 h-4 w-4">
+                    </div>
+                </label>
+            </div>
+
             <div class="flex items-center justify-between text-[10px] text-slate-400 mb-2">
                 <span>Press <span class="text-cyan-300">R</span> anytime on Game Over to restart.</span>
                 <button id="mute-toggle" class="px-2 py-1 border border-slate-600 rounded text-[10px] hover:border-cyan-400">
