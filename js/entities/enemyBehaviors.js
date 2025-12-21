@@ -373,8 +373,8 @@ function updateSwarmLeaderBehavior(scene, enemy, time, timeSlowMultiplier) {
 }
 
 // Allows regenerators to heal periodically while drifting in gentle arcs and firing.
-function updateRegeneratorBehavior(scene, enemy, time, timeSlowMultiplier) {
-    enemy.lastHeal += timeSlowMultiplier;
+function updateRegeneratorBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
+    enemy.lastHeal += delta * timeSlowMultiplier;
     if (enemy.lastHeal > 5000 && enemy.hp < getEnemyHP('regenerator')) {
         enemy.hp = Math.min(getEnemyHP('regenerator'), enemy.hp + enemy.healAmount);
         enemy.lastHeal = 0;
@@ -470,7 +470,7 @@ function updateEnemies(scene, time, delta) {
                 updateSwarmLeaderBehavior(scene, enemy, time, timeSlowMultiplier);
                 break;
             case 'regenerator':
-                updateRegeneratorBehavior(scene, enemy, time, timeSlowMultiplier);
+                updateRegeneratorBehavior(scene, enemy, time, delta, timeSlowMultiplier);
                 break;
         }
 
@@ -484,4 +484,8 @@ function updateEnemies(scene, time, delta) {
             spawnEnemy(scene, et, rx, ry, countsTowardsWave);
         }
     });
+}
+
+if (typeof module !== 'undefined') {
+    module.exports = { updateRegeneratorBehavior };
 }
