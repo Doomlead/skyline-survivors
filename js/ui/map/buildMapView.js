@@ -38,6 +38,24 @@ class BuildMapView {
     }
 
     build(width, height) {
+        // Clean up any existing objects if the scene was restarted
+        this.mapNodes.forEach(node => {
+            node.pulse?.stop();
+            node.node?.destroy();
+            node.label?.destroy();
+            node.timerText?.destroy();
+            node.connector?.destroy();
+        });
+        this.mapNodes = [];
+        this.districts = [];
+        this.selectedDistrict = null;
+        this.mapMarker = null;
+        this.mapPing = null;
+        if (this.planetContainer) {
+            this.planetContainer.destroy(true);
+            this.planetContainer = null;
+        }
+
         this.centerX = width * 0.35;
         this.centerY = height / 2 + 10;
 
