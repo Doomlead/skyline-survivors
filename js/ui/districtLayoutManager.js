@@ -88,6 +88,7 @@ const DistrictLayoutManager = (function() {
         if (phaserCanvas && gameContainer) {
             gameContainer.appendChild(phaserCanvas);
             removeDistrictStyling();
+            clearCanvasSizing();
         }
         
         console.log('Switched back to game layout');
@@ -128,6 +129,15 @@ const DistrictLayoutManager = (function() {
         phaserCanvas.style.boxShadow = '';
         
         console.log('District styling removed');
+    }
+    
+    function clearCanvasSizing() {
+        if (!phaserCanvas) return;
+        phaserCanvas.style.minWidth = '';
+        phaserCanvas.style.minHeight = '';
+        phaserCanvas.style.maxWidth = '';
+        phaserCanvas.style.maxHeight = '';
+        phaserCanvas.style.flex = '';
     }
     
     function resizeCanvasForDistrict() {
@@ -306,6 +316,40 @@ const DistrictLayoutManager = (function() {
     function updateElement(id, value) {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
+    }
+
+    function applyDistrictCenterSizing(container, width, height) {
+        const minWidth = Math.max(width, 400);
+        const minHeight = Math.max(height, 320);
+        container.style.minWidth = `${minWidth}px`;
+        container.style.minHeight = `${minHeight}px`;
+        container.style.flex = '1 0 auto';
+        lastMeasuredCenter = { minWidth, minHeight };
+        console.log('[DistrictLayout] Applied center sizing', minWidth, 'x', minHeight);
+        logLayoutMetrics('Center sizing applied');
+    }
+
+    function clearDistrictCenterSizing() {
+        const districtCenter = document.getElementById('district-game-container');
+        if (!districtCenter) return;
+        districtCenter.style.minWidth = '';
+        districtCenter.style.minHeight = '';
+        districtCenter.style.flex = '';
+        lastMeasuredCenter = null;
+    }
+
+    function logCanvasRect(label) {
+        if (!phaserCanvas) return;
+        const rect = phaserCanvas.getBoundingClientRect();
+        console.log(`[DistrictLayout] ${label}: canvas client ${Math.round(rect.width)} x ${Math.round(rect.height)}, intrinsic ${phaserCanvas.width} x ${phaserCanvas.height}`);
+    }
+
+    function logLayoutMetrics(label) {
+        const districtCenter = document.getElementById('district-game-container');
+        if (!districtCenter || !phaserCanvas) return;
+        const panelRect = districtCenter.getBoundingClientRect();
+        const canvasRect = phaserCanvas.getBoundingClientRect();
+        console.log(`[DistrictLayout] ${label}: center panel ${Math.round(panelRect.width)} x ${Math.round(panelRect.height)} (min ${districtCenter.style.minWidth || 'unset'} x ${districtCenter.style.minHeight || 'unset'}), canvas ${Math.round(canvasRect.width)} x ${Math.round(canvasRect.height)} (style ${phaserCanvas.style.width} x ${phaserCanvas.style.height})`);
     }
     
     function formatSeconds(seconds) {
