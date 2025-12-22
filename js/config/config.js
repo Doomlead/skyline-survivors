@@ -83,7 +83,9 @@ const gameState = {
     missionDirectives: null,
     missionDistrictState: null,
     rewardMultiplier: 1,
-    spawnMultiplier: 1
+    spawnMultiplier: 1,
+    metaAppliedLoadout: null,
+    metaRewardsGranted: false
 };
 
 // Player state
@@ -207,4 +209,6 @@ function resetGameState() {
     gameState.missionDirectives = null;
     gameState.rewardMultiplier = 1;
     gameState.spawnMultiplier = 1;
+    gameState.metaAppliedLoadout = null;
+    gameState.metaRewardsGranted = false;
 }

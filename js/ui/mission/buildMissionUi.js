@@ -14,6 +14,10 @@ class BuildMissionUi {
         this.launchButton = null;
         this.rollButton = null;
         this.onModeSelected = null;
+        this.shopPanel = null;
+        this.creditsText = null;
+        this.loadoutButtons = { offense: [], defense: [] };
+        this.shopItemRows = [];
     }
 
     createOverlay(width) {
@@ -142,6 +146,103 @@ class BuildMissionUi {
         }).setOrigin(0.5);
     }
 
+    createBuildShopPanel(width, height) {
+        const panelWidth = width * 0.62;
+        const panelHeight = 260;
+        const panelX = width * 0.45;
+        const panelY = height - panelHeight / 2 - 10;
+
+        this.shopPanel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, 0x0b1220, 0.8);
+        this.shopPanel.setStrokeStyle(2, 0x0ea5e9, 0.6);
+        this.shopPanel.setDepth(4);
+
+        this.scene.add.text(panelX - panelWidth / 2 + 12, panelY - panelHeight / 2 + 8, 'Between-Mission Build & Shop', {
+            fontFamily: 'Orbitron',
+            fontSize: '13px',
+            color: '#8bffff'
+        }).setOrigin(0, 0);
+
+        this.creditsText = this.scene.add.text(panelX + panelWidth / 2 - 12, panelY - panelHeight / 2 + 10, 'Credits: --', {
+            fontFamily: 'Orbitron',
+            fontSize: '12px',
+            color: '#fef08a'
+        }).setOrigin(1, 0);
+
+        const loadoutY = panelY - 25;
+        this.createLoadoutColumn(panelX - panelWidth * 0.22, loadoutY, 'offense', 'Offense Loadout');
+        this.createLoadoutColumn(panelX + panelWidth * 0.08, loadoutY, 'defense', 'Defense Loadout');
+
+        const shopStartY = panelY + 40;
+        this.scene.add.text(panelX - panelWidth / 2 + 12, shopStartY - 22, 'Shop Unlocks (Orbit Node)', {
+            fontFamily: 'Orbitron',
+            fontSize: '11px',
+            color: '#9fb8d1'
+        }).setOrigin(0, 0.5);
+
+        const inventory = window.metaProgression?.getShopInventory?.() || [];
+        const rowWidth = panelWidth - 30;
+        this.shopItemRows = inventory.map((item, idx) => {
+            const y = shopStartY + idx * 34;
+            const row = this.scene.add.rectangle(panelX, y, rowWidth, 30, 0x0f172a, 0.85)
+                .setStrokeStyle(1.5, 0x1dcaff, 0.35)
+                .setInteractive({ useHandCursor: true });
+            const nameText = this.scene.add.text(panelX - rowWidth / 2 + 10, y - 6, item.name, {
+                fontFamily: 'Orbitron',
+                fontSize: '11px',
+                color: '#dceefb'
+            }).setOrigin(0, 0.5);
+            const stateText = this.scene.add.text(panelX - rowWidth / 2 + 10, y + 8, '', {
+                fontFamily: 'Orbitron',
+                fontSize: '10px',
+                color: '#94a3b8'
+            }).setOrigin(0, 0.5);
+
+            row.on('pointerdown', () => this.purchaseItem(item.id));
+            return { id: item.id, row, nameText, stateText };
+        });
+    }
+
+    createLoadoutColumn(x, y, slot, title) {
+        this.scene.add.text(x - 90, y - 18, title, {
+            fontFamily: 'Orbitron',
+            fontSize: '11px',
+            color: '#9fb8d1'
+        }).setOrigin(0, 0.5);
+
+        const options = window.metaProgression?.getLoadoutOptions?.()?.[slot] || [];
+        const baseOptions = options.length ? options : [
+            { id: `${slot}-base`, name: 'Standard', description: 'Standard issue', unlocked: true, equipped: true }
+        ];
+        this.loadoutButtons[slot] = baseOptions.map((option, idx) => {
+            const btnY = y + idx * 30;
+            const rect = this.scene.add.rectangle(x, btnY, 200, 26, 0x0f172a, 0.85)
+                .setStrokeStyle(1.5, 0x22d3ee, 0.55)
+                .setInteractive({ useHandCursor: true });
+            const label = this.scene.add.text(x - 92, btnY, option.name, {
+                fontFamily: 'Orbitron',
+                fontSize: '11px',
+                color: '#dceefb'
+            }).setOrigin(0, 0.5);
+            const desc = this.scene.add.text(x + 10, btnY, option.description || '', {
+                fontFamily: 'Orbitron',
+                fontSize: '10px',
+                color: '#94a3b8'
+            }).setOrigin(0, 0.5);
+
+            rect.on('pointerdown', () => {
+                if (window.metaProgression?.setEquippedLoadout && option.unlocked !== false) {
+                    const changed = metaProgression.setEquippedLoadout(slot, option.id);
+                    if (changed) {
+                        this.refreshBuildShopPanel();
+                        this.highlightShopPanel();
+                    }
+                }
+            });
+
+            return { slot, optionId: option.id, rect, label, desc };
+        });
+    }
+
     createMissionButton(x, y, label, strokeColor, handler) {
         const button = this.scene.add.rectangle(x, y, 240, 38, 0x0f172a, 0.9)
             .setStrokeStyle(2, strokeColor, 0.8)
@@ -237,5 +338,82 @@ class BuildMissionUi {
             : 'Select a district to launch';
         btn.classList.toggle('opacity-50', !hasSelection);
         btn.classList.toggle('cursor-not-allowed', !hasSelection);
+    }
+
+    refreshBuildShopPanel() {
+        if (!this.shopPanel) return;
+        const meta = window.metaProgression?.getMetaState?.() || { credits: 0 };
+        const options = window.metaProgression?.getLoadoutOptions?.() || { offense: [], defense: [] };
+        const inventory = window.metaProgression?.getShopInventory?.() || [];
+
+        if (this.creditsText) {
+            this.creditsText.setText(`Credits: ${meta.credits}`);
+        }
+
+        ['offense', 'defense'].forEach(slot => {
+            const slotOptions = options[slot] || [];
+            this.loadoutButtons[slot]?.forEach(btn => {
+                const option = slotOptions.find(o => o.id === btn.optionId);
+                const unlocked = option ? option.unlocked !== false : true;
+                const equipped = option ? !!option.equipped : btn.optionId.includes('base');
+                btn.rect.setStrokeStyle(1.5, equipped ? 0x8b5cf6 : 0x22d3ee, unlocked ? 0.9 : 0.3);
+                btn.rect.setFillStyle(0x0f172a, unlocked ? 0.9 : 0.4);
+                btn.label.setColor(unlocked ? '#dceefb' : '#475569');
+                btn.desc.setColor(unlocked ? '#94a3b8' : '#475569');
+                if (unlocked && !btn.rect.input?.enabled) btn.rect.setInteractive({ useHandCursor: true });
+                if (!unlocked && btn.rect.input?.enabled) btn.rect.disableInteractive();
+                if (option && option.description) {
+                    btn.desc.setText(option.description);
+                }
+            });
+        });
+
+        this.shopItemRows.forEach(row => {
+            const item = inventory.find(i => i.id === row.id);
+            if (!item) return;
+            const owned = !!item.owned;
+            const affordable = !!item.affordable;
+            const stateLabel = owned
+                ? 'Unlocked'
+                : affordable
+                    ? `Purchase: ${item.cost} credits`
+                    : `Need ${item.cost - (meta.credits || 0)} more credits`;
+            row.stateText.setText(stateLabel);
+            row.stateText.setColor(owned ? '#a7f3d0' : affordable ? '#fef3c7' : '#fca5a5');
+            row.row.setStrokeStyle(1.5, owned ? 0x22c55e : 0x1dcaff, owned ? 0.6 : 0.4);
+            row.row.setFillStyle(0x0f172a, owned ? 0.6 : 0.85);
+            if (owned && row.row.input?.enabled) row.row.disableInteractive();
+            if (!owned && !row.row.input?.enabled) row.row.setInteractive({ useHandCursor: true });
+        });
+    }
+
+    highlightShopPanel() {
+        if (!this.shopPanel) return;
+        this.scene.tweens.add({
+            targets: this.shopPanel,
+            scale: { from: 1, to: 1.02 },
+            alpha: { from: 0.9, to: 1 },
+            duration: 180,
+            yoyo: true
+        });
+    }
+
+    purchaseItem(itemId) {
+        if (!window.metaProgression?.purchaseShopItem) return;
+        const result = metaProgression.purchaseShopItem(itemId);
+        if (result.success) {
+            this.updateDetail('Shop Acquisition', `${result.item.name} unlocked. Equip its loadout on the left.`);
+            this.highlightShopPanel();
+        } else if (result.reason === 'insufficient_funds') {
+            if (this.creditsText) {
+                this.scene.tweens.add({
+                    targets: this.creditsText,
+                    scale: { from: 1, to: 1.08 },
+                    duration: 140,
+                    yoyo: true
+                });
+            }
+        }
+        this.refreshBuildShopPanel();
     }
 }

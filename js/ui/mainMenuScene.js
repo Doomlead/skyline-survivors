@@ -53,7 +53,7 @@ class MainMenuScene extends Phaser.Scene {
         const frame = this.add.rectangle(width / 2, height / 2, width * 0.7, height * 0.6, 0x0b1220, 0.8);
         frame.setStrokeStyle(3, 0x1b4f8f, 0.7);
 
-        this.add.text(width / 2, height / 2 - 80, 'Press SPACE to open the System Map and pick your mission.', {
+        this.add.text(width / 2, height / 2 - 80, 'This menu is now settings-only. Press SPACE to return to the district map or open the settings overlay below.', {
             fontFamily: 'Orbitron',
             fontSize: '14px',
             color: '#c7e3ff',
@@ -61,14 +61,19 @@ class MainMenuScene extends Phaser.Scene {
             wordWrap: { width: width * 0.6 }
         }).setOrigin(0.5);
 
-        this.add.text(width / 2, height / 2 - 40, 'You can also return here later from the pause menu.', {
+        this.add.text(width / 2, height / 2 - 40, 'Use the settings overlay to adjust audio/accessibility anytime.', {
             fontFamily: 'Orbitron',
             fontSize: '12px',
             color: '#9fb8d1',
             align: 'center'
         }).setOrigin(0.5);
 
-        this.createMenuButton(width / 2, height / 2 + 20, 'Enter System Map (Space)', '#22d3ee', () => {
+        this.createMenuButton(width / 2, height / 2 + 20, 'Open Settings Overlay', '#22d3ee', () => {
+            if (window.openSettingsMenu) {
+                openSettingsMenu();
+            }
+        });
+        this.createMenuButton(width / 2, height / 2 + 70, 'Return to District Map', '#34d399', () => {
             if (window.enterDistrictMap) {
                 enterDistrictMap(true);
             }

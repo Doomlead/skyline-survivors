@@ -205,6 +205,7 @@ function updateRadar(scene) {
 function gameOver(scene) {
     gameState.gameOver = true;
     if (window.missionPlanner) missionPlanner.recordMissionOutcome(false);
+    const metaResult = recordMetaOutcome(false);
     scene.physics.pause();
     if (audioManager) {
         audioManager.playSound('gameOver');
@@ -223,7 +224,8 @@ function gameOver(scene) {
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
     scene.add.text(centerX, centerY + 30,
-        `Final Score: ${gameState.score}\nHumans Rescued: ${gameState.humansRescued}`, {
+        `Final Score: ${gameState.score}\nHumans Rescued: ${gameState.humansRescued}\n` +
+        `Meta Credits: +${metaResult?.earnedCredits || 0} (Bank: ${metaProgression?.getMetaState?.().credits || 0})`, {
         fontSize: '24px', fontFamily: 'Orbitron', color: '#00ffff', align: 'center', stroke: '#000000', strokeThickness: 4
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
@@ -254,6 +256,7 @@ function gameOver(scene) {
 function winGame(scene) {
     gameState.gameOver = true;
     if (window.missionPlanner) missionPlanner.recordMissionOutcome(true);
+    const metaResult = recordMetaOutcome(true);
     scene.physics.pause();
     if (audioManager) {
         audioManager.playSound('waveComplete');
@@ -271,7 +274,8 @@ function winGame(scene) {
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
     scene.add.text(centerX, centerY + 30,
-        `Victory!\nFinal Score: ${gameState.score}`, {
+        `Victory!\nFinal Score: ${gameState.score}\n` +
+        `Meta Credits: +${metaResult?.earnedCredits || 0} (Bank: ${metaProgression?.getMetaState?.().credits || 0})`, {
         fontSize: '24px', fontFamily: 'Orbitron', color: '#00ffff', align: 'center', stroke: '#000000', strokeThickness: 4
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
@@ -295,6 +299,22 @@ function winGame(scene) {
         scene.scene.restart();
     });
     menuButton.on('pointerdown', () => returnToMainMenu(scene));
+}
+
+function recordMetaOutcome(success) {
+    if (!window.metaProgression || gameState.metaRewardsGranted) return null;
+    const outcome = {
+        success,
+        score: gameState.score,
+        humansRescued: gameState.humansRescued,
+        mode: gameState.mode,
+        directives: gameState.missionDirectives,
+        districtId: gameState.missionContext?.district,
+        districtName: gameState.missionDirectives?.districtName || gameState.missionContext?.city
+    };
+    const result = metaProgression.recordRunOutcome(outcome);
+    gameState.metaRewardsGranted = true;
+    return result;
 }
 
 function togglePause(scene) {
