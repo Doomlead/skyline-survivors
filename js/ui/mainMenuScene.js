@@ -50,38 +50,39 @@ class MainMenuScene extends Phaser.Scene {
     }
 
     createIntroPanel(width, height) {
-        const frame = this.add.rectangle(width / 2, height / 2, width * 0.7, height * 0.6, 0x0b1220, 0.8);
+        const frame = this.add.rectangle(width / 2, height / 2, width * 0.7, height * 0.5, 0x0b1220, 0.8);
         frame.setStrokeStyle(3, 0x1b4f8f, 0.7);
 
-        this.add.text(width / 2, height / 2 - 80, 'This menu is now settings-only. Press SPACE to return to the district map or open the settings overlay below.', {
+        this.add.text(width / 2, height / 2 - 60, 'Welcome to Skyline Survivors', {
             fontFamily: 'Orbitron',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#c7e3ff',
-            align: 'center',
-            wordWrap: { width: width * 0.6 }
-        }).setOrigin(0.5);
-
-        this.add.text(width / 2, height / 2 - 40, 'Use the settings overlay to adjust audio/accessibility anytime.', {
-            fontFamily: 'Orbitron',
-            fontSize: '12px',
-            color: '#9fb8d1',
             align: 'center'
         }).setOrigin(0.5);
 
-        this.createMenuButton(width / 2, height / 2 + 20, 'Open Settings Overlay', '#22d3ee', () => {
-            if (window.openSettingsMenu) {
-                openSettingsMenu();
-            }
-        });
-        this.createMenuButton(width / 2, height / 2 + 70, 'Return to District Map', '#34d399', () => {
+        this.add.text(width / 2, height / 2 - 20, 'Press SPACE to enter the District Map\nor use the buttons below.', {
+            fontFamily: 'Orbitron',
+            fontSize: '12px',
+            color: '#9fb8d1',
+            align: 'center',
+            lineSpacing: 6
+        }).setOrigin(0.5);
+
+        this.createMenuButton(width / 2, height / 2 + 40, 'Enter District Map', '#34d399', () => {
             if (window.enterDistrictMap) {
                 enterDistrictMap(true);
+            }
+        });
+        
+        this.createMenuButton(width / 2, height / 2 + 90, 'Open Settings', '#22d3ee', () => {
+            if (window.openSettingsMenu) {
+                openSettingsMenu();
             }
         });
     }
 
     createMenuButton(x, y, label, strokeColor, handler) {
-        const button = this.add.rectangle(x, y, 260, 44, 0x0f172a, 0.9)
+        const button = this.add.rectangle(x, y, 220, 40, 0x0f172a, 0.9)
             .setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(strokeColor).color, 0.8)
             .setInteractive({ useHandCursor: true })
             .setDepth(5);
@@ -92,10 +93,10 @@ class MainMenuScene extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(5);
 
         button.on('pointerover', () => {
-            this.tweens.add({ targets: button, alpha: 1, duration: 120 });
+            this.tweens.add({ targets: button, alpha: 1, scaleX: 1.02, scaleY: 1.02, duration: 100 });
         });
         button.on('pointerout', () => {
-            this.tweens.add({ targets: button, alpha: 0.9, duration: 120 });
+            this.tweens.add({ targets: button, alpha: 0.9, scaleX: 1, scaleY: 1, duration: 100 });
         });
         button.on('pointerdown', () => {
             handler();

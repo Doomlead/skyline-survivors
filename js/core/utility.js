@@ -7,14 +7,11 @@ function wrapWorldBounds(sprite) {
     else if (sprite.x > CONFIG.worldWidth) sprite.x = 0;
 }
 
-
 function createExplosion(scene, x, y, color = 0xffff00) {
     if (audioManager) audioManager.playSound('explosion');
     const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const particleScale = reduceFlashes ? 0.35 : 0.5;
-    const flashAlpha = reduceFlashes ? 0.45 : 0.7;
     const particleCount = reduceFlashes ? 4 : 8;
-    // ENHANCED: 8 particles for dramatic effect
     for (let i = 0; i < particleCount; i++) {
         const particle = scene.add.sprite(x, y, 'explosion');
         particle.setTint(color);
@@ -46,7 +43,6 @@ function createSpawnEffect(scene, x, y, enemyType) {
     const particleCount = reduceFlashes ? 6 : 12;
     const particleScale = reduceFlashes ? 0.5 : 0.8;
     const flashAlpha = reduceFlashes ? 0.4 : 0.7;
-    // ENHANCED: 12 particles with spread patterns
     for (let i = 0; i < particleCount; i++) {
         const particle = scene.add.sprite(x, y, 'explosion');
         particle.setTint(color);
@@ -147,7 +143,6 @@ function createEnhancedDeathEffect(scene, x, y, enemyType) {
     const ringCount = reduceFlashes ? 1 : 2;
     const blastRadius = reduceFlashes ? 25 : 40;
     const particleDistanceBase = reduceFlashes ? 40 : 60;
-    // ENHANCED: 2 expanding rings for dramatic effect
     for (let ring = 0; ring < ringCount; ring++) {
         setTimeout(() => {
             for (let i = 0; i < 16; i++) {
@@ -232,6 +227,11 @@ function startGame(mode = 'classic') {
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
 
+    // Switch to game layout
+    if (window.DistrictLayoutManager) {
+        DistrictLayoutManager.switchToGameLayout();
+    }
+
     if (window.Phaser && window.game && game.scene) {
         const scene = game.scene.getScene(SCENE_KEYS.game);
         if (scene && scene.scene) {
@@ -245,24 +245,21 @@ function startGame(mode = 'classic') {
         }
         if (game.scene.isActive(SCENE_KEYS.build)) {
             game.scene.stop(SCENE_KEYS.build);
-            const toggleBtn = document.getElementById('build-toggle');
-            const returnBtn = document.getElementById('build-return');
-            const launchBtn = document.getElementById('build-launch');
-            if (toggleBtn) toggleBtn.classList.remove('hidden');
-            if (returnBtn) returnBtn.classList.add('hidden');
-            if (launchBtn) launchBtn.classList.add('hidden');
         }
         if (game.scene.isActive(SCENE_KEYS.menu)) {
             game.scene.stop(SCENE_KEYS.menu);
         }
     }
 
+    // Update UI buttons
+    const toggleBtn = document.getElementById('build-toggle');
+    if (toggleBtn) toggleBtn.classList.remove('hidden');
+
     if (audioManager && audioManager.audioContext.state === 'suspended') {
         audioManager.audioContext.resume().catch(() => {});
     }
 }
 
-// Make startGame available globally
 window.startGame = startGame;
 
 function applyMissionPayload(missionPayload) {
@@ -314,28 +311,19 @@ function openSettingsMenu() {
                 main.scene.pause();
             }
         }
-        if (!game.scene.isActive(SCENE_KEYS.menu)) {
-            game.scene.start(SCENE_KEYS.menu);
-        }
     }
 }
 
 function enterDistrictMap(options = false) {
     const overlayLaunch = typeof options === 'object' ? !!options.fromOverlay : !!options;
     const fromVictory = typeof options === 'object' ? !!options.fromVictory : false;
+    
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
-    if (window.buildOverlay?.render) {
-        const mission = missionPlanner?.getMission?.();
-        window.buildOverlay.render({
-            title: 'Select a district',
-            missionTitle: mission?.city || 'Mission & Build Routing',
-            missionBody: mission?.directives
-                ? `Urgency: ${mission.directives.urgency || 'threatened'} · Reward ${mission.directives.rewardMultiplier?.toFixed?.(2) || '1.00'}x`
-                : 'Choose a district to see routing details.',
-            shipTitle: 'Ship Status',
-            shipBody: `Lives ${gameState?.lives ?? '--'} · Bombs ${gameState?.smartBombs ?? '--'}`
-        });
+    
+    // Switch to district layout
+    if (window.DistrictLayoutManager) {
+        DistrictLayoutManager.switchToDistrictLayout();
     }
 
     if (window.game && game.scene) {
@@ -353,29 +341,20 @@ function enterDistrictMap(options = false) {
         game.scene.start(SCENE_KEYS.build);
         game.scene.bringToTop(SCENE_KEYS.build);
     }
-
-    const toggleBtn = document.getElementById('build-toggle');
-    const returnBtn = document.getElementById('build-return');
-    const launchBtn = document.getElementById('build-launch');
-    if (overlayLaunch) {
-        if (toggleBtn) toggleBtn.classList.add('hidden');
-        if (returnBtn) returnBtn.classList.add('hidden');
-        if (launchBtn) launchBtn.classList.add('hidden');
-    } else {
-        if (toggleBtn) toggleBtn.classList.add('hidden');
-        if (returnBtn) returnBtn.classList.remove('hidden');
-        if (launchBtn) launchBtn.classList.remove('hidden');
-    }
 }
 
 function openBuildView() {
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
-
     enterDistrictMap();
 }
 
 function closeBuildView() {
+    // Switch back to game layout
+    if (window.DistrictLayoutManager) {
+        DistrictLayoutManager.switchToGameLayout();
+    }
+    
     if (window.game && game.scene) {
         if (game.scene.isActive(SCENE_KEYS.build)) {
             game.scene.stop(SCENE_KEYS.build);
@@ -384,19 +363,20 @@ function closeBuildView() {
         if (mainScene && mainScene.scene.isPaused()) {
             mainScene.scene.resume();
         }
+        
+        // Resize canvas for game view
+        setTimeout(() => {
+            if (window.DistrictLayoutManager) {
+                DistrictLayoutManager.resizeCanvasForGame();
+            }
+        }, 50);
     }
 
     const toggleBtn = document.getElementById('build-toggle');
-    const returnBtn = document.getElementById('build-return');
-    const launchBtn = document.getElementById('build-launch');
     if (toggleBtn) toggleBtn.classList.remove('hidden');
-    if (returnBtn) returnBtn.classList.add('hidden');
-    if (launchBtn) launchBtn.classList.add('hidden');
-    window.buildOverlay?.hide?.();
 }
 
 function launchSelectedMission() {
-    const launchBtn = document.getElementById('build-launch');
     const buildScene = game?.scene?.getScene ? game.scene.getScene(SCENE_KEYS.build) : null;
     if (buildScene && buildScene.scene && buildScene.scene.isActive()) {
         buildScene.launchMission();
@@ -406,7 +386,6 @@ function launchSelectedMission() {
     const mission = missionPlanner?.getMission ? missionPlanner.getMission() : null;
     if (mission) {
         startGame(mission.mode || 'classic');
-        if (launchBtn) launchBtn.classList.add('hidden');
     }
 }
 
