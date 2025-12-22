@@ -9,6 +9,8 @@ const DistrictLayoutManager = (function() {
     let phaserCanvas = null;
     let originalParent = null;
     let selectedMode = 'classic';
+    let scaleListener = null;
+    let lastKnownScale = null;
     
     function init() {
         // Find the Phaser canvas once it's created
@@ -27,50 +29,54 @@ const DistrictLayoutManager = (function() {
     }
     
     function switchToDistrictLayout() {
-    console.log('=== SWITCHING TO DISTRICT LAYOUT ===');
-    if (currentLayout === 'district') {
-        console.log('Already in district layout, skipping');
-        return;
-    }
-    currentLayout = 'district';
-    
-    const gameLayout = document.getElementById('game-layout');
-    const districtLayout = document.getElementById('district-layout');
-    const districtCenter = document.getElementById('district-game-container');
-    
-    // Hide game layout, show district layout
-    if (gameLayout) gameLayout.classList.add('hidden-for-district');
-    if (districtLayout) districtLayout.classList.add('active');
-    
-    // Move canvas WITHOUT triggering resize
-    if (phaserCanvas && districtCenter) {
-        districtCenter.appendChild(phaserCanvas);
-        styleCanvasForDistrict();
-        
-        // ADDED: Explicitly prevent Phaser from auto-resizing
-        if (window.game && window.game.scale) {
-            // Store current dimensions before any potential resize
-            const currentWidth = window.game.scale.width;
-            const currentHeight = window.game.scale.height;
-            
-            // Use requestAnimationFrame to check after layout settles
-            requestAnimationFrame(() => {
-                if (window.game.scale.width !== currentWidth || 
-                    window.game.scale.height !== currentHeight) {
-                    console.log('Resize detected after layout switch, reverting...');
-                    window.game.scale.resize(currentWidth, currentHeight);
-                }
-            });
+        console.log('=== SWITCHING TO DISTRICT LAYOUT ===');
+        if (currentLayout === 'district') {
+            console.log('Already in district layout, skipping');
+            return;
         }
+        currentLayout = 'district';
+        
+        const gameLayout = document.getElementById('game-layout');
+        const districtLayout = document.getElementById('district-layout');
+        const districtCenter = document.getElementById('district-game-container');
+        
+        // Hide game layout, show district layout
+        if (gameLayout) gameLayout.classList.add('hidden-for-district');
+        if (districtLayout) districtLayout.classList.add('active');
+        
+        // Move canvas WITHOUT triggering resize
+        if (phaserCanvas && districtCenter) {
+            districtCenter.appendChild(phaserCanvas);
+            styleCanvasForDistrict();
+            
+            // ADDED: Explicitly prevent Phaser from auto-resizing
+            if (window.game && window.game.scale) {
+                // Store current dimensions before any potential resize
+                const currentWidth = window.game.scale.width;
+                const currentHeight = window.game.scale.height;
+                
+                // Use requestAnimationFrame to check after layout settles
+                requestAnimationFrame(() => {
+                    if (window.game.scale.width !== currentWidth || 
+                        window.game.scale.height !== currentHeight) {
+                        console.log('Resize detected after layout switch, reverting...');
+                        window.game.scale.resize(currentWidth, currentHeight);
+                        syncCanvasStyles(currentWidth, currentHeight);
+                    }
+                });
+            }
+        }
+        
+        // Monitor Phaser scale events while in district view to prevent unexpected shrink
+        attachScaleMonitor();
+        updateDistrictPanels();
     }
-    
-    updateDistrictPanels();
-}
     
     function switchToGameLayout() {
         console.log('=== SWITCHING TO GAME LAYOUT ===');
         if (currentLayout === 'game') return;
         currentLayout = 'game';
+        detachScaleMonitor();
         
         const gameLayout = document.getElementById('game-layout');
         const districtLayout = document.getElementById('district-layout');
@@ -105,6 +111,13 @@ const DistrictLayoutManager = (function() {
         console.log('Canvas dimensions AFTER styling:', phaserCanvas.width, 'x', phaserCanvas.height);
         console.log('Canvas style AFTER:', phaserCanvas.style.width, 'x', phaserCanvas.style.height);
         console.log('Styling complete - NO RESIZE performed');
+    }
+    
+    function syncCanvasStyles(width, height) {
+        if (!phaserCanvas) return;
+        phaserCanvas.style.width = `${width}px`;
+        phaserCanvas.style.height = `${height}px`;
+        console.log('[DistrictLayout] Synced canvas styles to', width, 'x', height);
     }
     
     function removeDistrictStyling() {
@@ -249,6 +262,45 @@ const DistrictLayoutManager = (function() {
     
     function getCurrentLayout() {
         return currentLayout;
+    }
+    
+    function attachScaleMonitor() {
+        if (!window.game?.scale) return;
+        if (scaleListener) {
+            window.game.scale.off('resize', scaleListener);
+            scaleListener = null;
+        }
+        
+        lastKnownScale = {
+            width: window.game.scale.width,
+            height: window.game.scale.height
+        };
+        console.log('[DistrictLayout] Captured scale for district view:', lastKnownScale.width, 'x', lastKnownScale.height);
+        
+        scaleListener = (gameSize) => {
+            console.log('[DistrictLayout] Phaser resize event while in district:', gameSize.width, 'x', gameSize.height);
+            if (currentLayout !== 'district') return;
+            
+            const targetWidth = lastKnownScale?.width || gameSize.width;
+            const targetHeight = lastKnownScale?.height || gameSize.height;
+            const dimensionsChanged = gameSize.width !== targetWidth || gameSize.height !== targetHeight;
+            
+            if (dimensionsChanged) {
+                console.warn('[DistrictLayout] Unexpected resize detected in district view. Restoring preserved dimensions.');
+                window.game.scale.resize(targetWidth, targetHeight);
+                syncCanvasStyles(targetWidth, targetHeight);
+            }
+        };
+        
+        window.game.scale.on('resize', scaleListener);
+    }
+    
+    function detachScaleMonitor() {
+        if (window.game?.scale && scaleListener) {
+            window.game.scale.off('resize', scaleListener);
+        }
+        scaleListener = null;
+        lastKnownScale = null;
     }
     
     function updateElement(id, value) {

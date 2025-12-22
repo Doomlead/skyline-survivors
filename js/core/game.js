@@ -414,6 +414,7 @@ function applyResponsiveResize() {
     // While the district layout is active, skip responsive resizing to avoid
     // transient layout measurements shrinking the canvas (and globe) after switch.
     if (window.DistrictLayoutManager?.getCurrentLayout?.() === 'district') {
+        console.log('[ResponsiveResize] Skipping resize because district layout is active');
         return;
     }
     if (!game.canvas) {
@@ -422,6 +423,7 @@ function applyResponsiveResize() {
         return;
     }
     const { width, height } = getResponsiveScale();
+    console.log('[ResponsiveResize] Resizing game to', width, 'x', height);
     game.scale.resize(width, height);
     game.canvas.style.width = `${width}px`;
     game.canvas.style.height = `${height}px`;
