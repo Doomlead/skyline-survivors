@@ -15,7 +15,7 @@ class BuildMapView {
         // 3D Globe state
         this.rotationX = 0.3;
         this.rotationY = 0;
-        this.globeRadius = 140;
+        this.globeRadius = 175;
         this.isDragging = false;
         this.lastPointer = { x: 0, y: 0 };
         this.autoRotate = true;
@@ -56,7 +56,7 @@ class BuildMapView {
             this.planetContainer = null;
         }
 
-        this.centerX = width * 0.35;
+        this.centerX = width * 0.42;
         this.centerY = height / 2 + 10;
 
         this.createStars();
@@ -171,7 +171,7 @@ class BuildMapView {
             );
             if (dist < this.globeRadius + 100) {
                 this.globeRadius -= deltaY * 0.1;
-                this.globeRadius = Phaser.Math.Clamp(this.globeRadius, 100, 200);
+                this.globeRadius = Phaser.Math.Clamp(this.globeRadius, 120, 230);
             }
         });
 
@@ -548,17 +548,17 @@ class BuildMapView {
         if (typeof missionPlanner === 'undefined') return;
 
         const nodeConfigs = [
-            { id: 'mothership', label: 'Mothership', angle: -40, radius: 230, color: 0xf472b6, timer: 65, rewardModifier: 1.15, spawnModifier: 1.15 },
-            { id: 'shop', label: 'Shop', angle: 70, radius: 250, color: 0x22d3ee, timer: 0, rewardModifier: 1.05, spawnModifier: 1 },
-            { id: 'relay', label: 'Relay', angle: 160, radius: 240, color: 0x93c5fd, timer: 45, rewardModifier: 1.1, spawnModifier: 1.05 },
-            { id: 'distress', label: 'Distress Node', angle: 240, radius: 210, color: 0xfacc15, timer: 30, rewardModifier: 1.2, spawnModifier: 1.2 }
+            { id: 'mothership', label: 'Mothership', angle: -40, radius: 280, color: 0xf472b6, timer: 65, rewardModifier: 1.15, spawnModifier: 1.15 },
+            { id: 'shop', label: 'Shop', angle: 70, radius: 320, color: 0x22d3ee, timer: 0, rewardModifier: 1.05, spawnModifier: 1 },
+            { id: 'relay', label: 'Relay', angle: 160, radius: 300, color: 0x93c5fd, timer: 45, rewardModifier: 1.1, spawnModifier: 1.05 },
+            { id: 'distress', label: 'Distress Node', angle: 240, radius: 260, color: 0xfacc15, timer: 30, rewardModifier: 1.2, spawnModifier: 1.2 }
         ];
 
         const orbitLines = this.scene.add.graphics();
         orbitLines.lineStyle(1, 0x0ea5e9, 0.25);
-        orbitLines.strokeCircle(centerX, centerY, 210);
         orbitLines.strokeCircle(centerX, centerY, 240);
-        orbitLines.strokeCircle(centerX, centerY, 270);
+        orbitLines.strokeCircle(centerX, centerY, 280);
+        orbitLines.strokeCircle(centerX, centerY, 320);
 
         nodeConfigs.forEach(config => {
             const x = centerX + Math.cos(Phaser.Math.DegToRad(config.angle)) * config.radius;
@@ -576,12 +576,12 @@ class BuildMapView {
 
             const nodeState = missionPlanner.ensureMapNodeState(config);
 
-            const label = this.scene.add.text(x, y - 22, config.label, {
+            const label = this.scene.add.text(x, y - 26, config.label, {
                 fontFamily: 'Orbitron',
-                fontSize: '11px',
+                fontSize: '12px',
                 color: '#c7e6ff',
                 align: 'center'
-            }).setOrigin(0.5);
+            }).setOrigin(0.5).setDepth(5);
 
             const timerLabel = nodeState.status === 'destroyed'
                 ? 'DESTROYED'
@@ -590,11 +590,11 @@ class BuildMapView {
                     : 'STABLE';
             const timerColor = nodeState.status === 'destroyed' ? '#f87171' : (nodeState.timer > 0 ? '#fef08a' : '#a7f3d0');
 
-            const timerText = this.scene.add.text(x, y + 16, timerLabel, {
+            const timerText = this.scene.add.text(x, y + 18, timerLabel, {
                 fontFamily: 'Orbitron',
-                fontSize: '10px',
+                fontSize: '11px',
                 color: timerColor
-            }).setOrigin(0.5);
+            }).setOrigin(0.5).setDepth(5);
 
             this.mapNodes.push({ id: config.id, config, node, label, timerText, pulse, connector, state: nodeState });
 

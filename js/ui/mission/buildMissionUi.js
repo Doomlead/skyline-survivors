@@ -21,7 +21,7 @@ class BuildMissionUi {
     }
 
     createOverlay(width) {
-        const header = this.scene.add.text(width / 2, 28, 'District + Build Map', {
+        const header = this.scene.add.text(width / 2, 24, 'District + Build Map', {
             fontFamily: 'Orbitron',
             fontSize: '18px',
             color: '#8bffff',
@@ -29,20 +29,20 @@ class BuildMissionUi {
         }).setOrigin(0.5);
         header.setShadow(0, 0, '#0ea5e9', 8, true, true);
 
-        this.detailCard = this.scene.add.rectangle(width / 2, 60, 420, 70, 0x0b1220, 0.7)
-            .setStrokeStyle(1, 0x1d4ed8, 0.8);
+        this.detailCard = this.scene.add.rectangle(width / 2, 52, 560, 96, 0x0b1220, 0.7)
+            .setStrokeStyle(1.5, 0x1d4ed8, 0.8);
         this.detailCard.setOrigin(0.5, 0);
         this.detailCard.setScrollFactor(0);
 
-        this.detailTitle = this.scene.add.text(width / 2 - 180, 70, 'Select a district', {
+        this.detailTitle = this.scene.add.text(width / 2 - 260, 64, 'Select a district', {
             fontFamily: 'Orbitron',
-            fontSize: '14px',
+            fontSize: '15px',
             color: '#c7e3ff'
         });
     }
 
     createModeButtons(width, selectedMode) {
-        this.modeButtons = this.scene.add.container(width * 0.35, 150);
+        this.modeButtons = this.scene.add.container(width * 0.42, 168);
         this.modeButtonRefs = [];
 
         const createButton = (offsetX, label, color, mode) => {
@@ -70,11 +70,13 @@ class BuildMissionUi {
         createButton(-90, 'Wave Mode', 0x7dd3fc, 'classic');
         createButton(90, 'Survival Mode', 0x22d3ee, 'survival');
 
-        this.modeHint = this.scene.add.text(width * 0.35, 185,
+        this.modeHint = this.scene.add.text(width * 0.42, 208,
             'Select a district to deploy and then choose your mode.', {
                 fontFamily: 'Orbitron',
                 fontSize: '11px',
-                color: '#9fb8d1'
+                color: '#9fb8d1',
+                wordWrap: { width: 360 },
+                lineSpacing: 4
             }).setOrigin(0.5);
 
         this.updateModeButtonStyles(selectedMode);
@@ -87,18 +89,20 @@ class BuildMissionUi {
             ? 'Hover or click a glowing sector to zoom in.\nNodes with active timers will destabilize—stabilize the most critical threats first.\nChoose a mode below to deploy to the selected district.'
             : 'Hover or click a glowing sector to zoom in.\nThis map is static for now—select a sector and prep a deployment when ready.\nChoose a mode below to deploy to the selected district.';
 
-        this.detailBody = this.scene.add.text(width / 2 - 180, 90, overlayDescription, {
+        this.detailBody = this.scene.add.text(width / 2 - 260, 94, overlayDescription, {
             fontFamily: 'Orbitron',
-            fontSize: '11px',
-            color: '#9fb8d1'
+            fontSize: '12px',
+            color: '#9fb8d1',
+            wordWrap: { width: 520 },
+            lineSpacing: 6
         });
     }
 
     createMissionConsole(width, height, { onLaunch, onReroute }) {
-        const panelWidth = width * 0.42;
-        const panelHeight = height * 0.62;
-        const panelX = width * 0.78;
-        const panelY = height * 0.48;
+        const panelWidth = width * 0.36;
+        const panelHeight = height * 0.64;
+        const panelX = width * 0.82;
+        const panelY = height * 0.46;
 
         const panel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, 0x0c1e34, 0.85);
         panel.setStrokeStyle(3, 0x33c0ff, 0.8);
@@ -147,10 +151,10 @@ class BuildMissionUi {
     }
 
     createBuildShopPanel(width, height) {
-        const panelWidth = width * 0.62;
-        const panelHeight = 260;
-        const panelX = width * 0.45;
-        const panelY = height - panelHeight / 2 - 10;
+        const panelWidth = width * 0.46;
+        const panelHeight = 230;
+        const panelX = width * 0.78;
+        const panelY = height - panelHeight / 2 - 12;
 
         this.shopPanel = this.scene.add.rectangle(panelX, panelY, panelWidth, panelHeight, 0x0b1220, 0.8);
         this.shopPanel.setStrokeStyle(2, 0x0ea5e9, 0.6);
