@@ -55,19 +55,12 @@ class BuildScene extends Phaser.Scene {
                 this.sound.context.resume();
             }
         });
-/*
-        // === FIX: Handle Resizing ===
-        this.scale.on('resize', (gameSize) => {
-            console.log('BuildScene Resized to:', gameSize.width, gameSize.height);
-            this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
-            
-            // Re-center UI
-            if (this.hintText) this.hintText.setPosition(gameSize.width / 2, gameSize.height - 20);
-            if (this.titleText) this.titleText.setPosition(gameSize.width / 2, 20);
-            
-            // Re-center Globe and update Radius
-            this.mapModule.resize(gameSize.width, gameSize.height);
-        }); */
+
+        // Handle Phaser scale resize events to keep the globe centered and properly sized
+        this.scale.on('resize', this.handleResize, this);
+        this.events.once('shutdown', () => {
+            this.scale.off('resize', this.handleResize, this);
+        });
     }
 
     createSceneOverlay(width, height) {
@@ -84,6 +77,23 @@ class BuildScene extends Phaser.Scene {
             color: '#4a9eff',
             align: 'center'
         }).setOrigin(0.5).setAlpha(0.7);
+    }
+
+    handleResize(gameSize) {
+        if (!gameSize) return;
+        const { width, height } = gameSize;
+
+        // Guard against transient zero/undefined sizes reported during layout moves.
+        if (!width || !height) return;
+        console.log('BuildScene Resized to:', width, height);
+
+        this.cameras.main.setViewport(0, 0, width, height);
+        this.cameras.main.setScroll(0, 0);
+
+        if (this.hintText) this.hintText.setPosition(width / 2, height - 20);
+        if (this.titleText) this.titleText.setPosition(width / 2, 20);
+
+        this.mapModule.resize(width, height);
     }
 
     focusDistrict(district, skipTweens = false) {
