@@ -80,11 +80,7 @@ class BuildScene extends Phaser.Scene {
     }
 
     handleResize(gameSize) {
-        if (!gameSize) return;
         const { width, height } = gameSize;
-
-        // Guard against transient zero/undefined sizes reported during layout moves.
-        if (!width || !height) return;
         console.log('BuildScene Resized to:', width, height);
 
         this.cameras.main.setViewport(0, 0, width, height);
