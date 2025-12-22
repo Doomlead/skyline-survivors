@@ -325,6 +325,18 @@ function enterDistrictMap(options = false) {
     const fromVictory = typeof options === 'object' ? !!options.fromVictory : false;
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
+    if (window.buildOverlay?.render) {
+        const mission = missionPlanner?.getMission?.();
+        window.buildOverlay.render({
+            title: 'Select a district',
+            missionTitle: mission?.city || 'Mission & Build Routing',
+            missionBody: mission?.directives
+                ? `Urgency: ${mission.directives.urgency || 'threatened'} · Reward ${mission.directives.rewardMultiplier?.toFixed?.(2) || '1.00'}x`
+                : 'Choose a district to see routing details.',
+            shipTitle: 'Ship Status',
+            shipBody: `Lives ${gameState?.lives ?? '--'} · Bombs ${gameState?.smartBombs ?? '--'}`
+        });
+    }
 
     if (window.game && game.scene) {
         const mainScene = game.scene.getScene(SCENE_KEYS.game);
@@ -380,6 +392,7 @@ function closeBuildView() {
     if (toggleBtn) toggleBtn.classList.remove('hidden');
     if (returnBtn) returnBtn.classList.add('hidden');
     if (launchBtn) launchBtn.classList.add('hidden');
+    window.buildOverlay?.hide?.();
 }
 
 function launchSelectedMission() {
