@@ -36,6 +36,7 @@ class BuildScene extends Phaser.Scene {
         this.updateMissionUi();
         this.uiModule.updateExternalLaunchButton(this.selectedDistrict, this.mission, this.selectedMode);
         this.uiModule.refreshBuildShopPanel();
+        this.syncOverlayLayout();
 
         this.input.keyboard.once('keydown-SPACE', () => this.launchMission());
         this.input.keyboard.on('keydown-R', () => this.rollMission());
@@ -78,6 +79,7 @@ class BuildScene extends Phaser.Scene {
         );
         this.uiModule.updateExternalLaunchButton(this.selectedDistrict, this.mission, this.selectedMode);
         this.updateMissionUi();
+        this.syncOverlayLayout();
 
         if (!skipTweens) {
             this.tweens.add({
@@ -134,6 +136,7 @@ class BuildScene extends Phaser.Scene {
         }
         this.uiModule.updateModeButtonStyles(this.selectedMode);
         this.updateMissionUi();
+        this.syncOverlayLayout();
     }
 
     updateMissionUi() {
@@ -146,6 +149,7 @@ class BuildScene extends Phaser.Scene {
 
         this.uiModule.updateMissionUi(this.mission, this.selectedMode, this.selectedDistrict, this.mapModule.mapNodes);
         this.uiModule.updateExternalLaunchButton(this.selectedDistrict, this.mission, this.selectedMode);
+        this.syncOverlayLayout();
     }
 
     update(time, delta) {
@@ -162,6 +166,9 @@ class BuildScene extends Phaser.Scene {
             this.uiModule.refreshBuildShopPanel();
             this._lastMetaRefresh = 0;
         }
+        if (this._lastMetaRefresh === 0) {
+            this.syncOverlayLayout();
+        }
     }
 
     formatTimer(seconds) {
@@ -175,5 +182,30 @@ class BuildScene extends Phaser.Scene {
         if (id === 'shop') {
             this.uiModule.highlightShopPanel();
         }
+    }
+
+    syncOverlayLayout() {
+        if (!window.buildOverlay?.render) return;
+        const mission = this.mission || missionPlanner?.getMission?.();
+        const directives = mission?.directives;
+        const districtName = this.selectedDistrict?.config?.name || 'Select a district';
+        const urgency = directives?.urgency || 'threatened';
+        const rewardMult = directives?.rewardMultiplier ? directives.rewardMultiplier.toFixed(2) : '1.00';
+        const missionBody = directives
+            ? `Mode: ${(mission?.mode || this.selectedMode || 'classic').toUpperCase()} · Urgency ${urgency} · Reward ${rewardMult}x\nSeed ${mission.seed?.slice?.(0, 6) || '--'}`
+            : 'Choose a district to view mission directives.';
+        const shipBody = [
+            `Lives ${gameState?.lives ?? '--'} · Bombs ${gameState?.smartBombs ?? '--'}`,
+            `Score ${gameState?.score ?? 0} · Reward x${(gameState?.rewardMultiplier || 1).toFixed(2)}`
+        ].join('\n');
+
+        window.buildOverlay.render({
+            title: 'Select a district',
+            missionTitle: districtName,
+            missionBody,
+            shipTitle: 'Ship Status',
+            shipBody,
+            centerTitle: 'District Globe'
+        });
     }
 }
