@@ -47,11 +47,13 @@
                 h: Math.max(260, height - topHeight - gutter * 2)
             };
 
-            drawPanel(ctx, 0, 0, width, topHeight, '#0b1220', '#33c0ff', { fillAlpha: 0.85 });
-            drawPanel(ctx, gutter, topHeight + gutter, sideWidth - gutter, (height - topHeight - gutter * 3) * 0.55, '#0c1e34', '#33c0ff', { fillAlpha: 0.85 });
-            drawPanel(ctx, gutter, height - (height - topHeight - gutter * 3) * 0.4, sideWidth - gutter, (height - topHeight - gutter * 3) * 0.4, '#0c1e34', '#22d3ee', { fillAlpha: 0.85 });
-            // Center panel outline only to avoid obscuring the globe
-            drawPanel(ctx, centerPanel.x, centerPanel.y, centerPanel.w, centerPanel.h, '#050912', '#0ea5e9', { fillAlpha: 0, strokeAlpha: 0.75 });
+            ctx.save();
+            ctx.globalAlpha = 0.85;
+            drawPanel(ctx, 0, 0, width, topHeight, '#0b1220', '#33c0ff');
+            drawPanel(ctx, gutter, topHeight + gutter, sideWidth - gutter, (height - topHeight - gutter * 3) * 0.55, '#0c1e34', '#33c0ff');
+            drawPanel(ctx, gutter, height - (height - topHeight - gutter * 3) * 0.4, sideWidth - gutter, (height - topHeight - gutter * 3) * 0.4, '#0c1e34', '#22d3ee');
+            drawPanel(ctx, centerPanel.x, centerPanel.y, centerPanel.w, centerPanel.h, '#050912', '#0ea5e9');
+            ctx.restore();
 
             ctx.fillStyle = '#c7e3ff';
             ctx.font = '16px Orbitron';
@@ -82,21 +84,12 @@
         }
     };
 
-    function drawPanel(ctx, x, y, w, h, fill, stroke, opts = {}) {
-        const { fillAlpha = 1, strokeAlpha = 1, strokeWidth = 2 } = opts;
-        ctx.save();
-        if (fillAlpha > 0) {
-            ctx.globalAlpha = fillAlpha;
-            ctx.fillStyle = fill;
-            roundRect(ctx, x, y, w, h, 12, true, false);
-        }
-        if (strokeAlpha > 0 && strokeWidth > 0) {
-            ctx.globalAlpha = strokeAlpha;
-            ctx.strokeStyle = stroke;
-            ctx.lineWidth = strokeWidth;
-            roundRect(ctx, x + 2, y + 2, w - 4, h - 4, 10, false, true);
-        }
-        ctx.restore();
+    function drawPanel(ctx, x, y, w, h, fill, stroke) {
+        ctx.fillStyle = fill;
+        roundRect(ctx, x, y, w, h, 12, true, false);
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2;
+        roundRect(ctx, x + 2, y + 2, w - 4, h - 4, 10, false, true);
     }
 
     function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
