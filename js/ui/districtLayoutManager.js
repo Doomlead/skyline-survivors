@@ -11,7 +11,6 @@ const DistrictLayoutManager = (function() {
     let selectedMode = 'classic';
     let scaleListener = null;
     let lastKnownScale = null;
-    let lastMeasuredCenter = null;
     
     function init() {
         // Find the Phaser canvas once it's created
@@ -47,12 +46,8 @@ const DistrictLayoutManager = (function() {
         
         // Move canvas WITHOUT triggering resize
         if (phaserCanvas && districtCenter) {
-            const targetWidth = window.game?.scale?.width || phaserCanvas.width || CONFIG.width;
-            const targetHeight = window.game?.scale?.height || phaserCanvas.height || CONFIG.height;
-            applyDistrictCenterSizing(districtCenter, targetWidth, targetHeight);
             districtCenter.appendChild(phaserCanvas);
             styleCanvasForDistrict();
-            enforceCanvasSizing(targetWidth, targetHeight);
             
             // ADDED: Explicitly prevent Phaser from auto-resizing
             if (window.game && window.game.scale) {
@@ -74,7 +69,6 @@ const DistrictLayoutManager = (function() {
         
         // Monitor Phaser scale events while in district view to prevent unexpected shrink
         attachScaleMonitor();
-        logLayoutMetrics('Post-switch metrics (district view)');
         updateDistrictPanels();
     }
     
@@ -83,7 +77,6 @@ const DistrictLayoutManager = (function() {
         if (currentLayout === 'game') return;
         currentLayout = 'game';
         detachScaleMonitor();
-        clearDistrictCenterSizing();
         
         const gameLayout = document.getElementById('game-layout');
         const districtLayout = document.getElementById('district-layout');
@@ -121,26 +114,11 @@ const DistrictLayoutManager = (function() {
         console.log('Styling complete - NO RESIZE performed');
     }
     
-    function enforceCanvasSizing(width, height) {
-        if (!phaserCanvas) return;
-        phaserCanvas.style.width = `${width}px`;
-        phaserCanvas.style.height = `${height}px`;
-        phaserCanvas.style.minWidth = `${width}px`;
-        phaserCanvas.style.minHeight = `${height}px`;
-        phaserCanvas.style.maxWidth = '100%';
-        phaserCanvas.style.maxHeight = '100%';
-        phaserCanvas.style.flex = '0 0 auto';
-        logCanvasRect('Applied canvas sizing');
-    }
-    
     function syncCanvasStyles(width, height) {
         if (!phaserCanvas) return;
         phaserCanvas.style.width = `${width}px`;
         phaserCanvas.style.height = `${height}px`;
-        phaserCanvas.style.minWidth = `${width}px`;
-        phaserCanvas.style.minHeight = `${height}px`;
         console.log('[DistrictLayout] Synced canvas styles to', width, 'x', height);
-        logCanvasRect('Canvas rect after sync');
     }
     
     function removeDistrictStyling() {
@@ -322,8 +300,6 @@ const DistrictLayoutManager = (function() {
                 window.game.scale.resize(targetWidth, targetHeight);
                 syncCanvasStyles(targetWidth, targetHeight);
             }
-            enforceCanvasSizing(targetWidth, targetHeight);
-            logLayoutMetrics('Phaser resize handler metrics');
         };
         
         window.game.scale.on('resize', scaleListener);
