@@ -55,12 +55,6 @@ class BuildScene extends Phaser.Scene {
                 this.sound.context.resume();
             }
         });
-
-        // Handle Phaser scale resize events to keep the globe centered and properly sized
-        this.scale.on('resize', this.handleResize, this);
-        this.events.once('shutdown', () => {
-            this.scale.off('resize', this.handleResize, this);
-        });
     }
 
     createSceneOverlay(width, height) {
@@ -77,19 +71,6 @@ class BuildScene extends Phaser.Scene {
             color: '#4a9eff',
             align: 'center'
         }).setOrigin(0.5).setAlpha(0.7);
-    }
-
-    handleResize(gameSize) {
-        const { width, height } = gameSize;
-        console.log('BuildScene Resized to:', width, height);
-
-        this.cameras.main.setViewport(0, 0, width, height);
-        this.cameras.main.setScroll(0, 0);
-
-        if (this.hintText) this.hintText.setPosition(width / 2, height - 20);
-        if (this.titleText) this.titleText.setPosition(width / 2, 20);
-
-        this.mapModule.resize(width, height);
     }
 
     focusDistrict(district, skipTweens = false) {

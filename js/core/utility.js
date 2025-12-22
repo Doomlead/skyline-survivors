@@ -364,12 +364,6 @@ function closeBuildView() {
             mainScene.scene.resume();
         }
         
-        // Resize canvas for game view
-        setTimeout(() => {
-            if (window.DistrictLayoutManager) {
-                DistrictLayoutManager.resizeCanvasForGame();
-            }
-        }, 50);
     }
 
     const toggleBtn = document.getElementById('build-toggle');
