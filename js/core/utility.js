@@ -225,6 +225,9 @@ function startGame(mode = 'classic') {
     resetGameState();
     gameState.mode = mode;
     applyMissionPayload(missionPayload);
+    if (window.metaProgression?.applyLoadoutEffects) {
+        gameState.metaAppliedLoadout = metaProgression.applyLoadoutEffects(gameState, playerState);
+    }
     if (mode === 'survival') gameState.timeRemaining = gameState.totalSurvivalDuration;
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
@@ -287,7 +290,7 @@ function getMissionScaledReward(base) {
 
 function enterMainMenu() {
     const menu = document.getElementById('menu-overlay');
-    if (menu) menu.style.display = 'none';
+    if (menu) menu.style.display = 'flex';
 
     if (window.game && game.scene) {
         if (game.scene.isActive(SCENE_KEYS.build)) {
@@ -297,6 +300,23 @@ function enterMainMenu() {
             game.scene.stop(SCENE_KEYS.game);
         }
         game.scene.start(SCENE_KEYS.menu);
+    }
+}
+
+function openSettingsMenu() {
+    const menu = document.getElementById('menu-overlay');
+    if (menu) menu.style.display = 'flex';
+
+    if (window.game && game.scene) {
+        if (game.scene.isActive(SCENE_KEYS.game)) {
+            const main = game.scene.getScene(SCENE_KEYS.game);
+            if (main && main.scene.isActive()) {
+                main.scene.pause();
+            }
+        }
+        if (!game.scene.isActive(SCENE_KEYS.menu)) {
+            game.scene.start(SCENE_KEYS.menu);
+        }
     }
 }
 
@@ -382,3 +402,4 @@ window.closeBuildView = closeBuildView;
 window.enterMainMenu = enterMainMenu;
 window.enterDistrictMap = enterDistrictMap;
 window.launchSelectedMission = launchSelectedMission;
+window.openSettingsMenu = openSettingsMenu;

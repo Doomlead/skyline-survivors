@@ -9,6 +9,7 @@ class BuildMapView {
         this.planetContainer = null;
         this.onDistrictFocused = null;
         this.onNodeDetailsRequested = null;
+        this.onOrbitNodeSelected = null;
         this._persistAccumulator = 0;
 
         // 3D Globe state
@@ -588,13 +589,17 @@ class BuildMapView {
                     : liveState.timer > 0
                         ? `Threatened — event in ${this.scene.formatTimer(liveState.timer)}`
                         : 'Stable';
+                const actionLine = config.id === 'shop'
+                    ? 'Open the build/shop panel below to spend meta credits before launch.'
+                    : 'Tap a district sector to deploy, or stabilize nearby threats first.';
 
                 this.onNodeDetailsRequested?.(
                     `${config.label} Node`,
                     `Status: ${nodeStatus}\n` +
-                    'Tap a district sector to deploy, or stabilize nearby threats first.\n' +
+                    `${actionLine}\n` +
                     `Rewards: x${(liveState.rewardModifier || 1).toFixed(2)} · Spawn: x${(liveState.spawnModifier || 1).toFixed(2)}`
                 );
+                this.onOrbitNodeSelected?.(config.id, liveState);
             });
         });
     }

@@ -6,6 +6,7 @@ class BuildScene extends Phaser.Scene {
         this.selectedMode = 'classic';
         this.mapModule = new BuildMapView(this);
         this.uiModule = new BuildMissionUi(this);
+        this._lastMetaRefresh = 0;
     }
 
     preload() {
@@ -19,6 +20,7 @@ class BuildScene extends Phaser.Scene {
 
         this.mapModule.onDistrictFocused = (district) => this.focusDistrict(district);
         this.mapModule.onNodeDetailsRequested = (title, body) => this.uiModule.updateDetail(title, body);
+        this.mapModule.onOrbitNodeSelected = (id) => this.handleOrbitNodeSelection(id);
         this.uiModule.onModeSelected = (mode) => this.selectMode(mode);
 
         this.mapModule.build(width, height);
@@ -29,9 +31,11 @@ class BuildScene extends Phaser.Scene {
             onLaunch: () => this.launchMission(),
             onReroute: () => this.rollMission()
         });
+        this.uiModule.createBuildShopPanel(width, height);
 
         this.updateMissionUi();
         this.uiModule.updateExternalLaunchButton(this.selectedDistrict, this.mission, this.selectedMode);
+        this.uiModule.refreshBuildShopPanel();
 
         this.input.keyboard.once('keydown-SPACE', () => this.launchMission());
         this.input.keyboard.on('keydown-R', () => this.rollMission());
@@ -153,6 +157,11 @@ class BuildScene extends Phaser.Scene {
         } else {
             this.uiModule.refreshNodeStatusText(this.mapModule.mapNodes, this.selectedDistrict);
         }
+        this._lastMetaRefresh += delta;
+        if (this._lastMetaRefresh > 500) {
+            this.uiModule.refreshBuildShopPanel();
+            this._lastMetaRefresh = 0;
+        }
     }
 
     formatTimer(seconds) {
@@ -160,5 +169,11 @@ class BuildScene extends Phaser.Scene {
         const mins = String(Math.floor(clamped / 60)).padStart(2, '0');
         const secs = String(clamped % 60).padStart(2, '0');
         return `${mins}:${secs}`;
+    }
+
+    handleOrbitNodeSelection(id) {
+        if (id === 'shop') {
+            this.uiModule.highlightShopPanel();
+        }
     }
 }
