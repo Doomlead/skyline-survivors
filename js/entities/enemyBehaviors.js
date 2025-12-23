@@ -2,8 +2,21 @@
 // Enemy AI Behaviors and Update Functions
 // ------------------------
 
+function releaseTargetHuman(enemy) {
+    const target = enemy.targetHuman;
+    if (!target) return;
+    target.isAbducted = false;
+    if (target.abductor === enemy) {
+        target.abductor = null;
+    }
+    enemy.targetHuman = null;
+}
+
 // Handles landers hunting humans, abducting them, and mutating if they escape.
 function updateLanderBehavior(scene, enemy, time) {
+    if (enemy.targetHuman && !enemy.targetHuman.active) {
+        releaseTargetHuman(enemy);
+    }
     const humans = scene.humans;
     if (!humans) return;
     if (!enemy.targetHuman && !enemy.abductedHuman) {
@@ -515,5 +528,5 @@ function updateEnemies(scene, time, delta) {
 }
 
 if (typeof module !== 'undefined') {
-    module.exports = { updateRegeneratorBehavior };
+    module.exports = { updateLanderBehavior, updateRegeneratorBehavior };
 }
