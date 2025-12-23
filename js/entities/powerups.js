@@ -3,6 +3,8 @@
 // ------------------------
 
 function spawnPowerUp(scene, x, y) {
+    const { powerUps } = scene;
+    if (!powerUps) return;
     const powerUpPool = [
         'laser','drone','shield','missile','overdrive','rear','side','rapid','multi','piercing','speed','magnet','bomb','double','invincibility','timeSlow'
     ];
@@ -26,6 +28,8 @@ function spawnPowerUp(scene, x, y) {
 }
 
 function updatePowerUps(scene) {
+    const { powerUps, player } = scene;
+    if (!powerUps || !player) return;
     powerUps.children.entries.forEach(powerUp => {
         wrapWorldBounds(powerUp);
         if (playerState.powerUps.magnet > 0) {
@@ -44,6 +48,7 @@ function updatePowerUps(scene) {
 
 function collectPowerUp(playerSprite, powerUp) {
     gameState.score += getMissionScaledReward(200);
+    const audioManager = this.audioManager;
     if (audioManager) audioManager.playSound('powerUpCollect');
     const p = playerState.powerUps;
     const powerUpNames = {
@@ -92,7 +97,7 @@ function collectPowerUp(playerSprite, powerUp) {
             break;
         case 'drone': {
             p.drone = Math.min((p.drone || 0) + 1, 3);
-            const drone = drones.create(player.x, player.y, 'forceDrone');
+            const drone = this.drones.create(player.x, player.y, 'forceDrone');
             drone.setScale(1.25);
             drone.setDepth(FG_DEPTH_BASE + 8);
             break;
@@ -148,6 +153,8 @@ function collectPowerUp(playerSprite, powerUp) {
 }
 
 function updatePowerUpMagnet(scene) {
+    const { powerUps, player } = scene;
+    if (!powerUps || !player) return;
     if (playerState.powerUps.magnet <= 0) return;
     const magnetRadius = 150;
     powerUps.children.entries.forEach(powerUp => {
@@ -161,7 +168,9 @@ function updatePowerUpMagnet(scene) {
 }
 
 
-function updatePowerUpTimers(delta) {
+function updatePowerUpTimers(scene, delta) {
+    const { player } = scene;
+    if (!player) return;
     if (playerState.powerUps.overdrive > 0) {
         playerState.powerUps.overdrive -= delta;
         if (playerState.powerUps.overdrive <= 0) {
