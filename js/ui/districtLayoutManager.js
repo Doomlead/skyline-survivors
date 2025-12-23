@@ -1,8 +1,6 @@
-// ============================================
-// District Layout Manager
-// Handles switching between game and district map layouts
-// WITH COMPREHENSIVE DEBUGGING
-// ============================================
+// ------------------------
+// File: js/ui/districtLayoutManager.js
+// ------------------------
 
 const DistrictLayoutManager = (function() {
     let currentLayout = 'game'; // 'game' or 'district'
@@ -17,98 +15,88 @@ const DistrictLayoutManager = (function() {
             if (phaserCanvas) {
                 originalParent = document.getElementById('game-container');
                 clearInterval(checkCanvas);
-                console.log('=== CANVAS FOUND ===');
-                console.log('Canvas dimensions:', phaserCanvas.width, 'x', phaserCanvas.height);
-                console.log('Canvas style:', phaserCanvas.style.width, 'x', phaserCanvas.style.height);
-                console.log('Game scale dimensions:', window.game?.scale?.width, 'x', window.game?.scale?.height);
-                console.log('CONFIG dimensions:', CONFIG.width, 'x', CONFIG.height);
+                console.log('DistrictLayoutManager initialized');
             }
         }, 100);
     }
     
-    function switchToDistrictLayout() {
-        console.log('=== SWITCHING TO DISTRICT LAYOUT ===');
-        if (currentLayout === 'district') {
-            console.log('Already in district layout, skipping');
-            return;
-        }
+        function switchToDistrictLayout() {
+        if (currentLayout === 'district') return;
         currentLayout = 'district';
         
         const gameLayout = document.getElementById('game-layout');
         const districtLayout = document.getElementById('district-layout');
         const districtCenter = document.getElementById('district-game-container');
         
-        // Hide game layout, show district layout
         if (gameLayout) gameLayout.classList.add('hidden-for-district');
         if (districtLayout) districtLayout.classList.add('active');
         
-        // Move canvas WITHOUT triggering resize
         if (phaserCanvas && districtCenter) {
             districtCenter.appendChild(phaserCanvas);
             styleCanvasForDistrict();
+            
+            // 🚨 CRITICAL: Force Phaser to recognize the new parent size
+            if (window.game && window.game.scale) {
+                window.game.scale.resize(
+                    districtCenter.clientWidth, 
+                    districtCenter.clientHeight
+                );
+            }
         }
 
         updateDistrictPanels();
     }
     
-    function switchToGameLayout() {
-        console.log('=== SWITCHING TO GAME LAYOUT ===');
-        if (currentLayout === 'game') return;
-        currentLayout = 'game';
+    // In DistrictLayoutManager.js
+
+function switchToGameLayout() {
+    if (currentLayout === 'game') return;
+    currentLayout = 'game';
+    
+    const gameLayout = document.getElementById('game-layout');
+    const districtLayout = document.getElementById('district-layout');
+    const gameContainer = document.getElementById('game-container');
+    
+    if (gameLayout) gameLayout.classList.remove('hidden-for-district');
+    if (districtLayout) districtLayout.classList.remove('active');
+    
+    if (phaserCanvas && gameContainer) {
+        gameContainer.appendChild(phaserCanvas);
         
-        const gameLayout = document.getElementById('game-layout');
-        const districtLayout = document.getElementById('district-layout');
-        const gameContainer = document.getElementById('game-container');
-        
-        if (gameLayout) gameLayout.classList.remove('hidden-for-district');
-        if (districtLayout) districtLayout.classList.remove('active');
-        
-        if (phaserCanvas && gameContainer) {
-            gameContainer.appendChild(phaserCanvas);
-            removeDistrictStyling();
-            clearCanvasSizing();
-        }
-        
-        console.log('Switched back to game layout');
+        // 🚨 CRITICAL FIX: Remove ALL inline styles so Phaser takes control
+        phaserCanvas.style.width = '';
+        phaserCanvas.style.height = '';
+        phaserCanvas.style.objectFit = '';
+        phaserCanvas.style.borderRadius = '';
+        phaserCanvas.style.border = '';
+        phaserCanvas.style.boxShadow = '';
     }
+}
     
     function styleCanvasForDistrict() {
-        if (!phaserCanvas) {
-            console.warn('styleCanvasForDistrict: No canvas found!');
-            return;
-        }
+        if (!phaserCanvas) return;
         
-        console.log('=== STYLING CANVAS FOR DISTRICT ===');
-        console.log('Canvas dimensions BEFORE styling:', phaserCanvas.width, 'x', phaserCanvas.height);
-        console.log('Canvas style BEFORE:', phaserCanvas.style.width, 'x', phaserCanvas.style.height);
+        // CRITICAL FIX: Force the canvas to fill the panel without resizing its internal resolution
+        phaserCanvas.style.width = '100%';
+        phaserCanvas.style.height = '100%';
+        phaserCanvas.style.objectFit = 'contain';
         
-        // Just add border/shadow styling, don't change size or scale
         phaserCanvas.style.borderRadius = '8px';
         phaserCanvas.style.border = '2px solid #0ea5e9';
         phaserCanvas.style.boxShadow = '0 0 20px rgba(14, 165, 233, 0.3)';
-        
-        console.log('Canvas dimensions AFTER styling:', phaserCanvas.width, 'x', phaserCanvas.height);
-        console.log('Canvas style AFTER:', phaserCanvas.style.width, 'x', phaserCanvas.style.height);
-        console.log('Styling complete - NO RESIZE performed');
     }
     
     function removeDistrictStyling() {
         if (!phaserCanvas) return;
         
+        // Remove overrides so Phaser's scaling takes back control
+        phaserCanvas.style.width = '';
+        phaserCanvas.style.height = '';
+        phaserCanvas.style.objectFit = '';
+        
         phaserCanvas.style.borderRadius = '';
         phaserCanvas.style.border = '';
         phaserCanvas.style.boxShadow = '';
-        
-        console.log('District styling removed');
-    }
-    
-    function clearCanvasSizing() {
-        if (!phaserCanvas) return;
-        phaserCanvas.style.minWidth = '';
-        phaserCanvas.style.minHeight = '';
-        phaserCanvas.style.maxWidth = '';
-        phaserCanvas.style.maxHeight = '';
-        phaserCanvas.style.flex = '';
     }
     
     function updateDistrictPanels() {

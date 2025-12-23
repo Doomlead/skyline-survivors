@@ -363,7 +363,6 @@ function update(time, delta) {
     }
 }
 
-
 // ------------------------
 // Phaser game setup
 // ------------------------
@@ -397,8 +396,11 @@ const config = {
 const game = new Phaser.Game(config);
 // Expose the Phaser game instance for UI helpers (startGame, enterMainMenu, etc.)
 window.game = game;
+
+// Trigger initial resize
 applyResponsiveResize();
 
+// Event listeners
 window.addEventListener('resize', () => {
     applyResponsiveResize();
 });
@@ -408,26 +410,41 @@ window.addEventListener('orientationchange', () => {
     }, 100);
 });
 
+// ------------------------
+// Responsive Resize Helper
+// ------------------------
 function applyResponsiveResize() {
-    if (!game || !game.scale) return;
+    // 1. Safety check: If the game or scale manager isn't ready, abort.
+    if (!game || !game.scale || !game.canvas) return;
 
-    // While the district layout is active, skip responsive resizing to avoid
-    // transient layout measurements shrinking the canvas (and globe) after switch.
-    if (window.DistrictLayoutManager?.getCurrentLayout?.() === 'district') {
-        console.log('[ResponsiveResize] Skipping resize because district layout is active');
+    // 2. District Mode check:
+    // If we are currently looking at the District Map, we DO NOT want to resize 
+    // based on the window. The DistrictLayoutManager handles the size (100% of the panel).
+    if (window.DistrictLayoutManager && 
+        window.DistrictLayoutManager.getCurrentLayout && 
+        window.DistrictLayoutManager.getCurrentLayout() === 'district') {
+        // console.log('[ResponsiveResize] Blocked: Currently in District Mode');
         return;
     }
-    if (!game.canvas) {
-        // The canvas may not be ready immediately after game creation.
-        setTimeout(applyResponsiveResize, 50);
-        return;
-    }
+
+    // 3. Normal Game Mode logic:
+    // Calculate the best fit for the window (e.g. 1000x500 or smaller for mobile)
     const { width, height } = getResponsiveScale();
-    console.log('[ResponsiveResize] Resizing game to', width, 'x', height);
-    game.scale.resize(width, height);
-    game.canvas.style.width = `${width}px`;
-    game.canvas.style.height = `${height}px`;
-    game.scale.refresh();
+    
+    // Only resize if the dimensions are valid (prevents 0x0 errors)
+    if (width > 0 && height > 0) {
+        console.log(`[ResponsiveResize] Updating game size to: ${width}x${height}`);
+        
+        // Force Phaser to use these dimensions
+        game.scale.resize(width, height);
+        
+        // Ensure CSS matches so it renders sharply
+        game.canvas.style.width = `${width}px`;
+        game.canvas.style.height = `${height}px`;
+        
+        // Refresh the scale manager internals
+        game.scale.refresh();
+    }
 }
 
 // ------------------------

@@ -1,3 +1,7 @@
+// ------------------------
+// BuildScene
+// ------------------------
+
 class BuildScene extends Phaser.Scene {
     constructor() {
         super({ key: SCENE_KEYS.build, active: false, visible: false });

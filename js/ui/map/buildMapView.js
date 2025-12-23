@@ -1,3 +1,7 @@
+// ------------------------
+// File: js/ui/map/buildMapView.js
+// ------------------------
+
 class BuildMapView {
     constructor(scene) {
         this.scene = scene;
@@ -13,7 +17,7 @@ class BuildMapView {
         // 3D Globe state
         this.rotationX = 0.3;
         this.rotationY = 0;
-        this.globeRadius = 175; // Initial fallback
+        this.globeRadius = 250; 
         this.isDragging = false;
         this.lastPointer = { x: 0, y: 0 };
         this.autoRotate = true;
@@ -32,15 +36,24 @@ class BuildMapView {
         this.atmosphereGraphics = null;
         this.districtGraphics = null;
         this.markerGraphics = null;
+		
+		this._isBuilt = false;
     }
 
     preload() { }
 
     build(width, height) {
+		
+		// If we already built it, STOP. Don't read the width/height again.
+        if (this._isBuilt) {
+            console.log('BuildMapView: Already built, skipping resize logic');
+            return;
+        }
+		
         // Clean up any existing objects
         this.cleanup();
 
-        // Calculate responsive dimensions immediately
+        // Calculate dimensions immediately
         this.calculateDimensions(width, height);
 
         this.createStars();
@@ -69,9 +82,12 @@ class BuildMapView {
         ]);
 
         this.initializeDistricts();
-        this.createOrbitNodes(); // Uses stored dimensions
+        this.createOrbitNodes(); 
         this.setupGlobeInput();
         this.renderGlobe();
+		
+		// SET FLAG TO TRUE
+		this._isBuilt = true;
     }
 
     cleanup() {
@@ -94,39 +110,14 @@ class BuildMapView {
     }
 
     calculateDimensions(width, height) {
-        this.centerX = width * 0.42;
-        this.centerY = height / 2 + 10;
-        
-        // === FIX: Responsive Radius ===
-        // Radius is 38% of height, clamped to avoid becoming too small (dot) or too huge
-        this.globeRadius = Phaser.Math.Clamp(height * 0.38, 140, 320);
-        console.log(`Globe resized: Center(${this.centerX}, ${this.centerY}), Radius: ${this.globeRadius}`);
-    }
+        //  Ensure it centers in the middle of the provided area
+        this.centerX = width * 0.5;
+        this.centerY = height * 0.5;
 
-    // New Method called by BuildScene
-    resize(width, height) {
-        this.calculateDimensions(width, height);
-        
-        // Update Container Position
-        if (this.planetContainer) {
-            this.planetContainer.setPosition(this.centerX, this.centerY);
-        }
-        
-        // Update Backdrop
-        if (this.backdropGlow) {
-            this.backdropGlow.setPosition(width/2, height/2 + 20);
-        }
-        // Note: We don't redraw grid lines for performance, but we could if needed.
-
-        // Update Orbit Nodes positions (they are outside the container)
-        this.updateOrbitNodesPositions();
-        
-        // Force render
-        this.renderGlobe();
+        this.globeRadius = Phaser.Math.Clamp(height * 0.45, 200, 650);
     }
 
     createStars() {
-        // Reuse texture if exists
         if (!this.scene.textures.exists('build-star')) {
             const g = this.scene.add.graphics();
             g.fillStyle(0xffffff, 1);
@@ -151,7 +142,7 @@ class BuildMapView {
         this.backdropGrid = this.scene.add.graphics();
         this.backdropGrid.lineStyle(1, 0x102a3f, 0.4);
         const spacing = 60;
-        for (let x = 0; x < width * 2; x += spacing) { // *2 to cover resize expansion
+        for (let x = 0; x < width * 2; x += spacing) { 
             this.backdropGrid.lineBetween(x, 0, x, height * 2);
         }
         for (let y = 0; y < height * 2; y += spacing) {
@@ -189,8 +180,7 @@ class BuildMapView {
             const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.centerX, this.centerY);
             if (dist < this.globeRadius + 100) {
                 this.globeRadius -= deltaY * 0.1;
-                // Clamp radius so it doesn't vanish
-                this.globeRadius = Phaser.Math.Clamp(this.globeRadius, 120, 400); 
+                this.globeRadius = Phaser.Math.Clamp(this.globeRadius, 150, 800); 
             }
         });
     }
@@ -296,7 +286,12 @@ class BuildMapView {
     }
 
     drawAllLand() {
-        if (typeof WORLD_DATA === 'undefined') return;
+        // Safe check for data to prevent crash
+        if (typeof WORLD_DATA === 'undefined') {
+            console.warn('WORLD_DATA missing - cannot draw land');
+            return;
+        }
+        
         const landMasses = Object.entries(WORLD_DATA).map(([name, coords]) => {
             const projected = coords.map(([lat, lon]) => this.project3D(lat, lon));
             const avgZ = projected.reduce((sum, p) => sum + p.z, 0) / projected.length;
@@ -475,7 +470,6 @@ class BuildMapView {
         ];
 
         this.nodeConfigs.forEach(config => {
-            // These are persistent objects, created once
             const connector = this.scene.add.graphics();
             const node = this.scene.add.circle(0, 0, 12, config.color, 0.9);
             node.setStrokeStyle(2, 0xffffff, 0.8);
@@ -508,7 +502,7 @@ class BuildMapView {
     updateOrbitNodesPositions() {
         this.mapNodes.forEach(mapNode => {
             const config = mapNode.config;
-            const radius = this.globeRadius * config.distScale; // Scales with globe
+            const radius = this.globeRadius * config.distScale; 
             
             const x = this.centerX + Math.cos(Phaser.Math.DegToRad(config.angle)) * radius;
             const y = this.centerY + Math.sin(Phaser.Math.DegToRad(config.angle)) * radius;
@@ -545,7 +539,6 @@ class BuildMapView {
 
         this.renderGlobe();
 
-        // Update district states and orbit node text (same logic as before)
         this.districts.forEach(district => {
             district.state = missionPlanner.getDistrictState(district.config.id);
         });
@@ -553,9 +546,7 @@ class BuildMapView {
         this.mapNodes.forEach(node => {
             const stored = missionPlanner.getMapNodeState(node.id) || node.state;
             node.state = stored;
-            // ... (Timer logic same as previous) ...
             
-            // Visual Update based on state
             const timerLabel = node.state.status === 'destroyed' ? 'DESTROYED' : node.state.timer > 0 ? this.scene.formatTimer(node.state.timer) : 'STABLE';
             const color = node.state.status === 'destroyed' ? '#f87171' : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
             node.timerText.setText(timerLabel);
