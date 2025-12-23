@@ -114,42 +114,6 @@ const playerState = {
     baseSpeed: 300
 };
 
-// Game objects (initialized in scene)
-let player;
-let cursors;
-let spaceKey;
-let shiftKey;
-let qKey;
-let rKey;
-let pKey;
-let enemies;
-let projectiles;
-let enemyProjectiles;
-let powerUps;
-let humans;
-let drones;
-let explosions;
-let bosses;
-
-// UI elements
-let scoreText;
-let livesText;
-let humansText;
-let smartBombsText;
-let powerUpIndicators;
-let radarGraphics;
-let timerText;
-let uiContainer;
-
-// Global audio manager instance
-let audioManager;
-
-// Global particle manager instance
-let particleManager;
-
-// Secondary cameras used to display wrapped world edges
-let wrapCamera;
-
 // Virtual input for touch controls
 window.virtualInput = {
     left: false,

@@ -8,6 +8,7 @@ function wrapWorldBounds(sprite) {
 }
 
 function createExplosion(scene, x, y, color = 0xffff00) {
+    const audioManager = scene?.audioManager;
     if (audioManager) audioManager.playSound('explosion');
     const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const particleScale = reduceFlashes ? 0.35 : 0.5;
@@ -255,6 +256,8 @@ function startGame(mode = 'classic') {
     const toggleBtn = document.getElementById('build-toggle');
     if (toggleBtn) toggleBtn.classList.remove('hidden');
 
+    const mainScene = game?.scene?.getScene ? game.scene.getScene(SCENE_KEYS.game) : null;
+    const audioManager = mainScene?.audioManager;
     if (audioManager && audioManager.audioContext.state === 'suspended') {
         audioManager.audioContext.resume().catch(() => {});
     }

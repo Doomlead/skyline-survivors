@@ -22,7 +22,7 @@ function initializeGame(scene) {
     if (gameState.mode === 'classic') {
         spawnEnemyWave(scene);
     }
-    updateUI();
+    updateUI(scene);
 }
 
 function preload() {
@@ -34,7 +34,12 @@ function preload() {
 // ------------------------
 
 // Ghost sprites for entities that need to appear on both sides of the wrap boundary
-let ghostSprites = new Map();
+function getGhostSprites(scene) {
+    if (!scene.ghostSprites) {
+        scene.ghostSprites = new Map();
+    }
+    return scene.ghostSprites;
+}
 
 function wrapValue(x, worldWidth) {
     x = x % worldWidth;
@@ -72,6 +77,7 @@ function getRenderX(entityX, cameraX, worldWidth) {
 
 // Create or update a ghost sprite for an entity near the boundary
 function updateGhostSprite(scene, entity, ghostX) {
+    const ghostSprites = getGhostSprites(scene);
     let ghost = ghostSprites.get(entity);
     
     if (!ghost) {
@@ -99,7 +105,8 @@ function updateGhostSprite(scene, entity, ghostX) {
     }
 }
 
-function removeGhostSprite(entity) {
+function removeGhostSprite(scene, entity) {
+    const ghostSprites = getGhostSprites(scene);
     const ghost = ghostSprites.get(entity);
     if (ghost) {
         ghost.destroy();
@@ -109,6 +116,17 @@ function removeGhostSprite(entity) {
 
 // Main function to handle entity visibility across wrap boundaries
 function updateEntityWrapping(scene) {
+    const {
+        player,
+        enemies,
+        projectiles,
+        enemyProjectiles,
+        powerUps,
+        humans,
+        drones,
+        bosses,
+        explosions
+    } = scene;
     const mainCam = scene.cameras.main;
     const scrollX = mainCam.scrollX;
     const camWidth = mainCam.width;
@@ -119,7 +137,7 @@ function updateEntityWrapping(scene) {
     
     const processEntity = (entity) => {
         if (!entity || !entity.active) {
-            removeGhostSprite(entity);
+            removeGhostSprite(scene, entity);
             return;
         }
         
@@ -149,7 +167,7 @@ function updateEntityWrapping(scene) {
         if (needsGhost) {
             updateGhostSprite(scene, entity, ghostX);
         } else {
-            removeGhostSprite(entity);
+            removeGhostSprite(scene, entity);
         }
         
         // Keep entity at canonical position
@@ -180,6 +198,7 @@ function updateEntityWrapping(scene) {
     }
     
     // Clean up ghosts for destroyed entities
+    const ghostSprites = getGhostSprites(scene);
     ghostSprites.forEach((ghost, entity) => {
         if (!entity.active) {
             ghost.destroy();
@@ -189,7 +208,8 @@ function updateEntityWrapping(scene) {
 }
 
 // Clean up all ghost sprites
-function destroyAllGhosts() {
+function destroyAllGhosts(scene) {
+    const ghostSprites = getGhostSprites(scene);
     ghostSprites.forEach((ghost) => {
         if (ghost) ghost.destroy();
     });
@@ -197,6 +217,9 @@ function destroyAllGhosts() {
 }
 
 function create() {
+    if (window.DistrictLayoutManager) {
+        DistrictLayoutManager.switchToGameLayout();
+    }
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
     
@@ -204,31 +227,31 @@ function create() {
     createBackground(this);
 
     // Player
-    player = this.physics.add.sprite(100, 300, 'player');
-    player.setCollideWorldBounds(false);
-    player.setScale(1.25);
-    player.body.setSize(25, 10);
-    player.setDepth(FG_DEPTH_BASE + 10);
+    this.player = this.physics.add.sprite(100, 300, 'player');
+    this.player.setCollideWorldBounds(false);
+    this.player.setScale(1.25);
+    this.player.body.setSize(25, 10);
+    this.player.setDepth(FG_DEPTH_BASE + 10);
 
     // Game object groups
-    enemies = this.physics.add.group();
-    projectiles = this.physics.add.group();
-    enemyProjectiles = this.physics.add.group();
-    powerUps = this.physics.add.group();
-    humans = this.physics.add.group();
-    drones = this.physics.add.group();
-    explosions = this.add.group();
-    bosses = this.physics.add.group();
+    this.enemies = this.physics.add.group();
+    this.projectiles = this.physics.add.group();
+    this.enemyProjectiles = this.physics.add.group();
+    this.powerUps = this.physics.add.group();
+    this.humans = this.physics.add.group();
+    this.drones = this.physics.add.group();
+    this.explosions = this.add.group();
+    this.bosses = this.physics.add.group();
 
-    particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
+    this.particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
 
     // Input
-    cursors = this.input.keyboard.createCursorKeys();
-    spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
-    qKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
-    rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-    pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+    this.qKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
+    this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+    this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
 
     if (this._restartHandler) {
         this.input.keyboard.off('keydown-R', this._restartHandler);
@@ -246,27 +269,27 @@ function create() {
             this.input.keyboard.off('keydown-R', this._restartHandler);
             this._restartHandler = null;
         }
-        if (particleManager) {
-            particleManager.destroy();
-            particleManager = null;
+        if (this.particleManager) {
+            this.particleManager.destroy();
+            this.particleManager = null;
         }
-        destroyAllGhosts();
+        destroyAllGhosts(this);
         destroyParallax();
     });
 
     // Physics overlaps
-    this.physics.add.overlap(projectiles, enemies, hitEnemy, null, this);
-    this.physics.add.overlap(projectiles, bosses, hitBoss, null, this);
-    this.physics.add.overlap(player, enemies, playerHitEnemy, null, this);
-    this.physics.add.overlap(player, bosses, playerHitBoss, null, this);
-    this.physics.add.overlap(player, enemyProjectiles, playerHitProjectile, null, this);
-    this.physics.add.overlap(player, powerUps, collectPowerUp, null, this);
-    this.physics.add.overlap(player, humans, rescueHuman, null, this);
+    this.physics.add.overlap(this.projectiles, this.enemies, hitEnemy, null, this);
+    this.physics.add.overlap(this.projectiles, this.bosses, hitBoss, null, this);
+    this.physics.add.overlap(this.player, this.enemies, playerHitEnemy, null, this);
+    this.physics.add.overlap(this.player, this.bosses, playerHitBoss, null, this);
+    this.physics.add.overlap(this.player, this.enemyProjectiles, playerHitProjectile, null, this);
+    this.physics.add.overlap(this.player, this.powerUps, collectPowerUp, null, this);
+    this.physics.add.overlap(this.player, this.humans, rescueHuman, null, this);
 
     createUI(this);
 
-    audioManager = new AudioManager(this);
-    audioManager.playAmbientMusic();
+    this.audioManager = new AudioManager(this);
+    this.audioManager.playAmbientMusic();
 
     initializeGame(this);
     this.gameScene = this;
@@ -275,15 +298,17 @@ function create() {
 }
 
 function update(time, delta) {
+    const { player, particleManager } = this;
+
     if (gameState.gameOver) {
-        if (Phaser.Input.Keyboard.JustDown(rKey)) {
+        if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
             resetGameState();
             this.scene.restart();
         }
         return;
     }
     if (gameState.paused) {
-        if (Phaser.Input.Keyboard.JustDown(pKey)) togglePause(this);
+        if (Phaser.Input.Keyboard.JustDown(this.pKey)) togglePause(this);
         return;
     }
     if (window.missionPlanner) {
@@ -339,21 +364,21 @@ function update(time, delta) {
     updateHumans(this);
     updateBosses(this, time, delta);
     checkSurvivalBosses(this);
-    updatePowerUpTimers(delta);
+    updatePowerUpTimers(this, delta);
 
     if (gameState.mode === 'survival') {
         let spawnChance = 0.001 + gameState.difficulty * 0.001;
         const progress = 1 - (gameState.timeRemaining / gameState.totalSurvivalDuration);
         spawnChance *= 1 + progress * 2;
         spawnChance *= gameState.spawnMultiplier || 1;
-        if (humans.countActive(true) < 12 && Math.random() < 0.002) {
+        if (this.humans.countActive(true) < 12 && Math.random() < 0.002) {
             spawnHuman(this, Math.random() * (CONFIG.worldWidth - 200) + 100);
         }
         if (Math.random() < spawnChance) spawnRandomEnemy(this);
     }
 
     updateRadar(this);
-    updateUI();
+    updateUI(this);
 
     if (!gameState.gameOver && typeof gameState.nextExtraLife === 'number') {
         while (gameState.score >= gameState.nextExtraLife) {
@@ -458,6 +483,11 @@ function applyResponsiveResize() {
     });
 })();
 
+function getActiveAudioManager() {
+    const scene = game?.scene?.getScene ? game.scene.getScene(SCENE_KEYS.game) : null;
+    return scene?.audioManager || null;
+}
+
 // ------------------------
 // Mute toggle wiring
 // ------------------------
@@ -466,6 +496,7 @@ const muteButton = document.getElementById('mute-toggle');
 if (muteButton) {
     muteButton.textContent = userSettings.muted ? 'Unmute' : 'Mute';
     muteButton.addEventListener('click', () => {
+        const audioManager = getActiveAudioManager();
         if (!audioManager) return;
         const muted = audioManager.toggleMute();
         muteButton.textContent = muted ? 'Unmute' : 'Mute';
@@ -487,6 +518,7 @@ function wireAccessibilityPanel() {
     if (musicSlider && musicLabel) {
         const applyMusic = (value) => {
             musicLabel.textContent = `${Math.round(value * 100)}%`;
+            const audioManager = getActiveAudioManager();
             if (audioManager) audioManager.setMusicVolume(value);
             else {
                 userSettings.musicVolume = value;
@@ -504,6 +536,7 @@ function wireAccessibilityPanel() {
     if (sfxSlider && sfxLabel) {
         const applySfx = (value) => {
             sfxLabel.textContent = `${Math.round(value * 100)}%`;
+            const audioManager = getActiveAudioManager();
             if (audioManager) audioManager.setSFXVolume(value);
             else {
                 userSettings.sfxVolume = value;
