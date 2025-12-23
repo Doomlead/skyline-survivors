@@ -19,6 +19,10 @@ class BuildScene extends Phaser.Scene {
     create() {
         console.log('=== BuildScene.create() ===');
         
+        if (window.DistrictLayoutManager) {
+            DistrictLayoutManager.switchToDistrictLayout();
+        }
+        
         // Initial build
         const width = this.scale.width;
         const height = this.scale.height;

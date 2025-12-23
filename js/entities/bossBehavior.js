@@ -29,6 +29,8 @@ function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
 
 function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
     // Aggressive pursuit with erratic wobble
+    const player = scene.player;
+    if (!player) return;
     const angle = Phaser.Math.Angle.Between(boss.x, boss.y, player.x, player.y);
     const wobble = Math.sin(time * 0.008) * 0.3;
     const speed = 80 * timeSlowMultiplier;
@@ -80,6 +82,8 @@ function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) {
 }
 
 function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultiplier) {
+    const enemyProjectiles = scene.enemyProjectiles;
+    if (!enemyProjectiles) return;
     // Slow horizontal patrol
     if (!boss.bomberDirection) {
         boss.bomberDirection = Math.random() < 0.5 ? -1 : 1;
@@ -151,6 +155,8 @@ function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
 
 function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
     // Serpentine weaving pattern
+    const player = scene.player;
+    if (!player) return;
     if (!boss.serpentinePhase) boss.serpentinePhase = 0;
     boss.serpentinePhase += 0.02 * timeSlowMultiplier;
     
@@ -178,6 +184,8 @@ function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
 
 function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
     // Aggressive suicide charge
+    const player = scene.player;
+    if (!player) return;
     const angle = Phaser.Math.Angle.Between(boss.x, boss.y, player.x, player.y);
     const speed = 150 * timeSlowMultiplier;
     
@@ -200,6 +208,9 @@ function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
 }
 
 function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
+    const enemyProjectiles = scene.enemyProjectiles;
+    const audioManager = scene.audioManager;
+    if (!enemyProjectiles) return;
     // Stationary - plant if not already
     if (!boss.isPlanted) {
         boss.isPlanted = true;

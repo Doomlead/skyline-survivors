@@ -41,6 +41,8 @@ function createEnemyTrail(scene, enemy) {
 // The countsTowardsWave flag keeps track of whether this enemy should progress
 // wave objectives when destroyed (used to exclude spawned minions).
 function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
+    const { enemies, audioManager } = scene;
+    if (!enemies) return null;
     const edgePadding = 100;
     const clampedX = Phaser.Math.Clamp(x, edgePadding, CONFIG.worldWidth - edgePadding);
 
@@ -105,6 +107,7 @@ function getMissionWeightedEnemyType() {
 
 // Spawns an enemy at a random edge or near a human to keep pressure on the player.
 function spawnRandomEnemy(scene) {
+    const humans = scene.humans;
     const type = getMissionWeightedEnemyType();
     let x, y;
     
@@ -112,7 +115,7 @@ function spawnRandomEnemy(scene) {
         x = scene.cameras.main.scrollX + (Math.random() < 0.5 ? -50 : CONFIG.width + 50);
         y = Math.random() * CONFIG.worldHeight;
     } else {
-        const randomHuman = Phaser.Utils.Array.GetRandom(humans.children.entries);
+        const randomHuman = humans ? Phaser.Utils.Array.GetRandom(humans.children.entries) : null;
         if (randomHuman) {
             x = randomHuman.x + (Math.random() - 0.5) * 300;
             y = randomHuman.y + (Math.random() - 0.5) * 200;
@@ -165,6 +168,8 @@ function spawnEnemyWave(scene) {
 // Creates an enemy projectile aimed at the player's current position, with
 // speed, visuals, and damage tuned to the firing enemy type.
 function shootAtPlayer(scene, enemy) {
+    const { player, enemyProjectiles, audioManager } = scene;
+    if (!player || !enemyProjectiles) return;
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     
     let textureName = 'enemyProjectile';
@@ -237,6 +242,7 @@ function shootAtPlayer(scene, enemy) {
 
 // Handles projectile/enemy overlap: apply damage, trigger effects, and remove.
 function hitEnemy(projectile, enemy) {
+    const { audioManager, particleManager } = this;
     enemy.hp -= projectile.damage || 1;
     if (audioManager) audioManager.playSound('hitEnemy');
     if (projectile.projectileType === 'homing' && particleManager) {
@@ -249,7 +255,17 @@ function hitEnemy(projectile, enemy) {
 // Fully resolves an enemy death: special effects, spawn logic, scoring, and
 // wave progression bookkeeping for classic mode.
 function destroyEnemy(scene, enemy) {
+    const { enemies, particleManager, audioManager } = scene;
+    if (!enemies) return;
     if (!enemy || enemy.isBeingDestroyed) return;
+
+    if (enemy.enemyType === 'lander' && enemy.targetHuman && !enemy.abductedHuman) {
+        if (enemy.targetHuman.abductor === enemy) {
+            enemy.targetHuman.abductor = null;
+        }
+        enemy.targetHuman.isAbducted = false;
+        enemy.targetHuman = null;
+    }
     enemy.isBeingDestroyed = true;
 
     let explosionSoundPlayed = false;
@@ -364,6 +380,7 @@ function destroyEnemy(scene, enemy) {
 
 // Awards bonuses and starts the next wave once a classic wave objective is met.
 function completeWave(scene) {
+    const audioManager = scene.audioManager;
     const completedWave = gameState.wave;
     const waveBonus = getMissionScaledReward(1000 * completedWave);
     gameState.score += waveBonus;
@@ -398,4 +415,10 @@ function completeWave(scene) {
     scene.time.delayedCall(2000, () => {
         spawnEnemyWave(scene);
     });
+}
+
+if (typeof module !== 'undefined') {
+    module.exports = {
+        destroyEnemy
+    };
 }
