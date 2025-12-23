@@ -258,6 +258,14 @@ function destroyEnemy(scene, enemy) {
     const { enemies, particleManager, audioManager } = scene;
     if (!enemies) return;
     if (!enemy || enemy.isBeingDestroyed) return;
+
+    if (enemy.enemyType === 'lander' && enemy.targetHuman && !enemy.abductedHuman) {
+        if (enemy.targetHuman.abductor === enemy) {
+            enemy.targetHuman.abductor = null;
+        }
+        enemy.targetHuman.isAbducted = false;
+        enemy.targetHuman = null;
+    }
     enemy.isBeingDestroyed = true;
 
     let explosionSoundPlayed = false;
@@ -407,4 +415,10 @@ function completeWave(scene) {
     scene.time.delayedCall(2000, () => {
         spawnEnemyWave(scene);
     });
+}
+
+if (typeof module !== 'undefined') {
+    module.exports = {
+        destroyEnemy
+    };
 }
