@@ -294,7 +294,9 @@ function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) {
 
 function updateBosses(scene, time, delta) {
     const topLimit = 20;
-    
+    const { bosses } = scene;
+    if (!bosses) return;
+
     bosses.children.entries.forEach(boss => {
         wrapWorldBounds(boss);
         
