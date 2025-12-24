@@ -117,9 +117,6 @@ function switchToGameLayout() {
         phaserCanvas.style.height = '';
         phaserCanvas.style.objectFit = '';
         phaserCanvas.style.display = '';
-        phaserCanvas.style.position = '';
-        phaserCanvas.style.top = '';
-        phaserCanvas.style.left = '';
         phaserCanvas.style.borderRadius = '';
         phaserCanvas.style.border = '';
         phaserCanvas.style.boxShadow = '';
@@ -146,9 +143,6 @@ function switchToGameLayout() {
         phaserCanvas.style.width = '100%';
         phaserCanvas.style.height = '100%';
         phaserCanvas.style.display = 'block';
-        phaserCanvas.style.position = 'absolute';
-        phaserCanvas.style.top = '0';
-        phaserCanvas.style.left = '0';
         
         phaserCanvas.style.borderRadius = '8px';
         phaserCanvas.style.border = '2px solid #0ea5e9';
@@ -163,9 +157,6 @@ function switchToGameLayout() {
         phaserCanvas.style.height = '';
         phaserCanvas.style.objectFit = '';
         phaserCanvas.style.display = '';
-        phaserCanvas.style.position = '';
-        phaserCanvas.style.top = '';
-        phaserCanvas.style.left = '';
         
         phaserCanvas.style.borderRadius = '';
         phaserCanvas.style.border = '';
