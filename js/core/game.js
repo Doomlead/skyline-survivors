@@ -220,6 +220,12 @@ function create() {
     if (window.DistrictLayoutManager) {
         DistrictLayoutManager.switchToGameLayout();
     }
+	
+	// Hide the BuildScene if it's active
+    if (this.scene.isActive(SCENE_KEYS.build)) {
+        this.scene.setVisible(false, SCENE_KEYS.build);
+    }
+	
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
     
@@ -299,6 +305,17 @@ function create() {
 
 function update(time, delta) {
     const { player, particleManager } = this;
+	
+	 // Don't update if scene isn't fully initialized
+    if (!player || !this.enemies) return;
+    
+    if (gameState.gameOver) {
+        if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
+            resetGameState();
+            this.scene.restart();
+        }
+        return;
+    }
 
     if (gameState.gameOver) {
         if (Phaser.Input.Keyboard.JustDown(this.rKey)) {

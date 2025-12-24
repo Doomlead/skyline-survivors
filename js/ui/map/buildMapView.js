@@ -111,7 +111,7 @@ class BuildMapView {
 
     calculateDimensions(width, height) {
         //  Ensure it centers in the middle of the provided area
-        this.centerX = width * 0.5;
+        this.centerX = width * 0.6;
         this.centerY = height * 0.5;
 
         this.globeRadius = Phaser.Math.Clamp(height * 0.45, 200, 650);

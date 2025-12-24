@@ -21,38 +21,65 @@ const DistrictLayoutManager = (function() {
     }
     
         function switchToDistrictLayout() {
-        if (currentLayout === 'district') return;
-        currentLayout = 'district';
-        
-        const gameLayout = document.getElementById('game-layout');
-        const districtLayout = document.getElementById('district-layout');
-        const districtCenter = document.getElementById('district-game-container');
-        
-        if (gameLayout) gameLayout.classList.add('hidden-for-district');
-        if (districtLayout) districtLayout.classList.add('active');
-        
-        if (phaserCanvas && districtCenter) {
-            districtCenter.appendChild(phaserCanvas);
-            styleCanvasForDistrict();
-            
-            // 🚨 CRITICAL: Force Phaser to recognize the new parent size
-            if (window.game && window.game.scale) {
-                window.game.scale.resize(
-                    districtCenter.clientWidth, 
-                    districtCenter.clientHeight
-                );
-            }
-        }
-
-        updateDistrictPanels();
-    }
+    if (currentLayout === 'district') return;
+    currentLayout = 'district';
     
-    // In DistrictLayoutManager.js
+    // Hide ALL game-related HTML elements
+    const gameHud = document.getElementById('hud-container');
+    const gameRadar = document.getElementById('radar-container');
+    const gameControls = document.getElementById('controls-text');
+    const touchControls = document.getElementById('touch-controls');
+    const buildToggle = document.getElementById('build-toggle');
+    
+    if (gameHud) gameHud.style.display = 'none';
+    if (gameRadar) gameRadar.style.display = 'none';
+    if (gameControls) gameControls.style.display = 'none';
+    if (touchControls) touchControls.style.display = 'none';
+    if (buildToggle) buildToggle.style.display = 'none';
+    
+    // Show district-specific layout
+    const gameLayout = document.getElementById('game-layout');
+    const districtLayout = document.getElementById('district-layout');
+    const districtCenter = document.getElementById('district-game-container');
+    
+    if (gameLayout) gameLayout.classList.add('hidden-for-district');
+    if (districtLayout) districtLayout.classList.add('active');
+    
+    if (phaserCanvas && districtCenter) {
+        districtCenter.appendChild(phaserCanvas);
+        styleCanvasForDistrict();
+        
+        if (window.game && window.game.scale) {
+            window.game.scale.resize(
+                districtCenter.clientWidth, 
+                districtCenter.clientHeight
+            );
+        }
+    }
+
+    updateDistrictPanels();
+}
+    
+
 
 function switchToGameLayout() {
     if (currentLayout === 'game') return;
     currentLayout = 'game';
     
+    // Show ALL game-related HTML elements
+    const gameHud = document.getElementById('hud-container');
+    const gameRadar = document.getElementById('radar-container');
+    const gameControls = document.getElementById('controls-text');
+    const touchControls = document.getElementById('touch-controls');
+    const buildToggle = document.getElementById('build-toggle');
+    
+    if (gameHud) gameHud.style.display = 'block';
+    if (gameRadar) gameRadar.style.display = 'block';
+    if (gameControls) gameControls.style.display = 'block';
+    if (touchControls) touchControls.style.display = 'flex';
+    if (buildToggle) buildToggle.style.display = 'block';
+    
+    // Hide district layout
     const gameLayout = document.getElementById('game-layout');
     const districtLayout = document.getElementById('district-layout');
     const gameContainer = document.getElementById('game-container');
@@ -63,7 +90,7 @@ function switchToGameLayout() {
     if (phaserCanvas && gameContainer) {
         gameContainer.appendChild(phaserCanvas);
         
-        // 🚨 CRITICAL FIX: Remove ALL inline styles so Phaser takes control
+        // Remove district styling
         phaserCanvas.style.width = '';
         phaserCanvas.style.height = '';
         phaserCanvas.style.objectFit = '';
