@@ -409,14 +409,12 @@ window.addEventListener('orientationchange', () => {
 });
 
 function applyResponsiveResize() {
-    if (!game || !game.scale) return;
-
-    // While the district layout is active, skip responsive resizing to avoid
-    // transient layout measurements shrinking the canvas (and globe) after switch.
-    if (window.DistrictLayoutManager?.getCurrentLayout?.() === 'district') {
-        console.log('[ResponsiveResize] Skipping resize because district layout is active');
+    if (window.ignoreNextResize) {
+        window.ignoreNextResize = false;
         return;
     }
+
+    if (!game || !game.scale) return;
     if (!game.canvas) {
         // The canvas may not be ready immediately after game creation.
         setTimeout(applyResponsiveResize, 50);

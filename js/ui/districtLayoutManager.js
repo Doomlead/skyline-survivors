@@ -45,8 +45,17 @@ const DistrictLayoutManager = (function() {
         // Move canvas WITHOUT triggering resize
         if (phaserCanvas && districtCenter) {
             districtCenter.appendChild(phaserCanvas);
+            
+            // Remove constraints inherited from game layout so it can grow
+            phaserCanvas.style.maxWidth = '';
+            phaserCanvas.style.maxHeight = '';
+            phaserCanvas.style.width = '';
+            phaserCanvas.style.height = '';
             styleCanvasForDistrict();
         }
+
+        // Skip the immediate resize cycle to avoid transient shrink
+        window.ignoreNextResize = true;
 
         updateDistrictPanels();
     }
@@ -68,6 +77,9 @@ const DistrictLayoutManager = (function() {
             removeDistrictStyling();
             clearCanvasSizing();
         }
+
+        // Skip the next resize after moving back
+        window.ignoreNextResize = true;
         
         console.log('Switched back to game layout');
     }

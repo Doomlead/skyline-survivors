@@ -99,7 +99,7 @@ class BuildMapView {
         
         // === FIX: Responsive Radius ===
         // Radius is 38% of height, clamped to avoid becoming too small (dot) or too huge
-        this.globeRadius = Phaser.Math.Clamp(height * 0.38, 140, 320);
+        this.globeRadius = Phaser.Math.Clamp(height * 0.38, 140, 500);
         console.log(`Globe resized: Center(${this.centerX}, ${this.centerY}), Radius: ${this.globeRadius}`);
     }
 
