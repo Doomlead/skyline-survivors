@@ -79,7 +79,6 @@ function switchToGameLayout() {
     if (touchControls) touchControls.style.display = 'flex';
     if (buildToggle) buildToggle.style.display = 'block';
     
-    // Hide district layout
     const gameLayout = document.getElementById('game-layout');
     const districtLayout = document.getElementById('district-layout');
     const gameContainer = document.getElementById('game-container');
@@ -90,13 +89,24 @@ function switchToGameLayout() {
     if (phaserCanvas && gameContainer) {
         gameContainer.appendChild(phaserCanvas);
         
-        // Remove district styling
+        // Remove ALL district styling so Phaser takes control
         phaserCanvas.style.width = '';
         phaserCanvas.style.height = '';
         phaserCanvas.style.objectFit = '';
         phaserCanvas.style.borderRadius = '';
         phaserCanvas.style.border = '';
         phaserCanvas.style.boxShadow = '';
+        
+        // Force the game canvas back to its proper size
+        // This ensures it doesn't stay at the district size
+        if (window.game && window.game.scale) {
+            const gameScene = window.game.scene.getScene(SCENE_KEYS.game);
+            if (gameScene && gameScene.scene.isActive()) {
+                // Use the original game dimensions (1000x500)
+                window.game.scale.resize(CONFIG.width, CONFIG.height);
+                window.game.scale.refresh();
+            }
+        }
     }
 }
     

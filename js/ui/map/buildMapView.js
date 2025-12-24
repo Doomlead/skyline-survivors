@@ -36,20 +36,19 @@ class BuildMapView {
         this.atmosphereGraphics = null;
         this.districtGraphics = null;
         this.markerGraphics = null;
-		
-		this._isBuilt = false;
+        
+        this._isBuilt = false;
     }
 
     preload() { }
 
     build(width, height) {
-		
-		// If we already built it, STOP. Don't read the width/height again.
+        // If we already built it, STOP. Don't read the width/height again.
         if (this._isBuilt) {
             console.log('BuildMapView: Already built, skipping resize logic');
             return;
         }
-		
+        
         // Clean up any existing objects
         this.cleanup();
 
@@ -85,9 +84,9 @@ class BuildMapView {
         this.createOrbitNodes(); 
         this.setupGlobeInput();
         this.renderGlobe();
-		
-		// SET FLAG TO TRUE
-		this._isBuilt = true;
+        
+        // SET FLAG TO TRUE
+        this._isBuilt = true;
     }
 
     cleanup() {
@@ -110,8 +109,9 @@ class BuildMapView {
     }
 
     calculateDimensions(width, height) {
-        //  Ensure it centers in the middle of the provided area
-        this.centerX = width * 0.6;
+        // Since the globe is in the left panel of the district layout,
+        // shift it to the right to account for the panel layout
+        this.centerX = width * 0.55; // Changed from 0.5 to 0.55 to shift right
         this.centerY = height * 0.5;
 
         this.globeRadius = Phaser.Math.Clamp(height * 0.45, 200, 650);

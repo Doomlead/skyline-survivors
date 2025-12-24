@@ -2,6 +2,9 @@
 // Main game scene and initialization
 // ------------------------
 
+// Flag to track if GameScene has been properly initialized
+let gameSceneInitialized = false;
+
 // Store canonical positions separately from render positions
 // This is the key to making wrap-around work properly
 
@@ -220,12 +223,15 @@ function create() {
     if (window.DistrictLayoutManager) {
         DistrictLayoutManager.switchToGameLayout();
     }
-	
-	// Hide the BuildScene if it's active
+    
+    // Hide the BuildScene if it's active
     if (this.scene.isActive(SCENE_KEYS.build)) {
         this.scene.setVisible(false, SCENE_KEYS.build);
     }
-	
+    
+    // Mark that the game scene has been properly initialized
+    gameSceneInitialized = true;
+    
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
     
@@ -271,6 +277,9 @@ function create() {
     this.input.keyboard.on('keydown-R', this._restartHandler);
     
     this.events.once('shutdown', () => {
+        // Reset the initialization flag when scene shuts down
+        gameSceneInitialized = false;
+        
         if (this._restartHandler) {
             this.input.keyboard.off('keydown-R', this._restartHandler);
             this._restartHandler = null;
@@ -305,18 +314,10 @@ function create() {
 
 function update(time, delta) {
     const { player, particleManager } = this;
-	
-	 // Don't update if scene isn't fully initialized
+    
+    // Don't update if scene isn't fully initialized
     if (!player || !this.enemies) return;
     
-    if (gameState.gameOver) {
-        if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
-            resetGameState();
-            this.scene.restart();
-        }
-        return;
-    }
-
     if (gameState.gameOver) {
         if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
             resetGameState();
@@ -465,11 +466,18 @@ function applyResponsiveResize() {
     if (window.DistrictLayoutManager && 
         window.DistrictLayoutManager.getCurrentLayout && 
         window.DistrictLayoutManager.getCurrentLayout() === 'district') {
-        // console.log('[ResponsiveResize] Blocked: Currently in District Mode');
         return;
     }
 
-    // 3. Normal Game Mode logic:
+    // 3. NEW: Check if GameScene is active and already initialized
+    // Don't resize an active game that's already been set up
+    const gameScene = game.scene.getScene(SCENE_KEYS.game);
+    if (gameScene && gameScene.scene.isActive() && gameSceneInitialized) {
+        console.log('[ResponsiveResize] Blocked: GameScene already initialized and active');
+        return;
+    }
+
+    // 4. Normal Game Mode logic:
     // Calculate the best fit for the window (e.g. 1000x500 or smaller for mobile)
     const { width, height } = getResponsiveScale();
     
