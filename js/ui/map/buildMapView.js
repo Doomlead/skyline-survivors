@@ -2,6 +2,14 @@
 // File: js/ui/map/buildMapView.js
 // ------------------------
 
+const GLOBE = {
+    centerXRatio: 0.55,
+    centerYRatio: 0.5,
+    radiusScale: 0.45,
+    minRadius: 200,
+    maxRadius: 650
+};
+
 class BuildMapView {
     constructor(scene) {
         this.scene = scene;
@@ -89,6 +97,20 @@ class BuildMapView {
         this._isBuilt = true;
     }
 
+    resize(width, height) {
+        if (!this._isBuilt) return;
+
+        this.calculateDimensions(width, height);
+
+        if (this.planetContainer) {
+            this.planetContainer.setPosition(this.centerX, this.centerY);
+        }
+
+        this.refreshBackdrop(width, height);
+        this.updateOrbitNodesPositions();
+        this.renderGlobe();
+    }
+
     cleanup() {
         this.mapNodes.forEach(node => {
             if (node.pulse) node.pulse.stop();
@@ -111,10 +133,14 @@ class BuildMapView {
     calculateDimensions(width, height) {
         // Since the globe is in the left panel of the district layout,
         // shift it to the right to account for the panel layout
-        this.centerX = width * 0.55; // Changed from 0.5 to 0.55 to shift right
-        this.centerY = height * 0.5;
+        this.centerX = width * GLOBE.centerXRatio;
+        this.centerY = height * GLOBE.centerYRatio;
 
-        this.globeRadius = Phaser.Math.Clamp(height * 0.45, 200, 650);
+        this.globeRadius = Phaser.Math.Clamp(
+            height * GLOBE.radiusScale,
+            GLOBE.minRadius,
+            GLOBE.maxRadius
+        );
     }
 
     createStars() {
@@ -151,6 +177,12 @@ class BuildMapView {
 
         this.backdropGlow = this.scene.add.circle(width / 2, height / 2 + 20, 180, 0x0b2a3b, 0.25);
         this.backdropGlow.setBlendMode(Phaser.BlendModes.ADD);
+    }
+
+    refreshBackdrop(width, height) {
+        if (this.backdropGrid) this.backdropGrid.destroy();
+        if (this.backdropGlow) this.backdropGlow.destroy();
+        this.createBackdrop(width, height);
     }
 
     setupGlobeInput() {
