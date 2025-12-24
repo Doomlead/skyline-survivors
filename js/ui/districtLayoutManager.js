@@ -47,7 +47,7 @@ const DistrictLayoutManager = (function() {
     
     if (phaserCanvas && districtCenter) {
         districtCenter.appendChild(phaserCanvas);
-        styleCanvasForDistrict();
+        styleCanvasForDistrict(districtCenter);
         
         if (window.game && window.game.scale) {
     console.log('[DistrictLayoutManager] Resizing canvas for district layout');
@@ -132,8 +132,12 @@ function switchToGameLayout() {
     }
 }
     
-    function styleCanvasForDistrict() {
+    function styleCanvasForDistrict(districtCenter) {
         if (!phaserCanvas) return;
+
+        if (districtCenter) {
+            districtCenter.style.position = 'relative';
+        }
         
         // Ensure the canvas fully fills the district panel without letterboxing.
         phaserCanvas.style.width = '100%';
