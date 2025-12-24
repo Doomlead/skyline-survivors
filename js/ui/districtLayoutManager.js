@@ -50,6 +50,7 @@ const DistrictLayoutManager = (function() {
         styleCanvasForDistrict();
         
         if (window.game && window.game.scale) {
+            console.log('[DistrictLayoutManager] Resizing canvas for district layout');
             window.game.scale.resize(
                 districtCenter.clientWidth, 
                 districtCenter.clientHeight
@@ -103,6 +104,7 @@ function switchToGameLayout() {
             const gameScene = window.game.scene.getScene(SCENE_KEYS.game);
             if (gameScene && gameScene.scene.isActive()) {
                 // Use the original game dimensions (1000x500)
+                console.log('[DistrictLayoutManager] Resizing canvas for game layout');
                 window.game.scale.resize(CONFIG.width, CONFIG.height);
                 window.game.scale.refresh();
             }
