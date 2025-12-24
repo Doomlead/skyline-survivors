@@ -45,6 +45,11 @@ class BuildScene extends Phaser.Scene {
         // Initial sync with HTML panels
         this.syncHTMLPanels();
 
+        this._resizeHandler = (gameSize) => {
+            this.handleResize(gameSize);
+        };
+        this.scale.on('resize', this._resizeHandler);
+
         // Keyboard shortcuts
         this.input.keyboard.once('keydown-SPACE', () => this.launchMission());
         this.input.keyboard.on('keydown-R', () => this.rollMission());
@@ -63,6 +68,13 @@ class BuildScene extends Phaser.Scene {
                 this.sound.context.resume();
             }
         });
+
+        this.events.once('shutdown', () => {
+            if (this._resizeHandler) {
+                this.scale.off('resize', this._resizeHandler);
+                this._resizeHandler = null;
+            }
+        });
     }
 
     createSceneOverlay(width, height) {
@@ -79,6 +91,22 @@ class BuildScene extends Phaser.Scene {
             color: '#4a9eff',
             align: 'center'
         }).setOrigin(0.5).setAlpha(0.7);
+    }
+
+    handleResize(gameSize) {
+        const width = gameSize.width;
+        const height = gameSize.height;
+        this.mapModule.resize(width, height);
+        this.updateSceneOverlay(width, height);
+    }
+
+    updateSceneOverlay(width, height) {
+        if (this.hintText) {
+            this.hintText.setPosition(width / 2, height - 20);
+        }
+        if (this.titleText) {
+            this.titleText.setPosition(width / 2, 20);
+        }
     }
 
     focusDistrict(district, skipTweens = false) {
