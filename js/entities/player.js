@@ -3,6 +3,8 @@
 // ------------------------
 
 function updatePlayer(scene, time) {
+    const { player, cursors, spaceKey, shiftKey, qKey, pKey, particleManager, audioManager } = scene;
+    if (!player || !cursors) return;
     let speed = playerState.powerUps.speed > 0 ? 400 : playerState.baseSpeed;
     player.setVelocity(0, 0);
     const vInput = window.virtualInput || { left: false, right: false, up: false, down: false, fire: false };
@@ -93,6 +95,8 @@ function updatePlayer(scene, time) {
 }
 
 function fireWeapon(scene) {
+    const { player, projectiles, drones, audioManager } = scene;
+    if (!player || !projectiles || !drones) return;
     let speed = 600;
     if (playerState.powerUps.speed > 0) speed = 750;
     const fireX = player.x + (playerState.direction === 'right' ? 25 : -25);
@@ -161,6 +165,8 @@ function fireWeapon(scene) {
 }
 
 function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, piercing = false) {
+    const { projectiles } = scene;
+    if (!projectiles) return;
     let proj;
     let textureName;
     
@@ -248,6 +254,8 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, pier
 }
 
 function updateProjectiles(scene) {
+    const { projectiles, enemyProjectiles, enemies, player } = scene;
+    if (!projectiles || !enemyProjectiles || !enemies || !player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const destroyIfGrounded = (proj) => {
         const terrainVariation = Math.sin(proj.x / 200) * 30;
@@ -295,6 +303,7 @@ function updateProjectiles(scene) {
 
 
 function playerHitEnemy(playerSprite, enemy) {
+    const audioManager = this.audioManager;
     if (playerState.powerUps.invincibility > 0) {
         destroyEnemy(this, enemy);
         return;
@@ -311,6 +320,7 @@ function playerHitEnemy(playerSprite, enemy) {
 }
 
 function playerHitProjectile(playerSprite, projectile) {
+    const audioManager = this.audioManager;
     if (playerState.powerUps.invincibility > 0) {
         projectile.destroy();
         return;
@@ -328,6 +338,8 @@ function playerHitProjectile(playerSprite, projectile) {
 }
 
 function playerDie(scene) {
+    const { player, particleManager, audioManager, drones } = scene;
+    if (!player) return;
     if (scene._isRespawning || gameState.gameOver) return;
     gameState.lives--;
     if (particleManager) {
@@ -374,6 +386,8 @@ function playerDie(scene) {
 }
 
 function useSmartBomb(scene) {
+    const { enemies, enemyProjectiles, audioManager } = scene;
+    if (!enemies || !enemyProjectiles) return;
     if (gameState.smartBombs <= 0) return;
     gameState.smartBombs--;
     if (audioManager) audioManager.playSound('smartBomb');
@@ -401,6 +415,8 @@ function useSmartBomb(scene) {
 }
 
 function useHyperspace(scene) {
+    const { player, particleManager, audioManager } = scene;
+    if (!player) return;
     player.x = Math.random() * CONFIG.worldWidth;
     player.y = 100 + Math.random() * (CONFIG.worldHeight - 200);
     if (particleManager) {
@@ -412,6 +428,8 @@ function useHyperspace(scene) {
 }
 
 function updateDrones(scene, time) {
+    const { drones, player } = scene;
+    if (!drones || !player) return;
     drones.children.entries.forEach((drone, index) => {
         const angle = (time * 0.002 + index * Math.PI * 2 / drones.children.entries.length) % (Math.PI * 2);
         drone.x = player.x + Math.cos(angle) * 60;
@@ -420,6 +438,8 @@ function updateDrones(scene, time) {
 }
 
 function spawnHuman(scene, x) {
+    const { humans } = scene;
+    if (!humans) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const terrainVariation = Math.sin(x / 200) * 30;
     const y = groundLevel - terrainVariation - 15;
@@ -433,6 +453,7 @@ function spawnHuman(scene, x) {
 }
 
 function rescueHuman(playerSprite, human) {
+    const audioManager = this.audioManager;
     if (!human.isAbducted) return;
     gameState.humansRescued++;
     const reward = getMissionScaledReward(1000);
@@ -463,6 +484,8 @@ function rescueHuman(playerSprite, human) {
 }
 
 function updateHumans(scene) {
+    const { humans } = scene;
+    if (!humans) return;
     humans.children.entries.forEach(human => {
         if (human.body && human.body.gravity && human.body.gravity.y > 0) {
             const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;

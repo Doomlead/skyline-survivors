@@ -1,8 +1,6 @@
-// ============================================
-// District Layout Manager
-// Handles switching between game and district map layouts
-// WITH COMPREHENSIVE DEBUGGING
-// ============================================
+// ------------------------
+// File: js/ui/districtLayoutManager.js
+// ------------------------
 
 const DistrictLayoutManager = (function() {
     let currentLayout = 'game'; // 'game' or 'district'
@@ -17,110 +15,133 @@ const DistrictLayoutManager = (function() {
             if (phaserCanvas) {
                 originalParent = document.getElementById('game-container');
                 clearInterval(checkCanvas);
-                console.log('=== CANVAS FOUND ===');
-                console.log('Canvas dimensions:', phaserCanvas.width, 'x', phaserCanvas.height);
-                console.log('Canvas style:', phaserCanvas.style.width, 'x', phaserCanvas.style.height);
-                console.log('Game scale dimensions:', window.game?.scale?.width, 'x', window.game?.scale?.height);
-                console.log('CONFIG dimensions:', CONFIG.width, 'x', CONFIG.height);
+                console.log('DistrictLayoutManager initialized');
             }
         }, 100);
     }
     
-    function switchToDistrictLayout() {
-        console.log('=== SWITCHING TO DISTRICT LAYOUT ===');
-        if (currentLayout === 'district') {
-            console.log('Already in district layout, skipping');
-            return;
-        }
-        currentLayout = 'district';
-        
-        const gameLayout = document.getElementById('game-layout');
-        const districtLayout = document.getElementById('district-layout');
-        const districtCenter = document.getElementById('district-game-container');
-        
-        // Hide game layout, show district layout
-        if (gameLayout) gameLayout.classList.add('hidden-for-district');
-        if (districtLayout) districtLayout.classList.add('active');
-        
-        // Move canvas WITHOUT triggering resize
-        if (phaserCanvas && districtCenter) {
-            districtCenter.appendChild(phaserCanvas);
-            
-            // Remove constraints inherited from game layout so it can grow
-            phaserCanvas.style.maxWidth = '';
-            phaserCanvas.style.maxHeight = '';
-            phaserCanvas.style.width = '';
-            phaserCanvas.style.height = '';
-            styleCanvasForDistrict();
-        }
-
-        // Skip the immediate resize cycle to avoid transient shrink
-        window.ignoreNextResize = true;
-
-        updateDistrictPanels();
-    }
+        function switchToDistrictLayout() {
+    if (currentLayout === 'district') return;
+    currentLayout = 'district';
     
-    function switchToGameLayout() {
-        console.log('=== SWITCHING TO GAME LAYOUT ===');
-        if (currentLayout === 'game') return;
-        currentLayout = 'game';
+    // Hide ALL game-related HTML elements
+    const gameHud = document.getElementById('hud-container');
+    const gameRadar = document.getElementById('radar-container');
+    const gameControls = document.getElementById('controls-text');
+    const touchControls = document.getElementById('touch-controls');
+    const buildToggle = document.getElementById('build-toggle');
+    
+    if (gameHud) gameHud.style.display = 'none';
+    if (gameRadar) gameRadar.style.display = 'none';
+    if (gameControls) gameControls.style.display = 'none';
+    if (touchControls) touchControls.style.display = 'none';
+    if (buildToggle) buildToggle.style.display = 'none';
+    
+    // Show district-specific layout
+    const gameLayout = document.getElementById('game-layout');
+    const districtLayout = document.getElementById('district-layout');
+    const districtCenter = document.getElementById('district-game-container');
+    
+    if (gameLayout) gameLayout.classList.add('hidden-for-district');
+    if (districtLayout) districtLayout.classList.add('active');
+    
+    if (phaserCanvas && districtCenter) {
+        districtCenter.appendChild(phaserCanvas);
+        styleCanvasForDistrict();
         
-        const gameLayout = document.getElementById('game-layout');
-        const districtLayout = document.getElementById('district-layout');
-        const gameContainer = document.getElementById('game-container');
-        
-        if (gameLayout) gameLayout.classList.remove('hidden-for-district');
-        if (districtLayout) districtLayout.classList.remove('active');
-        
-        if (phaserCanvas && gameContainer) {
-            gameContainer.appendChild(phaserCanvas);
-            removeDistrictStyling();
-            clearCanvasSizing();
-        }
-
-        // Skip the next resize after moving back
-        window.ignoreNextResize = true;
-        
-        console.log('Switched back to game layout');
+        if (window.game && window.game.scale) {
+    console.log('[DistrictLayoutManager] Resizing canvas for district layout');
+    
+    // Log the dimensions you're about to use
+    console.log('[DistrictLayoutManager] districtCenter dimensions:', {
+    width: districtCenter.clientWidth,
+    height: districtCenter.clientHeight
+});
+    
+    window.game.scale.resize(
+        districtCenter.clientWidth,
+        districtCenter.clientHeight
+    );
+    
+    window.game.scale.refresh();
+}
     }
+
+    updateDistrictPanels();
+}
+    
+
+
+function switchToGameLayout() {
+    if (currentLayout === 'game') return;
+    currentLayout = 'game';
+    
+    // Show ALL game-related HTML elements
+    const gameHud = document.getElementById('hud-container');
+    const gameRadar = document.getElementById('radar-container');
+    const gameControls = document.getElementById('controls-text');
+    const touchControls = document.getElementById('touch-controls');
+    const buildToggle = document.getElementById('build-toggle');
+    
+    if (gameHud) gameHud.style.display = 'block';
+    if (gameRadar) gameRadar.style.display = 'block';
+    if (gameControls) gameControls.style.display = 'block';
+    if (touchControls) touchControls.style.display = 'flex';
+    if (buildToggle) buildToggle.style.display = 'block';
+    
+    const gameLayout = document.getElementById('game-layout');
+    const districtLayout = document.getElementById('district-layout');
+    const gameContainer = document.getElementById('game-container');
+    
+    if (gameLayout) gameLayout.classList.remove('hidden-for-district');
+    if (districtLayout) districtLayout.classList.remove('active');
+    
+    if (phaserCanvas && gameContainer) {
+        gameContainer.appendChild(phaserCanvas);
+        
+        // Remove ALL district styling so Phaser takes control
+        phaserCanvas.style.width = '';
+        phaserCanvas.style.height = '';
+        phaserCanvas.style.objectFit = '';
+        phaserCanvas.style.borderRadius = '';
+        phaserCanvas.style.border = '';
+        phaserCanvas.style.boxShadow = '';
+        
+        // Force the game canvas back to its proper size
+        // This ensures it doesn't stay at the district size
+        if (window.game && window.game.scale) {
+            // Use the original game dimensions (1000x500)
+            console.log('[DistrictLayoutManager] Resizing canvas for game layout');
+            window.game.scale.resize(CONFIG.width, CONFIG.height);
+            window.game.scale.refresh();
+        }
+    }
+}
     
     function styleCanvasForDistrict() {
-        if (!phaserCanvas) {
-            console.warn('styleCanvasForDistrict: No canvas found!');
-            return;
-        }
+        if (!phaserCanvas) return;
         
-        console.log('=== STYLING CANVAS FOR DISTRICT ===');
-        console.log('Canvas dimensions BEFORE styling:', phaserCanvas.width, 'x', phaserCanvas.height);
-        console.log('Canvas style BEFORE:', phaserCanvas.style.width, 'x', phaserCanvas.style.height);
+        // CRITICAL FIX: Force the canvas to fill the panel without resizing its internal resolution
+        phaserCanvas.style.width = '100%';
+        phaserCanvas.style.height = '100%';
+        phaserCanvas.style.objectFit = 'contain';
         
-        // Just add border/shadow styling, don't change size or scale
         phaserCanvas.style.borderRadius = '8px';
         phaserCanvas.style.border = '2px solid #0ea5e9';
         phaserCanvas.style.boxShadow = '0 0 20px rgba(14, 165, 233, 0.3)';
-        
-        console.log('Canvas dimensions AFTER styling:', phaserCanvas.width, 'x', phaserCanvas.height);
-        console.log('Canvas style AFTER:', phaserCanvas.style.width, 'x', phaserCanvas.style.height);
-        console.log('Styling complete - NO RESIZE performed');
     }
     
     function removeDistrictStyling() {
         if (!phaserCanvas) return;
         
+        // Remove overrides so Phaser's scaling takes back control
+        phaserCanvas.style.width = '';
+        phaserCanvas.style.height = '';
+        phaserCanvas.style.objectFit = '';
+        
         phaserCanvas.style.borderRadius = '';
         phaserCanvas.style.border = '';
         phaserCanvas.style.boxShadow = '';
-        
-        console.log('District styling removed');
-    }
-    
-    function clearCanvasSizing() {
-        if (!phaserCanvas) return;
-        phaserCanvas.style.minWidth = '';
-        phaserCanvas.style.minHeight = '';
-        phaserCanvas.style.maxWidth = '';
-        phaserCanvas.style.maxHeight = '';
-        phaserCanvas.style.flex = '';
     }
     
     function updateDistrictPanels() {

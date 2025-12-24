@@ -24,13 +24,14 @@ function createUI(scene) {
     }
 }
 
-function updateUI() {
+function updateUI(scene) {
     if (!scoreEl) return;
+    const humansGroup = scene?.humans;
 
     scoreEl.innerText = gameState.score.toString().padStart(6, '0');
 
     if (gameState.mode === 'survival') {
-        const activeHumans = humans ? humans.countActive(true) : gameState.humans;
+        const activeHumans = humansGroup ? humansGroup.countActive(true) : gameState.humans;
         waveEl.style.display = 'block';
         waveEl.innerText = 'HUMANS: ' + String(activeHumans).padStart(3, '0');
 
@@ -99,7 +100,9 @@ function formatMetaTimer(seconds) {
 }
 
 function updateRadar(scene) {
-    if (!radarCtx || !player) return;
+    if (!radarCtx || !scene) return;
+    const { player, enemies, humans } = scene;
+    if (!player) return;
     
     const width = radarCanvas.width;
     const height = radarCanvas.height;
@@ -203,6 +206,7 @@ function updateRadar(scene) {
 // ------------------------
 
 function gameOver(scene) {
+    const audioManager = scene.audioManager;
     gameState.gameOver = true;
     if (window.missionPlanner) missionPlanner.recordMissionOutcome(false);
     const metaResult = recordMetaOutcome(false);
@@ -254,6 +258,7 @@ function gameOver(scene) {
 }
 
 function winGame(scene) {
+    const audioManager = scene.audioManager;
     gameState.gameOver = true;
     if (window.missionPlanner) missionPlanner.recordMissionOutcome(true);
     const metaResult = recordMetaOutcome(true);
@@ -318,6 +323,7 @@ function recordMetaOutcome(success) {
 }
 
 function togglePause(scene) {
+    const audioManager = scene.audioManager;
     gameState.paused = !gameState.paused;
     
     if (gameState.paused) {

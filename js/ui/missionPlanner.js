@@ -1,3 +1,7 @@
+// ------------------------
+// mission planner
+// ------------------------
+
 (function() {
     const cities = [
         'Neo Seattle', 'Skyline Prime', 'Aurora City', 'Nightfall Bay', 'Nova Odessa',

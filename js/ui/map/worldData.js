@@ -1,3 +1,7 @@
+// ------------------------
+// File: js/ui/map/worldData.js
+// ------------------------
+
 // World landmass data for 3D globe rendering
 const WORLD_DATA = {
     northAmerica: [
@@ -169,4 +173,3 @@ const LAND_COLORS = {
     newZealandNorth: { fill: 0x3d7a37, stroke: 0x2d5a27 },
     newZealandSouth: { fill: 0x3d7a37, stroke: 0x2d5a27 }
 };
-

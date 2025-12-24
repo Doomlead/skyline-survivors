@@ -49,6 +49,8 @@ function initializeBossQueue() {
 }
 
 function spawnBoss(scene, type, x, y) {
+    const { bosses, audioManager } = scene;
+    if (!bosses) return null;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const terrainVariation = Math.sin(x / 200) * 30;
     const minClearance = 60;
@@ -144,6 +146,8 @@ function startBossEncounter(scene, triggerInfo = {}) {
 }
 
 function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngle) {
+    const { player, enemyProjectiles, audioManager } = scene;
+    if (!player || !enemyProjectiles) return;
     const proj = enemyProjectiles.create(sourceX, sourceY, shotConfig.projectileType);
     proj.setDepth(FG_DEPTH_BASE + 4);
     proj.setScale(1.5);
@@ -196,6 +200,8 @@ function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngl
 
 function hitBoss(projectile, boss) {
     const scene = projectile.scene;
+    const audioManager = scene.audioManager;
+    const particleManager = scene.particleManager;
     boss.hp -= projectile.damage || 1;
 
     // Visual hit feedback
@@ -217,6 +223,7 @@ function hitBoss(projectile, boss) {
 
 function playerHitBoss(playerSprite, boss) {
     const scene = boss.scene;
+    const audioManager = scene.audioManager;
 
     if (playerState.powerUps.invincibility > 0) {
         boss.hp -= 3;
@@ -237,6 +244,8 @@ function playerHitBoss(playerSprite, boss) {
 }
 
 function destroyBoss(scene, boss) {
+    const { bosses, enemies } = scene;
+    if (!bosses) return;
     // Massive death effect
     screenShake(scene, 25, 500);
     
@@ -327,6 +336,7 @@ function destroyBoss(scene, boss) {
 }
 
 function completeBossWave(scene) {
+    const audioManager = scene.audioManager;
     const completedWave = gameState.wave;
     const bossReward = getMissionScaledReward(3000);
     gameState.score += bossReward;  // Large bonus for beating boss
@@ -373,6 +383,7 @@ function completeBossWave(scene) {
 }
 
 function hitBossProjectile(playerSprite, projectile) {
+    const audioManager = this.audioManager;
     // Find if this projectile came from a boss
     const sourceType = projectile.enemyType;
     
@@ -405,4 +416,3 @@ function checkSurvivalBosses(scene) {
         }
     });
 }
-
