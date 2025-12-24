@@ -484,6 +484,7 @@ function applyResponsiveResize() {
     // Only resize if the dimensions are valid (prevents 0x0 errors)
     if (width > 0 && height > 0) {
         console.log(`[ResponsiveResize] Updating game size to: ${width}x${height}`);
+        console.log('[ResponsiveResize] Resizing game canvas for responsive layout');
         
         // Force Phaser to use these dimensions
         game.scale.resize(width, height);
