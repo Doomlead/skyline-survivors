@@ -64,6 +64,19 @@ const DistrictLayoutManager = (function() {
     );
     
     window.game.scale.refresh();
+
+    if (window.game && window.game.scale && phaserCanvas) {
+        console.log('[DistrictLayoutManager] Canvas sizing after resize', {
+            canvasWidth: phaserCanvas.width,
+            canvasHeight: phaserCanvas.height,
+            clientWidth: phaserCanvas.clientWidth,
+            clientHeight: phaserCanvas.clientHeight,
+            scaleWidth: window.game.scale.width,
+            scaleHeight: window.game.scale.height,
+            displayWidth: window.game.scale.displaySize?.width,
+            displayHeight: window.game.scale.displaySize?.height
+        });
+    }
 }
     }
 
@@ -103,6 +116,7 @@ function switchToGameLayout() {
         phaserCanvas.style.width = '';
         phaserCanvas.style.height = '';
         phaserCanvas.style.objectFit = '';
+        phaserCanvas.style.display = '';
         phaserCanvas.style.borderRadius = '';
         phaserCanvas.style.border = '';
         phaserCanvas.style.boxShadow = '';
@@ -121,10 +135,10 @@ function switchToGameLayout() {
     function styleCanvasForDistrict() {
         if (!phaserCanvas) return;
         
-        // CRITICAL FIX: Force the canvas to fill the panel without resizing its internal resolution
+        // Ensure the canvas fully fills the district panel without letterboxing.
         phaserCanvas.style.width = '100%';
         phaserCanvas.style.height = '100%';
-        phaserCanvas.style.objectFit = 'contain';
+        phaserCanvas.style.display = 'block';
         
         phaserCanvas.style.borderRadius = '8px';
         phaserCanvas.style.border = '2px solid #0ea5e9';
@@ -138,6 +152,7 @@ function switchToGameLayout() {
         phaserCanvas.style.width = '';
         phaserCanvas.style.height = '';
         phaserCanvas.style.objectFit = '';
+        phaserCanvas.style.display = '';
         
         phaserCanvas.style.borderRadius = '';
         phaserCanvas.style.border = '';
