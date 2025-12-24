@@ -64,6 +64,19 @@ const DistrictLayoutManager = (function() {
     );
     
     window.game.scale.refresh();
+
+    if (window.game && window.game.scale && phaserCanvas) {
+        console.log('[DistrictLayoutManager] Canvas sizing after resize', {
+            canvasWidth: phaserCanvas.width,
+            canvasHeight: phaserCanvas.height,
+            clientWidth: phaserCanvas.clientWidth,
+            clientHeight: phaserCanvas.clientHeight,
+            scaleWidth: window.game.scale.width,
+            scaleHeight: window.game.scale.height,
+            displayWidth: window.game.scale.displaySize?.width,
+            displayHeight: window.game.scale.displaySize?.height
+        });
+    }
 }
     }
 
