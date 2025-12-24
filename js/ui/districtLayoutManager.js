@@ -47,7 +47,7 @@ const DistrictLayoutManager = (function() {
     
     if (phaserCanvas && districtCenter) {
         districtCenter.appendChild(phaserCanvas);
-        styleCanvasForDistrict();
+        styleCanvasForDistrict(districtCenter);
         
         if (window.game && window.game.scale) {
     console.log('[DistrictLayoutManager] Resizing canvas for district layout');
@@ -64,6 +64,19 @@ const DistrictLayoutManager = (function() {
     );
     
     window.game.scale.refresh();
+
+    if (window.game && window.game.scale && phaserCanvas) {
+        console.log('[DistrictLayoutManager] Canvas sizing after resize', {
+            canvasWidth: phaserCanvas.width,
+            canvasHeight: phaserCanvas.height,
+            clientWidth: phaserCanvas.clientWidth,
+            clientHeight: phaserCanvas.clientHeight,
+            scaleWidth: window.game.scale.width,
+            scaleHeight: window.game.scale.height,
+            displayWidth: window.game.scale.displaySize?.width,
+            displayHeight: window.game.scale.displaySize?.height
+        });
+    }
 }
     }
 
@@ -103,6 +116,10 @@ function switchToGameLayout() {
         phaserCanvas.style.width = '';
         phaserCanvas.style.height = '';
         phaserCanvas.style.objectFit = '';
+        phaserCanvas.style.display = '';
+        phaserCanvas.style.position = '';
+        phaserCanvas.style.top = '';
+        phaserCanvas.style.left = '';
         phaserCanvas.style.borderRadius = '';
         phaserCanvas.style.border = '';
         phaserCanvas.style.boxShadow = '';
@@ -118,13 +135,20 @@ function switchToGameLayout() {
     }
 }
     
-    function styleCanvasForDistrict() {
+    function styleCanvasForDistrict(districtCenter) {
         if (!phaserCanvas) return;
+
+        if (districtCenter) {
+            districtCenter.style.position = 'relative';
+        }
         
-        // CRITICAL FIX: Force the canvas to fill the panel without resizing its internal resolution
+        // Ensure the canvas fully fills the district panel without letterboxing.
         phaserCanvas.style.width = '100%';
         phaserCanvas.style.height = '100%';
-        phaserCanvas.style.objectFit = 'contain';
+        phaserCanvas.style.display = 'block';
+        phaserCanvas.style.position = 'absolute';
+        phaserCanvas.style.top = '0';
+        phaserCanvas.style.left = '0';
         
         phaserCanvas.style.borderRadius = '8px';
         phaserCanvas.style.border = '2px solid #0ea5e9';
@@ -138,6 +162,10 @@ function switchToGameLayout() {
         phaserCanvas.style.width = '';
         phaserCanvas.style.height = '';
         phaserCanvas.style.objectFit = '';
+        phaserCanvas.style.display = '';
+        phaserCanvas.style.position = '';
+        phaserCanvas.style.top = '';
+        phaserCanvas.style.left = '';
         
         phaserCanvas.style.borderRadius = '';
         phaserCanvas.style.border = '';

@@ -26,6 +26,17 @@ class BuildScene extends Phaser.Scene {
         // Initial build
         const width = this.scale.width;
         const height = this.scale.height;
+        console.log('[BuildScene] Scale snapshot', {
+            width,
+            height,
+            gameSize: this.scale.gameSize,
+            displaySize: this.scale.displaySize,
+            baseSize: this.scale.baseSize,
+            canvasWidth: this.game.canvas?.width,
+            canvasHeight: this.game.canvas?.height,
+            canvasClientWidth: this.game.canvas?.clientWidth,
+            canvasClientHeight: this.game.canvas?.clientHeight
+        });
         
         this.cameras.main.setBackgroundColor('#050912');
         this.cameras.main.setZoom(1);

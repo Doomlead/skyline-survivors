@@ -68,6 +68,11 @@ class BuildMapView {
 
         // Create planet container at globe center
         this.planetContainer = this.scene.add.container(this.centerX, this.centerY);
+        console.log('[BuildMapView] Globe spawned', {
+            centerX: this.centerX,
+            centerY: this.centerY,
+            globeRadius: this.globeRadius
+        });
 
         // Create graphics layers
         this.atmosphereGraphics = this.scene.add.graphics();
@@ -141,6 +146,13 @@ class BuildMapView {
             GLOBE_LAYOUT.minRadius,
             GLOBE_LAYOUT.maxRadius
         );
+
+        console.log('[BuildMapView] Globe dimensions', {
+            radius: this.globeRadius,
+            diameter: this.globeRadius * 2,
+            centerX: this.centerX,
+            centerY: this.centerY
+        });
     }
 
     createStars() {
