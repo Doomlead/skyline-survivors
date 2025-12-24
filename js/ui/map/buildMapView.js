@@ -2,7 +2,7 @@
 // File: js/ui/map/buildMapView.js
 // ------------------------
 
-const GLOBE = {
+const GLOBE_LAYOUT = {
     centerXRatio: 0.55,
     centerYRatio: 0.5,
     radiusScale: 0.45,
@@ -133,13 +133,13 @@ class BuildMapView {
     calculateDimensions(width, height) {
         // Since the globe is in the left panel of the district layout,
         // shift it to the right to account for the panel layout
-        this.centerX = width * GLOBE.centerXRatio;
-        this.centerY = height * GLOBE.centerYRatio;
+        this.centerX = width * GLOBE_LAYOUT.centerXRatio;
+        this.centerY = height * GLOBE_LAYOUT.centerYRatio;
 
         this.globeRadius = Phaser.Math.Clamp(
-            height * GLOBE.radiusScale,
-            GLOBE.minRadius,
-            GLOBE.maxRadius
+            height * GLOBE_LAYOUT.radiusScale,
+            GLOBE_LAYOUT.minRadius,
+            GLOBE_LAYOUT.maxRadius
         );
     }
 
