@@ -50,13 +50,21 @@ const DistrictLayoutManager = (function() {
         styleCanvasForDistrict();
         
         if (window.game && window.game.scale) {
-            console.log('[DistrictLayoutManager] Resizing canvas for district layout');
-            window.game.scale.resize(
-                districtCenter.clientWidth, 
-                districtCenter.clientHeight
-            );
-            window.game.scale.refresh();
-        }
+    console.log('[DistrictLayoutManager] Resizing canvas for district layout');
+    
+    // Log the dimensions you're about to use
+    console.log('[DistrictLayoutManager] districtCenter dimensions:', {
+    width: districtCenter.clientWidth,
+    height: districtCenter.clientHeight
+});
+    
+    window.game.scale.resize(
+        districtCenter.clientWidth,
+        districtCenter.clientHeight
+    );
+    
+    window.game.scale.refresh();
+}
     }
 
     updateDistrictPanels();
