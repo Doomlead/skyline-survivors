@@ -51,11 +51,7 @@ class BuildMapView {
     preload() { }
 
     build(width, height) {
-        // If we already built it, STOP. Don't read the width/height again.
-        if (this._isBuilt) {
-            console.log('BuildMapView: Already built, skipping resize logic');
-            return;
-        }
+        console.log('[BuildMapView.build] Called with dimensions:', { width, height, _isBuilt: this._isBuilt });
         
         // Clean up any existing objects
         this.cleanup();
@@ -133,11 +129,37 @@ class BuildMapView {
         }
         if (this.backdropGrid) this.backdropGrid.destroy();
         if (this.backdropGlow) this.backdropGlow.destroy();
+        
+        // Reset the build flag so we can rebuild
+        this._isBuilt = false;
     }
+	
+	calculateDimensions(width, height) {
+    const layout = GLOBE_LAYOUT;
+    
+    // Fallback to reasonable defaults if width/height are 0 or NaN
+    const safeWidth = width || window.innerWidth;
+    const safeHeight = height || window.innerHeight;
 
-    calculateDimensions(width, height) {
-        // Since the globe is in the left panel of the district layout,
-        // shift it to the right to account for the panel layout
+    this.centerX = safeWidth * layout.centerXRatio;
+    this.centerY = safeHeight * layout.centerYRatio;
+
+    // Use the smaller dimension to ensure the globe fits both ways
+    const minDim = Math.min(safeWidth, safeHeight);
+    const baseRadius = minDim * layout.radiusScale;
+    
+    this.globeRadius = Phaser.Math.Clamp(
+        baseRadius, 
+        layout.minRadius, 
+        layout.maxRadius
+    );
+
+    console.log(`[BuildMapView] Resizing: ${safeWidth}x${safeHeight} -> Radius: ${this.globeRadius}`);
+}
+
+    /*calculateDimensions(width, height) {
+        // Since the globe is in the center panel of the district layout,
+        // center it within the available space
         this.centerX = width * GLOBE_LAYOUT.centerXRatio;
         this.centerY = height * GLOBE_LAYOUT.centerYRatio;
 
@@ -153,7 +175,7 @@ class BuildMapView {
             centerX: this.centerX,
             centerY: this.centerY
         });
-    }
+    }*/
 
     createStars() {
         if (!this.scene.textures.exists('build-star')) {

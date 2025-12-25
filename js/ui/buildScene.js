@@ -19,74 +19,39 @@ class BuildScene extends Phaser.Scene {
     create() {
         console.log('=== BuildScene.create() ===');
         
+        // 1. Tell the UI manager to move the canvas
         if (window.DistrictLayoutManager) {
             DistrictLayoutManager.switchToDistrictLayout();
         }
         
-        // Initial build
+        // 2. WAIT for the browser to finish moving the canvas 
+        // before we try to measure the screen and draw the globe.
+        setTimeout(() => {
+            this.performCreate();
+        }, 150); 
+    }
+    
+    performCreate() {
+        // Now that the canvas is moved, get the NEW dimensions
         const width = this.scale.width;
         const height = this.scale.height;
-        console.log('[BuildScene] Scale snapshot', {
-            width,
-            height,
-            gameSize: this.scale.gameSize,
-            displaySize: this.scale.displaySize,
-            baseSize: this.scale.baseSize,
-            canvasWidth: this.game.canvas?.width,
-            canvasHeight: this.game.canvas?.height,
-            canvasClientWidth: this.game.canvas?.clientWidth,
-            canvasClientHeight: this.game.canvas?.clientHeight
-        });
+        console.log('[BuildScene] Building with final dimensions', { width, height });
         
         this.cameras.main.setBackgroundColor('#050912');
         this.cameras.main.setZoom(1);
         this.cameras.main.setScroll(0, 0);
 
         // Setup map module callbacks
-        this.mapModule.onDistrictFocused = (district) => this.focusDistrict(district);
-        this.mapModule.onNodeDetailsRequested = (title, body) => this.updateHTMLDetail(title, body);
-        this.mapModule.onOrbitNodeSelected = (id) => this.handleOrbitNodeSelection(id);
+        this.mapModule.onDistrictFocused = (d) => this.handleDistrictFocus(d);
+        this.mapModule.onNodeDetailsRequested = (n) => this.handleNodeDetails(n);
+        this.mapModule.onOrbitNodeSelected = (n) => this.handleOrbitNodeSelected(n);
 
-        // Build the globe/map
+        // Build the globe using the actual container size
         this.mapModule.build(width, height);
-
-        // Create minimal in-scene UI
-        this.createSceneOverlay(width, height);
-
-        // Initial sync with HTML panels
+        
         this.syncHTMLPanels();
-
-        this._resizeHandler = (gameSize) => {
-            this.handleResize(gameSize);
-        };
-        this.scale.on('resize', this._resizeHandler);
-
-        // Keyboard shortcuts
-        this.input.keyboard.once('keydown-SPACE', () => this.launchMission());
-        this.input.keyboard.on('keydown-R', () => this.rollMission());
-
-        // Mouse interaction for globe rotation
-        this.input.on('pointermove', pointer => {
-            if (this.mapModule.planetContainer) {
-                // Use mapModule's center instead of hardcoded width/2
-                const centerX = this.mapModule.centerX;
-                this.mapModule.planetContainer.rotation = Phaser.Math.DegToRad((pointer.x - centerX) * 0.015);
-            }
-        });
-
-        this.input.once('pointerdown', () => {
-            if (this.sound.context.state === 'suspended') {
-                this.sound.context.resume();
-            }
-        });
-
-        this.events.once('shutdown', () => {
-            if (this._resizeHandler) {
-                this.scale.off('resize', this._resizeHandler);
-                this._resizeHandler = null;
-            }
-        });
     }
+
 
     createSceneOverlay(width, height) {
         this.hintText = this.add.text(width / 2, height - 20, 'Click a glowing district to select · Press SPACE to launch', {
