@@ -52,8 +52,10 @@ class BuildScene extends Phaser.Scene {
         this.syncHTMLPanels();
 
         // Keyboard Controls
-        this.input.keyboard.once('keydown-SPACE', () => this.launchMission());
-        this.input.keyboard.on('keydown-R', () => this.rollMission());
+        this._spaceHandler = () => this.launchMission();
+        this._rerollHandler = () => this.rollMission();
+        this.input.keyboard.on('keydown-SPACE', this._spaceHandler);
+        this.input.keyboard.on('keydown-R', this._rerollHandler);
 
         // Globe Rotation Logic
         this.input.on('pointermove', pointer => {
@@ -77,6 +79,14 @@ class BuildScene extends Phaser.Scene {
             if (this._resizeHandler) {
                 this.scale.off('resize', this._resizeHandler);
                 this._resizeHandler = null;
+            }
+            if (this._spaceHandler) {
+                this.input.keyboard.off('keydown-SPACE', this._spaceHandler);
+                this._spaceHandler = null;
+            }
+            if (this._rerollHandler) {
+                this.input.keyboard.off('keydown-R', this._rerollHandler);
+                this._rerollHandler = null;
             }
         });
 
@@ -148,6 +158,19 @@ class BuildScene extends Phaser.Scene {
                 });
             }
         }
+    }
+
+    handleDistrictFocus(district) {
+        this.focusDistrict(district);
+    }
+
+    handleNodeDetails(node) {
+        if (!node) return;
+        console.log('[BuildScene] Node details requested', node);
+    }
+
+    handleOrbitNodeSelected(nodeId) {
+        this.handleOrbitNodeSelection(nodeId);
     }
 
     rollMission() {
