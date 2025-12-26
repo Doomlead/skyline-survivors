@@ -98,10 +98,17 @@ const DistrictLayoutManager = (function() {
             // Force the game canvas back to its proper size
             // This ensures it doesn't stay at the district size
             if (window.game && window.game.scale) {
-                // Use the original game dimensions (1000x500)
                 console.log('[DistrictLayoutManager] Resizing canvas for game layout');
-                window.game.scale.resize(CONFIG.width, CONFIG.height);
-                window.game.scale.refresh();
+                if (typeof applyResponsiveResize === 'function') {
+                    applyResponsiveResize({ force: true });
+                } else {
+                    window.game.scale.resize(CONFIG.width, CONFIG.height);
+                    if (window.game.canvas) {
+                        window.game.canvas.style.width = `${CONFIG.width}px`;
+                        window.game.canvas.style.height = `${CONFIG.height}px`;
+                    }
+                    window.game.scale.refresh();
+                }
             }
         }
     }
