@@ -65,14 +65,15 @@
         }
         
         #district-center-panel {
-            flex: 1;
-            background: #050912;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            min-width: 400px;
-        }
+    flex: 1;
+    background: #050912;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-width: 400px;
+    min-height: 600px; /* Minimum height for the globe */
+}
         
         #district-right-panel {
             width: 260px;
@@ -141,26 +142,16 @@
             color: #e0f2fe;
             font-weight: bold;
         }
-        
-        /* District center canvas container *//*
-        #district-game-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }*/
+
 		
 		#district-game-container {
-    flex: 1;
-    background: #050912; /* Use the same dark color as the scene */
-    position: relative;
-    min-height: 0;
-    overflow: hidden;
-    border: 1px solid #1e293b;
-}
+			flex: 1;
+			background: #050912; /* Use the same dark color as the scene */
+			position: relative;
+			min-height: 0;
+			overflow: hidden;
+		border: 1px solid #1e293b;
+		}
         
         /* Mode buttons in district layout */
         .district-mode-btn {

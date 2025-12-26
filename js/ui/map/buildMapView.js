@@ -3,11 +3,11 @@
 // ------------------------
 
 const GLOBE_LAYOUT = {
-    centerXRatio: 0.55,
-    centerYRatio: 0.5,
-    radiusScale: 0.45,
-    minRadius: 200,
-    maxRadius: 650
+    centerXRatio: .75,
+    centerYRatio: 0.75,
+    radiusScale: 0.23,
+    minRadius: 100,
+    maxRadius: 400
 };
 
 class BuildMapView {
