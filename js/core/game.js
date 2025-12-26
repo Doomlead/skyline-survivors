@@ -456,14 +456,15 @@ window.addEventListener('orientationchange', () => {
 // ------------------------
 // Responsive Resize Helper
 // ------------------------
-function applyResponsiveResize() {
+function applyResponsiveResize(options = {}) {
+    const { force = false } = options;
     // 1. Safety check: If the game or scale manager isn't ready, abort.
     if (!game || !game.scale || !game.canvas) return;
 
     // 2. District Mode check:
     // If we are currently looking at the District Map, we DO NOT want to resize 
     // based on the window. The DistrictLayoutManager handles the size (100% of the panel).
-    if (window.DistrictLayoutManager && 
+    if (!force && window.DistrictLayoutManager && 
         window.DistrictLayoutManager.getCurrentLayout && 
         window.DistrictLayoutManager.getCurrentLayout() === 'district') {
         return;
@@ -472,7 +473,7 @@ function applyResponsiveResize() {
     // 3. NEW: Check if GameScene is active and already initialized
     // Don't resize an active game that's already been set up
     const gameScene = game.scene.getScene(SCENE_KEYS.game);
-    if (gameScene && gameScene.scene.isActive() && gameSceneInitialized) {
+    if (!force && gameScene && gameScene.scene.isActive() && gameSceneInitialized) {
         console.log('[ResponsiveResize] Blocked: GameScene already initialized and active');
         return;
     }
