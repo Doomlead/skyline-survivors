@@ -32,24 +32,54 @@ class BuildScene extends Phaser.Scene {
     }
     
     performCreate() {
-        // Now that the canvas is moved, get the NEW dimensions
+        // 1. Get dimensions
         const width = this.scale.width;
         const height = this.scale.height;
         console.log('[BuildScene] Building with final dimensions', { width, height });
         
+        // 2. Scene Setup
         this.cameras.main.setBackgroundColor('#050912');
         this.cameras.main.setZoom(1);
         this.cameras.main.setScroll(0, 0);
 
-        // Setup map module callbacks
+        // 3. Map Module Setup
         this.mapModule.onDistrictFocused = (d) => this.handleDistrictFocus(d);
         this.mapModule.onNodeDetailsRequested = (n) => this.handleNodeDetails(n);
         this.mapModule.onOrbitNodeSelected = (n) => this.handleOrbitNodeSelected(n);
 
-        // Build the globe using the actual container size
+        // 4. Build the Globe
         this.mapModule.build(width, height);
-        
         this.syncHTMLPanels();
+
+        // Keyboard Controls
+        this.input.keyboard.once('keydown-SPACE', () => this.launchMission());
+        this.input.keyboard.on('keydown-R', () => this.rollMission());
+
+        // Globe Rotation Logic
+        this.input.on('pointermove', pointer => {
+            // Check if planetContainer exists inside mapModule
+            if (this.mapModule.planetContainer) {
+                const centerX = this.mapModule.centerX;
+                // Rotates based on distance from the center of the map
+                this.mapModule.planetContainer.rotation = Phaser.Math.DegToRad((pointer.x - centerX) * 0.015);
+            }
+        });
+
+        // Audio Resume (Browser Security Requirement)
+        this.input.once('pointerdown', () => {
+            if (this.sound.context.state === 'suspended') {
+                this.sound.context.resume();
+            }
+        });
+
+        // Cleanup Handler
+        this.events.once('shutdown', () => {
+            if (this._resizeHandler) {
+                this.scale.off('resize', this._resizeHandler);
+                this._resizeHandler = null;
+            }
+        });
+
     }
 
 
