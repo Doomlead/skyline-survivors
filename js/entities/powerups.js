@@ -97,7 +97,7 @@ function collectPowerUp(playerSprite, powerUp) {
             break;
         case 'drone': {
             p.drone = Math.min((p.drone || 0) + 1, 3);
-            const drone = this.drones.create(player.x, player.y, 'forceDrone');
+            const drone = this.drones.create(playerSprite.x, playerSprite.y, 'forceDrone');
             drone.setScale(1.25);
             drone.setDepth(FG_DEPTH_BASE + 8);
             break;
