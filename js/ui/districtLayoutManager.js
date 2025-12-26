@@ -74,8 +74,14 @@ const DistrictLayoutManager = (function() {
         const districtLayout = document.getElementById('district-layout');
         const gameContainer = document.getElementById('game-container');
         
-        if (gameLayout) gameLayout.classList.remove('hidden-for-district');
-        if (districtLayout) districtLayout.classList.remove('active');
+        if (gameLayout) {
+            gameLayout.style.display = 'flex';
+            gameLayout.classList.remove('hidden-for-district');
+        }
+        if (districtLayout) {
+            districtLayout.style.display = 'none';
+            districtLayout.classList.remove('active');
+        }
         
         if (phaserCanvas && gameContainer) {
             gameContainer.appendChild(phaserCanvas);
