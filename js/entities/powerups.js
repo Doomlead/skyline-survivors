@@ -171,21 +171,24 @@ function updatePowerUpMagnet(scene) {
 function updatePowerUpTimers(scene, delta) {
     const { player } = scene;
     if (!player) return;
+    let minFireRate = 200;
     if (playerState.powerUps.overdrive > 0) {
         playerState.powerUps.overdrive -= delta;
         if (playerState.powerUps.overdrive <= 0) {
             playerState.powerUps.overdrive = 0;
-            if (playerState.powerUps.rapid <= 0) playerState.fireRate = 200;
+        } else {
+            minFireRate = Math.min(minFireRate, 50);
         }
     }
     if (playerState.powerUps.rapid > 0) {
         playerState.powerUps.rapid -= delta;
-        playerState.fireRate = 80;
         if (playerState.powerUps.rapid <= 0) {
             playerState.powerUps.rapid = 0;
-            if (playerState.powerUps.overdrive <= 0) playerState.fireRate = 200;
+        } else {
+            minFireRate = Math.min(minFireRate, 80);
         }
     }
+    playerState.fireRate = minFireRate;
     if (playerState.powerUps.shield > 0 && player.shieldSprite) {
         const pulse = Math.sin(Date.now() * 0.005) * 0.2 + 0.5;
         player.shieldSprite.setAlpha(pulse);
