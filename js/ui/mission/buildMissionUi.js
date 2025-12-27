@@ -141,7 +141,7 @@ class BuildMissionUi {
         }).setOrigin(0.5);
 
         this.launchButton = this.createMissionButton(panelX, panelY + panelHeight * 0.43, 'Launch Deployment (Space)', 0x22d3ee, onLaunch);
-        this.rollButton = this.createMissionButton(panelX, panelY + panelHeight * 0.55, 'Reroute to New City (R)', 0xf97316, onReroute);
+        this.rollButton = this.createMissionButton(panelX, panelY + panelHeight * 0.55, 'Reroll New City (R)', 0xf97316, onReroute);
 
         this.scene.add.text(panelX, height - 24, 'Select a district, pick a mode, then launch.', {
             fontFamily: 'Orbitron',
