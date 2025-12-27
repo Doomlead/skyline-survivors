@@ -86,8 +86,8 @@ class BuildMissionUi {
         const hasTimedNodes = (typeof missionPlanner !== 'undefined' && missionPlanner.hasMapTimerData()) && mapNodes.some(
             node => (node.state?.timer || 0) > 0);
         const overlayDescription = hasTimedNodes
-            ? 'Hover or click a glowing sector to zoom in.\nNodes with active timers will destabilize—stabilize the most critical threats first.\nChoose a mode below to deploy to the selected district.'
-            : 'Hover or click a glowing sector to zoom in.\nThis map is static for now—select a sector and prep a deployment when ready.\nChoose a mode below to deploy to the selected district.';
+            ? 'Click a glowing sector to select it. Drag to rotate the globe.\nNodes with active timers will destabilize—stabilize the most critical threats first.\nChoose a mode below to deploy to the selected district.'
+            : 'Click a glowing sector to select it. Drag to rotate the globe.\nThis map is static for now—select a sector and prep a deployment when ready.\nChoose a mode below to deploy to the selected district.';
 
         this.detailBody = this.scene.add.text(width / 2 - 260, 94, overlayDescription, {
             fontFamily: 'Orbitron',
