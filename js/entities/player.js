@@ -113,7 +113,7 @@ function updatePlayer(scene, time, delta) {
 
     if (veritechState.active) {
         const speed = veritechState.mode === 'fighter' ? 320 : 220;
-        const horizontalSpeed = speed * 0.65;
+        const horizontalSpeed = speed * 0.4;
         const accel = veritechState.mode === 'fighter' ? 0.18 : 0.2;
         const drag = veritechState.mode === 'fighter' ? 0.92 : 0.9;
         const gravity = veritechState.mode === 'guardian' ? 520 : 0;
