@@ -244,6 +244,11 @@ function create() {
     this.player.setScale(1.25);
     this.player.body.setSize(25, 10);
     this.player.setDepth(FG_DEPTH_BASE + 10);
+    this.pilotSprite = this.physics.add.sprite(100, 300, 'human');
+    this.pilotSprite.setActive(false).setVisible(false);
+    this.pilotSprite.setScale(1.1);
+    this.pilotSprite.body.setSize(8, 12);
+    this.pilotSprite.setDepth(FG_DEPTH_BASE + 9);
 
     // Game object groups
     this.enemies = this.physics.add.group();

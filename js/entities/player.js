@@ -5,6 +5,10 @@
 function updatePlayer(scene, time) {
     const { player, cursors, spaceKey, shiftKey, qKey, pKey, particleManager, audioManager } = scene;
     if (!player || !cursors) return;
+    if (playerState.controlScheme === 'veritech') {
+        updateVeritechController(scene, time);
+        return;
+    }
     let speed = playerState.powerUps.speed > 0 ? 400 : playerState.baseSpeed;
     player.setVelocity(0, 0);
     const vInput = window.virtualInput || { left: false, right: false, up: false, down: false, fire: false };
@@ -92,6 +96,83 @@ function updatePlayer(scene, time) {
     } else if (particleManager) {
         particleManager.stopExhaustTrail();
     }
+}
+
+function updateVeritechController(scene, time) {
+    const { veritech, pilot } = playerState;
+    if (veritech.active) {
+        updateVeritech(scene, time, veritech);
+    } else if (pilot.active) {
+        updatePilot(scene, time, pilot);
+    }
+}
+
+function updateVeritech(scene, time, state) {
+    const { player, cursors, spaceKey, shiftKey, audioManager } = scene;
+    if (!player || !cursors) return;
+
+    const speed = playerState.powerUps.speed > 0 ? 400 : playerState.baseSpeed;
+    player.setVelocity(0, 0);
+
+    if (cursors.left.isDown) {
+        player.setVelocityX(-speed);
+        player.flipX = true;
+        playerState.facingRight = false;
+        playerState.direction = 'left';
+    } else if (cursors.right.isDown) {
+        player.setVelocityX(speed);
+        player.flipX = false;
+        playerState.facingRight = true;
+        playerState.direction = 'right';
+    }
+    if (cursors.up.isDown) player.setVelocityY(-speed);
+    else if (cursors.down.isDown) player.setVelocityY(speed);
+
+    if (spaceKey.isDown && time > playerState.lastFire + playerState.fireRate) {
+        fireWeapon(scene);
+        if (audioManager) {
+            audioManager.playSound(playerState.powerUps.laser > 0 ? 'playerFireSpread' : 'playerFire');
+        }
+        playerState.lastFire = time;
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(shiftKey)) {
+        toggleVeritechTransform(state);
+    }
+}
+
+function updatePilot(scene, time, state) {
+    const { pilotSprite, cursors, spaceKey, audioManager } = scene;
+    if (!pilotSprite || !cursors) return;
+    if (!pilotSprite.active) return;
+
+    const speed = 180;
+    pilotSprite.setVelocity(0, 0);
+
+    if (cursors.left.isDown) {
+        pilotSprite.setVelocityX(-speed);
+        state.facing = -1;
+    } else if (cursors.right.isDown) {
+        pilotSprite.setVelocityX(speed);
+        state.facing = 1;
+    }
+    if (cursors.up.isDown) pilotSprite.setVelocityY(-speed);
+    else if (cursors.down.isDown) pilotSprite.setVelocityY(speed);
+
+    if (spaceKey.isDown && time > playerState.lastFire + playerState.fireRate) {
+        fireWeapon(scene);
+        if (audioManager) {
+            audioManager.playSound(playerState.powerUps.laser > 0 ? 'playerFireSpread' : 'playerFire');
+        }
+        playerState.lastFire = time;
+    }
+}
+
+function toggleVeritechTransform(state) {
+    const now = Date.now();
+    if (now - state.lastTransformTime < state.transformCooldownMs) return;
+    state.mode = state.mode === 'fighter' ? 'guardian' : 'fighter';
+    state.lastTransformTime = now;
 }
 
 function fireWeapon(scene) {
