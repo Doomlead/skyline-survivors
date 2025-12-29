@@ -316,7 +316,7 @@ function destroyEnemy(scene, enemy) {
     if (enemy.enemyType === 'lander' && enemy.abductedHuman && enemy.abductedHuman.active) {
         const fallingHuman = enemy.abductedHuman;
         enemy.abductedHuman = null;
-        fallingHuman.isAbducted = true;
+        fallingHuman.isAbducted = false;
         fallingHuman.abductor = null;
         fallingHuman.setVelocity(0, 0);
         if (fallingHuman.body) {
