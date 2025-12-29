@@ -90,6 +90,7 @@ const gameState = {
 
 // Player state
 const playerState = {
+    controlScheme: 'classic',
     fireRate: 200,
     lastFire: 0,
     lastExhaustTime: 0,
@@ -111,7 +112,32 @@ const playerState = {
         timeSlow: 0
     },
     direction: 'right',
-    baseSpeed: 300
+    baseSpeed: 300,
+    facingRight: true,
+    aimAngle: 0,
+    veritech: {
+        active: true,
+        mode: 'fighter',
+        health: 8,
+        maxHealth: 8,
+        x: 100,
+        y: 300,
+        vx: 0,
+        vy: 0,
+        transformCooldownMs: 0,
+        lastTransformTime: 0
+    },
+    pilot: {
+        active: false,
+        health: 3,
+        maxHealth: 3,
+        x: 100,
+        y: 300,
+        vx: 0,
+        vy: 0,
+        grounded: false,
+        facing: 1
+    }
 };
 
 // Virtual input for touch controls
@@ -159,6 +185,32 @@ function resetGameState() {
         timeSlow: 0
     };
     playerState.direction = 'right';
+    playerState.controlScheme = 'classic';
+    playerState.facingRight = true;
+    playerState.aimAngle = 0;
+    playerState.veritech = {
+        active: true,
+        mode: 'fighter',
+        health: 8,
+        maxHealth: 8,
+        x: 100,
+        y: 300,
+        vx: 0,
+        vy: 0,
+        transformCooldownMs: 0,
+        lastTransformTime: 0
+    };
+    playerState.pilot = {
+        active: false,
+        health: 3,
+        maxHealth: 3,
+        x: 100,
+        y: 300,
+        vx: 0,
+        vy: 0,
+        grounded: false,
+        facing: 1
+    };
 
     gameState.bossActive = false;
     gameState.currentBossKey = null;
