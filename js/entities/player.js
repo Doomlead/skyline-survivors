@@ -113,15 +113,16 @@ function updatePlayer(scene, time, delta) {
 
     if (veritechState.active) {
         const speed = veritechState.mode === 'fighter' ? 320 : 220;
+        const horizontalSpeed = speed * 0.65;
         const accel = veritechState.mode === 'fighter' ? 0.18 : 0.2;
         const drag = veritechState.mode === 'fighter' ? 0.92 : 0.9;
         const gravity = veritechState.mode === 'guardian' ? 520 : 0;
 
         if (left) {
-            veritechState.vx -= speed * accel;
+            veritechState.vx -= horizontalSpeed * accel;
             veritechState.facing = -1;
         } else if (right) {
-            veritechState.vx += speed * accel;
+            veritechState.vx += horizontalSpeed * accel;
             veritechState.facing = 1;
         }
 
@@ -138,7 +139,8 @@ function updatePlayer(scene, time, delta) {
         veritechState.vy *= drag;
 
         const maxSpeed = speed * 1.1;
-        veritechState.vx = Phaser.Math.Clamp(veritechState.vx, -maxSpeed, maxSpeed);
+        const maxHorizontalSpeed = horizontalSpeed * 1.1;
+        veritechState.vx = Phaser.Math.Clamp(veritechState.vx, -maxHorizontalSpeed, maxHorizontalSpeed);
         veritechState.vy = Phaser.Math.Clamp(veritechState.vy, -maxSpeed, maxSpeed);
 
         veritech.x += veritechState.vx * (delta / 1000);
@@ -167,14 +169,15 @@ function updatePlayer(scene, time, delta) {
         syncActivePlayer(scene);
     } else if (pilotState.active) {
         const speed = 200;
+        const horizontalSpeed = speed * 0.65;
         const jumpForce = -320;
         const gravity = 900;
 
         if (left) {
-            pilotState.vx = -speed;
+            pilotState.vx = -horizontalSpeed;
             pilotState.facing = -1;
         } else if (right) {
-            pilotState.vx = speed;
+            pilotState.vx = horizontalSpeed;
             pilotState.facing = 1;
         } else {
             pilotState.vx *= 0.8;
