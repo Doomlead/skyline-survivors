@@ -2,51 +2,230 @@
 // Player mechanics and controls
 // ------------------------
 
-function updatePlayer(scene, time) {
-    const { player, cursors, spaceKey, shiftKey, qKey, pKey, particleManager, audioManager } = scene;
-    if (!player || !cursors) return;
-    let speed = playerState.powerUps.speed > 0 ? 400 : playerState.baseSpeed;
-    player.setVelocity(0, 0);
-    const vInput = window.virtualInput || { left: false, right: false, up: false, down: false, fire: false };
+function getActivePlayer(scene) {
+    return veritechState.active ? scene.veritech : scene.pilot;
+}
 
-    if (cursors.left.isDown || vInput.left) {
-        player.setVelocityX(-speed);
-        player.flipX = true;
-        playerState.direction = 'left';
-    } else if (cursors.right.isDown || vInput.right) {
-        player.setVelocityX(speed);
-        player.flipX = false;
-        playerState.direction = 'right';
+function syncActivePlayer(scene) {
+    scene.player = getActivePlayer(scene);
+    return scene.player;
+}
+
+function setVeritechMode(scene, mode) {
+    veritechState.mode = mode;
+    const texture = mode === 'guardian' ? 'veritech_guardian' : 'veritech_fighter';
+    if (scene.veritech) {
+        scene.veritech.setTexture(texture);
+        if (mode === 'guardian') {
+            scene.veritech.body.setSize(22, 28);
+        } else {
+            scene.veritech.body.setSize(28, 12);
+        }
     }
-    if (cursors.up.isDown || vInput.up) player.setVelocityY(-speed);
-    else if (cursors.down.isDown || vInput.down) player.setVelocityY(speed);
+}
+
+function ejectPilot(scene) {
+    if (!scene.veritech || !scene.pilot || !veritechState.active) return;
+    veritechState.active = false;
+    pilotState.active = true;
+    pilotState.grounded = false;
+    pilotState.vx = veritechState.vx * 0.5;
+    pilotState.vy = -120;
+    pilotState.facing = veritechState.facing;
+    scene.pilot.setPosition(scene.veritech.x, scene.veritech.y);
+    scene.pilot.setActive(true).setVisible(true);
+    scene.pilot.body.enable = true;
+    scene.veritech.body.enable = false;
+    scene.veritech.setAlpha(1);
+    if (scene.veritech.shieldSprite) {
+        scene.veritech.shieldSprite.destroy();
+        scene.veritech.shieldSprite = null;
+    }
+    syncActivePlayer(scene);
+}
+
+function enterVeritech(scene) {
+    if (!scene.veritech || !scene.pilot || !pilotState.active) return;
+    const dist = Phaser.Math.Distance.Between(scene.pilot.x, scene.pilot.y, scene.veritech.x, scene.veritech.y);
+    if (dist > 60) return;
+    pilotState.active = false;
+    veritechState.active = true;
+    pilotState.vx = 0;
+    pilotState.vy = 0;
+    scene.pilot.setActive(false).setVisible(false);
+    scene.pilot.body.enable = false;
+    scene.veritech.body.enable = true;
+    scene.pilot.setAlpha(1);
+    if (scene.pilot.shieldSprite) {
+        scene.pilot.shieldSprite.destroy();
+        scene.pilot.shieldSprite = null;
+    }
+    syncActivePlayer(scene);
+}
+
+function updatePlayer(scene, time, delta) {
+    const {
+        veritech,
+        pilot,
+        cursors,
+        spaceKey,
+        shiftKey,
+        bKey,
+        eKey,
+        rKey,
+        qKey,
+        pKey,
+        particleManager,
+        audioManager
+    } = scene;
+    if (!veritech || !cursors) return;
+
+    const vInput = window.virtualInput || { left: false, right: false, up: false, down: false, fire: false };
+    const left = cursors.left.isDown || vInput.left;
+    const right = cursors.right.isDown || vInput.right;
+    const up = cursors.up.isDown || vInput.up;
+    const down = cursors.down.isDown || vInput.down;
+
+    if (veritechState.transformCooldown > 0) {
+        veritechState.transformCooldown -= delta;
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(shiftKey) && veritechState.active && veritechState.transformCooldown <= 0) {
+        const nextMode = veritechState.mode === 'fighter' ? 'guardian' : 'fighter';
+        setVeritechMode(scene, nextMode);
+        veritechState.transformCooldown = 350;
+    }
+
+    if (eKey && Phaser.Input.Keyboard.JustDown(eKey) && veritechState.active) {
+        ejectPilot(scene);
+    }
+
+    if (rKey && Phaser.Input.Keyboard.JustDown(rKey) && pilotState.active) {
+        enterVeritech(scene);
+    }
+
+    if (bKey && Phaser.Input.Keyboard.JustDown(bKey)) useSmartBomb(scene);
+    if (Phaser.Input.Keyboard.JustDown(qKey)) useHyperspace(scene);
+    if (Phaser.Input.Keyboard.JustDown(pKey)) togglePause(scene);
 
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
-    const terrainVariation = Math.sin(player.x / 200) * 30;
     const minY = 20;
-    const maxY = groundLevel - terrainVariation - 20;
-    if (player.y < minY) player.y = minY;
-    if (player.y > maxY) player.y = maxY;
+
+    if (veritechState.active) {
+        const speed = veritechState.mode === 'fighter' ? 320 : 220;
+        const accel = veritechState.mode === 'fighter' ? 0.18 : 0.2;
+        const drag = veritechState.mode === 'fighter' ? 0.92 : 0.9;
+        const gravity = veritechState.mode === 'guardian' ? 520 : 0;
+
+        if (left) {
+            veritechState.vx -= speed * accel;
+            veritechState.facing = -1;
+        } else if (right) {
+            veritechState.vx += speed * accel;
+            veritechState.facing = 1;
+        }
+
+        if (veritechState.mode === 'fighter') {
+            if (up) veritechState.vy -= speed * accel;
+            if (down) veritechState.vy += speed * accel;
+        } else {
+            if (up) veritechState.vy -= speed * accel * 1.2;
+            if (down) veritechState.vy += speed * accel * 0.7;
+            veritechState.vy += gravity * (delta / 1000);
+        }
+
+        veritechState.vx *= drag;
+        veritechState.vy *= drag;
+
+        const maxSpeed = speed * 1.1;
+        veritechState.vx = Phaser.Math.Clamp(veritechState.vx, -maxSpeed, maxSpeed);
+        veritechState.vy = Phaser.Math.Clamp(veritechState.vy, -maxSpeed, maxSpeed);
+
+        veritech.x += veritechState.vx * (delta / 1000);
+        veritech.y += veritechState.vy * (delta / 1000);
+        veritech.body.setVelocity(veritechState.vx, veritechState.vy);
+
+        const terrainVariation = Math.sin(veritech.x / 200) * 30;
+        const maxY = groundLevel - terrainVariation - 20;
+        if (veritech.y < minY) veritech.y = minY;
+        if (veritech.y > maxY) {
+            veritech.y = maxY;
+            veritechState.vy = 0;
+        }
+
+        const pointer = scene.input.activePointer;
+        if (pointer) {
+            const pointerWorldX = Number.isFinite(pointer.worldX)
+                ? pointer.worldX
+                : pointer.x + scene.cameras.main.scrollX;
+            const pointerWorldY = Number.isFinite(pointer.worldY) ? pointer.worldY : pointer.y;
+            veritechState.aimAngle = Phaser.Math.Angle.Between(veritech.x, veritech.y, pointerWorldX, pointerWorldY);
+        }
+
+        veritech.flipX = veritechState.facing < 0;
+        playerState.direction = veritechState.facing < 0 ? 'left' : 'right';
+        syncActivePlayer(scene);
+    } else if (pilotState.active) {
+        const speed = 200;
+        const jumpForce = -320;
+        const gravity = 900;
+
+        if (left) {
+            pilotState.vx = -speed;
+            pilotState.facing = -1;
+        } else if (right) {
+            pilotState.vx = speed;
+            pilotState.facing = 1;
+        } else {
+            pilotState.vx *= 0.8;
+        }
+
+        if (up && pilotState.grounded) {
+            pilotState.vy = jumpForce;
+            pilotState.grounded = false;
+        }
+
+        pilotState.vy += gravity * (delta / 1000);
+        pilotState.vy = Math.min(pilotState.vy, 900);
+
+        pilot.x += pilotState.vx * (delta / 1000);
+        pilot.y += pilotState.vy * (delta / 1000);
+        pilot.body.setVelocity(pilotState.vx, pilotState.vy);
+
+        const terrainVariation = Math.sin(pilot.x / 200) * 30;
+        const maxY = groundLevel - terrainVariation - 12;
+        if (pilot.y < minY) pilot.y = minY;
+        if (pilot.y > maxY) {
+            pilot.y = maxY;
+            pilotState.vy = 0;
+            pilotState.grounded = true;
+        } else {
+            pilotState.grounded = false;
+        }
+
+        pilot.flipX = pilotState.facing < 0;
+        playerState.direction = pilotState.facing < 0 ? 'left' : 'right';
+        syncActivePlayer(scene);
+    }
+
+    const activePlayer = syncActivePlayer(scene);
 
     if ((spaceKey.isDown || vInput.fire) && time > playerState.lastFire + playerState.fireRate) {
-        fireWeapon(scene);
+        const angle = veritechState.active && veritechState.mode === 'guardian' ? veritechState.aimAngle : null;
+        fireWeapon(scene, angle);
         if (audioManager) {
             audioManager.playSound(playerState.powerUps.laser > 0 ? 'playerFireSpread' : 'playerFire');
         }
         playerState.lastFire = time;
     }
 
-    if (Phaser.Input.Keyboard.JustDown(shiftKey)) useSmartBomb(scene);
-    if (Phaser.Input.Keyboard.JustDown(qKey)) useHyperspace(scene);
-    if (Phaser.Input.Keyboard.JustDown(pKey)) togglePause(scene);
-
-    if (playerState.powerUps.shield > 0 && !player.shieldSprite) {
-        player.shieldSprite = scene.add.sprite(player.x, player.y, 'shield');
-        player.shieldSprite.setAlpha(0.7);
-        player.shieldSprite.setDepth(FG_DEPTH_BASE + 11);
-        player.shieldSprite.setScale(1.2);
-    } else if (playerState.powerUps.shield <= 0 && player.shieldSprite) {
-        const shieldSprite = player.shieldSprite;
+    if (playerState.powerUps.shield > 0 && !activePlayer.shieldSprite) {
+        activePlayer.shieldSprite = scene.add.sprite(activePlayer.x, activePlayer.y, 'shield');
+        activePlayer.shieldSprite.setAlpha(0.7);
+        activePlayer.shieldSprite.setDepth(FG_DEPTH_BASE + 11);
+        activePlayer.shieldSprite.setScale(1.2);
+    } else if (playerState.powerUps.shield <= 0 && activePlayer.shieldSprite) {
+        const shieldSprite = activePlayer.shieldSprite;
         const shieldX = shieldSprite.x;
         const shieldY = shieldSprite.y;
         scene.tweens.add({
@@ -57,51 +236,56 @@ function updatePlayer(scene, time) {
             ease: 'Power2.easeOut',
             onComplete: () => {
                 if (shieldSprite && shieldSprite.destroy) shieldSprite.destroy();
-                if (player.shieldSprite === shieldSprite) player.shieldSprite = null;
+                if (activePlayer.shieldSprite === shieldSprite) activePlayer.shieldSprite = null;
             }
         });
         createExplosion(scene, shieldX, shieldY, 0x00aaff);
     }
 
-    if (player.shieldSprite) {
-        player.shieldSprite.x = player.x;
-        player.shieldSprite.y = player.y;
+    if (activePlayer.shieldSprite) {
+        activePlayer.shieldSprite.x = activePlayer.x;
+        activePlayer.shieldSprite.y = activePlayer.y;
         const pulse = Math.sin(Date.now() * 0.008) * 0.15 + 0.7;
-        player.shieldSprite.setAlpha(pulse);
+        activePlayer.shieldSprite.setAlpha(pulse);
         const colorShift = Math.sin(Date.now() * 0.003) * 0.3 + 0.7;
-        player.shieldSprite.setTint(Phaser.Display.Color.GetColor(
+        activePlayer.shieldSprite.setTint(Phaser.Display.Color.GetColor(
             Math.floor(255 * colorShift),
             255,
             Math.floor(255 * colorShift)
         ));
     }
 
-    const velocityX = player.body.velocity.x;
-    const velocityY = player.body.velocity.y;
+    const velocityX = activePlayer.body.velocity.x;
+    const velocityY = activePlayer.body.velocity.y;
     const movementSpeed = Math.hypot(velocityX, velocityY);
-    if (particleManager && movementSpeed > 20) {
+    if (particleManager && movementSpeed > 20 && veritechState.active) {
         const rotation = movementSpeed > 0
             ? Math.atan2(velocityY, velocityX)
             : (playerState.direction === 'right' ? 0 : Math.PI);
         const exhaustInterval = 40;
         if (!playerState.lastExhaustTime || time - playerState.lastExhaustTime >= exhaustInterval) {
-            particleManager.makeExhaustFire(player.x, player.y, rotation);
+            particleManager.makeExhaustFire(activePlayer.x, activePlayer.y, rotation);
             playerState.lastExhaustTime = time;
         }
-        particleManager.makeExhaustTrail(player.x, player.y, rotation, movementSpeed);
+        particleManager.makeExhaustTrail(activePlayer.x, activePlayer.y, rotation, movementSpeed);
     } else if (particleManager) {
         particleManager.stopExhaustTrail();
     }
 }
 
-function fireWeapon(scene) {
-    const { player, projectiles, drones, audioManager } = scene;
+function fireWeapon(scene, angleOverride = null) {
+    const { projectiles, drones } = scene;
+    const player = getActivePlayer(scene);
     if (!player || !projectiles || !drones) return;
     let speed = 600;
     if (playerState.powerUps.speed > 0) speed = 750;
-    const fireX = player.x + (playerState.direction === 'right' ? 25 : -25);
-    const fireY = player.y;
-    const velocityX = playerState.direction === 'right' ? speed : -speed;
+    const baseAngle = typeof angleOverride === 'number'
+        ? angleOverride
+        : (playerState.direction === 'right' ? 0 : Math.PI);
+    const fireX = player.x + Math.cos(baseAngle) * 25;
+    const fireY = player.y + Math.sin(baseAngle) * 25;
+    const velocityX = Math.cos(baseAngle) * speed;
+    const velocityY = Math.sin(baseAngle) * speed;
     const baseDamage = 1;
     const damage = playerState.powerUps.double > 0 ? baseDamage * 2 : baseDamage;
 
@@ -111,43 +295,45 @@ function fireWeapon(scene) {
     switch (playerState.powerUps.laser) {
         case 0:
             // Normal shot - use piercing texture if active
-            createProjectile(scene, fireX, fireY, velocityX, 0, isPiercing ? 'piercing' : 'normal', damage);
+            createProjectile(scene, fireX, fireY, velocityX, velocityY, isPiercing ? 'piercing' : 'normal', damage);
             break;
         case 1:
             // Spread shot - cyan diamond projectiles
-            createProjectile(scene, fireX, fireY, velocityX, 0, 'spread', damage);
-            createProjectile(scene, fireX, fireY - 5, velocityX, -100, 'spread', damage);
-            createProjectile(scene, fireX, fireY + 5, velocityX, 100, 'spread', damage);
+            createProjectile(scene, fireX, fireY, velocityX, velocityY, 'spread', damage);
+            createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.15) * speed, Math.sin(baseAngle - 0.15) * speed, 'spread', damage);
+            createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.15) * speed, Math.sin(baseAngle + 0.15) * speed, 'spread', damage);
             break;
         case 2:
             // Wave shot - purple sinusoidal energy
-            createProjectile(scene, fireX, fireY, velocityX, 0, 'wave', damage, true);
+            createProjectile(scene, fireX, fireY, velocityX, velocityY, 'wave', damage, true);
             break;
     }
 
     if (playerState.powerUps.missile > 0) {
-        createProjectile(scene, fireX, fireY - 10, velocityX, 0, 'homing', damage);
+        createProjectile(scene, fireX, fireY, velocityX, velocityY, 'homing', damage);
     }
     if (playerState.powerUps.overdrive > 0) {
         // Overdrive shots - orange flame bolts
-        createProjectile(scene, fireX, fireY - 15, velocityX, -50, 'overdrive', damage);
-        createProjectile(scene, fireX, fireY + 15, velocityX, 50, 'overdrive', damage);
+        createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.08) * speed, Math.sin(baseAngle - 0.08) * speed, 'overdrive', damage);
+        createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.08) * speed, Math.sin(baseAngle + 0.08) * speed, 'overdrive', damage);
     }
     if (playerState.powerUps.rearShot > 0) {
-        const rearVelocityX = playerState.direction === 'right' ? -speed : speed;
-        createProjectile(scene, player.x, fireY, rearVelocityX, 0, isPiercing ? 'piercing' : 'normal', damage);
+        const rearAngle = baseAngle + Math.PI;
+        createProjectile(scene, player.x, fireY, Math.cos(rearAngle) * speed, Math.sin(rearAngle) * speed, isPiercing ? 'piercing' : 'normal', damage);
     }
     if (playerState.powerUps.sideShot > 0) {
         // Side shots - teal vertical bolts
-        createProjectile(scene, player.x, fireY, 0, -speed, 'side', damage);
-        createProjectile(scene, player.x, fireY, 0, speed, 'side', damage);
+        const leftAngle = baseAngle - Math.PI / 2;
+        const rightAngle = baseAngle + Math.PI / 2;
+        createProjectile(scene, player.x, fireY, Math.cos(leftAngle) * speed, Math.sin(leftAngle) * speed, 'side', damage);
+        createProjectile(scene, player.x, fireY, Math.cos(rightAngle) * speed, Math.sin(rightAngle) * speed, 'side', damage);
     }
     if (playerState.powerUps.multiShot > 0) {
         // Multi-shot - small yellow pellets
-        createProjectile(scene, fireX, fireY - 10, velocityX, -150, 'multi', damage);
-        createProjectile(scene, fireX, fireY - 5, velocityX, -75, 'multi', damage);
-        createProjectile(scene, fireX, fireY + 5, velocityX, 75, 'multi', damage);
-        createProjectile(scene, fireX, fireY + 10, velocityX, 150, 'multi', damage);
+        createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.2) * speed, Math.sin(baseAngle - 0.2) * speed, 'multi', damage);
+        createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.1) * speed, Math.sin(baseAngle - 0.1) * speed, 'multi', damage);
+        createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.1) * speed, Math.sin(baseAngle + 0.1) * speed, 'multi', damage);
+        createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.2) * speed, Math.sin(baseAngle + 0.2) * speed, 'multi', damage);
     }
 
     // Drone projectiles - green energy orbs
@@ -155,7 +341,7 @@ function fireWeapon(scene) {
         const dProj = projectiles.create(drone.x, drone.y, 'projectile_drone');
         dProj.setScale(1.25);
         dProj.setDepth(FG_DEPTH_BASE + 6);
-        dProj.setVelocity(velocityX, 0);
+        dProj.setVelocity(velocityX, velocityY);
         dProj.damage = damage;
         dProj.projectileType = 'drone';
         scene.time.delayedCall(2000, () => {
@@ -338,7 +524,8 @@ function playerHitProjectile(playerSprite, projectile) {
 }
 
 function playerDie(scene) {
-    const { player, particleManager, audioManager, drones } = scene;
+    const { particleManager, audioManager, drones } = scene;
+    const player = getActivePlayer(scene);
     if (!player) return;
     if (scene._isRespawning || gameState.gameOver) return;
     gameState.lives--;
@@ -356,6 +543,8 @@ function playerDie(scene) {
         scene._isRespawning = true;
         player.setActive(false).setVisible(false);
         player.body.enable = false;
+        pilotState.active = false;
+        veritechState.active = true;
 
         const p = playerState.powerUps;
         const weaponKeys = ['laser','drone','shield','missile','overdrive','rearShot','sideShot','rapid','multiShot','piercing','speed','magnet','double','timeSlow'];
@@ -375,10 +564,13 @@ function playerDie(scene) {
         }
 
         scene.time.delayedCall(1000, () => {
-            player.x = 100;
-            player.y = 300;
-            player.setActive(true).setVisible(true);
-            player.body.enable = true;
+            setVeritechMode(scene, 'fighter');
+            scene.veritech.x = 100;
+            scene.veritech.y = 300;
+            scene.veritech.setActive(true).setVisible(true);
+            scene.veritech.body.enable = true;
+            scene.pilot.setActive(false).setVisible(false);
+            scene.pilot.body.enable = false;
             playerState.powerUps.invincibility = 2000;
             scene._isRespawning = false;
         });
@@ -415,7 +607,8 @@ function useSmartBomb(scene) {
 }
 
 function useHyperspace(scene) {
-    const { player, particleManager, audioManager } = scene;
+    const { particleManager, audioManager } = scene;
+    const player = getActivePlayer(scene);
     if (!player) return;
     player.x = Math.random() * CONFIG.worldWidth;
     player.y = 100 + Math.random() * (CONFIG.worldHeight - 200);
@@ -428,7 +621,8 @@ function useHyperspace(scene) {
 }
 
 function updateDrones(scene, time) {
-    const { drones, player } = scene;
+    const { drones } = scene;
+    const player = getActivePlayer(scene);
     if (!drones || !player) return;
     drones.children.entries.forEach((drone, index) => {
         const angle = (time * 0.002 + index * Math.PI * 2 / drones.children.entries.length) % (Math.PI * 2);

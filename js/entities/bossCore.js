@@ -146,7 +146,8 @@ function startBossEncounter(scene, triggerInfo = {}) {
 }
 
 function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngle) {
-    const { player, enemyProjectiles, audioManager } = scene;
+    const { enemyProjectiles, audioManager } = scene;
+    const player = getActivePlayer(scene);
     if (!player || !enemyProjectiles) return;
     const proj = enemyProjectiles.create(sourceX, sourceY, shotConfig.projectileType);
     proj.setDepth(FG_DEPTH_BASE + 4);

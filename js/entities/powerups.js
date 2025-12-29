@@ -153,7 +153,8 @@ function collectPowerUp(playerSprite, powerUp) {
 }
 
 function updatePowerUpMagnet(scene) {
-    const { powerUps, player } = scene;
+    const { powerUps } = scene;
+    const player = getActivePlayer(scene);
     if (!powerUps || !player) return;
     if (playerState.powerUps.magnet <= 0) return;
     const magnetRadius = 150;
@@ -169,7 +170,7 @@ function updatePowerUpMagnet(scene) {
 
 
 function updatePowerUpTimers(scene, delta) {
-    const { player } = scene;
+    const player = getActivePlayer(scene);
     if (!player) return;
     let minFireRate = 200;
     if (playerState.powerUps.overdrive > 0) {

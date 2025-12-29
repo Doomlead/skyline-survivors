@@ -29,7 +29,7 @@ function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
 
 function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
     // Aggressive pursuit with erratic wobble
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     if (!player) return;
     const angle = Phaser.Math.Angle.Between(boss.x, boss.y, player.x, player.y);
     const wobble = Math.sin(time * 0.008) * 0.3;
@@ -155,7 +155,7 @@ function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
 
 function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
     // Serpentine weaving pattern
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     if (!player) return;
     if (!boss.serpentinePhase) boss.serpentinePhase = 0;
     boss.serpentinePhase += 0.02 * timeSlowMultiplier;
@@ -184,7 +184,7 @@ function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
 
 function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
     // Aggressive suicide charge
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     if (!player) return;
     const angle = Phaser.Math.Angle.Between(boss.x, boss.y, player.x, player.y);
     const speed = 150 * timeSlowMultiplier;

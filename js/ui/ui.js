@@ -101,7 +101,8 @@ function formatMetaTimer(seconds) {
 
 function updateRadar(scene) {
     if (!radarCtx || !scene) return;
-    const { player, enemies, humans } = scene;
+    const { enemies, humans } = scene;
+    const player = getActivePlayer(scene);
     if (!player) return;
     
     const width = radarCanvas.width;
