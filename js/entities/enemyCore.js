@@ -168,7 +168,8 @@ function spawnEnemyWave(scene) {
 // Creates an enemy projectile aimed at the player's current position, with
 // speed, visuals, and damage tuned to the firing enemy type.
 function shootAtPlayer(scene, enemy) {
-    const { player, enemyProjectiles, audioManager } = scene;
+    const { enemyProjectiles, audioManager } = scene;
+    const player = getActivePlayer(scene);
     if (!player || !enemyProjectiles) return;
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     

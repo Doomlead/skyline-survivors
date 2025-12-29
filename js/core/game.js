@@ -121,6 +121,8 @@ function removeGhostSprite(scene, entity) {
 function updateEntityWrapping(scene) {
     const {
         player,
+        veritech,
+        pilot,
         enemies,
         projectiles,
         enemyProjectiles,
@@ -182,9 +184,15 @@ function updateEntityWrapping(scene) {
         group.children.entries.forEach(processEntity);
     };
     
-    // IMPORTANT: Process the player first (standalone sprite, not in a group)
+    // IMPORTANT: Process the active player first (standalone sprite, not in a group)
     if (player && player.active) {
         processEntity(player);
+    }
+    if (veritech && veritech.active && veritech !== player) {
+        processEntity(veritech);
+    }
+    if (pilot && pilot.active && pilot !== player) {
+        processEntity(pilot);
     }
     
     // Process all entity groups
@@ -238,12 +246,22 @@ function create() {
     // Generate backgrounds FIRST
     createBackground(this);
 
-    // Player
-    this.player = this.physics.add.sprite(100, 300, 'player');
-    this.player.setCollideWorldBounds(false);
-    this.player.setScale(1.25);
-    this.player.body.setSize(25, 10);
-    this.player.setDepth(FG_DEPTH_BASE + 10);
+    // Veritech + Pilot
+    this.veritech = this.physics.add.sprite(100, 300, 'veritech_fighter');
+    this.veritech.setCollideWorldBounds(false);
+    this.veritech.setScale(1.25);
+    this.veritech.body.setSize(28, 12);
+    this.veritech.setDepth(FG_DEPTH_BASE + 10);
+
+    this.pilot = this.physics.add.sprite(100, 300, 'pilot');
+    this.pilot.setCollideWorldBounds(false);
+    this.pilot.setScale(1.25);
+    this.pilot.body.setSize(12, 18);
+    this.pilot.setDepth(FG_DEPTH_BASE + 9);
+    this.pilot.setActive(false).setVisible(false);
+
+    // Maintain legacy scene.player reference for shared systems
+    this.player = this.veritech;
 
     // Game object groups
     this.enemies = this.physics.add.group();
@@ -261,6 +279,8 @@ function create() {
     this.cursors = this.input.keyboard.createCursorKeys();
     this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+    this.bKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
+    this.eKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     this.qKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
     this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
     this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
@@ -295,11 +315,17 @@ function create() {
     // Physics overlaps
     this.physics.add.overlap(this.projectiles, this.enemies, hitEnemy, null, this);
     this.physics.add.overlap(this.projectiles, this.bosses, hitBoss, null, this);
-    this.physics.add.overlap(this.player, this.enemies, playerHitEnemy, null, this);
-    this.physics.add.overlap(this.player, this.bosses, playerHitBoss, null, this);
-    this.physics.add.overlap(this.player, this.enemyProjectiles, playerHitProjectile, null, this);
-    this.physics.add.overlap(this.player, this.powerUps, collectPowerUp, null, this);
-    this.physics.add.overlap(this.player, this.humans, rescueHuman, null, this);
+    this.physics.add.overlap(this.veritech, this.enemies, playerHitEnemy, null, this);
+    this.physics.add.overlap(this.veritech, this.bosses, playerHitBoss, null, this);
+    this.physics.add.overlap(this.veritech, this.enemyProjectiles, playerHitProjectile, null, this);
+    this.physics.add.overlap(this.veritech, this.powerUps, collectPowerUp, null, this);
+    this.physics.add.overlap(this.veritech, this.humans, rescueHuman, null, this);
+
+    this.physics.add.overlap(this.pilot, this.enemies, playerHitEnemy, null, this);
+    this.physics.add.overlap(this.pilot, this.bosses, playerHitBoss, null, this);
+    this.physics.add.overlap(this.pilot, this.enemyProjectiles, playerHitProjectile, null, this);
+    this.physics.add.overlap(this.pilot, this.powerUps, collectPowerUp, null, this);
+    this.physics.add.overlap(this.pilot, this.humans, rescueHuman, null, this);
 
     createUI(this);
 
@@ -313,7 +339,8 @@ function create() {
 }
 
 function update(time, delta) {
-    const { player, particleManager } = this;
+    const { particleManager } = this;
+    const player = getActivePlayer(this);
     
     // Don't update if scene isn't fully initialized
     if (!player || !this.enemies) return;
@@ -337,19 +364,26 @@ function update(time, delta) {
         if (gameState.timeRemaining <= 0) winGame(this);
     }
 
-    updatePlayer(this, time);
+    updatePlayer(this, time, delta);
 
     if (particleManager) {
         particleManager.update(delta);
     }
 
-    // Wrap player to canonical position
-    player.x = wrapValue(player.x, CONFIG.worldWidth);
+    const activePlayer = getActivePlayer(this);
+
+    // Wrap veritech + pilot to canonical positions
+    if (this.veritech && this.veritech.active) {
+        this.veritech.x = wrapValue(this.veritech.x, CONFIG.worldWidth);
+    }
+    if (this.pilot && this.pilot.active) {
+        this.pilot.x = wrapValue(this.pilot.x, CONFIG.worldWidth);
+    }
 
     // Camera positioning - clamp scrollX to prevent negative values
     // This keeps the camera within valid world coordinates
     const mainCam = this.cameras.main;
-    let desiredScrollX = player.x - mainCam.width / 2;
+    let desiredScrollX = activePlayer.x - mainCam.width / 2;
     
     // Clamp camera to world bounds (this is key!)
     // We allow some overflow for smooth transitions at boundaries

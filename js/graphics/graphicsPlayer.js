@@ -358,7 +358,61 @@ function createPlayerGraphics(scene) {
     // ========================
     // GENERATE TEXTURE
     // ========================
-    g.generateTexture('player', w, h);
+    g.generateTexture('veritech_fighter', w, h);
     g.destroy();
-}
 
+    // ========================
+    // GUARDIAN MODE (MECH)
+    // ========================
+    const guardian = scene.add.graphics();
+    const gw = 48, gh = 44;
+    const gx = gw / 2;
+    const gy = gh / 2;
+
+    guardian.fillStyle(0x1f1f2a, 0.5);
+    guardian.fillEllipse(gx, gh - 6, 36, 10);
+
+    guardian.fillStyle(0xdddddd, 1);
+    guardian.fillRect(gx - 10, gy - 6, 20, 18);
+    guardian.fillStyle(0x888888, 1);
+    guardian.fillRect(gx - 16, gy - 2, 6, 10);
+    guardian.fillRect(gx + 10, gy - 2, 6, 10);
+
+    guardian.fillStyle(0x444444, 1);
+    guardian.fillRect(gx - 8, gy + 12, 8, 12);
+    guardian.fillRect(gx + 0, gy + 12, 8, 12);
+    guardian.fillStyle(0x222222, 1);
+    guardian.fillRect(gx - 10, gy + 22, 12, 6);
+    guardian.fillRect(gx + -2, gy + 22, 12, 6);
+
+    guardian.fillStyle(0xff3333, 1);
+    guardian.fillRect(gx - 12, gy - 14, 24, 6);
+    guardian.fillStyle(0x00ccff, 1);
+    guardian.fillRect(gx - 6, gy - 10, 12, 6);
+
+    guardian.generateTexture('veritech_guardian', gw, gh);
+    guardian.destroy();
+
+    // ========================
+    // PILOT
+    // ========================
+    const pilot = scene.add.graphics();
+    const pw = 18, ph = 22;
+    const px = pw / 2;
+    const py = ph / 2;
+
+    pilot.fillStyle(0xffffff, 1);
+    pilot.fillCircle(px, 5, 4);
+    pilot.fillStyle(0x000000, 1);
+    pilot.fillRect(px - 1, 4, 4, 2);
+    pilot.fillStyle(0xff6600, 1);
+    pilot.fillRect(px - 4, 8, 8, 8);
+    pilot.fillStyle(0xffffff, 1);
+    pilot.fillRect(px - 3, 10, 6, 3);
+    pilot.fillStyle(0xffffff, 1);
+    pilot.fillRect(px - 5, 16, 4, 6);
+    pilot.fillRect(px + 1, 16, 4, 6);
+
+    pilot.generateTexture('pilot', pw, ph);
+    pilot.destroy();
+}

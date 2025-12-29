@@ -114,6 +114,25 @@ const playerState = {
     baseSpeed: 300
 };
 
+// Veritech + pilot states
+const veritechState = {
+    mode: 'fighter',
+    active: true,
+    facing: 1,
+    aimAngle: 0,
+    transformCooldown: 0,
+    vx: 0,
+    vy: 0
+};
+
+const pilotState = {
+    active: false,
+    facing: 1,
+    grounded: false,
+    vx: 0,
+    vy: 0
+};
+
 // Virtual input for touch controls
 window.virtualInput = {
     left: false,
@@ -159,6 +178,18 @@ function resetGameState() {
         timeSlow: 0
     };
     playerState.direction = 'right';
+    veritechState.mode = 'fighter';
+    veritechState.active = true;
+    veritechState.facing = 1;
+    veritechState.aimAngle = 0;
+    veritechState.transformCooldown = 0;
+    veritechState.vx = 0;
+    veritechState.vy = 0;
+    pilotState.active = false;
+    pilotState.facing = 1;
+    pilotState.grounded = false;
+    pilotState.vx = 0;
+    pilotState.vy = 0;
 
     gameState.bossActive = false;
     gameState.currentBossKey = null;

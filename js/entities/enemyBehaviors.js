@@ -71,7 +71,7 @@ function updateLanderBehavior(scene, enemy, time) {
 
 // Drives aggressive pursuit for mutants, constantly steering toward the player.
 function updateMutantBehavior(scene, enemy, time, timeSlowMultiplier) {
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     if (!player) return;
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     enemy.setVelocity(Math.cos(angle) * 150 * timeSlowMultiplier, Math.sin(angle) * 150 * timeSlowMultiplier);
@@ -184,7 +184,7 @@ function updatePodBehavior(scene, enemy, time, timeSlowMultiplier) {
 
 // Swarmer drones zig-zag toward the player and may fire quick shots.
 function updateSwarmerBehavior(scene, enemy, time, timeSlowMultiplier) {
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     if (!player) return;
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     const wobble = Math.sin(time * 0.01) * 0.5;
@@ -194,7 +194,7 @@ function updateSwarmerBehavior(scene, enemy, time, timeSlowMultiplier) {
 
 // Baiters circle the player with erratic velocity changes and rapid fire.
 function updateBaiterBehavior(scene, enemy, time, timeSlowMultiplier) {
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     if (!player) return;
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     const speed = 180 * timeSlowMultiplier;
@@ -206,7 +206,7 @@ function updateBaiterBehavior(scene, enemy, time, timeSlowMultiplier) {
 
 // Kamikazes home in aggressively and occasionally juke before firing.
 function updateKamikazeBehavior(scene, enemy, time, timeSlowMultiplier) {
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     if (!player) return;
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
     const speed = 250 * timeSlowMultiplier;
@@ -232,7 +232,7 @@ function updateShieldBehavior(scene, enemy, time, timeSlowMultiplier) {
 
 // Predicts the player's position and chases that future location before shooting.
 function updateSeekerBehavior(scene, enemy, time, timeSlowMultiplier) {
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     if (!player || !player.body) return;
     const playerVelX = player.body.velocity.x;
     const playerVelY = player.body.velocity.y;
@@ -342,7 +342,7 @@ function updateBouncerBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
 
 // Snipers hover at range, taking aimed shots and repositioning when too close.
 function updateSniperBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     const enemyProjectiles = scene.enemyProjectiles;
     const audioManager = scene.audioManager;
     if (!player || !enemyProjectiles) return;
@@ -383,7 +383,7 @@ function updateSniperBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
 // Buffs nearby swarmers and sprays slowing fields while pursuing the player.
 function updateSwarmLeaderBehavior(scene, enemy, time, timeSlowMultiplier) {
     const enemies = scene.enemies;
-    const player = scene.player;
+    const player = getActivePlayer(scene);
     if (!enemies || !player) return;
     enemies.children.entries.forEach(ally => {
         if (ally !== enemy && ally.active && Phaser.Math.Distance.Between(enemy.x, enemy.y, ally.x, ally.y) < enemy.buffRadius) {
