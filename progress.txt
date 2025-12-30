@@ -1,0 +1,33 @@
+Skyline Survivors Progress (DesignDocument.txt vs. Current Code)
+
+Implemented
+- System/district map UI: 3D rotating globe with selectable districts, orbit-node markers (mothership/shop/relay/distress), district status/timer readouts, and launch flow (js/ui/buildScene.js, js/ui/map/buildMapView.js, js/ui/missionPlanner.js).
+- Mission directives: urgency-based reward/spawn multipliers, district timers, and district state persistence (threatened/cleared/destroyed) (js/ui/missionPlanner.js).
+- District layout panels and build/shop presentation: mission overview, directives, credits, loadout selection, and shop unlock list (index.html, js/ui/mission/buildMissionUi.js, js/ui/districtLayoutManager.js).
+- Meta progression scaffolding: credits, shop unlocks, offense/defense loadouts, persistent storage, and run history (js/config/metaProgression.js).
+- Side-scrolling combat scene with wraparound world, enemy wave spawning, survival mode timer, and boss queue (js/core/game.js, js/entities/enemyCore.js, js/entities/bossCore.js).
+- Parallax cityscape background layers (static) for combat view (js/graphics/background.js).
+- Ship mechanics: fighter and guardian/turret forms with inertia, 360° mouse aim in guardian mode, transform toggle, hyperspace, and smart bomb (js/entities/player.js).
+- Pilot ejection/on-foot mode with gravity, jumping, and re-entry to the ship (js/entities/player.js).
+- Core HUD: score, wave/enemy count, timer (survival), bombs/lives, power-up readout, and radar mini-map (index.html, js/ui/ui.js).
+- Human rescue loop: landers abduct humans, mutate them into mutants, player can rescue abducted humans for score/power-up chances (js/entities/enemyBehaviors.js, js/entities/player.js).
+- Enemy roster coverage: lander, mutant, bomber, swarmer, drone, and multiple additional archetypes with behaviors and projectiles (js/config/enemyConfig.js, js/entities/enemyBehaviors.js).
+- Boss encounters and boss visuals/behaviors (multiple boss archetypes) (js/config/bossConfig.js, js/entities/bossBehavior.js).
+- Power-up pickups and weapon variants: laser tiers (spread/wave), drones, shield, homing missiles, overdrive, plus additional modifiers (rear/side/rapid/multi/piercing/speed/magnet/double/invincibility/timeSlow) (js/entities/powerups.js, js/entities/player.js).
+- Audio settings (music/sfx/mute) and accessibility toggles (reduce flashes) (js/audio/audio.js, js/core/game.js, index.html).
+
+Missing Features
+- System map gameplay depth: roaming enemy motherships that attack districts, dynamic node threats beyond timers, permanent district loss increasing global difficulty, and challenge mission nodes (DesignDocument §§2.1, 6.1).
+- Endgame flow: enemy base assault with multi-phase levels and special endings/perfect run logic (DesignDocument §6.2).
+- Full campaign structure: 50+ districts per run and global progression gates to unlock the enemy base (DesignDocument §§2.3, 9.1).
+- On-foot combat depth: distinct weapon loadout (pistol/rifle/grenades), cover system, and environmental pickups for ground combat (DesignDocument §4.2.1).
+- Operative squad system: rescued comrades fighting alongside the player, role variants (turret/medic/engineer), carry/deposit mechanics, and safe zones for buffs/currency (DesignDocument §§3.1, 4.2.1, 4.2.3).
+- Extraction/rebuild loop: dropship extraction encounters, rebuild station, and alien tech risk/reward upgrades (DesignDocument §4.2.2).
+- Mutation risk mechanics: captured comrades turning into mutant troopers with reconversion option (DesignDocument §4.2.3).
+- Power-up tier trees and synergy combos: force drone modes (front/orbit/detached), shield segments/timed invulnerability, and combo effects (DesignDocument §4.3.2–4.3.3).
+- Environment variety: destroyable buildings, civilians/traffic layers, dynamic weather/day-night cycle, and distinct district hazard themes (DesignDocument §5).
+- Dedicated system-map threat indicators (flashing districts) and in-combat off-screen arrows for priority targets (DesignDocument §8.1).
+- Weapon satellite shop as an interactive node with permanent upgrades and synergy items (beyond current meta shop UI) (DesignDocument §6.1).
+- Additional enemy families: mothership entities on the map, cyber-mutants, and kaiju units with limb-destruction mechanics (DesignDocument §7).
+- Additional modes: mission mode scenarios, boss rush mode, daily/weekly challenges with mutators (DesignDocument §9).
+- Replayability systems: unlockable cosmetics/challenges and difficulty scaling based on destroyed districts (DesignDocument §§8.2, 10).
