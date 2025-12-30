@@ -1,344 +1,230 @@
 Skyline Survivors: Urban Defender
-Game Design Document
-Single-Player Side-Scrolling Shooter with In/Out-of-Vehicle Combat
 
 1. Core Concept
-1.1 Genre + Inspiration Blend
-Stargate/Defender II (1981): wraparound side-scrolling rescue shooter core
-Strike Force (1991): system map meta, district defense pressure, turret flavor
-R-Type/Gradius: modular upgrade paths and weapon synergies
-Vampire Survivors: escalating density, screen-filling chaos, build crafting
-Blaster Master/Metal Warrior: seamless ship-to-ground transition
-1.2 Setting + Premise
-Player pilots an advanced strike ship defending city-arcologies (“urban planets” / districts) from alien invasion
-System map provides district selection and strategic priorities
-Rescue civilians/ground operatives, prevent district destruction, progress toward enemy base assault
-1.3 Core Hook (Ship Loss → On-Foot Continuation)
-When ship is destroyed, player ejects and continues on foot
-Fight to reclaim the ship or extract safely
-Blends aerial shmup + ground combat into a high-stakes survival loop
+
+    A modern reimagining of Defender/Stargate fused with Strike Force, Vampire Survivors, and Blaster Master-style vehicle/foot combat.
+    Key Themes:
+        Defend a network of cities (“urban planets”) from alien invasion.
+        Seamlessly transition between piloting a strike ship and fighting on foot when destroyed.
+        Rescue armed ground operatives to aid in combat.
+        Escalating enemy density, modular upgrades, and systemic risk (district destruction).
 
 2. High-Level Structure
-2.1 System View (Strike Force-Inspired)
-Orbital/system map of city districts (nodes)
-Enemy motherships move between nodes and initiate attacks
-Player chooses which district to defend
-Ignoring flashing nodes risks permanent district destruction
-Single-player only
-2.2 Combat View (Defender/Stargate Core)
-Horizontal wraparound map above city surface
-Radar/HUD displays:
-Player position
-Civilians/ground operatives
-Enemy clusters
-Pickups / special weapons
-Primary loop: Rescue → Escort → Extraction
-Ground units assist in combat
-Ship destruction triggers on-foot transition
-2.3 Meta Progression Structure
-Clear enough districts to unlock enemy base assault
-Lost districts increase endgame difficulty (elite enemies, tighter timers, reduced resources)
-Perfect Run: save all districts → special ending/cosmetics/harder difficulty
+2.1. System View (Galactic/Orbital Map)
+
+    Purpose: Strategic node selection.
+    Elements:
+        City districts (“planets”) displayed as nodes.
+        Enemy motherships roam between nodes, attacking districts.
+        Special nodes:
+            Weapons Satellite (Shop)
+            Enemy Base (Endgame)
+            Optional Challenge Missions
+    Mechanics:
+        Select districts to defend.
+        Ignoring attacks → District destruction → Permanent loss + increased difficulty.
+
+2.2. Side-Scrolling Combat View
+
+    Perspective: Horizontal wraparound map above a cityscape.
+    Core Loop:
+        Defend district from waves of enemies.
+        Rescue armed ground operatives (comrades).
+        Collect power-ups and defeat mini-bosses.
+        Survive or extract before district is lost.
+    Key Features:
+        Radar HUD (Defender-style).
+        Parallax cityscape with dynamic weather/day-night cycle.
+
+2.3. Meta Progression
+
+    Clear districts to unlock the enemy base assault.
+    Failed defenses increase base difficulty or lock unwinnable paths.
 
 3. Gameplay Overview
-3.1 Core Parameters
-Perspective: Side-scrolling shooter with wraparound
-Players: Single-player
-3.2 Core Loop (Run Flow)
-System View: choose district to defend
-Combat View:
-rescue comrades
-collect power-ups
-survive waves
-clear district
-if ship destroyed → on-foot combat
-Return to System View:
-choose upgrades
-visit Weapons Satellite (shop)
-select next hotspot
-After enough districts: attempt enemy base assault
+3.1. Single-Player Focus
+
+    No multiplayer.
+    AI Companions: Rescued comrades fight alongside you (on foot or in vehicle).
+
+3.2. Core Loop
+
+    System Map: Choose a district to defend.
+    Combat Mission:
+        Pilot ship → Fight waves → Rescue comrades.
+        If ship destroyed: Fight on foot with rescued operatives.
+    Extract/Upgrade:
+        Deposit rescued comrades for currency/buffs.
+        Visit Weapons Satellite shop.
+    Repeat until enemy base is unlocked.
 
 4. Player Mechanics
-4.1 Ship Forms & Movement
-4.1.1 Normal Fighter Form
-Movement: 8-directional with slight inertia; high speed traversal
-Primary weapon: forward-firing blaster (based on facing)
-Secondary actions:
-Smart Bomb (limited screen clear)
-Hyperspace/Warp (random teleport; risky)
-4.1.2 Turret Mode (Single-Player Adaptation)
-Activation: toggle to enter Turret Mode
-Characteristics:
-movement reduced to slow drift
-360° aim via stick/mouse/keys
-higher DPS / denser shots / special shot types
-Optional variant: turret mode only on ground (post-destruction), encouraging on-foot use
-4.2 On-Foot Combat (Blaster Master/Metal Warrior Integration)
-4.2.1 Trigger: When Ship is Destroyed
-Safe ejection (no instant death)
-Transition to on-foot mode on city surface
-Health carries over from ship
-Continue fighting with ground weapons
-Dying on foot = game over
-4.2.2 Ground Combat Mechanics
-Weapons:
-pistol (limited ammo; medium range; fast fire)
-melee (short range; high stun; stamina-based)
-Movement:
-slower than ship
-jump + crouch
-light platforming across city structures
-4.2.3 Ground Objectives
-Rescue comrades: touch to recruit; they follow and shoot
-Pick up surface weapons/items:
-shotgun, flamethrower, rocket launcher, temporary shield
-Reclaim ship:
-locate crashed pod (radar-marked)
-interact to re-enter
-ship returns to full health
-power-ups do not carry over unless stored
-Escape:
-reach dropship zone/bunker to extract and end mission
-Risk/Reward:
-vulnerable but allows recovery and clutch comebacks
-4.3 Comrades & Rescue System
-4.3.1 Ground Operatives (Comrades)
-Replace “humans” with armed operatives
-Behaviors:
-fight aliens with basic firearms
-some operate stationary turrets/vehicles (hover bikes)
-Rescue mechanics:
-touch to follow and shoot
-carry one at a time
-deposit at safe zones for:
-score bonus
-currency
-temporary buff (e.g., +10% damage for 30 seconds)
-4.3.2 Mutation Risk (Mutant Operatives)
-Process:
-large aliens capture comrades and mutate them
-mutated comrades become fast mutant troopers
-Impact:
-mutants can hijack turrets/vehicles
-higher score value
-rare reconversion possible (special drop/item)
+4.1. Ship Forms & Movement
+4.1.1. Normal Fighter Form
 
-5. Power-Up & Weapon System
-5.1 Power Capsules (Airborne)
-Dropped by specific enemies
-Mechanic options:
-R-Type style cycling through weapon types
-OR shared upgrade bar with path selection at thresholds
-5.2 Surface Weapons & Items (Strike Force-Style)
-Pickups near ground / in hazards / hidden by structures
-Examples:
-missiles / multi-missiles
-laser upgrades (range, piercing)
-bomb types (cluster, carpet)
-afterburner (speed)
-warps (short-range teleport)
-shield (timed invulnerability)
-5.3 Upgrade Paths
-5.3.1 Laser System
-Single → Twin → Spread → Wave → Plasma Beam
-5.3.2 Drone System
-Fixed → Rotating → Detachable (holds lane) → Twin Drones
-5.3.3 Shield Generator
-1 segment → 3 segments → Temporal Shield (3s invulnerability)
-5.3.4 Homing Missiles
-Basic → Homing → Swarm → Smart Missiles
-5.3.5 Overdrive Mode
-5s → 10s → increased DPS → homing added to all weapons
-5.4 Power Combinations (Synergies)
-Drone + Spread Laser: close-range zone clearing
-Afterburner + Shield: “Ram Mode” contact damage
-Homing + Overdrive: screen-wide missile chaos
+    Movement: 8-directional, slight inertia.
+    Primary Weapon: Forward blaster (direction matches facing).
+    Secondary Actions:
+        Smart Bomb: Screen-clearing attack (limited charges).
+        Hyperspace: Emergency teleport (risky spawn).
 
-6. Environment Design
-6.1 City Presentation (4-Layer Parallax)
-6.1.1 Foreground Layer
-destroyable buildings, platforms, billboards
-hides pickups/comrades
-6.1.2 Mid-Ground Layer
-traffic, holo-signs, flying cars, crowds
-civilians react to destruction
-6.1.3 Background Layer
-skyscrapers, bridges, megastructures
-conveys scale
-6.1.4 Sky Layer
-day/night tied to mission progression
-dynamic weather: rain, lightning, storms, smog
-visibility + silhouettes affected
-6.2 District Types (Themed “Planets”)
-6.2.1 Downtown Core
-hazards: narrow corridors, structure collision
-comrade density: medium
-tactical: turret mode shines in tight lanes
-6.2.2 Industrial Zone
-hazards: machinery, toxic spills, crushers
-comrade density: low
-tactical: vertical danger zones
-6.2.3 Residential Sector
-hazards: hostage-like pressure from dense population
-comrade density: high
-tactical: highest rescue + mutation risk
-6.2.4 Dockyards / Waterfront
-hazards: enemies diving in/out of water
-comrade density: medium
-tactical: mixed air/water engagements
-6.2.5 Orbital Platforms (Late-Game)
-hazards: drifting debris, decompression zones, rotating platforms
-comrade density: medium
-tactical: altered physics
+4.1.2. Turret Form (Strike Force)
 
-7. System View & Meta Layer
-7.1 System Map Elements
-district nodes
-player cursor/position
-enemy mothership routes
-Weapons Satellite (shop node)
-enemy base (endgame node)
-optional challenge nodes (bonus stages)
-7.2 Dynamic Threats
-7.2.1 Mothership Attacks
-districts flash when attacked
-timer/pressure meter appears
-7.2.2 Outcomes
-If ignored:
-district permanently destroyed
-global aggression increases
-elite spawns increase
-fewer resources for base assault
-If defended:
-mini-boss mothership fight
-increased rewards
-7.3 Weapons Satellite (Shop)
-access: between missions
-currency: score-based or separate rescue/kill resource
-purchases:
-weapon/drone upgrades
-smart bombs, shields, afterburners
-temporary buffs (damage/speed/defense)
-repair kits (restore at mission start)
-overdrive extensions
-7.4 Enemy Base & Endgame
-7.4.1 Unlocking
-base becomes vulnerable after X cleared districts
-player can delay for upgrades or assault early
-7.4.2 Base Mission Structure (3 Phases)
-Exterior defense ring: elite waves + turret installations
-Interior corridors: tight spaces, traps, mini-bosses
-Core chamber: final boss encounter
-7.4.3 End Conditions
-Victory: destroy core → campaign run complete
-Perfect Run: save all districts + destroy base → special ending + cosmetics + harder modes
+    Activation: Toggle button.
+    Movement: Drastically slowed.
+    Aim/Fire: 360° aim (mouse/right stick).
+    Firepower: Higher DPS, special shot types.
 
-8. Enemy Design
-8.1 Classic Enemies (Reimagined)
-8.1.1 Landers
-abduct comrades; mutate if not intercepted
-weak point: underside
-8.1.2 Mutants
-fast erratic movement; can hijack turrets/vehicles
-spawn condition: landers succeed in mutation
-8.1.3 Bombers
-slow armored; drop bombs on ground structures/comrades
-weak point: rear thrusters
-8.1.4 Swarmers
-fragile; appear in huge groups; screen-filling pressure
-weak point: any hit
-8.2 New Enemy Types
-8.2.1 Security Drones
-patrol zones; raise alarms + call reinforcements
-weak point: processor exposed after damage
-8.2.2 Cyber-Mutants
-hybrid alien tech + humans; short blink/teleport
-weak point: energy core glows pre-teleport
-8.2.3 Giant Saurians / Kaiju Units
-multi-hit bosses; area attacks; can destroy city blocks
-mechanic: shoot off limbs to reduce attacks
-8.2.4 Motherships
-system-map roaming; trigger mini-boss missions
-multi-phase encounters with destructible components
+4.2. Ground Combat & Operative System
 
-9. Game Systems
-9.1 Radar / HUD
-9.1.1 Mini-Radar (Defender-Style)
-player: blue
-comrades: green
-mutants: red
-pickups: yellow
-mini-bosses/motherships: purple
-features:
-threat arrows for off-screen priority targets
-wraparound indicators
-9.1.2 System Map Indicators
-flashing districts (under attack)
-destroyed districts (grayed)
-enemy base status
-node resources
-9.2 Scoring & Rewards
-9.2.1 Base Points
-enemy kills scaled by type
-9.2.2 Bonuses / Multipliers
-rescues:
-base bonus
-deposit bonus
-rescue streak multiplier
-performance:
-comrades surviving
-mutant reconversions (if included)
-no-death runs
-district completion streaks
-time bonus
-9.2.3 Currency Conversion
-score converts to shop currency post-mission
-extra currency for perfect district saves
+(Blaster Master / Metal Warrior Fusion)
+4.2.1. Ship Destruction → Foot Combat
 
-10. Progression & Game Modes
-10.1 Core Modes
-10.1.1 Arcade Campaign (Strike Force-Style)
-~50 districts per system
-dynamic threats + district defense
-destroyed districts shape remaining difficulty
-multiple routes; player agency
-10.1.2 Mission Mode (Hand-Crafted Scenarios)
-Hold the Line (survive X minutes)
-Escort Mission (protect transport)
-Sabotage (destroy mutation labs)
-Rescue Op (extract high-value targets)
-Boss Assassination (hunt elite enemy)
-10.1.3 Boss Rush
-sequential boss/mini-boss fights
-unlock after completing campaign
-leaderboard support
-10.1.4 Daily/Weekly Challenges
-mutators:
-double enemy speed
-limited weapons
-turret-only
-on-foot only
-infinite smart bombs
-one-hit death
-random power-up mutations
-rewards:
-cosmetics
-bonus currency
-leaderboard rankings
-10.2 Difficulty & Replayability
-10.2.1 Difficulty Scaling Based on Destroyed Districts
-more destroyed districts →
-higher aggression
-increased elite spawns
-shorter timers
-reduced drop rates
-10.2.2 Perfect System Saves Unlocks
-ship skins + color schemes
-higher district count systems
-harder base variants
-New Game+ with remixed placements
-10.2.3 Meta Progression (Optional)
-permanent unlocks across runs
-ship customization
-starting loadout choices
-additional weapon paths
+    Ejection Sequence:
+        Ship destroyed → Pilot ejects and lands near crash site.
+        Rescue nearby comrades to form a squad.
+    On-Foot Mechanics:
+        Weapons: Pistol, rifle, grenades, improvised weapons (found in environment).
+        Cover System: Use debris, buildings, or destroyed vehicles.
+        Operative AI:
+            Basic Combat: Auto-fire at enemies.
+            Special Roles:
+                Turret Operative: Man mounted guns.
+                Medic: Heal player.
+                Engineer: Repair vehicles.
+
+4.2.2. Rebuilding/Extraction
+
+    Rescue Dropship:
+        Trigger mini-boss fight to secure extraction.
+        Return to system map with ship rebuilt.
+    Rebuild Station (Optional):
+        Collect alien tech to rebuild a stronger ship (risk/reward).
+
+4.2.3. Comrade Rescue & Mutation Risk
+
+    Rescue Mechanics:
+        Touch comrades to pick them up.
+        While carried, they fire at enemies (gun pod effect).
+        Deposit at safe zones for:
+            Score/currency.
+            Temporary buffs (e.g., shield recharge).
+    Mutation Risk:
+        Captured comrades become mutant troopers.
+        Kill mutants for bonus points OR risk rescuing them back.
+
+4.3. Power-Up & Weapon System
+4.3.1. Power Sources
+
+    Airborne Power Capsules: Dropped by enemies (R-Type-style cycling).
+    Surface Items: Scattered on ground (must fly low to collect).
+
+4.3.2. Upgrade Paths
+System	Upgrade Tier
+Laser	Single → Twin → Spread → Wave Beam
+Force Drone	Front → Orbit → Detached
+Shield	Ablative segments → Timed invulnerability
+Homing Missiles	Basic → Swarms → Guided Barrage
+Overdrive	+Duration → +Damage → Screen-Filling Chaos
+4.3.3. Combo Examples
+
+    Force Drone + Spread Laser: Rotating projectile ring.
+    Afterburner + Shield: “Ram Mode” – crash into enemies safely.
+    Homing Missiles + Overdrive: Apocalypse swarm.
+
+5. Environment Design
+5.1. Parallax Cityscape
+
+    Foreground: Destroyable buildings, hidden pickups.
+    Mid-Ground: Traffic, civilians, flying cars.
+    Background: Megastructures, dynamic weather.
+    Sky Layer: Day/night cycle affecting visibility.
+
+5.2. District Themes
+District	Hazards & Features
+Downtown Core	Narrow corridors; ideal for Turret Mode
+Industrial Zone	Crushing machinery, toxic spills
+Residential Sector	High comrade density; hostage situations
+Dockyards	Water enemies, cranes
+Orbital Platform	Low gravity, rotating platforms (late-game)
+6. System Map & Meta Layer
+6.1. System Map Mechanics
+
+    Dynamic Threats:
+        Flashing districts = under attack.
+        Ignore → District destroyed → Global difficulty spike.
+    Weapons Satellite (Shop):
+        Spend currency for:
+            Permanent upgrades.
+            Temporary buffs.
+            Synergy items (e.g., tether beam for Turret Mode).
+
+6.2. Enemy Base Assault
+
+    Phases:
+        Exterior defense ring.
+        Interior corridors with traps.
+        Core boss fight.
+    End Conditions:
+        Victory: Destroy core → Campaign ends.
+        Perfect Run: Save all districts + destroy base → Special ending.
+
+7. Enemy Design
+Enemy Type	Behavior
+Landers	Abduct comrades → mutate if unchecked
+Mutants	Fast, hijack vehicles/turrets
+Bombers	Drop bomb patterns
+Swarmers	Small, overwhelming numbers
+Bosses	
+Motherships	Mini-boss; appears on system map
+Cyber-Mutants	Blink/teleport, hybrid alien-human tech
+Kaiju Units	Multi-limb bosses; destroy limbs for advantage
+8. Game Systems
+8.1. Radar / HUD
+
+    Mini-Radar: Shows player, comrades, mutants, pickups.
+    Threat Indicators:
+        System map: Flashing districts.
+        Combat view: Off-screen arrows for priority targets.
+
+8.2. Scoring & Rewards
+
+    Points For:
+        Enemy kills.
+        Comrade rescues/survival.
+        Mutant reconversions.
+        No-death runs.
+    Currency Conversion:
+        Score → Shop resources.
+        Unlocks cosmetics/challenges.
+
+9. Progression & Modes
+9.1. Core Mode: Arcade Campaign
+
+    50+ districts per run.
+    Risk of district destruction shapes each run.
+
+9.2. Mission Mode
+
+    Handcrafted scenarios:
+        Hold Sector X for 5 minutes.
+        Escort VIP transports.
+
+9.3. Boss Rush
+
+    Sequential boss fights from all districts + base.
+
+9.4. Daily/Weekly Challenges
+
+    Mutators:
+        Double enemy speed.
+        Only Turret Mode allowed.
+        Limited weapons.
+
+10. Difficulty & Replayability
+
+    Scaling: More destroyed districts → Harder enemies.
+    Unlocks:
+        New ship skins.
+        Permanent buffs for Perfect Runs.
+        Harder base variants.
