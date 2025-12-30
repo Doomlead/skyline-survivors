@@ -10,11 +10,11 @@ Skyline Survivors: Urban Defender
         Escalating enemy density, modular upgrades, and systemic risk (district destruction).
 
 2. High-Level Structure
-2.1. System View (Galactic/Orbital Map)
+2.1. System View Orbital Map
 
     Purpose: Strategic node selection.
     Elements:
-        City districts (“planets”) displayed as nodes.
+        City districts displayed as nodes.
         Enemy motherships roam between nodes, attacking districts.
         Special nodes:
             Weapons Satellite (Shop)
@@ -42,12 +42,7 @@ Skyline Survivors: Urban Defender
     Failed defenses increase base difficulty or lock unwinnable paths.
 
 3. Gameplay Overview
-3.1. Single-Player Focus
-
-    No multiplayer.
-    AI Companions: Rescued comrades fight alongside you (on foot or in vehicle).
-
-3.2. Core Loop
+3.1 Core Loop
 
     System Map: Choose a district to defend.
     Combat Mission:
@@ -68,7 +63,7 @@ Skyline Survivors: Urban Defender
         Smart Bomb: Screen-clearing attack (limited charges).
         Hyperspace: Emergency teleport (risky spawn).
 
-4.1.2. Turret Form (Strike Force)
+4.1.2. Guardian Form 
 
     Activation: Toggle button.
     Movement: Drastically slowed.
