@@ -449,6 +449,8 @@ class BuildMapView {
             const radius = isSelected ? baseRadius * 1.3 : baseRadius;
             const alpha = isDestroyed ? 0.4 : 0.8;
 
+            this.drawDistrictThreatPulse(district, projected, radius);
+
             this.districtGraphics.fillStyle(district.config.color, alpha * 0.3);
             this.districtGraphics.fillCircle(projected.x, projected.y, radius * 2);
             this.districtGraphics.fillStyle(district.config.color, alpha);
@@ -461,6 +463,22 @@ class BuildMapView {
             district.projectedRadius = radius * 2;
         });
         this.setupDistrictInteraction();
+    }
+
+    drawDistrictThreatPulse(district, projected, radius) {
+        if (!district?.state || district.state.status !== 'threatened') return;
+        const maxTimer = district.config?.timer || 1;
+        if (maxTimer <= 0) return;
+        const remaining = Math.max(0, district.state.timer ?? 0);
+        const urgency = Phaser.Math.Clamp(1 - remaining / maxTimer, 0, 1);
+        const pulseSpeed = Phaser.Math.Linear(0.002, 0.006, urgency);
+        const pulse = (Math.sin(this.scene.time.now * pulseSpeed) + 1) / 2;
+        const pulseRadius = radius * (1.6 + pulse * 0.6);
+        const pulseAlpha = Phaser.Math.Linear(0.15, 0.55, pulse) * Phaser.Math.Linear(0.7, 1, urgency);
+        const pulseColor = urgency > 0.65 ? 0xf87171 : urgency > 0.35 ? 0xfbbf24 : 0xfef08a;
+
+        this.districtGraphics.lineStyle(2, pulseColor, pulseAlpha);
+        this.districtGraphics.strokeCircle(projected.x, projected.y, pulseRadius);
     }
 
     setupDistrictInteraction() {
