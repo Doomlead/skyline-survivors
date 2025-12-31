@@ -122,7 +122,8 @@ const veritechState = {
     aimAngle: 0,
     transformCooldown: 0,
     vx: 0,
-    vy: 0
+    vy: 0,
+    destroyed: false
 };
 
 const pilotState = {
@@ -185,6 +186,7 @@ function resetGameState() {
     veritechState.transformCooldown = 0;
     veritechState.vx = 0;
     veritechState.vy = 0;
+    veritechState.destroyed = false;
     pilotState.active = false;
     pilotState.facing = 1;
     pilotState.grounded = false;
