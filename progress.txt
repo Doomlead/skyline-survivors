@@ -8,9 +8,10 @@ Implemented
 - District layout panels and build/shop presentation: mission overview, directives, credits, loadout selection, and shop unlock list (index.html, js/ui/mission/buildMissionUi.js, js/ui/districtLayoutManager.js).
 - Meta progression scaffolding: credits, shop unlocks, offense/defense loadouts, persistent storage, and run history (js/config/metaProgression.js).
 - Side-scrolling combat scene with wraparound world, enemy wave spawning, survival mode timer, and boss queue (js/core/game.js, js/entities/enemyCore.js, js/entities/bossCore.js).
-- Parallax cityscape background layers (static) for combat view (js/graphics/background.js).
+- Procedurally generated parallax cityscape background layers for combat view (js/graphics/background.js).
 - Ship mechanics: fighter and guardian/turret forms with inertia, 360° mouse aim in guardian mode, transform toggle, hyperspace, and smart bomb (js/entities/player.js).
 - Pilot ejection/on-foot mode with gravity, jumping, and re-entry to the ship (js/entities/player.js).
+- Rebuild objective loop on ship destruction: extraction dropship encounter and ship rebuild on success (js/core/game.js, js/entities/player.js, js/entities/enemyCore.js).
 - Core HUD: score, wave/enemy count, timer (survival), bombs/lives, power-up readout, and radar mini-map (index.html, js/ui/ui.js).
 - Human rescue loop: landers abduct humans, mutate them into mutants, player can rescue abducted humans for score/power-up chances (js/entities/enemyBehaviors.js, js/entities/player.js).
 - Enemy roster coverage: lander, mutant, bomber, swarmer, drone, and multiple additional archetypes with behaviors and projectiles (js/config/enemyConfig.js, js/entities/enemyBehaviors.js).
@@ -24,7 +25,7 @@ Missing Features
 - Full campaign structure: 50+ districts per run and global progression gates to unlock the enemy base (DesignDocument §§2.3, 9.1).
 - On-foot combat depth: distinct weapon loadout (pistol/rifle/grenades), cover system, and environmental pickups for ground combat (DesignDocument §4.2.1).
 - Operative squad system: rescued comrades fighting alongside the player, role variants (turret/medic/engineer), carry/deposit mechanics, and safe zones for buffs/currency (DesignDocument §§3.1, 4.2.1, 4.2.3).
-- Extraction/rebuild loop: dropship extraction encounters, rebuild station, and alien tech risk/reward upgrades (DesignDocument §4.2.2).
+- Rebuild station branch: alien tech collection and risk/reward rebuild upgrades (DesignDocument §4.2.2).
 - Mutation risk mechanics: captured comrades turning into mutant troopers with reconversion option (DesignDocument §4.2.3).
 - Power-up tier trees and synergy combos: force drone modes (front/orbit/detached), shield segments/timed invulnerability, and combo effects (DesignDocument §4.3.2–4.3.3).
 - Environment variety: destroyable buildings, civilians/traffic layers, dynamic weather/day-night cycle, and distinct district hazard themes (DesignDocument §5).
