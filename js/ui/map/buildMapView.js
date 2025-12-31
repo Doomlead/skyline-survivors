@@ -44,6 +44,7 @@ class BuildMapView {
         this.atmosphereGraphics = null;
         this.districtGraphics = null;
         this.markerGraphics = null;
+        this.mothershipMarkers = [];
         
         this._isBuilt = false;
     }
@@ -90,6 +91,7 @@ class BuildMapView {
         ]);
 
         this.initializeDistricts();
+        this.createMothershipMarkers();
         this.createOrbitNodes(); 
         this.setupGlobeInput();
         this.renderGlobe();
@@ -123,6 +125,8 @@ class BuildMapView {
         this.mapNodes = [];
         this.districts = [];
         this.selectedDistrict = null;
+        this.mothershipMarkers.forEach(marker => marker.destroy());
+        this.mothershipMarkers = [];
         if (this.planetContainer) {
             this.planetContainer.destroy(true);
             this.planetContainer = null;
@@ -422,6 +426,29 @@ class BuildMapView {
         });
     }
 
+    createMothershipMarkers() {
+        if (typeof missionPlanner === 'undefined' || !this.planetContainer) return;
+        this.mothershipMarkers.forEach(marker => marker.destroy());
+        this.mothershipMarkers = [];
+        const ships = missionPlanner.getMotherships();
+        ships.forEach(() => {
+            const hull = this.scene.add.triangle(0, 0, 0, -12, -10, 10, 10, 10, 0xf43f5e, 0.95);
+            hull.setStrokeStyle(2, 0xffffff, 0.9);
+            hull.setBlendMode(Phaser.BlendModes.ADD);
+            hull.setDepth(6);
+            this.planetContainer.add(hull);
+            this.scene.tweens.add({
+                targets: hull,
+                scale: 1.15,
+                duration: 800,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            this.mothershipMarkers.push(hull);
+        });
+    }
+
     getDistrictCenterCoords(config) {
         if (!config) return { lat: 0, lon: 0 };
         if (config.center) return config.center;
@@ -450,6 +477,12 @@ class BuildMapView {
             const alpha = isDestroyed ? 0.4 : 0.8;
 
             this.drawDistrictThreatPulse(district, projected, radius);
+            if (district.state.underAttack && !isDestroyed) {
+                const attackPulse = (Math.sin(this.scene.time.now / 200) + 1) / 2;
+                const attackRadius = radius * (2.1 + attackPulse * 0.6);
+                this.districtGraphics.lineStyle(2.5, 0xef4444, 0.7);
+                this.districtGraphics.strokeCircle(projected.x, projected.y, attackRadius);
+            }
 
             this.districtGraphics.fillStyle(district.config.color, alpha * 0.3);
             this.districtGraphics.fillCircle(projected.x, projected.y, radius * 2);
@@ -615,6 +648,7 @@ class BuildMapView {
         if (typeof missionPlanner === 'undefined') return mission;
         const dt = delta / 1000;
         missionPlanner.tickDistricts(dt);
+        missionPlanner.tickMotherships(dt);
         this._persistAccumulator += dt;
 
         if (this.autoRotate && !this.isDragging) {
@@ -635,6 +669,15 @@ class BuildMapView {
             const color = node.state.status === 'destroyed' ? '#f87171' : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
             node.timerText.setText(timerLabel);
             node.timerText.setColor(color);
+        });
+
+        const motherships = missionPlanner.getMotherships();
+        motherships.forEach((ship, index) => {
+            const marker = this.mothershipMarkers[index];
+            if (!marker) return;
+            const projected = this.project3D(ship.lat, ship.lon);
+            marker.setPosition(projected.x, projected.y);
+            marker.setVisible(projected.visible);
         });
 
         return mission;
