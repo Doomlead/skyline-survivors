@@ -85,7 +85,19 @@ const gameState = {
     rewardMultiplier: 1,
     spawnMultiplier: 1,
     metaAppliedLoadout: null,
-    metaRewardsGranted: false
+    metaRewardsGranted: false,
+    rebuildObjective: {
+        active: false,
+        stage: null,
+        timer: 0,
+        encounterSpawned: false,
+        extractionX: 0,
+        extractionY: 0,
+        branch: 'dropship',
+        requiredAlienTech: 0,
+        collectedAlienTech: 0,
+        shipReturned: false
+    }
 };
 
 // Player state
@@ -208,4 +220,16 @@ function resetGameState() {
     gameState.spawnMultiplier = 1;
     gameState.metaAppliedLoadout = null;
     gameState.metaRewardsGranted = false;
+    gameState.rebuildObjective = {
+        active: false,
+        stage: null,
+        timer: 0,
+        encounterSpawned: false,
+        extractionX: 0,
+        extractionY: 0,
+        branch: 'dropship',
+        requiredAlienTech: 0,
+        collectedAlienTech: 0,
+        shipReturned: false
+    };
 }
