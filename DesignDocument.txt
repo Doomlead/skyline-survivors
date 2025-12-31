@@ -294,13 +294,115 @@ A modern reimagining of Defender/Stargate fused with Strike Force, Vampire Survi
 
 ### 8.1. Standard Forces
 
-| Enemy Type | Behavior | Defense/Assault |
-|------------|----------|-----------------|
-| Landers | Abduct comrades → mutate if unchecked | Defense only |
-| Mutants | Fast, hijack vehicles/turrets | Both (more in Assault) |
-| Bombers | Drop bomb patterns | Defense waves |
-| Swarmers | Small, overwhelming numbers | Both |
-| Drones | Basic patrol enemies | Both |
+Enemies
+Lander
+Behavior: Hunts nearby humans, marks a target, abducts them, and climbs upward; if it reaches the top while carrying a human, the human is destroyed and a Mutant spawns at the human’s position. If idle (no target), it drifts, occasionally reverses direction, and may fire at the player. On death, it releases any target it was abducting.
+Look: Classic red saucer with a domed canopy, running lights, landing legs, and a green tractor‑beam glow beneath.
+
+Mutant
+Behavior: Aggressively homes in on the player with constant pursuit.
+Look: Humanoid alien with a tail, claws, orange body, and glowing aura; detailed limbs and head features.
+
+Drone
+Behavior: Lazy patrol in a circular arc while occasionally shooting at the player.
+Look: Small magenta/purple orb with concentric glows, sensor nodes, and a bright core.
+
+Bomber
+Behavior: Patrols horizontally, periodically drops spinning mines, and intermittently fires at the player.
+Look: Red aircraft‑like hull with winglets, cockpit, bomb bay detail, engine flames, and warning stripes.
+
+Swarmer
+Behavior: Zig‑zags toward the player with a wobble in its heading; pure rush behavior.
+Look: Small green orb with sensor “eyes,” antennae, and a glowing core plus speed‑trail glow.
+
+Pod
+Behavior: Drifts on a slow sinusoidal path. On death, it always releases 3 swarmers.
+Look: Purple organic sphere with a translucent membrane, visible green “embryos,” veins, and glowing node points.
+
+Baiter
+Behavior: Aggressive chaser that speeds up erratically in bursts; no direct shooting behavior in its update loop.
+Look: Sleek magenta wedge‑shaped ship with exhaust flames, sensor/glow cockpit, fins, and speed streaks.
+
+Kamikaze
+Behavior: Homes aggressively toward the player, occasionally jukes, and may fire rarely; on death it explodes and damages nearby enemies within a radius.
+Look: Red missile with warning stripes, flame tail, and an “angry eye” motif.
+
+Turret
+Behavior: Wanders briefly, then plants itself in place and alternates between cardinal and diagonal multi‑shot volleys.
+
+
+Look: Small gray turret with a base platform and four gun barrels (up/down/left/right) around a red sensor eye.
+
+Shield
+Behavior: Slow arcing patrol; occasionally fires. Has a shield HP property and special shield‑break explosion effects.
+Look: Cyan shield bubble with hex‑like generator nodes, concentric pulse rings, and a central eye.
+
+Seeker
+Behavior: Predicts the player’s future position based on velocity and pursues that predicted point, firing periodically.
+Look: Purple body with a scanning dish, multiple red “tracking eyes,” and targeting lines.
+
+Spawner
+Behavior: Periodically spawns two Swarmer minions (up to a cap), patrols in a slow arc, and fires intermittently. On death, it has a chance to spawn extra swarmers.
+Look: Yellow‑gold organic pod with visible embryos, multiple spawn ports, and a central control node.
+
+Shielder
+Behavior: Creates protective tethers to nearby allies, heals allies who have been damaged recently, and tries to stay near them while occasionally shooting.
+Look: Green diamond‑shaped core with energy nodes at corners and a protective field ring.
+
+Bouncer
+Behavior: Ricochets erratically by picking a new direction every ~0.5s; fires occasionally.
+Look: Orange bouncy orb with motion blur, angry eyes/eyebrows, and speed lines.
+
+Sniper
+Behavior: Positions itself for a brief setup phase; once “positioned,” it stabilizes and fires high‑speed shots at longer intervals.
+Look: Long gray barrel with a red laser tip and scope; clearly a gun‑platform silhouette.
+
+Swarm Leader
+Behavior: Buffs nearby allies (speeding them up with visual glow), moves toward the player with evasive weaving, and fires periodically. On death, nearby enemies are debuffed (slowed).
+Look: Purple command orb with a crown motif, golden spikes, and glowing command nodes.
+
+Regenerator
+Behavior: Periodically heals itself and emits a green healing burst, drifts in gentle arcs, and fires occasionally.
+Look: Green organic cell with healing aura, tissue patches, and a bright nucleus core.
+
+
+### 8.1.2Bosses
+
+Mega Lander
+Behavior: Orbits around screen center in a loop and fires from four tentacles in a radial pattern.
+Look: Giant red UFO with a large glowing eye, upper dome, and four bright tentacles with glowing tips.
+
+Titan Mutant
+Behavior: Aggressive pursuit with wobble; fires a three‑arm spread toward the player.
+Look: Massive humanoid alien with elongated head, glowing eyes, multiple arms, and a tail spike.
+
+Hive Drone
+Behavior: Hovers and patrols laterally with a slow vertical bob; fires from six hex‑arranged ports.
+Look: Large magenta hexagonal platform with six gun ports and a glowing central core.
+
+Behemoth Bomber
+Behavior: Slow horizontal patrol; drops mines from three bays and fires lateral shots from side guns.
+Look: Huge red aerial fortress with bomb bays, cockpit, twin engines, and wing guns.
+
+Colossal Pod
+Behavior: Sinuous vertical oscillation while drifting horizontally; fires from four ports in radial patterns.
+Look: Giant purple organic pod with multiple glowing spawn ports and internal nuclei.
+
+Leviathan Baiter
+Behavior: Serpentine pursuit with weaving; fires sequentially from five thrusters.
+Look: Long cyan sea‑monster silhouette with dorsal spines, glowing eye, and thruster vents.
+
+Apex Kamikaze
+Behavior: Fast suicide‑style charge with spinning; fires from four appendages in bursts.
+Look: Angry red missile with an eye, spiky explosive appendages, and flame exhaust.
+
+Fortress Turret
+Behavior: Stationary once planted; alternates between 8‑direction firing patterns, rotating its barrel mode.
+Look: Heavy gray turret platform with eight barrels arranged in a ring and a central red targeting core.
+
+Overlord Shield
+Behavior: Slow orbital movement around center; six energy nodes fire in a radial pattern.
+Look: Large circular energy barrier with concentric rings, six node emitters, and a glowing central core.
 
 ### 8.2. Elite Forces
 
@@ -317,7 +419,7 @@ A modern reimagining of Defender/Stargate fused with Strike Force, Vampire Survi
 - **Garrison Forces:** Elite troops defending base perimeter
 - **Core Reactor:** Primary target, heavily armored
 
----
+
 
 ## 9. Game Systems
 
@@ -427,4 +529,6 @@ A modern reimagining of Defender/Stargate fused with Strike Force, Vampire Survi
 - **Strategic layer:** Balance defending territory vs. reclaiming lost ground
 - **Dynamic campaign:** Player failure creates new challenges (occupied districts)
 - **Clear victory path:** Secure planet → Assault Mothership → Win
+
+
 
