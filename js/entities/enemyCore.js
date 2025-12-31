@@ -367,6 +367,12 @@ function destroyEnemy(scene, enemy) {
     if (Math.random() < 0.2) spawnPowerUp(scene, enemy.x, enemy.y);
     enemy.destroy();
 
+    if (enemy.isExtractionTarget && gameState.rebuildObjective?.active) {
+        gameState.rebuildObjective.stage = 'return_ship';
+        gameState.rebuildObjective.timer = 0;
+        gameState.rebuildObjective.encounterSpawned = false;
+    }
+
     if (gameState.mode === 'classic') {
         if (enemy.countsTowardsWave !== false) {
             gameState.killsThisWave = (gameState.killsThisWave || 0) + 1;

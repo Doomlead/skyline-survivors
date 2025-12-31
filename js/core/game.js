@@ -32,6 +32,108 @@ function preload() {
     createGraphics(this);
 }
 
+function showRebuildObjectiveBanner(scene, message, color = '#66ccff') {
+    if (!scene) return;
+    const banner = scene.add.text(
+        CONFIG.width / 2,
+        CONFIG.height / 2 - 120,
+        message,
+        {
+            fontSize: '26px',
+            fontFamily: 'Orbitron',
+            color,
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 4
+        }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(210);
+
+    scene.tweens.add({
+        targets: banner,
+        alpha: 0,
+        y: banner.y - 40,
+        duration: 2200,
+        onComplete: () => banner.destroy()
+    });
+}
+
+function spawnExtractionDropship(scene, objective) {
+    const spawnOffset = Math.random() < 0.5 ? -260 : 260;
+    const spawnX = wrapValue(objective.extractionX + spawnOffset, CONFIG.worldWidth);
+    const spawnY = CONFIG.height * 0.35;
+    const dropShip = spawnEnemy(scene, 'spawner', spawnX, spawnY, false);
+    if (!dropShip) return null;
+
+    dropShip.isExtractionTarget = true;
+    dropShip.hp = Math.round(dropShip.hp * 2.5);
+    dropShip.setScale(dropShip.scaleX * 1.4, dropShip.scaleY * 1.4);
+    dropShip.setDepth(FG_DEPTH_BASE + 5);
+
+    showRebuildObjectiveBanner(scene, 'Extraction dropship inbound');
+    return dropShip;
+}
+
+function rebuildVeritechAtExtraction(scene, objective) {
+    if (!scene.veritech || !scene.pilot) return;
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(objective.extractionX / 200) * 30;
+    const spawnY = Math.max(40, groundLevel - terrainVariation - 30);
+
+    setVeritechMode(scene, 'fighter');
+    veritechState.destroyed = false;
+    veritechState.active = true;
+    veritechState.vx = 0;
+    veritechState.vy = 0;
+
+    scene.veritech.setPosition(objective.extractionX, spawnY);
+    scene.veritech.setActive(true).setVisible(true);
+    scene.veritech.body.enable = true;
+
+    pilotState.active = false;
+    scene.pilot.setActive(false).setVisible(false);
+    scene.pilot.body.enable = false;
+    syncActivePlayer(scene);
+
+    playerState.powerUps.invincibility = 2000;
+    showRebuildObjectiveBanner(scene, 'Veritech rebuilt - return to battle', '#66ff88');
+}
+
+function addAlienTechToRebuildObjective(amount = 1) {
+    const objective = gameState.rebuildObjective;
+    if (!objective || !objective.active || objective.branch !== 'station') return;
+    objective.collectedAlienTech += amount;
+}
+
+function updateRebuildObjective(scene, delta) {
+    const objective = gameState.rebuildObjective;
+    if (!objective || !objective.active) return;
+
+    objective.timer += delta;
+
+    if (objective.stage === 'secure_extraction') {
+        if (!objective.encounterSpawned && objective.branch !== 'station') {
+            spawnExtractionDropship(scene, objective);
+            objective.encounterSpawned = true;
+        }
+        if (objective.branch === 'station' && objective.requiredAlienTech > 0
+            && objective.collectedAlienTech >= objective.requiredAlienTech) {
+            objective.stage = 'return_ship';
+            objective.timer = 0;
+        }
+    } else if (objective.stage === 'return_ship') {
+        if (!objective.shipReturned) {
+            rebuildVeritechAtExtraction(scene, objective);
+            objective.shipReturned = true;
+        }
+        if (objective.timer > 800) {
+            objective.active = false;
+            objective.stage = null;
+            objective.timer = 0;
+            objective.shipReturned = false;
+        }
+    }
+}
+
 // ------------------------
 // Wrap-around rendering system
 // ------------------------
@@ -365,6 +467,7 @@ function update(time, delta) {
     }
 
     updatePlayer(this, time, delta);
+    updateRebuildObjective(this, delta);
 
     if (particleManager) {
         particleManager.update(delta);
