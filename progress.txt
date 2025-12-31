@@ -23,23 +23,26 @@ All core themes are present in the codebase:
 - District nodes with status indicators (threatened/cleared/destroyed)
 - Special nodes: Weapons Satellite (Shop), relay stations, distress beacons
 - District selection and launch flow
-- Threat indicators with pulsing urgency rings
+- Threat indicators with pulsing urgency rings and under-attack highlights
 - District timers and state persistence
+- Roaming mothership markers with travel/assault phases
+- Mothership assaults drain district timers and flag districts as under attack
+- Orbit node timers and status readouts in the build mission panel
 
 ❌ **Missing:**
-- Roaming enemy motherships that attack districts dynamically
 - Enemy Base node (endgame assault location)
-- Challenge Mission nodes
-- Dynamic node threats beyond timers
+- Challenge Mission node functionality (nodes are visual only)
+- Dedicated assault/occupied district state (no assault mission flow)
 - Global difficulty scaling triggered by destroyed districts
 
 ## 2.2. Side-Scrolling Combat View
 
-**Status: Fully Implemented**
+**Status: Partially Implemented**
 
 ✅ **Implemented:**
 - Horizontal wraparound combat arena
-- Wave-based enemy spawning with district defense
+- Wave-based enemy spawning with district defense (classic mode)
+- Survival mode with timed boss triggers
 - Human rescue mechanics (landers/mutants)
 - Power-up collection system
 - Mini-boss and boss encounters
@@ -47,6 +50,8 @@ All core themes are present in the codebase:
 - Procedurally generated parallax cityscape backgrounds
 
 ❌ **Missing:**
+- Fixed 15-wave defense structure
+- Assault mission objectives (enemy base destruction)
 - Dynamic weather effects
 - Day-night cycle affecting visibility
 - Destroyable building interactions
@@ -78,15 +83,16 @@ All core themes are present in the codebase:
 
 ✅ **Implemented:**
 - System map district selection
-- Combat missions with ship combat and wave defense
+- Combat missions with ship combat and wave/survival modes
 - Human rescue during missions
 - Shop/upgrade system between missions
+- District timers that decay (including mothership pressure) and persist
 
 ❌ **Missing:**
 - Comrade deposit system for currency/buffs
 - Safe zones for depositing rescued operatives
 - Operative-based progression mechanics
-- Clear path to enemy base unlock
+- Clear path to enemy base/assault unlock
 
 ---
 
@@ -122,6 +128,7 @@ All core themes are present in the codebase:
 - Ship destruction triggers ejection sequence
 - Pilot lands on foot near crash site
 - Basic on-foot movement with gravity and jumping
+- Pilot uses the same weapon/projectile system while on foot
 - Re-entry to rebuilt ship after extraction
 
 ❌ **Missing:**
@@ -144,7 +151,7 @@ All core themes are present in the codebase:
 ❌ **Missing:**
 - Rebuild Station as alternative option
 - Alien tech collection mechanic
-- Risk/reward upgrade path for rebuild stations
+- Risk/reward upgrade path for rebuild stations (station branch exists but is not wired in)
 
 ### 4.2.3. Comrade Rescue & Mutation Risk
 
@@ -179,7 +186,7 @@ All core themes are present in the codebase:
 **Status: Partially Implemented**
 
 ✅ **Implemented:**
-- Laser tiers: Single → Twin → Spread → Wave Beam
+- Laser tiers: Single → Spread → Wave Beam
 - Drones (basic implementation)
 - Shield system
 - Homing Missiles
@@ -244,15 +251,16 @@ All core themes are present in the codebase:
 **Status: Partially Implemented**
 
 ✅ **Implemented:**
-- District threat states (flashing/threatened)
+- District threat states (flashing/threatened/cleared/destroyed)
 - District destruction tracking
 - Weapons Satellite shop node
+- Orbit nodes with timers (shop/relay/distress/mothership)
 - Meta currency system
 - Permanent upgrade purchases
+- Motherships roam the map and drain district timers during assaults
+- Urgency-based mission modifiers (spawn/reward multipliers, human counts)
 
 ❌ **Missing:**
-- Roaming mothership entities on map
-- Dynamic district attacks from motherships
 - Global difficulty spike from ignored districts
 - Synergy items in shop (e.g., tether beam for Turret Mode)
 - Challenge mission selection
@@ -283,11 +291,12 @@ All core themes are present in the codebase:
 - Bombers (bomb patterns)
 - Swarmers (overwhelming numbers)
 - Drones
+- Additional enemies (turret, shield, shielder, seeker, spawner, kamikaze, baiter, bouncer, sniper, swarm leader, regenerator)
 - Multiple boss archetypes with behaviors
 
 ❌ **Missing:**
 - Mutants hijacking vehicles/turrets
-- Motherships as mini-bosses on system map
+- Battleship-style boss encounters tied to district assaults
 - Cyber-Mutants (blink/teleport, hybrid tech)
 - Kaiju Units (multi-limb bosses with destructible limbs)
 - Full enemy behavior roster from design doc
@@ -318,6 +327,7 @@ All core themes are present in the codebase:
 - Points for enemy kills
 - Points for human rescues
 - Score display and tracking
+- Wave-completion bonuses and mission completion credit rewards
 - Currency conversion (meta credits)
 
 ❌ **Missing:**
@@ -339,9 +349,10 @@ All core themes are present in the codebase:
 - District-based mission structure
 - District destruction consequences
 - Run-to-run variation
+- Wave and survival combat modes
 
 ❌ **Missing:**
-- Full 50+ district campaign structure
+- Full 50+ district campaign structure (current map uses 5 districts)
 - Complete risk/reward shaping across entire run
 - Campaign progression gates
 
@@ -382,6 +393,7 @@ All core themes are present in the codebase:
 - Basic difficulty scaling through waves
 - Meta progression unlocks
 - Persistent loadout system
+- District urgency scaling (spawn/reward multipliers)
 
 ❌ **Missing:**
 - Scaling based on destroyed districts
@@ -396,15 +408,16 @@ All core themes are present in the codebase:
 ## Summary Statistics
 
 **Major Systems:**
-- Fully Complete: 3/10 (30%)
-- Partially Complete: 6/10 (60%)
-- Not Started: 1/10 (10%)
+- Fully Complete: 1/10 (10%)
+- Partially Complete: 9/10 (90%)
+- Not Started: 0/10 (0%)
 
 **Core Features:**
 - ✅ Basic combat loop and ship mechanics
 - ✅ System map navigation and district selection
 - ✅ Human rescue and mutation system
 - ✅ Power-up and upgrade foundation
+- ✅ Mothership-driven district pressure on the system map
 - ⚠️ Meta progression framework (needs depth)
 - ❌ Operative squad system
 - ❌ Ground combat depth
