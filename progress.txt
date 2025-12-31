@@ -4,6 +4,7 @@ Implemented
 - System/district map UI: 3D rotating globe with selectable districts, orbit-node markers (mothership/shop/relay/distress), district status/timer readouts, and launch flow (js/ui/buildScene.js, js/ui/map/buildMapView.js, js/ui/missionPlanner.js).
 - Dedicated system-map threat indicators with pulsing urgency rings for threatened districts (js/ui/map/buildMapView.js).
 - Mission directives: urgency-based reward/spawn multipliers, district timers, and district state persistence (threatened/cleared/destroyed) (js/ui/missionPlanner.js).
+- Mission mode selection between classic wave runs and survival runs, including survival timer setup and mode-aware boss triggers (js/core/game.js, js/entities/enemyCore.js, js/entities/bossCore.js, js/ui/districtLayoutManager.js, js/ui/mission/buildMissionUi.js).
 - District layout panels and build/shop presentation: mission overview, directives, credits, loadout selection, and shop unlock list (index.html, js/ui/mission/buildMissionUi.js, js/ui/districtLayoutManager.js).
 - Meta progression scaffolding: credits, shop unlocks, offense/defense loadouts, persistent storage, and run history (js/config/metaProgression.js).
 - Side-scrolling combat scene with wraparound world, enemy wave spawning, survival mode timer, and boss queue (js/core/game.js, js/entities/enemyCore.js, js/entities/bossCore.js).
@@ -18,7 +19,7 @@ Implemented
 - Audio settings (music/sfx/mute) and accessibility toggles (reduce flashes) (js/audio/audio.js, js/core/game.js, index.html).
 
 Missing Features
-- System map gameplay depth: roaming enemy motherships that attack districts, dynamic node threats beyond timers, permanent district loss increasing global difficulty, and challenge mission nodes (DesignDocument §§2.1, 6.1).
+- System map gameplay depth: roaming enemy motherships that attack districts, dynamic node threats beyond timers, global difficulty scaling from destroyed districts, and challenge mission nodes (DesignDocument §§2.1, 6.1).
 - Endgame flow: enemy base assault with multi-phase levels and special endings/perfect run logic (DesignDocument §6.2).
 - Full campaign structure: 50+ districts per run and global progression gates to unlock the enemy base (DesignDocument §§2.3, 9.1).
 - On-foot combat depth: distinct weapon loadout (pistol/rifle/grenades), cover system, and environmental pickups for ground combat (DesignDocument §4.2.1).
