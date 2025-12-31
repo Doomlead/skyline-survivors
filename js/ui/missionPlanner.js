@@ -94,8 +94,16 @@
         }
     ];
 
+    const MOTHERSHIP_CONFIG = {
+        count: 2,
+        travelTime: 26,
+        assaultTime: 18,
+        assaultDrain: 1.6
+    };
+
     let mission = null;
     let districtState = null;
+    let mothershipState = null;
     const mapState = { nodes: {}, hasTimerData: false };
 
     function getDefaultDistrictState(config) {
@@ -210,6 +218,116 @@
             return { lat: sum.lat / count, lon: sum.lon / count };
         }
         return { lat: 0, lon: 0 };
+    }
+
+    function getActiveDistrictConfigs() {
+        return DISTRICT_CONFIGS.filter(cfg => getDistrictState(cfg.id).status !== 'destroyed');
+    }
+
+    function pickRandomDistrictId(excludeId = null) {
+        const candidates = getActiveDistrictConfigs();
+        const pool = candidates.length ? candidates : DISTRICT_CONFIGS;
+        const options = excludeId ? pool.filter(cfg => cfg.id !== excludeId) : pool;
+        const pickFrom = options.length ? options : pool;
+        return Phaser.Utils.Array.GetRandom(pickFrom).id;
+    }
+
+    function ensureMothershipState() {
+        if (mothershipState) return mothershipState;
+        mothershipState = Array.from({ length: MOTHERSHIP_CONFIG.count }).map((_, index) => {
+            const fromId = pickRandomDistrictId();
+            const toId = pickRandomDistrictId(fromId);
+            return {
+                id: `mothership-${index + 1}`,
+                phase: 'travel',
+                fromId,
+                toId,
+                timer: MOTHERSHIP_CONFIG.travelTime,
+                lat: 0,
+                lon: 0
+            };
+        });
+        return mothershipState;
+    }
+
+    function lerpValue(start, end, t) {
+        return start + (end - start) * t;
+    }
+
+    function tickMotherships(seconds = 0) {
+        if (seconds <= 0) return ensureMothershipState();
+        const state = safeLoadState();
+        const ships = ensureMothershipState();
+        const attackedDistrictIds = new Set();
+        let mutated = false;
+
+        ships.forEach(ship => {
+            if (ship.phase === 'travel') {
+                ship.timer -= seconds;
+                const progress = Phaser.Math.Clamp(1 - ship.timer / MOTHERSHIP_CONFIG.travelTime, 0, 1);
+                const fromConfig = getDistrictConfigById(ship.fromId);
+                const toConfig = getDistrictConfigById(ship.toId);
+                const fromCenter = getDistrictCenter(fromConfig);
+                const toCenter = getDistrictCenter(toConfig);
+                ship.lat = lerpValue(fromCenter.lat, toCenter.lat, progress);
+                ship.lon = lerpValue(fromCenter.lon, toCenter.lon, progress);
+                if (ship.timer <= 0) {
+                    ship.phase = 'assault';
+                    ship.timer = MOTHERSHIP_CONFIG.assaultTime;
+                    ship.fromId = ship.toId;
+                }
+            } else if (ship.phase === 'assault') {
+                ship.timer -= seconds;
+                const targetId = ship.fromId;
+                const targetState = state.districts[targetId];
+                const targetConfig = getDistrictConfigById(targetId);
+                const targetCenter = getDistrictCenter(targetConfig);
+                ship.lat = targetCenter.lat;
+                ship.lon = targetCenter.lon;
+                attackedDistrictIds.add(targetId);
+
+                if (targetState && targetState.status !== 'destroyed') {
+                    const drain = seconds * MOTHERSHIP_CONFIG.assaultDrain;
+                    const nextTimer = Math.max(0, targetState.timer - drain);
+                    if (nextTimer !== targetState.timer) {
+                        targetState.timer = nextTimer;
+                        if (targetState.status === 'cleared') {
+                            targetState.status = 'threatened';
+                        }
+                        if (targetState.timer === 0) {
+                            targetState.status = 'destroyed';
+                            targetState.lastOutcome = 'failed';
+                        }
+                        mutated = true;
+                    }
+                }
+
+                if (ship.timer <= 0) {
+                    ship.phase = 'travel';
+                    ship.toId = pickRandomDistrictId(ship.fromId);
+                    ship.timer = MOTHERSHIP_CONFIG.travelTime;
+                }
+            }
+        });
+
+        Object.entries(state.districts).forEach(([id, entry]) => {
+            const underAttack = attackedDistrictIds.has(id);
+            if (entry.underAttack !== underAttack) {
+                entry.underAttack = underAttack;
+                mutated = true;
+            }
+        });
+
+        if (mutated) {
+            state.lastUpdated = Date.now();
+            persistState();
+        }
+
+        return ships;
+    }
+
+    function getMotherships() {
+        return ensureMothershipState();
     }
 
     function selectDistrict(name, longitudeOverride = null, providedState = null) {
@@ -418,6 +536,8 @@
         getMapNodeState,
         getMapState,
         hasMapTimerData,
-        setMapTimerDataAvailable
+        setMapTimerDataAvailable,
+        tickMotherships,
+        getMotherships
     };
 })();
