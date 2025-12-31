@@ -46,6 +46,7 @@ function ejectPilot(scene) {
 
 function enterVeritech(scene) {
     if (!scene.veritech || !scene.pilot || !pilotState.active) return;
+    if (veritechState.destroyed) return;
     const dist = Phaser.Math.Distance.Between(scene.pilot.x, scene.pilot.y, scene.veritech.x, scene.veritech.y);
     if (dist > 60) return;
     pilotState.active = false;
@@ -531,7 +532,7 @@ function playerDie(scene) {
     const player = getActivePlayer(scene);
     if (!player) return;
     if (scene._isRespawning || gameState.gameOver) return;
-    gameState.lives--;
+    const isVeritechActive = veritechState.active || player === scene.veritech;
     if (particleManager) {
         if (audioManager) audioManager.playSound('explosion');
         particleManager.playerExplosion(player.x, player.y);
@@ -540,6 +541,18 @@ function playerDie(scene) {
     }
     screenShake(scene, 20, 500);
 
+    if (isVeritechActive) {
+        veritechState.destroyed = true;
+        if (scene.veritech) {
+            scene.veritech.setActive(false).setVisible(false);
+            scene.veritech.body.enable = false;
+        }
+        ejectPilot(scene);
+        playerState.powerUps.invincibility = 1500;
+        return;
+    }
+
+    gameState.lives--;
     if (gameState.lives <= 0) {
         gameOver(scene);
     } else {
@@ -568,6 +581,7 @@ function playerDie(scene) {
 
         scene.time.delayedCall(1000, () => {
             setVeritechMode(scene, 'fighter');
+            veritechState.destroyed = false;
             scene.veritech.x = 100;
             scene.veritech.y = 300;
             scene.veritech.setActive(true).setVisible(true);
