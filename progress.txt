@@ -1,36 +1,413 @@
-Skyline Survivors Progress (DesignDocument.txt vs. Current Code)
+Skyline Survivors: Implementation Progress
 
-Implemented
-- System/district map UI: 3D rotating globe with selectable districts, orbit-node markers (mothership/shop/relay/distress), district status/timer readouts, and launch flow (js/ui/buildScene.js, js/ui/map/buildMapView.js, js/ui/missionPlanner.js).
-- Dedicated system-map threat indicators with pulsing urgency rings for threatened districts (js/ui/map/buildMapView.js).
-- Mission directives: urgency-based reward/spawn multipliers, district timers, and district state persistence (threatened/cleared/destroyed) (js/ui/missionPlanner.js).
-- Mission mode selection between classic wave runs and survival runs, including survival timer setup and mode-aware boss triggers (js/core/game.js, js/entities/enemyCore.js, js/entities/bossCore.js, js/ui/districtLayoutManager.js, js/ui/mission/buildMissionUi.js).
-- District layout panels and build/shop presentation: mission overview, directives, credits, loadout selection, and shop unlock list (index.html, js/ui/mission/buildMissionUi.js, js/ui/districtLayoutManager.js).
-- Meta progression scaffolding: credits, shop unlocks, offense/defense loadouts, persistent storage, and run history (js/config/metaProgression.js).
-- Side-scrolling combat scene with wraparound world, enemy wave spawning, survival mode timer, and boss queue (js/core/game.js, js/entities/enemyCore.js, js/entities/bossCore.js).
-- Procedurally generated parallax cityscape background layers for combat view (js/graphics/background.js).
-- Ship mechanics: fighter and guardian/turret forms with inertia, 360° mouse aim in guardian mode, transform toggle, hyperspace, and smart bomb (js/entities/player.js).
-- Pilot ejection/on-foot mode with gravity, jumping, and re-entry to the ship (js/entities/player.js).
-- Rebuild objective loop on ship destruction: extraction dropship encounter and ship rebuild on success (js/core/game.js, js/entities/player.js, js/entities/enemyCore.js).
-- Core HUD: score, wave/enemy count, timer (survival), bombs/lives, power-up readout, and radar mini-map (index.html, js/ui/ui.js).
-- Human rescue loop: landers abduct humans, mutate them into mutants, player can rescue abducted humans for score/power-up chances (js/entities/enemyBehaviors.js, js/entities/player.js).
-- Enemy roster coverage: lander, mutant, bomber, swarmer, drone, and multiple additional archetypes with behaviors and projectiles (js/config/enemyConfig.js, js/entities/enemyBehaviors.js).
-- Boss encounters and boss visuals/behaviors (multiple boss archetypes) (js/config/bossConfig.js, js/entities/bossBehavior.js).
-- Power-up pickups and weapon variants: laser tiers (spread/wave), drones, shield, homing missiles, overdrive, plus additional modifiers (rear/side/rapid/multi/piercing/speed/magnet/double/invincibility/timeSlow) (js/entities/powerups.js, js/entities/player.js).
-- Audio settings (music/sfx/mute) and accessibility toggles (reduce flashes) (js/audio/audio.js, js/core/game.js, index.html).
+1. Core Concept
 
-Missing Features
-- System map gameplay depth: roaming enemy motherships that attack districts, dynamic node threats beyond timers, global difficulty scaling from destroyed districts, and challenge mission nodes (DesignDocument §§2.1, 6.1).
-- Endgame flow: enemy base assault with multi-phase levels and special endings/perfect run logic (DesignDocument §6.2).
-- Full campaign structure: 50+ districts per run and global progression gates to unlock the enemy base (DesignDocument §§2.3, 9.1).
-- On-foot combat depth: distinct weapon loadout (pistol/rifle/grenades), cover system, and environmental pickups for ground combat (DesignDocument §4.2.1).
-- Operative squad system: rescued comrades fighting alongside the player, role variants (turret/medic/engineer), carry/deposit mechanics, and safe zones for buffs/currency (DesignDocument §§3.1, 4.2.1, 4.2.3).
-- Rebuild station branch: alien tech collection and risk/reward rebuild upgrades (DesignDocument §4.2.2).
-- Mutation risk mechanics: captured comrades turning into mutant troopers with reconversion option (DesignDocument §4.2.3).
-- Power-up tier trees and synergy combos: force drone modes (front/orbit/detached), shield segments/timed invulnerability, and combo effects (DesignDocument §4.3.2–4.3.3).
-- Environment variety: destroyable buildings, civilians/traffic layers, dynamic weather/day-night cycle, and distinct district hazard themes (DesignDocument §5).
-- In-combat off-screen arrows for priority targets (DesignDocument §8.1).
-- Weapon satellite shop as an interactive node with permanent upgrades and synergy items (beyond current meta shop UI) (DesignDocument §6.1).
-- Additional enemy families: mothership entities on the map, cyber-mutants, and kaiju units with limb-destruction mechanics (DesignDocument §7).
-- Additional modes: mission mode scenarios, boss rush mode, daily/weekly challenges with mutators (DesignDocument §9).
-- Replayability systems: unlockable cosmetics/challenges and difficulty scaling based on destroyed districts (DesignDocument §§8.2, 10).
+**Status: Fully Implemented**
+
+All core themes are present in the codebase:
+- Urban defense gameplay with district-based missions
+- Ship/foot combat transitions via pilot ejection system
+- Human rescue mechanics with landers and mutants
+- Escalating difficulty through wave systems and boss encounters
+
+---
+
+2. High-Level Structure
+
+## 2.1. System View Orbital Map
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- 3D rotating globe with selectable districts
+- District nodes with status indicators (threatened/cleared/destroyed)
+- Special nodes: Weapons Satellite (Shop), relay stations, distress beacons
+- District selection and launch flow
+- Threat indicators with pulsing urgency rings
+- District timers and state persistence
+
+❌ **Missing:**
+- Roaming enemy motherships that attack districts dynamically
+- Enemy Base node (endgame assault location)
+- Challenge Mission nodes
+- Dynamic node threats beyond timers
+- Global difficulty scaling triggered by destroyed districts
+
+## 2.2. Side-Scrolling Combat View
+
+**Status: Fully Implemented**
+
+✅ **Implemented:**
+- Horizontal wraparound combat arena
+- Wave-based enemy spawning with district defense
+- Human rescue mechanics (landers/mutants)
+- Power-up collection system
+- Mini-boss and boss encounters
+- Radar HUD mini-map
+- Procedurally generated parallax cityscape backgrounds
+
+❌ **Missing:**
+- Dynamic weather effects
+- Day-night cycle affecting visibility
+- Destroyable building interactions
+- Mid-ground traffic/civilians layers
+
+## 2.3. Meta Progression
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- District clearing tracking
+- Meta progression scaffolding (credits, unlocks, loadouts)
+- Persistent storage and run history
+- Failed defense consequences (district destruction states)
+
+❌ **Missing:**
+- Enemy base unlock system (50+ districts requirement)
+- Progressive difficulty increase from failed defenses
+- Campaign-wide progression gates
+- Perfect run tracking and special rewards
+
+---
+
+3. Gameplay Overview
+
+## 3.1 Core Loop
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- System map district selection
+- Combat missions with ship combat and wave defense
+- Human rescue during missions
+- Shop/upgrade system between missions
+
+❌ **Missing:**
+- Comrade deposit system for currency/buffs
+- Safe zones for depositing rescued operatives
+- Operative-based progression mechanics
+- Clear path to enemy base unlock
+
+---
+
+4. Player Mechanics
+
+## 4.1. Ship Forms & Movement
+
+### 4.1.1. Normal Fighter Form
+
+**Status: Fully Implemented**
+
+✅ **Implemented:**
+- 8-directional movement with inertia
+- Forward blaster matching facing direction
+- Smart Bomb (screen-clearing attack)
+- Hyperspace (emergency teleport)
+
+### 4.1.2. Guardian Form
+
+**Status: Fully Implemented**
+
+✅ **Implemented:**
+- Toggle activation between forms
+- Drastically slowed movement in guardian mode
+- 360° mouse/controller aim
+- Higher DPS special shot types
+
+## 4.2. Ground Combat & Operative System
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- Ship destruction triggers ejection sequence
+- Pilot lands on foot near crash site
+- Basic on-foot movement with gravity and jumping
+- Re-entry to rebuilt ship after extraction
+
+❌ **Missing:**
+- Distinct ground weapon loadout (pistol/rifle/grenades/improvised)
+- Cover system using debris/buildings
+- Rescued comrade squad formation
+- Operative AI (auto-fire, special roles)
+- Turret Operative, Medic, Engineer role variants
+- Environmental weapon pickups
+
+### 4.2.2. Rebuilding/Extraction
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- Rescue dropship extraction encounter
+- Ship rebuild on successful extraction
+- Mini-boss fight to secure extraction
+
+❌ **Missing:**
+- Rebuild Station as alternative option
+- Alien tech collection mechanic
+- Risk/reward upgrade path for rebuild stations
+
+### 4.2.3. Comrade Rescue & Mutation Risk
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- Touch-based human rescue
+- Landers abduct and mutate humans into mutants
+- Score rewards for rescues
+- Mutant enemies as threats
+
+❌ **Missing:**
+- Carried comrades firing as gun pods
+- Safe zone deposit mechanics
+- Temporary buffs from deposited comrades
+- Shield recharge from deposits
+- Mutant reconversion system (rescue mutated comrades)
+- Bonus points for risky reconversion attempts
+
+## 4.3. Power-Up & Weapon System
+
+### 4.3.1. Power Sources
+
+**Status: Fully Implemented**
+
+✅ **Implemented:**
+- Airborne power capsules dropped by enemies
+- Surface item pickups (fly low to collect)
+
+### 4.3.2. Upgrade Paths
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- Laser tiers: Single → Twin → Spread → Wave Beam
+- Drones (basic implementation)
+- Shield system
+- Homing Missiles
+- Overdrive mode
+- Additional modifiers: rear/side/rapid/multi/piercing/speed/magnet/double/invincibility/timeSlow
+
+❌ **Missing:**
+- Force Drone progression (Front → Orbit → Detached modes)
+- Shield upgrade path (Ablative segments → Timed invulnerability tiers)
+- Homing Missile tiers (Basic → Swarms → Guided Barrage)
+- Overdrive tiers (+Duration → +Damage → Screen-Filling Chaos)
+
+### 4.3.3. Combo Examples
+
+**Status: Not Implemented**
+
+❌ **Missing:**
+- Force Drone + Spread Laser synergy (rotating projectile ring)
+- Afterburner + Shield "Ram Mode" combo
+- Homing Missiles + Overdrive apocalypse swarm
+- Other documented combo effects
+
+---
+
+5. Environment Design
+
+## 5.1. Parallax Cityscape
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- Procedurally generated parallax background layers
+- Basic cityscape visuals
+
+❌ **Missing:**
+- Destroyable buildings in foreground
+- Hidden pickups in environment
+- Mid-ground traffic and civilians
+- Flying cars layer
+- Background megastructures
+- Dynamic weather effects
+- Day/night cycle sky layer
+
+## 5.2. District Themes
+
+**Status: Not Implemented**
+
+❌ **Missing:**
+- Downtown Core (narrow corridors, turret-optimized)
+- Industrial Zone (crushing machinery, toxic spills)
+- Residential Sector (high comrade density, hostages)
+- Dockyards (water enemies, cranes)
+- Orbital Platform (low gravity, rotating platforms)
+- District-specific hazards and gameplay features
+
+---
+
+6. System Map & Meta Layer
+
+## 6.1. System Map Mechanics
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- District threat states (flashing/threatened)
+- District destruction tracking
+- Weapons Satellite shop node
+- Meta currency system
+- Permanent upgrade purchases
+
+❌ **Missing:**
+- Roaming mothership entities on map
+- Dynamic district attacks from motherships
+- Global difficulty spike from ignored districts
+- Synergy items in shop (e.g., tether beam for Turret Mode)
+- Challenge mission selection
+
+## 6.2. Enemy Base Assault
+
+**Status: Not Implemented**
+
+❌ **Missing:**
+- Enemy base node on system map
+- Multi-phase base assault levels
+- Exterior defense ring phase
+- Interior corridor phase with traps
+- Core boss fight
+- Victory condition and campaign end
+- Perfect Run tracking (save all districts)
+- Special ending for perfect runs
+
+---
+
+7. Enemy Design
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- Landers (abduct humans, create mutants)
+- Mutants (fast enemies)
+- Bombers (bomb patterns)
+- Swarmers (overwhelming numbers)
+- Drones
+- Multiple boss archetypes with behaviors
+
+❌ **Missing:**
+- Mutants hijacking vehicles/turrets
+- Motherships as mini-bosses on system map
+- Cyber-Mutants (blink/teleport, hybrid tech)
+- Kaiju Units (multi-limb bosses with destructible limbs)
+- Full enemy behavior roster from design doc
+
+---
+
+8. Game Systems
+
+## 8.1. Radar / HUD
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- Mini-radar showing player, enemies, humans, pickups
+- System map flashing districts for threats
+- Core HUD elements (score, wave count, timer, bombs, lives)
+- Power-up status readout
+
+❌ **Missing:**
+- Off-screen priority target arrows in combat view
+- Enhanced threat indicators for priority enemies
+
+## 8.2. Scoring & Rewards
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- Points for enemy kills
+- Points for human rescues
+- Score display and tracking
+- Currency conversion (meta credits)
+
+❌ **Missing:**
+- Points for comrade survival
+- Mutant reconversion bonus points
+- No-death run bonuses
+- Cosmetic unlocks
+- Challenge unlocks
+
+---
+
+9. Progression & Modes
+
+## 9.1. Core Mode: Arcade Campaign
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- District-based mission structure
+- District destruction consequences
+- Run-to-run variation
+
+❌ **Missing:**
+- Full 50+ district campaign structure
+- Complete risk/reward shaping across entire run
+- Campaign progression gates
+
+## 9.2. Mission Mode
+
+**Status: Not Implemented**
+
+❌ **Missing:**
+- Handcrafted scenario missions
+- "Hold Sector X for 5 minutes" missions
+- Escort VIP transport missions
+- Custom mission objectives
+
+## 9.3. Boss Rush
+
+**Status: Not Implemented**
+
+❌ **Missing:**
+- Sequential boss fight mode
+- All district bosses + base boss sequence
+
+## 9.4. Daily/Weekly Challenges
+
+**Status: Not Implemented**
+
+❌ **Missing:**
+- Challenge system
+- Mutators (double speed, turret-only, limited weapons, etc.)
+- Rotating challenge schedules
+
+---
+
+10. Difficulty & Replayability
+
+**Status: Partially Implemented**
+
+✅ **Implemented:**
+- Basic difficulty scaling through waves
+- Meta progression unlocks
+- Persistent loadout system
+
+❌ **Missing:**
+- Scaling based on destroyed districts
+- New ship skin unlocks
+- Permanent buffs for Perfect Runs
+- Harder base variants
+- Cosmetic progression system
+- Challenge-based unlocks
+
+---
+
+## Summary Statistics
+
+**Major Systems:**
+- Fully Complete: 3/10 (30%)
+- Partially Complete: 6/10 (60%)
+- Not Started: 1/10 (10%)
+
+**Core Features:**
+- ✅ Basic combat loop and ship mechanics
+- ✅ System map navigation and district selection
+- ✅ Human rescue and mutation system
+- ✅ Power-up and upgrade foundation
+- ⚠️ Meta progression framework (needs depth)
+- ❌ Operative squad system
+- ❌ Ground combat depth
+- ❌ Environment interactions
+- ❌ Enemy base endgame
+- ❌ Additional game modes
