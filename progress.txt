@@ -1,22 +1,30 @@
-Skyline Survivors: Implementation Progress
+# Skyline Survivors: Urban Defender - Implementation Progress
 
-1. Core Concept
+## 1. Core Concept
 
-**Status: Fully Implemented**
+**Implementation Status: 60% Complete**
 
-All core themes are present in the codebase:
+### Key Themes Progress:
+
+✅ **Implemented:**
 - Urban defense gameplay with district-based missions
 - Ship/foot combat transitions via pilot ejection system
 - Human rescue mechanics with landers and mutants
 - Escalating difficulty through wave systems and boss encounters
 
+❌ **Missing:**
+- **Defend and Reclaim**: Districts exist in three states - friendly, threatened, or enemy-occupied
+- Seamlessly transition between piloting a strike ship and fighting on foot when destroyed (basic version exists, needs depth)
+- Rescue armed ground operatives to aid in combat (rescue exists, operative squad system missing)
+- Dynamic front lines with strategic territory control
+
 ---
 
-2. High-Level Structure
+## 2. High-Level Structure
 
-## 2.1. System View Orbital Map
+### 2.1. System View Orbital Map
 
-**Status: Partially Implemented**
+**Implementation Status: 50% Complete**
 
 ✅ **Implemented:**
 - 3D rotating globe with selectable districts
@@ -30,36 +38,66 @@ All core themes are present in the codebase:
 - Orbit node timers and status readouts in the build mission panel
 
 ❌ **Missing:**
-- Enemy Base node (endgame assault location)
-- Challenge Mission node functionality (nodes are visual only)
-- Dedicated assault/occupied district state (no assault mission flow)
-- Global difficulty scaling triggered by destroyed districts
+- **City districts** displayed as nodes with three states:
+  - 🟢 **Friendly** (Secured) - No immediate action needed
+  - 🟡 **Threatened** (Under Attack) - Requires defense
+  - 🔴 **Occupied** (Enemy Controlled) - Requires assault
+- **Battleships** roam between nodes, attacking friendly districts (current "motherships" need renaming and behavior changes)
+- **Special nodes:**
+  - **Mothership** (Final Endgame Target - unlocked when all districts secured)
+  - Challenge Missions (nodes are visual only)
+- **Mechanics:**
+  - **Defensive Missions:** Select threatened districts to defend from 15 waves
+  - **Assault Missions:** Attack occupied districts to destroy enemy ground bases
+  - **Consequence System:** Ignoring threatened districts → District falls to enemy control → Becomes assault mission
+  - **Victory Condition:** Secure all districts → Unlock Mothership assault
 
-## 2.2. Side-Scrolling Combat View
+---
 
-**Status: Partially Implemented**
+### 2.2. Side-Scrolling Combat View
+
+**Implementation Status: 60% Complete**
+
+**Perspective:** ✅ Horizontal wraparound map above a cityscape
+
+#### Defense Missions (Threatened Districts)
+**Implementation Status: 70% Complete**
 
 ✅ **Implemented:**
-- Horizontal wraparound combat arena
-- Wave-based enemy spawning with district defense (classic mode)
-- Survival mode with timed boss triggers
-- Human rescue mechanics (landers/mutants)
-- Power-up collection system
+- Wave-based enemy spawning system
+- Human rescue mechanics
+- Power-up collection
 - Mini-boss and boss encounters
-- Radar HUD mini-map
-- Procedurally generated parallax cityscape backgrounds
 
 ❌ **Missing:**
-- Fixed 15-wave defense structure
-- Assault mission objectives (enemy base destruction)
-- Dynamic weather effects
-- Day-night cycle affecting visibility
-- Destroyable building interactions
-- Mid-ground traffic/civilians layers
+- Defend district from **exactly 15 waves** (current system is variable)
+- Rescue armed ground operatives (**comrades** - basic rescue exists, operative squad missing)
+- Extract after wave 15 to **secure district** (state change not implemented)
 
-## 2.3. Meta Progression
+#### Assault Missions (Occupied Districts)
+**Implementation Status: 0% Complete**
 
-**Status: Partially Implemented**
+❌ **Missing - Complete System:**
+- Destroy all enemy forces in the district
+- **Primary Objective:** Destroy the enemy ground base
+- Ground base has defensive turrets, shields, and garrison forces
+- Success: District returns to friendly control
+- Failure: Retreat and retry (district remains occupied)
+
+**Key Features:**
+✅ **Implemented:**
+- Radar HUD (Defender-style)
+- Parallax cityscape (basic version)
+
+❌ **Missing:**
+- Dynamic weather/day-night cycle
+- Mission type affects enemy composition and objectives
+
+---
+
+### 2.3. Meta Progression
+
+**Implementation Status: 40% Complete**
 
 ✅ **Implemented:**
 - District clearing tracking
@@ -68,125 +106,148 @@ All core themes are present in the codebase:
 - Failed defense consequences (district destruction states)
 
 ❌ **Missing:**
-- Enemy base unlock system (50+ districts requirement)
-- Progressive difficulty increase from failed defenses
-- Campaign-wide progression gates
-- Perfect run tracking and special rewards
+- **Planetary Control Tracker:** Visual representation of friendly vs. occupied territories
+- **Battleship Threat System:** Roaming battleships target friendly districts over time
+- **Mothership Unlock:** Only accessible when all districts are secured (none occupied)
+- **Dynamic Difficulty:** More occupied districts = stronger battleship presence
 
 ---
 
-3. Gameplay Overview
+## 3. Gameplay Overview
 
-## 3.1 Core Loop
+### 3.1 Core Loop
 
-**Status: Partially Implemented**
+**Implementation Status: 50% Complete**
 
-✅ **Implemented:**
-- System map district selection
-- Combat missions with ship combat and wave/survival modes
-- Human rescue during missions
-- Shop/upgrade system between missions
-- District timers that decay (including mothership pressure) and persist
+✅ **Implemented (Partial):**
+1. **System Map:** District selection and status viewing
+3. **Combat Mission:** Ship combat, human rescue, mission completion
+4. **Extract/Upgrade:** Return to system map, shop access, district status checks
 
 ❌ **Missing:**
-- Comrade deposit system for currency/buffs
-- Safe zones for depositing rescued operatives
-- Operative-based progression mechanics
-- Clear path to enemy base/assault unlock
+1. **System Map:** Assess planetary situation
+   - Identify **threatened districts** (defense needed) vs **occupied districts** (assault needed)
+   - Track roaming **battleships**
+
+2. **Mission Selection:**
+   - **Defense Mission:** Protect threatened district from 15 waves
+   - **Assault Mission:** Destroy enemy base in occupied district
+
+3. **Combat Mission:**
+   - If ship destroyed: Fight on foot **with rescued operatives** (operative squad missing)
+   - **Assault missions require destroying fortified ground base**
+
+5. **Campaign Progression:**
+   - Secure all districts → Unlock Mothership
+   - Assault Mothership → Victory
 
 ---
 
-4. Player Mechanics
+## 4. Player Mechanics
 
-## 4.1. Ship Forms & Movement
+### 4.1. Ship Forms & Movement
 
-### 4.1.1. Normal Fighter Form
+#### 4.1.1. Normal Fighter Form
+**Implementation Status: 100% Complete ✅**
 
-**Status: Fully Implemented**
+✅ **Fully Implemented:**
+- Movement: 8-directional, slight inertia
+- Primary Weapon: Forward blaster (direction matches facing)
+- Secondary Actions:
+  - Smart Bomb: Screen-clearing attack (limited charges)
+  - Hyperspace: Emergency teleport (risky spawn)
+
+#### 4.1.2. Guardian Form
+**Implementation Status: 100% Complete ✅**
+
+✅ **Fully Implemented:**
+- Activation: Toggle button
+- Movement: Drastically slowed
+- Aim/Fire: 360° aim (mouse/right stick)
+- Firepower: Higher DPS, special shot types
+- **Critical for Assault Missions:** Base destruction benefits from sustained fire (assault missions not yet implemented)
+
+---
+
+### 4.2. Ground Combat & Operative System
+
+**Implementation Status: 30% Complete**
+
+#### 4.2.1. Ship Destruction → Foot Combat
+**Implementation Status: 40% Complete**
 
 ✅ **Implemented:**
-- 8-directional movement with inertia
-- Forward blaster matching facing direction
-- Smart Bomb (screen-clearing attack)
-- Hyperspace (emergency teleport)
-
-### 4.1.2. Guardian Form
-
-**Status: Fully Implemented**
-
-✅ **Implemented:**
-- Toggle activation between forms
-- Drastically slowed movement in guardian mode
-- 360° mouse/controller aim
-- Higher DPS special shot types
-
-## 4.2. Ground Combat & Operative System
-
-**Status: Partially Implemented**
-
-✅ **Implemented:**
-- Ship destruction triggers ejection sequence
-- Pilot lands on foot near crash site
+- Ship destroyed → Pilot ejects and lands near crash site
 - Basic on-foot movement with gravity and jumping
 - Pilot uses the same weapon/projectile system while on foot
 - Re-entry to rebuilt ship after extraction
 
 ❌ **Missing:**
-- Distinct ground weapon loadout (pistol/rifle/grenades/improvised)
-- Cover system using debris/buildings
-- Rescued comrade squad formation
-- Operative AI (auto-fire, special roles)
-- Turret Operative, Medic, Engineer role variants
-- Environmental weapon pickups
+**Ejection Sequence:**
+- Rescue nearby comrades to form a squad
 
-### 4.2.2. Rebuilding/Extraction
+**On-Foot Mechanics:**
+- Weapons: Pistol, rifle, grenades, improvised weapons (currently uses same ship weapons)
+- Cover System: Use debris, buildings, destroyed vehicles
+- **Assault Mission Advantage:** Ground combat effective against base defenses
+- **Operative AI:**
+  - Basic Combat: Auto-fire at enemies
+  - Special Roles:
+    - Turret Operative: Man mounted guns
+    - Medic: Heal player
+    - Engineer: Repair vehicles / Sabotage enemy base systems
 
-**Status: Partially Implemented**
+#### 4.2.2. Rebuilding/Extraction
+**Implementation Status: 60% Complete**
 
 ✅ **Implemented:**
 - Rescue dropship extraction encounter
-- Ship rebuild on successful extraction
-- Mini-boss fight to secure extraction
+- Trigger mini-boss fight to secure extraction
+- Return to system map with ship rebuilt
 
 ❌ **Missing:**
-- Rebuild Station as alternative option
-- Alien tech collection mechanic
-- Risk/reward upgrade path for rebuild stations (station branch exists but is not wired in)
+**Rebuild Station (Optional):**
+- Collect alien tech to rebuild stronger ship (risk/reward)
 
-### 4.2.3. Comrade Rescue & Mutation Risk
-
-**Status: Partially Implemented**
+#### 4.2.3. Comrade Rescue & Mutation Risk
+**Implementation Status: 50% Complete**
 
 ✅ **Implemented:**
-- Touch-based human rescue
-- Landers abduct and mutate humans into mutants
+- Touch comrades to pick them up (basic rescue)
+- Landers abduct humans and mutate them
 - Score rewards for rescues
 - Mutant enemies as threats
 
 ❌ **Missing:**
-- Carried comrades firing as gun pods
-- Safe zone deposit mechanics
-- Temporary buffs from deposited comrades
-- Shield recharge from deposits
-- Mutant reconversion system (rescue mutated comrades)
-- Bonus points for risky reconversion attempts
+**Rescue Mechanics:**
+- While carried, they fire at enemies (gun pod effect)
+- Deposit at safe zones for:
+  - Score/currency
+  - Temporary buffs (e.g., shield recharge)
 
-## 4.3. Power-Up & Weapon System
+**Mutation Risk:**
+- Kill mutants for bonus points OR risk rescuing them back
+- **In Occupied Districts:** Fewer comrades available (most captured/converted)
 
-### 4.3.1. Power Sources
+---
 
-**Status: Fully Implemented**
+### 4.3. Power-Up & Weapon System
 
-✅ **Implemented:**
-- Airborne power capsules dropped by enemies
-- Surface item pickups (fly low to collect)
-
-### 4.3.2. Upgrade Paths
-
-**Status: Partially Implemented**
+#### 4.3.1. Power Sources
+**Implementation Status: 85% Complete**
 
 ✅ **Implemented:**
-- Laser tiers: Single → Spread → Wave Beam
+- Airborne Power Capsules: Dropped by enemies
+- Surface Items: Scattered on ground (fly low to collect)
+
+❌ **Missing:**
+- **Base Destruction Rewards:** Major power-ups from destroyed enemy bases
+
+#### 4.3.2. Upgrade Paths
+**Implementation Status: 60% Complete**
+
+✅ **Implemented:**
+- Laser: Single → Spread → Wave Beam
 - Drones (basic implementation)
 - Shield system
 - Homing Missiles
@@ -194,61 +255,126 @@ All core themes are present in the codebase:
 - Additional modifiers: rear/side/rapid/multi/piercing/speed/magnet/double/invincibility/timeSlow
 
 ❌ **Missing:**
-- Force Drone progression (Front → Orbit → Detached modes)
-- Shield upgrade path (Ablative segments → Timed invulnerability tiers)
-- Homing Missile tiers (Basic → Swarms → Guided Barrage)
-- Overdrive tiers (+Duration → +Damage → Screen-Filling Chaos)
 
-### 4.3.3. Combo Examples
+| System | Current Status | Design Goal |
+|--------|----------------|-------------|
+| Laser | Single → Spread → Wave | Single → **Twin** → Spread → Wave Beam |
+| Force Drone | Basic only | Front → Orbit → Detached |
+| Shield | Basic only | Ablative segments → Timed invulnerability |
+| Homing Missiles | Basic only | Basic → Swarms → Guided Barrage |
+| Overdrive | Basic only | +Duration → +Damage → Screen-Filling Chaos |
 
-**Status: Not Implemented**
+#### 4.3.3. Combo Examples
+**Implementation Status: 0% Complete**
 
 ❌ **Missing:**
-- Force Drone + Spread Laser synergy (rotating projectile ring)
-- Afterburner + Shield "Ram Mode" combo
-- Homing Missiles + Overdrive apocalypse swarm
-- Other documented combo effects
+- Force Drone + Spread Laser: Rotating projectile ring
+- **Afterburner + Shield: "Ram Mode" - crash into base defenses safely**
+- **Homing Missiles + Overdrive: Apocalypse swarm - base siege weapon**
 
 ---
 
-5. Environment Design
+## 5. Mission Types
 
-## 5.1. Parallax Cityscape
+### 5.1. Defense Missions (Threatened Districts)
 
-**Status: Partially Implemented**
+**Implementation Status: 70% Complete**
+
+✅ **Implemented:**
+- Wave-based combat system
+- Enemy spawning with increasing difficulty
+- Boss encounters at wave completion
+- Human rescue mechanics
+- Power-up drops
+
+❌ **Missing:**
+
+**Objective:** Survive 15 waves of enemies (currently variable wave count)
+
+**Structure:**
+- Waves 1-5: Light forces (scouts, drones)
+- Waves 6-10: Heavy forces (bombers, landers)
+- Waves 11-14: Elite forces (cyber-mutants, assault pods)
+- Wave 15: **Battleship** mini-boss
+
+**Success:** District remains friendly (state change not implemented)
+**Failure:** District becomes occupied (requires assault mission)
+
+**Special Features:**
+- High comrade density to rescue (not emphasized)
+- Power-up drops increase per wave (basic version exists)
+- Bonus rewards for zero civilian casualties
+
+---
+
+### 5.2. Assault Missions (Occupied Districts)
+
+**Implementation Status: 0% Complete**
+
+❌ **Missing - Complete System:**
+
+**Objective:** Destroy the enemy ground base
+
+**Structure:**
+- Heavy enemy presence throughout district
+- **Ground Base Components:**
+  - Shield Generators (must destroy to expose core)
+  - Defensive Turrets (auto-targeting)
+  - Garrison Forces (elite units defending base)
+  - Core Reactor (primary target)
+
+**Tactics:**
+- Air superiority: Destroy turrets and air defenses
+- Ground assault: Deploy on foot to sabotage systems
+- Engineers can disable shields faster
+- Base destruction triggers explosion and evacuation sequence
+
+**Success:** District returns to friendly control + major reward
+**Failure:** Forced retreat, district remains occupied
+
+**Special Features:**
+- Minimal comrade presence (most converted to mutants)
+- High-value power-ups inside base
+- Risky but rewarding infiltration opportunities
+
+---
+
+## 6. Environment Design
+
+### 6.1. Parallax Cityscape
+**Implementation Status: 40% Complete**
 
 ✅ **Implemented:**
 - Procedurally generated parallax background layers
 - Basic cityscape visuals
 
 ❌ **Missing:**
-- Destroyable buildings in foreground
-- Hidden pickups in environment
-- Mid-ground traffic and civilians
-- Flying cars layer
-- Background megastructures
-- Dynamic weather effects
-- Day/night cycle sky layer
+- Foreground: Destroyable buildings, hidden pickups
+- Mid-Ground: Traffic, civilians, flying cars
+- Background: Megastructures, dynamic weather
+- Sky Layer: Day/night cycle affecting visibility
 
-## 5.2. District Themes
+### 6.2. District Themes
 
-**Status: Not Implemented**
+**Implementation Status: 0% Complete**
 
-❌ **Missing:**
-- Downtown Core (narrow corridors, turret-optimized)
-- Industrial Zone (crushing machinery, toxic spills)
-- Residential Sector (high comrade density, hostages)
-- Dockyards (water enemies, cranes)
-- Orbital Platform (low gravity, rotating platforms)
-- District-specific hazards and gameplay features
+❌ **Missing - Complete System:**
+
+| District | Defense Features | Assault Features |
+|----------|------------------|------------------|
+| Downtown Core | Narrow corridors; ideal for Guardian Mode | Fortified skyscrapers; vertical base structures |
+| Industrial Zone | Crushing machinery, toxic spills | Factory bases with assembly line defenses |
+| Residential Sector | High comrade density; hostage situations | Underground bunker bases |
+| Dockyards | Water enemies, cranes | Naval base with water defenses |
+| Orbital Platform | Low gravity, rotating platforms | Space station base with shield layers |
 
 ---
 
-6. System Map & Meta Layer
+## 7. System Map & Meta Layer
 
-## 6.1. System Map Mechanics
+### 7.1. System Map Mechanics
 
-**Status: Partially Implemented**
+**Implementation Status: 45% Complete**
 
 ✅ **Implemented:**
 - District threat states (flashing/threatened/cleared/destroyed)
@@ -257,57 +383,107 @@ All core themes are present in the codebase:
 - Orbit nodes with timers (shop/relay/distress/mothership)
 - Meta currency system
 - Permanent upgrade purchases
-- Motherships roam the map and drain district timers during assaults
-- Urgency-based mission modifiers (spawn/reward multipliers, human counts)
+- Roaming entities (current "motherships") drain district timers during assaults
+- Urgency-based mission modifiers
 
 ❌ **Missing:**
-- Global difficulty spike from ignored districts
-- Synergy items in shop (e.g., tether beam for Turret Mode)
-- Challenge mission selection
 
-## 6.2. Enemy Base Assault
+**Dynamic Threats:**
+- **Battleships** roam the map, targeting friendly districts (need to rename current "motherships")
+- Districts under battleship attack become threatened
+- Timer countdown shows when district will fall if not defended
+- Ignoring threats → District captured → New assault mission appears
 
-**Status: Not Implemented**
+**District States:**
+- 🟢 **Friendly:** Secured, generates passive resources
+- 🟡 **Threatened:** Battleship attacking, defense mission available
+- 🔴 **Occupied:** Enemy base established, assault mission required
 
-❌ **Missing:**
-- Enemy base node on system map
-- Multi-phase base assault levels
-- Exterior defense ring phase
-- Interior corridor phase with traps
-- Core boss fight
-- Victory condition and campaign end
-- Perfect Run tracking (save all districts)
-- Special ending for perfect runs
+**Strategic Layer:**
+- Prioritize defenses vs. reclamation
+- Some districts may be more valuable (resources, strategic position)
+- Losing key districts increases battleship aggression
+
+### 7.2. Mothership Assault (Final Mission)
+
+**Implementation Status: 0% Complete**
+
+❌ **Missing - Complete System:**
+
+**Unlock Condition:** All districts must be friendly (none occupied)
+
+**Structure:**
+- **Phase 1:** Exterior defense ring (battleship gauntlet)
+- **Phase 2:** Interior corridors with traps and elite forces
+- **Phase 3:** Core boss fight (Mothership Queen/AI)
+
+**End Conditions:**
+- **Victory:** Destroy Mothership core → Campaign complete
+- **Perfect Run:** Complete campaign without losing any district → Special ending
+- **Defeat:** Retreat and continue liberating districts
 
 ---
 
-7. Enemy Design
+## 8. Enemy Design
 
-**Status: Partially Implemented**
+### 8.1. Standard Forces
+
+**Implementation Status: 90% Complete**
 
 ✅ **Implemented:**
 - Landers (abduct humans, create mutants)
 - Mutants (fast enemies)
 - Bombers (bomb patterns)
 - Swarmers (overwhelming numbers)
-- Drones
-- Additional enemies (turret, shield, shielder, seeker, spawner, kamikaze, baiter, bouncer, sniper, swarm leader, regenerator)
-- Multiple boss archetypes with behaviors
+- Drones (basic patrol)
+- Additional enemies: turret, shield, shielder, seeker, spawner, kamikaze, baiter, bouncer, sniper, swarm leader, regenerator
 
 ❌ **Missing:**
+
+| Enemy Type | Behavior | Defense/Assault |
+|------------|----------|-----------------|
+| Landers | ✅ Implemented | ❌ Should be Defense only |
+| Mutants | ✅ Implemented | ❌ Both (more in Assault) - not differentiated |
+| Bombers | ✅ Implemented | ❌ Should be Defense waves |
+| Swarmers | ✅ Implemented | ✅ Both contexts |
+| Drones | ✅ Implemented | ✅ Both contexts |
+
 - Mutants hijacking vehicles/turrets
-- Battleship-style boss encounters tied to district assaults
-- Cyber-Mutants (blink/teleport, hybrid tech)
-- Kaiju Units (multi-limb bosses with destructible limbs)
-- Full enemy behavior roster from design doc
+
+### 8.2. Elite Forces
+
+**Implementation Status: 30% Complete**
+
+✅ **Implemented:**
+- Multiple boss archetypes with behaviors
+- Current "motherships" as roaming threats
+
+❌ **Missing:**
+
+| Enemy Type | Behavior | Primary Context |
+|------------|----------|-----------------|
+| **Battleships** | Wave 15 mini-boss; roams system map | Defense missions (rename from "motherships") |
+| Cyber-Mutants | Blink/teleport, hybrid tech | Assault missions |
+| Kaiju Units | Multi-limb bosses; destroy limbs for advantage | Special events |
+| Base Defenders | Elite units protecting ground bases | Assault missions only |
+
+### 8.3. Base Defenses (Assault Only)
+
+**Implementation Status: 0% Complete**
+
+❌ **Missing - Complete System:**
+- **Turrets:** Auto-targeting defense systems
+- **Shield Generators:** Protect core reactor
+- **Garrison Forces:** Elite troops defending base perimeter
+- **Core Reactor:** Primary target, heavily armored
 
 ---
 
-8. Game Systems
+## 9. Game Systems
 
-## 8.1. Radar / HUD
+### 9.1. Radar / HUD
 
-**Status: Partially Implemented**
+**Implementation Status: 60% Complete**
 
 ✅ **Implemented:**
 - Mini-radar showing player, enemies, humans, pickups
@@ -316,34 +492,50 @@ All core themes are present in the codebase:
 - Power-up status readout
 
 ❌ **Missing:**
-- Off-screen priority target arrows in combat view
-- Enhanced threat indicators for priority enemies
 
-## 8.2. Scoring & Rewards
+**Combat View:**
+- **Mission Objective Indicator:**
+  - Defense: Wave count (X/15) - currently shows generic wave count
+  - Assault: Base health bar
+- Off-screen arrows for priority targets
 
-**Status: Partially Implemented**
+**System Map:**
+- Red districts (occupied)
+- Battleship positions and movement paths
+- District timers (countdown to fall)
+
+### 9.2. Scoring & Rewards
+
+**Implementation Status: 50% Complete**
 
 ✅ **Implemented:**
-- Points for enemy kills
-- Points for human rescues
+- Enemy kills
+- Human rescues
 - Score display and tracking
-- Wave-completion bonuses and mission completion credit rewards
+- Wave-completion bonuses
+- Mission completion credit rewards
 - Currency conversion (meta credits)
 
 ❌ **Missing:**
-- Points for comrade survival
-- Mutant reconversion bonus points
-- No-death run bonuses
-- Cosmetic unlocks
-- Challenge unlocks
+
+**Points For:**
+- Comrade rescues/**survival** (rescue implemented, survival tracking missing)
+- Mutant reconversions
+- **Base destruction** (major bonus)
+- No-death runs
+- Perfect district defense (no civilian casualties)
+
+**Currency Conversion:**
+- **District Liberation Bonus:** Major currency reward for assault victories
+- Unlocks cosmetics/challenges
 
 ---
 
-9. Progression & Modes
+## 10. Progression & Modes
 
-## 9.1. Core Mode: Arcade Campaign
+### 10.1. Core Mode: Planetary Liberation Campaign
 
-**Status: Partially Implemented**
+**Implementation Status: 40% Complete**
 
 ✅ **Implemented:**
 - District-based mission structure
@@ -352,75 +544,142 @@ All core themes are present in the codebase:
 - Wave and survival combat modes
 
 ❌ **Missing:**
-- Full 50+ district campaign structure (current map uses 5 districts)
-- Complete risk/reward shaping across entire run
-- Campaign progression gates
 
-## 9.2. Mission Mode
+**Campaign Structure:**
+- Start with 30-50% districts friendly, rest occupied
+- Battleships begin attacking friendly districts
+- Goal: Secure all districts → Unlock Mothership → Destroy Mothership
 
-**Status: Not Implemented**
+**Dynamic Campaign:**
+- Player choices shape the battlefield
+- Lost defenses create new assault challenges
+- Strategic decisions affect difficulty curve
 
-❌ **Missing:**
-- Handcrafted scenario missions
-- "Hold Sector X for 5 minutes" missions
-- Escort VIP transport missions
-- Custom mission objectives
+### 10.2. Mission Mode
 
-## 9.3. Boss Rush
+**Implementation Status: 0% Complete**
 
-**Status: Not Implemented**
+❌ **Missing - Complete System:**
+- Handcrafted scenarios:
+  - Hold Sector X for 5 minutes
+  - **Assault Fortress Base in under 10 minutes**
+  - Escort VIP transports
+  - **Sabotage enemy supply lines**
 
-❌ **Missing:**
-- Sequential boss fight mode
-- All district bosses + base boss sequence
+### 10.3. Boss Rush
 
-## 9.4. Daily/Weekly Challenges
+**Implementation Status: 0% Complete**
 
-**Status: Not Implemented**
+❌ **Missing - Complete System:**
+- Sequential boss fights:
+  - All **battleship** encounters
+  - **Special assault base commanders**
+  - Final **Mothership** battle
 
-❌ **Missing:**
-- Challenge system
-- Mutators (double speed, turret-only, limited weapons, etc.)
-- Rotating challenge schedules
+### 10.4. Daily/Weekly Challenges
+
+**Implementation Status: 0% Complete**
+
+❌ **Missing - Complete System:**
+
+**Mutators:**
+- Double enemy speed
+- Only Guardian Mode allowed
+- Limited weapons
+- **"Assault Only"** - All districts start occupied
+- **"Last Stand"** - All districts threatened simultaneously
 
 ---
 
-10. Difficulty & Replayability
+## 11. Difficulty & Replayability
 
-**Status: Partially Implemented**
+**Implementation Status: 35% Complete**
 
 ✅ **Implemented:**
 - Basic difficulty scaling through waves
 - Meta progression unlocks
 - Persistent loadout system
-- District urgency scaling (spawn/reward multipliers)
+- District urgency scaling
 
 ❌ **Missing:**
-- Scaling based on destroyed districts
-- New ship skin unlocks
+
+**Scaling Systems:**
+- More occupied districts → Stronger battleship forces
+- Failed defenses → Harder assault missions
+- District liberation → Unlocks harder battleship variants
+
+**Unlocks:**
+- New ship skins
 - Permanent buffs for Perfect Runs
-- Harder base variants
-- Cosmetic progression system
-- Challenge-based unlocks
+- Harder Mothership variants
+- **Base assault equipment** (bunker busters, EMP bombs)
+
+**Meta Progression:**
+- Persistent upgrades carry between campaigns
+- Unlock starting advantages (more friendly districts)
+- Cosmetic rewards for perfect defense records
 
 ---
 
-## Summary Statistics
+## 12. Key Design Changes Summary
 
-**Major Systems:**
-- Fully Complete: 1/10 (10%)
-- Partially Complete: 9/10 (90%)
-- Not Started: 0/10 (0%)
+### Previous System vs. New System
 
-**Core Features:**
-- ✅ Basic combat loop and ship mechanics
-- ✅ System map navigation and district selection
-- ✅ Human rescue and mutation system
-- ✅ Power-up and upgrade foundation
-- ✅ Mothership-driven district pressure on the system map
-- ⚠️ Meta progression framework (needs depth)
-- ❌ Operative squad system
-- ❌ Ground combat depth
-- ❌ Environment interactions
-- ❌ Enemy base endgame
-- ❌ Additional game modes
+**Previous System:**
+✅ Districts only defended from attacks (partially implemented)
+❌ Single "enemy base" endgame (not implemented)
+✅ Motherships were mini-bosses (implemented but need redesign)
+
+**New System:**
+❌ **Districts have three states:** Friendly, Threatened, Occupied (not implemented)
+❌ **Two mission types:**
+  - **Defense:** 15 waves (current system has variable waves)
+  - **Assault:** Destroy enemy ground base (not implemented)
+❌ **Battleships** are mini-bosses that attack districts (need to rename current motherships)
+❌ **Mothership** is the final boss (unlocked when all districts secured) (not implemented)
+❌ **Strategic layer:** Balance defending territory vs. reclaiming lost ground (not implemented)
+✅ **Dynamic campaign:** Player failure creates new challenges (partially implemented - districts can be destroyed)
+❌ **Clear victory path:** Secure planet → Assault Mothership → Win (not implemented)
+
+---
+
+## Implementation Priority Summary
+
+### Critical Path to MVP (Priority Order):
+
+1. ❌ **HIGH PRIORITY:** Implement district three-state system (Friendly/Threatened/Occupied)
+2. ❌ **HIGH PRIORITY:** Create assault mission type with base destruction mechanics
+3. ❌ **HIGH PRIORITY:** Rename motherships → battleships, implement as wave 15 boss
+4. ❌ **HIGH PRIORITY:** Add Mothership node (unlocked when all districts friendly)
+5. ⚠️ **MEDIUM PRIORITY:** Standardize defense missions to 15 waves
+6. ⚠️ **MEDIUM PRIORITY:** Implement district state transitions (failed defense → occupied)
+7. ⚠️ **MEDIUM PRIORITY:** Add campaign victory condition (destroy Mothership)
+8. ⚠️ **LOW PRIORITY:** District themes and environmental variations
+9. ⚠️ **LOW PRIORITY:** Additional game modes (Mission Mode, Boss Rush, Challenges)
+10. ⚠️ **LOW PRIORITY:** Enhanced ground combat and operative squad system
+
+---
+
+## Overall Completion Statistics
+
+**Core Systems:**
+- Fully Complete: 2/12 (17%) - Normal Fighter Form, Guardian Form
+- Partially Complete: 8/12 (67%)
+- Not Started: 2/12 (16%) - Assault Missions, Mothership Final Boss
+
+**Design Document Alignment:**
+- ✅ Implemented: ~45%
+- ⚠️ Partially Implemented: ~35%
+- ❌ Not Implemented: ~20%
+
+**Critical Missing Features for Design Document Compliance:**
+1. District three-state system (Friendly/Threatened/Occupied)
+2. Assault mission implementation (complete system)
+3. Battleship redesign (rename + wave 15 mini-boss behavior)
+4. Mothership final boss node and mission
+5. Strategic campaign layer and victory path
+6. Fixed 15-wave defense structure
+7. Ground base destruction mechanics
+8. Operative squad system
+9. District-specific themes and variations
+10. Additional game modes and challenges
