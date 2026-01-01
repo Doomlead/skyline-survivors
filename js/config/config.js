@@ -72,6 +72,7 @@ const gameState = {
     killsThisWave: 0,
     nextExtraLife: 10000,
     bossActive: false,
+    battleshipActive: false,
     currentBossKey: null,
     currentBossName: '',
     pendingBossWave: null,
@@ -208,6 +209,7 @@ function resetGameState() {
     pilotState.vy = 0;
 
     gameState.bossActive = false;
+    gameState.battleshipActive = false;
     gameState.currentBossKey = null;
     gameState.currentBossName = '';
     gameState.pendingBossWave = null;

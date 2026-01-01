@@ -170,7 +170,11 @@ function spawnEnemyWave(scene) {
         if (gameState.wave > waveLimit) {
             return;
         }
-        const bossWaves = [5, 10, waveLimit];
+        if (gameState.wave === waveLimit) {
+            startBattleshipEncounter(scene, { mode: 'classic', wave: gameState.wave });
+            return;
+        }
+        const bossWaves = [5, 10];
         if (bossWaves.includes(gameState.wave)) {
             startBossEncounter(scene, { mode: 'classic', wave: gameState.wave });
             return;

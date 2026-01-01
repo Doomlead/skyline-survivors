@@ -75,10 +75,10 @@
 - Human rescue mechanics
 - Power-up collection
 - Mini-boss and boss encounters
+- Wave 15: **Battleship** mini-boss encounter
 - **Mission Objective Indicator (Defense):** Wave count (X/15) displayed in HUD
 
 ❌ **Not Implemented:**
-- Wave 15: **Battleship** mini-boss (battleships exist but not as wave 15 boss)
 - Rescue armed ground operatives as **squad members** (basic rescue exists, squad system missing)
 - Extract after wave 15 to **secure district** (state change from threatened → friendly not implemented)
 - High comrade density emphasis
@@ -155,7 +155,6 @@
 3. **Combat Mission:**
    - Fight on foot **with rescued operatives** (operative squad system missing)
    - **Assault missions require destroying fortified ground base**
-   - Wave 15 battleship boss encounter
 
 4. **Campaign Progression:**
    - Assault Mothership mission → Victory
@@ -301,12 +300,12 @@
 - Wave-based combat system with increasing difficulty
 - Wave tier progression for light/heavy/elite enemy mixes
 - Boss encounters at wave completion
+- Wave 15: **Battleship** mini-boss
 - Human rescue mechanics during waves
 - Power-up drops throughout waves
 - Wave counter HUD display (X/15)
 
 ❌ **Not Implemented:**
-- Wave 15: **Battleship** mini-boss - *battleships exist but not as wave 15 boss*
 - **Success state:** District remains friendly (state change from threatened → friendly not implemented)
 - **Failure state:** District becomes occupied, requires assault mission (not implemented)
 - **Special Features:**
@@ -483,7 +482,7 @@
 
 | Enemy Type | Behavior | Primary Context | Status |
 |------------|----------|-----------------|--------|
-| **Battleships** | Wave 15 mini-boss; roams system map | Defense missions | Roaming implemented, Wave 15 boss missing |
+| **Battleships** | Wave 15 mini-boss; roams system map | Defense missions | ✅ Wave 15 boss implemented; roaming implemented |
 | **Cyber-Mutants** | Blink/teleport, hybrid tech | Assault missions | Not implemented |
 | **Kaiju Units** | Multi-limb bosses; destroy limbs for advantage | Special events | Not implemented |
 | **Base Defenders** | Elite units protecting ground bases | Assault missions only | Not implemented |
@@ -645,7 +644,7 @@
 | **Districts - Three States** | Friendly, Threatened, Occupied | ✅ **Fully Implemented** |
 | **Mission Types - Defense** | 15 waves with tier progression | ⚠️ **Partially Implemented** (15 waves ✅, tier progression ❌) |
 | **Mission Types - Assault** | Destroy enemy ground base | ❌ **Not Implemented** |
-| **Battleships** | Mini-bosses that attack districts | ⚠️ **Partially Implemented** (roaming ✅, wave 15 boss ❌) |
+| **Battleships** | Mini-bosses that attack districts | ✅ **Fully Implemented** (roaming ✅, wave 15 boss ✅) |
 | **Mothership** | Final boss unlocked when all districts secured | ⚠️ **Partially Implemented** (unlock ✅, mission ❌) |
 | **Strategic Layer** | Balance defending vs. reclaiming | ❌ **Not Implemented** |
 | **Dynamic Campaign** | Player failure creates challenges | ⚠️ **Partially Implemented** (districts can be occupied, but no assault mission flow) |
@@ -661,7 +660,7 @@
 |----------|---------|--------|-------|
 | 1 | ✅ District three-state system | **COMPLETE** | Friendly/Threatened/Occupied fully functional |
 | 2 | ❌ Assault mission type | **NOT STARTED** | Base destruction mechanics needed |
-| 3 | ⚠️ Battleships as wave 15 boss | **PARTIAL** | Exist as roaming threats, need wave 15 integration |
+| 3 | ✅ Battleships as wave 15 boss | **COMPLETE** | Battleships now spawn as the wave 15 boss |
 | 4 | ⚠️ Mothership node unlock | **PARTIAL** | Unlock condition works, mission missing |
 | 5 | ✅ Defense mission tier progression | **COMPLETE** | Light/heavy/elite wave mix implemented |
 | 6 | ❌ District state transitions | **NOT STARTED** | Failed defense → occupied, successful assault → friendly |
@@ -692,7 +691,7 @@
 5. ✅ Wave counter HUD implemented
 
 **Immediate Next Steps (Recommended Order):**
-1. **Add battleship as wave 15 boss encounter**
+1. ✅ **Add battleship as wave 15 boss encounter**
 2. **Create assault mission type framework** (base destruction objectives)
 3. **Implement district state transitions** (threatened → friendly on defense success)
 4. **Build Mothership final assault mission** (3-phase boss fight)
@@ -705,10 +704,9 @@
 
 **Critical Missing Features for Design Document Compliance:**
 1. Assault mission implementation (complete system)
-2. Battleship redesign (wave 15 mini-boss behavior missing; rename complete)
-3. Mothership final boss mission
-4. Strategic campaign layer and victory path
-5. Ground base destruction mechanics
-6. Operative squad system
-7. District-specific themes and variations
-8. Additional game modes and challenges
+2. Mothership final boss mission
+3. Strategic campaign layer and victory path
+4. Ground base destruction mechanics
+5. Operative squad system
+6. District-specific themes and variations
+7. Additional game modes and challenges

@@ -114,6 +114,10 @@ const BATTLESHIP_SHOT_CONFIGS = {
     }
 };
 
+function getRandomBattleshipType() {
+    return Phaser.Utils.Array.GetRandom(BATTLESHIP_TYPES);
+}
+
 function getBattleshipHP(type) {
     const baseHP = BATTLESHIP_HP_VALUES[type] || 18;
     return Math.round(baseHP * BATTLESHIP_HP_MULTIPLIER);
@@ -276,6 +280,95 @@ function playerHitBattleship(playerSprite, battleship) {
     }
 }
 
+function startBattleshipEncounter(scene, triggerInfo = {}) {
+    if (gameState.battleshipActive) return null;
+
+    const battleshipType = getRandomBattleshipType();
+    if (!battleshipType) return null;
+
+    const spawnOffset = Math.random() < 0.5 ? -220 : 220;
+    const spawnX = scene.cameras.main.scrollX + CONFIG.width / 2 + spawnOffset;
+    const spawnY = CONFIG.height / 2;
+
+    gameState.battleshipActive = true;
+    gameState.currentBossKey = `battleship-${battleshipType}`;
+    gameState.currentBossName = `battleship-${battleshipType}`;
+
+    const warning = scene.add.text(
+        CONFIG.width / 2,
+        CONFIG.height / 2,
+        `WARNING!\nBATTLESHIP INBOUND`,
+        {
+            fontSize: '32px',
+            fontFamily: 'Orbitron',
+            color: '#ff6b6b',
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 4
+        }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(210);
+
+    scene.tweens.add({
+        targets: warning,
+        alpha: 0,
+        y: CONFIG.height / 2 - 40,
+        duration: 2500,
+        onComplete: () => warning.destroy()
+    });
+
+    if (triggerInfo.mode === 'classic' && triggerInfo.wave) {
+        gameState.classicBossFlags[triggerInfo.wave] = true;
+    }
+
+    return spawnBattleship(scene, battleshipType, spawnX, spawnY);
+}
+
+function completeBattleshipWave(scene) {
+    const audioManager = scene.audioManager;
+    const completedWave = gameState.wave;
+    const battleReward = getMissionScaledReward(3500);
+    gameState.score += battleReward;
+    if (audioManager) audioManager.playSound('waveComplete');
+
+    const battleText = scene.add.text(
+        CONFIG.width / 2,
+        CONFIG.height / 2,
+        `BATTLESHIP DESTROYED!\nWAVE ${completedWave} COMPLETE!\nBonus: ${battleReward} points`,
+        {
+            fontSize: '32px',
+            fontFamily: 'Orbitron',
+            color: '#00ff88',
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 4
+        }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(200);
+
+    scene.tweens.add({
+        targets: battleText,
+        alpha: 0,
+        y: CONFIG.height / 2 - 80,
+        duration: 3000,
+        onComplete: () => battleText.destroy()
+    });
+
+    const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
+    if (gameState.mode === 'classic' && completedWave >= waveLimit) {
+        scene.time.delayedCall(1000, () => {
+            winGame(scene);
+        });
+        return;
+    }
+
+    gameState.wave++;
+    gameState.killsThisWave = 0;
+    gameState.enemiesToKillThisWave = 20 + (gameState.wave - 1) * 5;
+
+    scene.time.delayedCall(3000, () => {
+        spawnEnemyWave(scene);
+    });
+}
+
 function destroyBattleship(scene, battleship) {
     const { battleships } = scene;
     if (!battleships) return;
@@ -313,6 +406,20 @@ function destroyBattleship(scene, battleship) {
 
     spawnPowerUp(scene, battleship.x, battleship.y);
     battleship.destroy();
+
+    if (battleships.countActive(true) === 0) {
+        gameState.battleshipActive = false;
+        if (gameState.currentBossKey && gameState.currentBossKey.startsWith('battleship')) {
+            gameState.currentBossKey = null;
+            gameState.currentBossName = '';
+        }
+    }
+
+    if (gameState.mode === 'classic'
+        && battleships.countActive(true) === 0
+        && scene.enemies?.countActive(true) === 0) {
+        completeBattleshipWave(scene);
+    }
 }
 
 if (typeof module !== 'undefined') {
