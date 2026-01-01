@@ -94,7 +94,7 @@
         }
     ];
 
-    const MOTHERSHIP_CONFIG = {
+    const BATTLESHIP_CONFIG = {
         count: 2,
         travelTime: 26,
         assaultTime: 18,
@@ -103,7 +103,7 @@
 
     let mission = null;
     let districtState = null;
-    let mothershipState = null;
+    let battleshipState = null;
     const mapState = { nodes: {}, hasTimerData: false };
 
     function getDefaultDistrictState(config) {
@@ -237,39 +237,39 @@
         return Phaser.Utils.Array.GetRandom(pickFrom).id;
     }
 
-    function ensureMothershipState() {
-        if (mothershipState) return mothershipState;
-        mothershipState = Array.from({ length: MOTHERSHIP_CONFIG.count }).map((_, index) => {
+    function ensureBattleshipState() {
+        if (battleshipState) return battleshipState;
+        battleshipState = Array.from({ length: BATTLESHIP_CONFIG.count }).map((_, index) => {
             const fromId = pickRandomDistrictId();
             const toId = pickRandomDistrictId(fromId);
             return {
-                id: `mothership-${index + 1}`,
+                id: `battleship-${index + 1}`,
                 phase: 'travel',
                 fromId,
                 toId,
-                timer: MOTHERSHIP_CONFIG.travelTime,
+                timer: BATTLESHIP_CONFIG.travelTime,
                 lat: 0,
                 lon: 0
             };
         });
-        return mothershipState;
+        return battleshipState;
     }
 
     function lerpValue(start, end, t) {
         return start + (end - start) * t;
     }
 
-    function tickMotherships(seconds = 0) {
-        if (seconds <= 0) return ensureMothershipState();
+    function tickBattleships(seconds = 0) {
+        if (seconds <= 0) return ensureBattleshipState();
         const state = safeLoadState();
-        const ships = ensureMothershipState();
+        const ships = ensureBattleshipState();
         const attackedDistrictIds = new Set();
         let mutated = false;
 
         ships.forEach(ship => {
             if (ship.phase === 'travel') {
                 ship.timer -= seconds;
-                const progress = Phaser.Math.Clamp(1 - ship.timer / MOTHERSHIP_CONFIG.travelTime, 0, 1);
+                const progress = Phaser.Math.Clamp(1 - ship.timer / BATTLESHIP_CONFIG.travelTime, 0, 1);
                 const fromConfig = getDistrictConfigById(ship.fromId);
                 const toConfig = getDistrictConfigById(ship.toId);
                 const fromCenter = getDistrictCenter(fromConfig);
@@ -278,7 +278,7 @@
                 ship.lon = lerpValue(fromCenter.lon, toCenter.lon, progress);
                 if (ship.timer <= 0) {
                     ship.phase = 'assault';
-                    ship.timer = MOTHERSHIP_CONFIG.assaultTime;
+                    ship.timer = BATTLESHIP_CONFIG.assaultTime;
                     ship.fromId = ship.toId;
                 }
             } else if (ship.phase === 'assault') {
@@ -296,7 +296,7 @@
                         targetState.status = 'threatened';
                         targetState.timer = targetConfig?.timer || targetState.timer;
                     }
-                    const drain = seconds * MOTHERSHIP_CONFIG.assaultDrain;
+                    const drain = seconds * BATTLESHIP_CONFIG.assaultDrain;
                     const nextTimer = Math.max(0, targetState.timer - drain);
                     if (nextTimer !== targetState.timer) {
                         targetState.timer = nextTimer;
@@ -311,7 +311,7 @@
                 if (ship.timer <= 0) {
                     ship.phase = 'travel';
                     ship.toId = pickRandomDistrictId(ship.fromId);
-                    ship.timer = MOTHERSHIP_CONFIG.travelTime;
+                    ship.timer = BATTLESHIP_CONFIG.travelTime;
                 }
             }
         });
@@ -332,8 +332,8 @@
         return ships;
     }
 
-    function getMotherships() {
-        return ensureMothershipState();
+    function getBattleships() {
+        return ensureBattleshipState();
     }
 
     function selectDistrict(name, longitudeOverride = null, providedState = null) {
@@ -543,7 +543,7 @@
         getMapState,
         hasMapTimerData,
         setMapTimerDataAvailable,
-        tickMotherships,
-        getMotherships
+        tickBattleships,
+        getBattleships
     };
 })();

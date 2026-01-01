@@ -44,7 +44,7 @@ class BuildMapView {
         this.atmosphereGraphics = null;
         this.districtGraphics = null;
         this.markerGraphics = null;
-        this.mothershipMarkers = [];
+        this.battleshipMarkers = [];
         
         this._isBuilt = false;
     }
@@ -91,7 +91,7 @@ class BuildMapView {
         ]);
 
         this.initializeDistricts();
-        this.createMothershipMarkers();
+        this.createBattleshipMarkers();
         this.createOrbitNodes(); 
         this.setupGlobeInput();
         this.renderGlobe();
@@ -125,8 +125,8 @@ class BuildMapView {
         this.mapNodes = [];
         this.districts = [];
         this.selectedDistrict = null;
-        this.mothershipMarkers.forEach(marker => marker.destroy());
-        this.mothershipMarkers = [];
+        this.battleshipMarkers.forEach(marker => marker.destroy());
+        this.battleshipMarkers = [];
         if (this.planetContainer) {
             this.planetContainer.destroy(true);
             this.planetContainer = null;
@@ -426,11 +426,11 @@ class BuildMapView {
         });
     }
 
-    createMothershipMarkers() {
+    createBattleshipMarkers() {
         if (typeof missionPlanner === 'undefined' || !this.planetContainer) return;
-        this.mothershipMarkers.forEach(marker => marker.destroy());
-        this.mothershipMarkers = [];
-        const ships = missionPlanner.getMotherships();
+        this.battleshipMarkers.forEach(marker => marker.destroy());
+        this.battleshipMarkers = [];
+        const ships = missionPlanner.getBattleships();
         ships.forEach(() => {
             const hull = this.scene.add.triangle(0, 0, 0, -12, -10, 10, 10, 10, 0xf43f5e, 0.95);
             hull.setStrokeStyle(2, 0xffffff, 0.9);
@@ -445,7 +445,7 @@ class BuildMapView {
                 repeat: -1,
                 ease: 'Sine.easeInOut'
             });
-            this.mothershipMarkers.push(hull);
+            this.battleshipMarkers.push(hull);
         });
     }
 
@@ -580,7 +580,7 @@ class BuildMapView {
         // Configuration relative to globe size
         // 1.0 = on rim, 1.5 = far out
         this.nodeConfigs = [
-            { id: 'mothership', label: 'Mothership', angle: -40, distScale: 1.6, color: 0xf472b6 },
+            { id: 'battleship', label: 'Battleship', angle: -40, distScale: 1.6, color: 0xf472b6 },
             { id: 'shop', label: 'Shop', angle: 70, distScale: 1.8, color: 0x22d3ee },
             { id: 'relay', label: 'Relay', angle: 160, distScale: 1.7, color: 0x93c5fd },
             { id: 'distress', label: 'Distress Node', angle: 240, distScale: 1.5, color: 0xfacc15 }
@@ -648,7 +648,7 @@ class BuildMapView {
         if (typeof missionPlanner === 'undefined') return mission;
         const dt = delta / 1000;
         missionPlanner.tickDistricts(dt);
-        missionPlanner.tickMotherships(dt);
+        missionPlanner.tickBattleships(dt);
         this._persistAccumulator += dt;
 
         if (this.autoRotate && !this.isDragging) {
@@ -671,9 +671,9 @@ class BuildMapView {
             node.timerText.setColor(color);
         });
 
-        const motherships = missionPlanner.getMotherships();
-        motherships.forEach((ship, index) => {
-            const marker = this.mothershipMarkers[index];
+        const battleships = missionPlanner.getBattleships();
+        battleships.forEach((ship, index) => {
+            const marker = this.battleshipMarkers[index];
             if (!marker) return;
             const projected = this.project3D(ship.lat, ship.lon);
             marker.setPosition(projected.x, projected.y);
