@@ -107,9 +107,11 @@
     const mapState = { nodes: {}, hasTimerData: false };
 
     function getDefaultDistrictState(config) {
+        const roll = Math.random();
+        const status = roll < 0.4 ? 'friendly' : 'occupied';
         return {
             id: config.id,
-            status: 'threatened',
+            status,
             timer: config.timer,
             lastOutcome: null,
             clearedRuns: 0
@@ -135,12 +137,15 @@
         DISTRICT_CONFIGS.forEach(cfg => {
             const existing = stored?.districts?.[cfg.id];
             const base = existing ? { ...existing } : getDefaultDistrictState(cfg);
-            if (base.status !== 'destroyed') {
+            if (base.status === 'threatened') {
                 base.timer = Math.max(0, base.timer - elapsed);
                 if (base.timer === 0) {
-                    base.status = 'destroyed';
+                    base.status = 'occupied';
                     base.lastOutcome = 'failed';
                 }
+            }
+            if (base.status === 'occupied') {
+                base.timer = 0;
             }
             districtState.districts[cfg.id] = base;
         });
@@ -221,7 +226,7 @@
     }
 
     function getActiveDistrictConfigs() {
-        return DISTRICT_CONFIGS.filter(cfg => getDistrictState(cfg.id).status !== 'destroyed');
+        return DISTRICT_CONFIGS.filter(cfg => getDistrictState(cfg.id).status !== 'occupied');
     }
 
     function pickRandomDistrictId(excludeId = null) {
@@ -286,16 +291,17 @@
                 ship.lon = targetCenter.lon;
                 attackedDistrictIds.add(targetId);
 
-                if (targetState && targetState.status !== 'destroyed') {
+                if (targetState && targetState.status !== 'occupied') {
+                    if (targetState.status === 'friendly') {
+                        targetState.status = 'threatened';
+                        targetState.timer = targetConfig?.timer || targetState.timer;
+                    }
                     const drain = seconds * MOTHERSHIP_CONFIG.assaultDrain;
                     const nextTimer = Math.max(0, targetState.timer - drain);
                     if (nextTimer !== targetState.timer) {
                         targetState.timer = nextTimer;
-                        if (targetState.status === 'cleared') {
-                            targetState.status = 'threatened';
-                        }
                         if (targetState.timer === 0) {
-                            targetState.status = 'destroyed';
+                            targetState.status = 'occupied';
                             targetState.lastOutcome = 'failed';
                         }
                         mutated = true;
@@ -360,7 +366,7 @@
         const state = safeLoadState();
         if (!state.districts[id]) {
             const cfg = getDistrictConfigById(id);
-            state.districts[id] = cfg ? getDefaultDistrictState(cfg) : { id, status: 'threatened', timer: 90 };
+            state.districts[id] = cfg ? getDefaultDistrictState(cfg) : { id, status: 'friendly', timer: 90 };
         }
         return state.districts[id];
     }
@@ -382,15 +388,19 @@
     function buildMissionDirectives(config, state, modeOverride = null) {
         if (!config || !state) return null;
         const timerRatio = config.timer > 0 ? Math.max(0, state.timer) / config.timer : 0;
-        const urgency = state.status === 'destroyed' ? 'collapse' : timerRatio < 0.35 ? 'critical' : 'threatened';
-        const rewardMultiplier = urgency === 'collapse' ? 1.5 : urgency === 'critical' ? 1.25 : 1;
-        const spawnMultiplier = urgency === 'collapse' ? 1.35 : urgency === 'critical' ? 1.15 : 1;
-        const humans = urgency === 'collapse' ? 20 : urgency === 'critical' ? 18 : 15;
+        const urgency = state.status === 'occupied'
+            ? 'occupied'
+            : state.status === 'friendly'
+                ? 'stable'
+                : timerRatio < 0.35 ? 'critical' : 'threatened';
+        const rewardMultiplier = urgency === 'occupied' ? 1.5 : urgency === 'critical' ? 1.25 : 1;
+        const spawnMultiplier = urgency === 'occupied' ? 1.35 : urgency === 'critical' ? 1.15 : 1;
+        const humans = urgency === 'occupied' ? 10 : urgency === 'critical' ? 18 : 15;
         const focusedTypes = [...config.threats];
-        if (urgency !== 'threatened') {
+        if (urgency !== 'threatened' && urgency !== 'stable') {
             focusedTypes.push('bomber', 'kamikaze');
         }
-        if (urgency === 'collapse') {
+        if (urgency === 'occupied') {
             focusedTypes.push('shield', 'spawner');
         }
 
@@ -418,13 +428,13 @@
         const state = safeLoadState();
         let mutated = false;
         Object.values(state.districts).forEach((entry) => {
-            if (entry.status === 'destroyed') return;
+            if (entry.status !== 'threatened') return;
             if (entry.timer > 0 && seconds > 0) {
                 entry.timer = Math.max(0, entry.timer - seconds);
                 mutated = true;
             }
-            if (entry.timer === 0 && entry.status !== 'destroyed') {
-                entry.status = 'destroyed';
+            if (entry.timer === 0 && entry.status !== 'occupied') {
+                entry.status = 'occupied';
                 mutated = true;
             }
         });
@@ -442,18 +452,14 @@
         if (!cfg) return;
 
         if (success) {
-            state.status = 'cleared';
+            state.status = 'friendly';
             state.timer = cfg.timer + 60;
             state.clearedRuns = (state.clearedRuns || 0) + 1;
             state.lastOutcome = 'cleared';
         } else {
-            state.timer = Math.max(0, state.timer - cfg.timer * 0.35);
             state.lastOutcome = 'failed';
-            if (state.timer === 0) {
-                state.status = 'destroyed';
-            } else {
-                state.status = 'threatened';
-            }
+            state.status = 'occupied';
+            state.timer = 0;
         }
 
         districtState.lastUpdated = Date.now();

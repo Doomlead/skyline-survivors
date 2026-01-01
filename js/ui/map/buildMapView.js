@@ -471,13 +471,13 @@ class BuildMapView {
             if (!projected.visible) return;
 
             const isSelected = this.selectedDistrict === district;
-            const isDestroyed = district.state.status === 'destroyed';
+            const isOccupied = district.state.status === 'occupied';
             const baseRadius = 8;
             const radius = isSelected ? baseRadius * 1.3 : baseRadius;
-            const alpha = isDestroyed ? 0.4 : 0.8;
+            const alpha = isOccupied ? 0.5 : 0.8;
 
             this.drawDistrictThreatPulse(district, projected, radius);
-            if (district.state.underAttack && !isDestroyed) {
+            if (district.state.underAttack && !isOccupied) {
                 const attackPulse = (Math.sin(this.scene.time.now / 200) + 1) / 2;
                 const attackRadius = radius * (2.1 + attackPulse * 0.6);
                 this.districtGraphics.lineStyle(2.5, 0xef4444, 0.7);

@@ -210,13 +210,13 @@ const DistrictLayoutManager = (function() {
         const container = document.getElementById('district-node-status');
         if (!container) return;
         
-        const statusLabel = district.state?.status === 'destroyed' 
-            ? '🔴 DESTROYED'
-            : district.state?.status === 'cleared'
-                ? '🟢 STABILIZED'
+        const statusLabel = district.state?.status === 'occupied'
+            ? '🔴 OCCUPIED'
+            : district.state?.status === 'friendly'
+                ? '🟢 FRIENDLY'
                 : '🟡 THREATENED';
         
-        const timerText = district.state?.timer > 0 
+        const timerText = district.state?.status === 'threatened' && district.state?.timer > 0
             ? `Destabilization in: ${formatSeconds(district.state.timer)}`
             : 'No active timer';
         
