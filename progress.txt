@@ -16,9 +16,10 @@
 ⚠️ **Partially Implemented:**
 - Seamless transition between ship and foot combat (basic version exists, needs depth)
 - Rescue armed ground operatives (rescue exists, operative squad system missing)
+- Dynamic front lines with strategic territory control (district state changes and battleship pressure exist, strategic layer missing)
 
 ❌ **Not Implemented:**
-- Dynamic front lines with strategic territory control
+- Strategic territory control layer (prioritization, district value impacts)
 
 ---
 
@@ -26,7 +27,7 @@
 
 ### 2.1. System View Orbital Map
 
-**Implementation Status: 65% Complete** ⬆️ (was 50%)
+**Implementation Status: 75% Complete** ⬆️ (was 50%)
 
 ✅ **Fully Implemented:**
 - 3D rotating globe with selectable districts
@@ -47,15 +48,15 @@
 - Orbit node timers and status readouts in the build mission panel
 - Districts under battleship attack become threatened
 - Timer countdown shows when district will fall if not defended
+- Consequence system: threatened districts can fall to occupied if ignored
+- District state transitions (win → friendly, loss → occupied)
 
 ❌ **Not Implemented:**
 - **Special nodes:**
   - Challenge Missions (nodes are visual only, not functional)
 - **Mechanics:**
-  - **Defensive Missions:** Fixed 15-wave structure with tier progression
   - **Assault Missions:** Complete implementation (base destruction objectives)
-  - **Consequence System:** Ignoring threatened districts → District falls to enemy control → Becomes assault mission
-  - **Victory Condition:** Secure all districts → Unlock Mothership assault mission
+  - **Victory Condition:** Secure all districts → Unlock Mothership assault mission (unlock messaging works; mission missing)
 
 ---
 
@@ -77,10 +78,10 @@
 - Mini-boss and boss encounters
 - Wave 15: **Battleship** mini-boss encounter
 - **Mission Objective Indicator (Defense):** Wave count (X/15) displayed in HUD
+- Extract after wave 15 to **secure district** (mission success updates district state)
 
 ❌ **Not Implemented:**
 - Rescue armed ground operatives as **squad members** (basic rescue exists, squad system missing)
-- Extract after wave 15 to **secure district** (state change from threatened → friendly not implemented)
 - High comrade density emphasis
 - Bonus rewards for zero civilian casualties
 
@@ -304,10 +305,10 @@
 - Human rescue mechanics during waves
 - Power-up drops throughout waves
 - Wave counter HUD display (X/15)
+- **Success state:** District remains friendly (state change from threatened → friendly on mission completion)
+- **Failure state:** District becomes occupied (assault mission missing)
 
 ❌ **Not Implemented:**
-- **Success state:** District remains friendly (state change from threatened → friendly not implemented)
-- **Failure state:** District becomes occupied, requires assault mission (not implemented)
 - **Special Features:**
   - Emphasized high comrade density to rescue
   - Power-up drops that increase per wave tier
@@ -401,17 +402,18 @@
 - Permanent upgrade purchases
 - Roaming battleships drain district timers during assaults
 - Urgency-based mission modifiers
+- District threat timers expiring into occupied state
+- Successful defense resets district to friendly
+- Failed defense marks district as occupied
 
 ❌ **Not Implemented:**
 - **Consequence System:**
-  - Ignoring threatened districts → District falls to enemy control (timer expires but doesn't create occupied state)
   - Failed defense → New assault mission appears
 - **Strategic Layer:**
   - Prioritization UI for defenses vs. reclamation
   - District value indicators (resources, strategic position)
   - Key district loss consequences (increased battleship aggression)
 - **District state transitions:**
-  - Successful defense → Remains friendly (threatened → friendly transition not implemented)
   - Successful assault → Returns to friendly (assault missions don't exist)
 - Global difficulty spike based on number of occupied districts
 
@@ -519,7 +521,7 @@
 - **System Map:**
   - Red highlight/badge for occupied districts (color exists, not emphasized)
   - Battleship positions and movement paths visualization
-  - District timer countdown (to fall) display
+  - District timer countdown (to fall) display on globe view (timer exists in district detail panel)
 
 ### 9.2. Scoring & Rewards
 
@@ -560,13 +562,13 @@
 - 15-wave defense combat mode
 - Battleships attacking friendly districts
 - Mothership node unlocks when all districts are friendly
+- Start with 30-50% districts friendly, rest occupied (implemented via randomized starting states)
 
 ❌ **Not Implemented:**
 - **Campaign Structure:**
-  - Start with 30-50% districts friendly, rest occupied (currently all start friendly)
   - Goal: Secure all districts → Unlock Mothership → **Destroy Mothership** (final mission missing)
 - **Dynamic Campaign:**
-  - Player choices shape the battlefield (defense failures don't create assault missions)
+  - Player choices shape the battlefield (defense failures create occupied states; assault missions missing)
   - Lost defenses create new assault challenges (assault missions don't exist)
   - Strategic decisions affect difficulty curve
 
@@ -642,7 +644,7 @@
 | Feature | Design Goal | Implementation Status |
 |---------|-------------|---------------------|
 | **Districts - Three States** | Friendly, Threatened, Occupied | ✅ **Fully Implemented** |
-| **Mission Types - Defense** | 15 waves with tier progression | ⚠️ **Partially Implemented** (15 waves ✅, tier progression ❌) |
+| **Mission Types - Defense** | 15 waves with tier progression | ✅ **Fully Implemented** |
 | **Mission Types - Assault** | Destroy enemy ground base | ❌ **Not Implemented** |
 | **Battleships** | Mini-bosses that attack districts | ✅ **Fully Implemented** (roaming ✅, wave 15 boss ✅) |
 | **Mothership** | Final boss unlocked when all districts secured | ⚠️ **Partially Implemented** (unlock ✅, mission ❌) |
@@ -663,7 +665,7 @@
 | 3 | ✅ Battleships as wave 15 boss | **COMPLETE** | Battleships now spawn as the wave 15 boss |
 | 4 | ⚠️ Mothership node unlock | **PARTIAL** | Unlock condition works, mission missing |
 | 5 | ✅ Defense mission tier progression | **COMPLETE** | Light/heavy/elite wave mix implemented |
-| 6 | ❌ District state transitions | **NOT STARTED** | Failed defense → occupied, successful assault → friendly |
+| 6 | ⚠️ District state transitions | **PARTIAL** | Defense outcomes + timers implemented; assault returns missing |
 | 7 | ❌ Campaign victory condition | **NOT STARTED** | Destroy Mothership → Win |
 | 8 | ❌ Strategic campaign layer | **NOT STARTED** | Prioritization, district values, difficulty scaling |
 | 9 | ❌ Ground combat depth | **NOT STARTED** | Operative squad system, cover mechanics |
