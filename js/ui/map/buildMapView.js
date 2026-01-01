@@ -583,7 +583,8 @@ class BuildMapView {
             { id: 'battleship', label: 'Battleship', angle: -40, distScale: 1.6, color: 0xf472b6 },
             { id: 'shop', label: 'Shop', angle: 70, distScale: 1.8, color: 0x22d3ee },
             { id: 'relay', label: 'Relay', angle: 160, distScale: 1.7, color: 0x93c5fd },
-            { id: 'distress', label: 'Distress Node', angle: 240, distScale: 1.5, color: 0xfacc15 }
+            { id: 'distress', label: 'Distress Node', angle: 240, distScale: 1.5, color: 0xfacc15 },
+            { id: 'mothership', label: 'Mothership', angle: 300, distScale: 1.95, color: 0x818cf8 }
         ];
 
         this.nodeConfigs.forEach(config => {
@@ -603,7 +604,7 @@ class BuildMapView {
 
             const nodeState = missionPlanner.ensureMapNodeState(config);
 
-            this.mapNodes.push({ id: config.id, config, node, label, timerText, pulse, connector, state: nodeState });
+            this.mapNodes.push({ id: config.id, config, node, label, timerText, pulse, connector, state: nodeState, isEnabled: true });
 
             node.setInteractive({ useHandCursor: true });
             node.on('pointerdown', () => {
@@ -661,7 +662,27 @@ class BuildMapView {
             district.state = missionPlanner.getDistrictState(district.config.id);
         });
 
+        const allFriendly = missionPlanner.areAllDistrictsFriendly?.();
         this.mapNodes.forEach(node => {
+            if (node.id !== 'mothership') return;
+            const ready = !!allFriendly;
+            node.state = { ...(node.state || {}), status: ready ? 'ready' : 'locked', timer: 0 };
+            node.timerText.setText(ready ? 'READY' : 'LOCKED');
+            node.timerText.setColor(ready ? '#a5f3fc' : '#94a3b8');
+            node.node.setAlpha(ready ? 1 : 0.35);
+            node.label.setAlpha(ready ? 1 : 0.5);
+            if (ready && !node.isEnabled) {
+                node.node.setInteractive({ useHandCursor: true });
+                node.isEnabled = true;
+            }
+            if (!ready && node.isEnabled) {
+                node.node.disableInteractive();
+                node.isEnabled = false;
+            }
+        });
+
+        this.mapNodes.forEach(node => {
+            if (node.id === 'mothership') return;
             const stored = missionPlanner.getMapNodeState(node.id) || node.state;
             node.state = stored;
             
