@@ -93,7 +93,10 @@ const gameState = {
         active: false,
         baseHp: 0,
         baseHpMax: 0,
-        spawnTimer: 0
+        spawnTimer: 0,
+        shieldsRemaining: 0,
+        shieldHitCooldown: 0,
+        turretFireTimer: 0
     },
     rebuildObjective: {
         active: false,

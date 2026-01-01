@@ -86,11 +86,13 @@
 - Bonus rewards for zero civilian casualties
 
 #### Assault Missions (Occupied Districts)
-**Implementation Status: 35% Complete** ⬆️ (was 0%)
+**Implementation Status: 50% Complete** ⬆️ (was 0%)
 
 ✅ **Implemented:**
 - Assault mission mode override for occupied districts
 - Base core objective with HP and victory condition
+- Shield generators that must be destroyed to expose the core
+- Defensive base turrets with auto-fire
 - Assault HUD objective display (base core HP)
 - Continuous defender reinforcements during assault missions
 - Successful assault clears district back to friendly state
@@ -98,10 +100,7 @@
 ❌ **Not Implemented:**
 - Destroy all enemy forces in the district
 - **Ground base components:**
-  - Shield Generators (must destroy to expose core)
-  - Defensive Turrets (auto-targeting)
   - Garrison Forces (elite units defending base)
-  - Core Reactor (primary target)
 - Failure flow for assaults beyond game-over (retreat/retry loop, mid-mission extraction)
 - Minimal comrade presence (most converted to mutants)
 - High-value power-ups inside base
@@ -326,11 +325,13 @@
 
 ### 5.2. Assault Missions (Occupied Districts)
 
-**Implementation Status: 35% Complete** ⬆️ (was 0%)
+**Implementation Status: 50% Complete** ⬆️ (was 0%)
 
 ✅ **Implemented:**
 - Assault mission mode override for occupied districts
 - Base core target with HP and mission-complete condition
+- Shield generators that gate core damage
+- Defensive base turrets that fire on the player
 - Assault reinforcement spawns during mission
 - Assault mission completion restores district to friendly
 
@@ -341,10 +342,8 @@
 **Structure:**
 - Heavy enemy presence throughout district
 - **Ground Base Components:**
-  - Shield Generators (must destroy to expose core)
-  - Defensive Turrets (auto-targeting)
   - Garrison Forces (elite units defending base)
-  - Core Reactor (primary target, heavily armored)
+  - Core Reactor phase beyond current base core
 
 **Tactics:**
 - Air superiority: Destroy turrets and air defenses
@@ -503,13 +502,15 @@
 
 ### 8.3. Base Defenses (Assault Only)
 
-**Implementation Status: 0% Complete**
+**Implementation Status: 40% Complete**
 
-❌ **Not Implemented - Complete System:**
-- **Turrets:** Auto-targeting defense systems
-- **Shield Generators:** Protect core reactor
+✅ **Implemented:**
+- **Turrets:** Auto-targeting defense systems (assault base emplacements)
+- **Shield Generators:** Protect core reactor (must destroy to expose core)
+
+❌ **Not Implemented:**
 - **Garrison Forces:** Elite troops defending base perimeter
-- **Core Reactor:** Primary target, heavily armored
+- **Core Reactor:** Primary target, heavily armored (phase beyond current base core)
 
 ---
 
@@ -720,7 +721,7 @@
 1. Assault mission implementation (complete base components + assault flow)
 2. Mothership final boss mission and campaign victory flow
 3. Strategic campaign layer (priority UI, district values, difficulty scaling)
-4. Ground base destruction mechanics (shield generators, turrets, garrison)
+4. Ground base destruction mechanics (garrison forces + core reactor phase)
 5. Operative squad system and ground combat depth
 6. District-specific themes and visual variations
 7. Additional game modes and challenge systems
