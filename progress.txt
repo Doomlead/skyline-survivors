@@ -30,6 +30,7 @@
 - 3D rotating globe with selectable districts
 - District nodes with status indicators (friendly/threatened/occupied)
 - Special nodes: Weapons Satellite (Shop), relay stations, distress beacons
+- **Mothership** orbit node (locked until all districts are friendly)
 - District selection and launch flow
 - Threat indicators with pulsing urgency rings and under-attack highlights
 - District timers and state persistence
@@ -46,7 +47,6 @@
 
 ❌ **Missing:**
 - **Special nodes:**
-  - **Mothership** (Final Endgame Target - unlocked when all districts secured)
   - Challenge Missions (nodes are visual only)
 - **Mechanics:**
   - **Defensive Missions:** Select threatened districts to defend from 15 waves
@@ -107,10 +107,10 @@
 - Persistent storage and run history
 - Failed defense consequences (district destruction states)
 - Battleship threat system: roaming battleships target friendly districts over time
+- **Mothership Unlock:** Orbit node becomes available when all districts are friendly
 
 ❌ **Missing:**
 - **Planetary Control Tracker:** Visual representation of friendly vs. occupied territories
-- **Mothership Unlock:** Only accessible when all districts are secured (none occupied)
 - **Dynamic Difficulty:** More occupied districts = stronger battleship presence
 
 ---
@@ -410,6 +410,7 @@
 ❌ **Missing - Complete System:**
 
 **Unlock Condition:** All districts must be friendly (none occupied)
+✅ **Implemented:** Unlock condition now activates the Mothership orbit node once all districts are friendly
 
 **Structure:**
 - **Phase 1:** Exterior defense ring (battleship gauntlet)
@@ -635,7 +636,7 @@
   - **Defense:** 15 waves
   - **Assault:** Destroy enemy ground base (not implemented)
 ⚠️ **Battleships** are mini-bosses that attack districts (rename complete; wave 15 behavior missing)
-❌ **Mothership** is the final boss (unlocked when all districts secured) (not implemented)
+⚠️ **Mothership** node unlock condition implemented; final assault mission remains missing
 ❌ **Strategic layer:** Balance defending territory vs. reclaiming lost ground (not implemented)
 ✅ **Dynamic campaign:** Player failure creates new challenges (partially implemented - districts can be occupied)
 ❌ **Clear victory path:** Secure planet → Assault Mothership → Win (not implemented)
@@ -649,7 +650,7 @@
 1. ❌ **HIGH PRIORITY:** Implement district three-state system (Friendly/Threatened/Occupied)
 2. ❌ **HIGH PRIORITY:** Create assault mission type with base destruction mechanics
 3. ❌ **HIGH PRIORITY:** Implement battleships as wave 15 boss (rename complete)
-4. ❌ **HIGH PRIORITY:** Add Mothership node (unlocked when all districts friendly)
+4. ✅ **HIGH PRIORITY:** Add Mothership node (unlocked when all districts friendly)
 5. ⚠️ **MEDIUM PRIORITY:** Implement district state transitions (failed defense → occupied)
 6. ⚠️ **MEDIUM PRIORITY:** Add campaign victory condition (destroy Mothership)
 7. ⚠️ **LOW PRIORITY:** District themes and environmental variations
@@ -673,7 +674,7 @@
 **Critical Missing Features for Design Document Compliance:**
 1. Assault mission implementation (complete system)
 2. Battleship redesign (wave 15 mini-boss behavior missing; rename complete)
-3. Mothership final boss node and mission
+3. Mothership final boss mission
 4. Strategic campaign layer and victory path
 5. Ground base destruction mechanics
 6. Operative squad system

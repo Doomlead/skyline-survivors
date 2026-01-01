@@ -385,6 +385,11 @@
         return DISTRICT_CONFIGS.map(cfg => ({ config: cfg, state: getDistrictState(cfg.id) }));
     }
 
+    function areAllDistrictsFriendly() {
+        const state = safeLoadState();
+        return Object.values(state.districts).every(entry => entry.status === 'friendly');
+    }
+
     function buildMissionDirectives(config, state, modeOverride = null) {
         if (!config || !state) return null;
         const timerRatio = config.timer > 0 ? Math.max(0, state.timer) / config.timer : 0;
@@ -531,6 +536,7 @@
         selectDistrict,
         getDistrictConfigs: () => DISTRICT_CONFIGS,
         getAllDistrictStates,
+        areAllDistrictsFriendly,
         getDistrictState,
         updateDistrictState,
         buildMissionDirectives,

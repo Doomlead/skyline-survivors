@@ -262,5 +262,24 @@ class BuildScene extends Phaser.Scene {
         if (id === 'shop') {
             console.log('Shop node selected');
         }
+        if (id === 'mothership') {
+            const ready = window.missionPlanner?.areAllDistrictsFriendly?.();
+            if (!ready) {
+                if (this.hintText) {
+                    this.hintText.setText('Mothership locked: secure every district to unlock final assault.');
+                    this.tweens.add({
+                        targets: this.hintText,
+                        alpha: { from: 1, to: 0.4 },
+                        duration: 200,
+                        yoyo: true,
+                        repeat: 2
+                    });
+                }
+                return;
+            }
+            if (this.hintText) {
+                this.hintText.setText('Mothership coordinates acquired. Final assault staging soon.');
+            }
+        }
     }
 }
