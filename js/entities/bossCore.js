@@ -324,16 +324,20 @@ function destroyBoss(scene, boss) {
         ? (gameState.survivalBossesDefeated || 0) + 1
         : gameState.survivalBossesDefeated;
 
-    if (bosses.countActive(true) === 0) {
-        gameState.bossActive = false;
-        gameState.currentBossKey = null;
-        gameState.currentBossName = '';
-    }
+    scene.time.delayedCall(0, () => {
+        if (bosses.countActive(true) === 0) {
+            gameState.bossActive = false;
+            gameState.currentBossKey = null;
+            gameState.currentBossName = '';
+        }
 
-    // Check if boss wave complete
-    if (gameState.mode === 'classic' && bosses.countActive(true) === 0 && enemies.countActive(true) === 0) {
-        completeBossWave(scene);
-    }
+        // Check if boss wave complete
+        if (gameState.mode === 'classic'
+            && bosses.countActive(true) === 0
+            && enemies.countActive(true) === 0) {
+            completeBossWave(scene);
+        }
+    });
 }
 
 function completeBossWave(scene) {
