@@ -11,9 +11,9 @@
 - Ship/foot combat transitions via pilot ejection system
 - Human rescue mechanics with landers and mutants
 - Escalating difficulty through wave systems and boss encounters
+- **Defend and Reclaim**: Districts exist in three states - friendly, threatened, or enemy-occupied
 
 ❌ **Missing:**
-- **Defend and Reclaim**: Districts exist in three states - friendly, threatened, or enemy-occupied
 - Seamlessly transition between piloting a strike ship and fighting on foot when destroyed (basic version exists, needs depth)
 - Rescue armed ground operatives to aid in combat (rescue exists, operative squad system missing)
 - Dynamic front lines with strategic territory control
@@ -28,7 +28,7 @@
 
 ✅ **Implemented:**
 - 3D rotating globe with selectable districts
-- District nodes with status indicators (threatened/cleared/destroyed)
+- District nodes with status indicators (friendly/threatened/occupied)
 - Special nodes: Weapons Satellite (Shop), relay stations, distress beacons
 - District selection and launch flow
 - Threat indicators with pulsing urgency rings and under-attack highlights
@@ -36,12 +36,12 @@
 - Roaming mothership markers with travel/assault phases
 - Mothership assaults drain district timers and flag districts as under attack
 - Orbit node timers and status readouts in the build mission panel
-
-❌ **Missing:**
 - **City districts** displayed as nodes with three states:
   - 🟢 **Friendly** (Secured) - No immediate action needed
   - 🟡 **Threatened** (Under Attack) - Requires defense
   - 🔴 **Occupied** (Enemy Controlled) - Requires assault
+
+❌ **Missing:**
 - **Battleships** roam between nodes, attacking friendly districts (current "motherships" need renaming and behavior changes)
 - **Special nodes:**
   - **Mothership** (Final Endgame Target - unlocked when all districts secured)
@@ -377,14 +377,15 @@
 **Implementation Status: 45% Complete**
 
 ✅ **Implemented:**
-- District threat states (flashing/threatened/cleared/destroyed)
-- District destruction tracking
+- District threat states (friendly/threatened/occupied)
+- District occupation tracking
 - Weapons Satellite shop node
 - Orbit nodes with timers (shop/relay/distress/mothership)
 - Meta currency system
 - Permanent upgrade purchases
 - Roaming entities (current "motherships") drain district timers during assaults
 - Urgency-based mission modifiers
+- 🟢 **Friendly**, 🟡 **Threatened**, 🔴 **Occupied** district status flow
 
 ❌ **Missing:**
 
@@ -393,11 +394,6 @@
 - Districts under battleship attack become threatened
 - Timer countdown shows when district will fall if not defended
 - Ignoring threats → District captured → New assault mission appears
-
-**District States:**
-- 🟢 **Friendly:** Secured, generates passive resources
-- 🟡 **Threatened:** Battleship attacking, defense mission available
-- 🔴 **Occupied:** Enemy base established, assault mission required
 
 **Strategic Layer:**
 - Prioritize defenses vs. reclamation
@@ -638,7 +634,7 @@
 ❌ **Battleships** are mini-bosses that attack districts (need to rename current motherships)
 ❌ **Mothership** is the final boss (unlocked when all districts secured) (not implemented)
 ❌ **Strategic layer:** Balance defending territory vs. reclaiming lost ground (not implemented)
-✅ **Dynamic campaign:** Player failure creates new challenges (partially implemented - districts can be destroyed)
+✅ **Dynamic campaign:** Player failure creates new challenges (partially implemented - districts can be occupied)
 ❌ **Clear victory path:** Secure planet → Assault Mothership → Win (not implemented)
 
 ---
@@ -673,13 +669,12 @@
 - ❌ Not Implemented: ~20%
 
 **Critical Missing Features for Design Document Compliance:**
-1. District three-state system (Friendly/Threatened/Occupied)
-2. Assault mission implementation (complete system)
-3. Battleship redesign (rename + wave 15 mini-boss behavior)
-4. Mothership final boss node and mission
-5. Strategic campaign layer and victory path
-6. Fixed 15-wave defense structure
-7. Ground base destruction mechanics
-8. Operative squad system
-9. District-specific themes and variations
-10. Additional game modes and challenges
+1. Assault mission implementation (complete system)
+2. Battleship redesign (rename + wave 15 mini-boss behavior)
+3. Mothership final boss node and mission
+4. Strategic campaign layer and victory path
+5. Fixed 15-wave defense structure
+6. Ground base destruction mechanics
+7. Operative squad system
+8. District-specific themes and variations
+9. Additional game modes and challenges

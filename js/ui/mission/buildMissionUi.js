@@ -290,11 +290,13 @@ class BuildMissionUi {
     refreshNodeStatusText(mapNodes, selectedDistrict) {
         if (!this.nodeStatusText) return;
         const lines = mapNodes.map(node => {
-            const statusLabel = node.state.status === 'destroyed'
-                ? 'DOWN'
-                : node.state.timer > 0
-                    ? `T-${this.scene.formatTimer(node.state.timer)}`
-                    : 'STABLE';
+            const statusLabel = node.state.status === 'occupied'
+                ? 'OCCUPIED'
+                : node.state.status === 'friendly'
+                    ? 'FRIENDLY'
+                    : node.state.timer > 0
+                        ? `T-${this.scene.formatTimer(node.state.timer)}`
+                        : 'THREATENED';
             return `${node.config.label}: ${statusLabel}`;
         });
         const district = selectedDistrict ? `${selectedDistrict.config.name}: ${selectedDistrict.state.status.toUpperCase()}` : 'No district selected';
