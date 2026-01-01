@@ -61,16 +61,16 @@
 **Perspective:** ✅ Horizontal wraparound map above a cityscape
 
 #### Defense Missions (Threatened Districts)
-**Implementation Status: 70% Complete**
+**Implementation Status: 80% Complete**
 
 ✅ **Implemented:**
 - Wave-based enemy spawning system
+- Defend districts through **exactly 15 waves**
 - Human rescue mechanics
 - Power-up collection
 - Mini-boss and boss encounters
 
 ❌ **Missing:**
-- Defend district from **exactly 15 waves** (current system is variable)
 - Rescue armed ground operatives (**comrades** - basic rescue exists, operative squad missing)
 - Extract after wave 15 to **secure district** (state change not implemented)
 
@@ -278,7 +278,7 @@
 
 ### 5.1. Defense Missions (Threatened Districts)
 
-**Implementation Status: 70% Complete**
+**Implementation Status: 80% Complete**
 
 ✅ **Implemented:**
 - Wave-based combat system
@@ -286,10 +286,9 @@
 - Boss encounters at wave completion
 - Human rescue mechanics
 - Power-up drops
+- **Objective:** Survive 15 waves of enemies
 
 ❌ **Missing:**
-
-**Objective:** Survive 15 waves of enemies (currently variable wave count)
 
 **Structure:**
 - Waves 1-5: Light forces (scouts, drones)
@@ -479,19 +478,19 @@
 
 ### 9.1. Radar / HUD
 
-**Implementation Status: 60% Complete**
+**Implementation Status: 70% Complete**
 
 ✅ **Implemented:**
 - Mini-radar showing player, enemies, humans, pickups
 - System map flashing districts for threats
 - Core HUD elements (score, wave count, timer, bombs, lives)
 - Power-up status readout
+- **Mission Objective Indicator (Defense):** Wave count (X/15)
 
 ❌ **Missing:**
 
 **Combat View:**
 - **Mission Objective Indicator:**
-  - Defense: Wave count (X/15) - currently shows generic wave count
   - Assault: Base health bar
 - Off-screen arrows for priority targets
 
@@ -629,7 +628,7 @@
 **New System:**
 ❌ **Districts have three states:** Friendly, Threatened, Occupied (not implemented)
 ❌ **Two mission types:**
-  - **Defense:** 15 waves (current system has variable waves)
+  - **Defense:** 15 waves
   - **Assault:** Destroy enemy ground base (not implemented)
 ❌ **Battleships** are mini-bosses that attack districts (need to rename current motherships)
 ❌ **Mothership** is the final boss (unlocked when all districts secured) (not implemented)
@@ -647,12 +646,11 @@
 2. ❌ **HIGH PRIORITY:** Create assault mission type with base destruction mechanics
 3. ❌ **HIGH PRIORITY:** Rename motherships → battleships, implement as wave 15 boss
 4. ❌ **HIGH PRIORITY:** Add Mothership node (unlocked when all districts friendly)
-5. ⚠️ **MEDIUM PRIORITY:** Standardize defense missions to 15 waves
-6. ⚠️ **MEDIUM PRIORITY:** Implement district state transitions (failed defense → occupied)
-7. ⚠️ **MEDIUM PRIORITY:** Add campaign victory condition (destroy Mothership)
-8. ⚠️ **LOW PRIORITY:** District themes and environmental variations
-9. ⚠️ **LOW PRIORITY:** Additional game modes (Mission Mode, Boss Rush, Challenges)
-10. ⚠️ **LOW PRIORITY:** Enhanced ground combat and operative squad system
+5. ⚠️ **MEDIUM PRIORITY:** Implement district state transitions (failed defense → occupied)
+6. ⚠️ **MEDIUM PRIORITY:** Add campaign victory condition (destroy Mothership)
+7. ⚠️ **LOW PRIORITY:** District themes and environmental variations
+8. ⚠️ **LOW PRIORITY:** Additional game modes (Mission Mode, Boss Rush, Challenges)
+9. ⚠️ **LOW PRIORITY:** Enhanced ground combat and operative squad system
 
 ---
 
@@ -673,8 +671,7 @@
 2. Battleship redesign (rename + wave 15 mini-boss behavior)
 3. Mothership final boss node and mission
 4. Strategic campaign layer and victory path
-5. Fixed 15-wave defense structure
-6. Ground base destruction mechanics
-7. Operative squad system
-8. District-specific themes and variations
-9. Additional game modes and challenges
+5. Ground base destruction mechanics
+6. Operative squad system
+7. District-specific themes and variations
+8. Additional game modes and challenges
