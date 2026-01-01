@@ -437,6 +437,9 @@ function updateEnemies(scene, time, delta) {
     const topLimit = 20;
     
     enemies.children.entries.forEach(enemy => {
+        if (!enemy || !enemy.body || !enemy.active) {
+            return;
+        }
         wrapWorldBounds(enemy);
         
         const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
