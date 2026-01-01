@@ -236,6 +236,7 @@ function createGraphics(scene) {
     createEnemyProjectileGraphics(scene);
     createOriginalEnemyGraphics(scene);
     createNewEnemyGraphics(scene);
+    createBattleshipGraphics(scene);
 
     // Boss sprites for boss waves
     createBossGraphics(scene);
