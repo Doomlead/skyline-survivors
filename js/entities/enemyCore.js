@@ -135,7 +135,11 @@ function spawnRandomEnemy(scene) {
 // active mode and wave number.
 function spawnEnemyWave(scene) {
     if (gameState.mode === 'classic') {
-        const bossWaves = [5, 10, 15];
+        const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
+        if (gameState.wave > waveLimit) {
+            return;
+        }
+        const bossWaves = [5, 10, waveLimit];
         if (bossWaves.includes(gameState.wave)) {
             startBossEncounter(scene, { mode: 'classic', wave: gameState.wave });
             return;
@@ -414,6 +418,14 @@ function completeWave(scene) {
         duration: 2000,
         onComplete: () => waveText.destroy()
     });
+
+    const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
+    if (gameState.mode === 'classic' && completedWave >= waveLimit) {
+        scene.time.delayedCall(1000, () => {
+            winGame(scene);
+        });
+        return;
+    }
 
     gameState.wave++;
     gameState.killsThisWave = 0;

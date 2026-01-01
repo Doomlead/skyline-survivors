@@ -365,7 +365,8 @@ function completeBossWave(scene) {
         onComplete: () => bossWaveText.destroy()
     });
 
-    const isFinalBossWave = completedWave >= 15;
+    const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
+    const isFinalBossWave = completedWave >= waveLimit;
 
     if (isFinalBossWave) {
         scene.time.delayedCall(1000, () => {

@@ -15,6 +15,8 @@ const CONFIG = {
     worldHeight: 500
 };
 
+const CLASSIC_WAVE_LIMIT = 15;
+
 // Player-facing settings (audio + accessibility)
 const SETTINGS_STORAGE_KEY = 'skyline_user_settings_v1';
 const userSettings = {

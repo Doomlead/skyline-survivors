@@ -46,7 +46,8 @@ function updateUI(scene) {
         waveEl.style.display = 'block';
         
         const enemiesLeft = Math.max(0, (gameState.enemiesToKillThisWave || 0) - (gameState.killsThisWave || 0));
-        waveEl.innerText = 'WAVE ' + gameState.wave + '  ENEMIES: ' + String(enemiesLeft).padStart(3, '0');
+        const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
+        waveEl.innerText = `WAVE ${gameState.wave}/${waveLimit}  ENEMIES: ${String(enemiesLeft).padStart(3, '0')}`;
     }
 
     bombsEl.innerText = gameState.smartBombs;
