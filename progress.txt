@@ -33,16 +33,18 @@
 - District selection and launch flow
 - Threat indicators with pulsing urgency rings and under-attack highlights
 - District timers and state persistence
-- Roaming mothership markers with travel/assault phases
-- Mothership assaults drain district timers and flag districts as under attack
+- Roaming battleship markers with travel/assault phases
+- Battleship assaults drain district timers and flag districts as under attack
 - Orbit node timers and status readouts in the build mission panel
 - **City districts** displayed as nodes with three states:
   - 🟢 **Friendly** (Secured) - No immediate action needed
   - 🟡 **Threatened** (Under Attack) - Requires defense
   - 🔴 **Occupied** (Enemy Controlled) - Requires assault
 
+✅ **Implemented:**
+- **Battleships** roam between nodes, attacking friendly districts
+
 ❌ **Missing:**
-- **Battleships** roam between nodes, attacking friendly districts (current "motherships" need renaming and behavior changes)
 - **Special nodes:**
   - **Mothership** (Final Endgame Target - unlocked when all districts secured)
   - Challenge Missions (nodes are visual only)
@@ -104,10 +106,10 @@
 - Meta progression scaffolding (credits, unlocks, loadouts)
 - Persistent storage and run history
 - Failed defense consequences (district destruction states)
+- Battleship threat system: roaming battleships target friendly districts over time
 
 ❌ **Missing:**
 - **Planetary Control Tracker:** Visual representation of friendly vs. occupied territories
-- **Battleship Threat System:** Roaming battleships target friendly districts over time
 - **Mothership Unlock:** Only accessible when all districts are secured (none occupied)
 - **Dynamic Difficulty:** More occupied districts = stronger battleship presence
 
@@ -379,17 +381,19 @@
 - District threat states (friendly/threatened/occupied)
 - District occupation tracking
 - Weapons Satellite shop node
-- Orbit nodes with timers (shop/relay/distress/mothership)
+- Orbit nodes with timers (shop/relay/distress/battleship)
 - Meta currency system
 - Permanent upgrade purchases
-- Roaming entities (current "motherships") drain district timers during assaults
+- Roaming battleships drain district timers during assaults
 - Urgency-based mission modifiers
 - 🟢 **Friendly**, 🟡 **Threatened**, 🔴 **Occupied** district status flow
 
-❌ **Missing:**
+✅ **Implemented:**
 
 **Dynamic Threats:**
-- **Battleships** roam the map, targeting friendly districts (need to rename current "motherships")
+- **Battleships** roam the map, targeting friendly districts
+
+❌ **Missing:**
 - Districts under battleship attack become threatened
 - Timer countdown shows when district will fall if not defended
 - Ignoring threats → District captured → New assault mission appears
@@ -451,13 +455,13 @@
 
 ✅ **Implemented:**
 - Multiple boss archetypes with behaviors
-- Current "motherships" as roaming threats
+- Battleships as roaming threats (renamed from "motherships")
 
 ❌ **Missing:**
 
 | Enemy Type | Behavior | Primary Context |
 |------------|----------|-----------------|
-| **Battleships** | Wave 15 mini-boss; roams system map | Defense missions (rename from "motherships") |
+| **Battleships** | Wave 15 mini-boss; roams system map | Defense missions |
 | Cyber-Mutants | Blink/teleport, hybrid tech | Assault missions |
 | Kaiju Units | Multi-limb bosses; destroy limbs for advantage | Special events |
 | Base Defenders | Elite units protecting ground bases | Assault missions only |
@@ -630,7 +634,7 @@
 ❌ **Two mission types:**
   - **Defense:** 15 waves
   - **Assault:** Destroy enemy ground base (not implemented)
-❌ **Battleships** are mini-bosses that attack districts (need to rename current motherships)
+⚠️ **Battleships** are mini-bosses that attack districts (rename complete; wave 15 behavior missing)
 ❌ **Mothership** is the final boss (unlocked when all districts secured) (not implemented)
 ❌ **Strategic layer:** Balance defending territory vs. reclaiming lost ground (not implemented)
 ✅ **Dynamic campaign:** Player failure creates new challenges (partially implemented - districts can be occupied)
@@ -644,7 +648,7 @@
 
 1. ❌ **HIGH PRIORITY:** Implement district three-state system (Friendly/Threatened/Occupied)
 2. ❌ **HIGH PRIORITY:** Create assault mission type with base destruction mechanics
-3. ❌ **HIGH PRIORITY:** Rename motherships → battleships, implement as wave 15 boss
+3. ❌ **HIGH PRIORITY:** Implement battleships as wave 15 boss (rename complete)
 4. ❌ **HIGH PRIORITY:** Add Mothership node (unlocked when all districts friendly)
 5. ⚠️ **MEDIUM PRIORITY:** Implement district state transitions (failed defense → occupied)
 6. ⚠️ **MEDIUM PRIORITY:** Add campaign victory condition (destroy Mothership)
@@ -668,7 +672,7 @@
 
 **Critical Missing Features for Design Document Compliance:**
 1. Assault mission implementation (complete system)
-2. Battleship redesign (rename + wave 15 mini-boss behavior)
+2. Battleship redesign (wave 15 mini-boss behavior missing; rename complete)
 3. Mothership final boss node and mission
 4. Strategic campaign layer and victory path
 5. Ground base destruction mechanics
