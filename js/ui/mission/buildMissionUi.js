@@ -313,10 +313,14 @@ class BuildMissionUi {
         const modeToUse = mission.mode || selectedMode;
         const { city, latitude, longitude, seed, directives } = mission;
         const mode = mission.mode || selectedMode;
-        const modeLabel = mode === 'survival' ? 'Survival' : 'Wave';
+        const modeLabel = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Wave';
         const directiveLabel = directives?.urgency ? `${directives.urgency.toUpperCase()} THREAT` : 'Threat mix pending';
         const rewardLabel = directives?.rewardMultiplier ? `${directives.rewardMultiplier.toFixed(2)}x rewards · ${directives.reward}` : 'Standard rewards';
-        const launchLabel = mode === 'survival' ? 'Launch Survival Run (Space)' : 'Launch Wave Run (Space)';
+        const launchLabel = mode === 'survival'
+            ? 'Launch Survival Run (Space)'
+            : mode === 'assault'
+                ? 'Launch Assault Run (Space)'
+                : 'Launch Wave Run (Space)';
 
         this.panelSummary.setText(
             `${city}\nLat ${latitude.toFixed(1)} · Lon ${longitude.toFixed(1)}\nSeed ${seed.slice(0, 6)}`
@@ -336,7 +340,7 @@ class BuildMissionUi {
         if (!btn) return;
         const hasSelection = !!selectedDistrict;
         const mode = mission?.mode || selectedMode;
-        const labelMode = mode === 'survival' ? 'Survival' : 'Wave';
+        const labelMode = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Wave';
         const districtName = selectedDistrict?.config?.name || 'mission';
         btn.disabled = !hasSelection;
         btn.textContent = hasSelection

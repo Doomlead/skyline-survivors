@@ -86,17 +86,21 @@
 - Bonus rewards for zero civilian casualties
 
 #### Assault Missions (Occupied Districts)
-**Implementation Status: 0% Complete**
+**Implementation Status: 25% Complete** ⬆️ (was 0%)
 
-❌ **Not Implemented - Complete System:**
+✅ **Implemented:**
+- Assault mission mode override for occupied districts
+- Base core objective with HP and victory condition
+- Assault HUD objective display (base core HP)
+- Continuous defender reinforcements during assault missions
+
+❌ **Not Implemented:**
 - Destroy all enemy forces in the district
-- **Primary Objective:** Destroy the enemy ground base
 - **Ground base components:**
   - Shield Generators (must destroy to expose core)
   - Defensive Turrets (auto-targeting)
   - Garrison Forces (elite units defending base)
   - Core Reactor (primary target)
-- Success: District returns to friendly control
 - Failure: Retreat and retry (district remains occupied)
 - Minimal comrade presence (most converted to mutants)
 - High-value power-ups inside base
@@ -318,7 +322,12 @@
 
 ### 5.2. Assault Missions (Occupied Districts)
 
-**Implementation Status: 0% Complete**
+**Implementation Status: 25% Complete** ⬆️ (was 0%)
+
+✅ **Implemented:**
+- Assault mission mode override for occupied districts
+- Base core target with HP and mission-complete condition
+- Assault reinforcement spawns during mission
 
 ❌ **Not Implemented - Complete Mission Type:**
 
@@ -661,7 +670,7 @@
 | Priority | Feature | Status | Notes |
 |----------|---------|--------|-------|
 | 1 | ✅ District three-state system | **COMPLETE** | Friendly/Threatened/Occupied fully functional |
-| 2 | ❌ Assault mission type | **NOT STARTED** | Base destruction mechanics needed |
+| 2 | ⚠️ Assault mission type | **PARTIAL** | Base core objective + assault mode framing implemented |
 | 3 | ✅ Battleships as wave 15 boss | **COMPLETE** | Battleships now spawn as the wave 15 boss |
 | 4 | ⚠️ Mothership node unlock | **PARTIAL** | Unlock condition works, mission missing |
 | 5 | ✅ Defense mission tier progression | **COMPLETE** | Light/heavy/elite wave mix implemented |
@@ -694,7 +703,7 @@
 
 **Immediate Next Steps (Recommended Order):**
 1. ✅ **Add battleship as wave 15 boss encounter**
-2. **Create assault mission type framework** (base destruction objectives)
+2. ✅ **Create assault mission type framework** (base destruction objectives)
 3. **Implement district state transitions** (threatened → friendly on defense success)
 4. **Build Mothership final assault mission** (3-phase boss fight)
 

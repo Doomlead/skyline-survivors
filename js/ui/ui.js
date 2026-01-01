@@ -40,6 +40,13 @@ function updateUI(scene) {
         const mins = Math.floor(t / 60000).toString().padStart(2, '0');
         const secs = Math.floor((t % 60000) / 1000).toString().padStart(2, '0');
         timerEl.innerText = `TIME: ${mins}:${secs}`;
+    } else if (gameState.mode === 'assault') {
+        timerEl.style.display = 'none';
+        waveEl.style.display = 'block';
+        const objective = gameState.assaultObjective;
+        const baseHp = objective?.baseHp ?? 0;
+        const baseMax = objective?.baseHpMax ?? 0;
+        waveEl.innerText = `BASE CORE: ${String(Math.max(0, Math.ceil(baseHp)))} / ${String(Math.max(0, Math.ceil(baseMax)))}`;
     } else {
         // Classic mode
         timerEl.style.display = 'none';
