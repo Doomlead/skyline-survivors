@@ -243,6 +243,61 @@ function createUtilityGraphics(scene) {
     baseGraphics.destroy();
 
     // ========================
+    // ASSAULT BASE SHIELD GENERATOR
+    // ========================
+    const shieldGenGraphics = scene.add.graphics();
+    const shieldGenWidth = 46;
+    const shieldGenHeight = 54;
+    const shieldGenCenterX = shieldGenWidth / 2;
+    const shieldGenCenterY = shieldGenHeight / 2;
+
+    shieldGenGraphics.fillStyle(0x0f172a, 1);
+    shieldGenGraphics.fillRoundedRect(2, 10, shieldGenWidth - 4, shieldGenHeight - 12, 8);
+
+    shieldGenGraphics.fillStyle(0x1e293b, 1);
+    shieldGenGraphics.fillRoundedRect(6, 4, shieldGenWidth - 12, 16, 6);
+
+    shieldGenGraphics.fillStyle(0x38bdf8, 0.9);
+    shieldGenGraphics.fillCircle(shieldGenCenterX, shieldGenCenterY + 8, 10);
+    shieldGenGraphics.fillStyle(0x7dd3fc, 0.8);
+    shieldGenGraphics.fillCircle(shieldGenCenterX, shieldGenCenterY + 8, 5);
+
+    shieldGenGraphics.lineStyle(2, 0x22d3ee, 0.8);
+    shieldGenGraphics.strokeCircle(shieldGenCenterX, shieldGenCenterY + 8, 14);
+
+    shieldGenGraphics.lineStyle(2, 0x94a3b8, 1);
+    shieldGenGraphics.strokeRoundedRect(2, 10, shieldGenWidth - 4, shieldGenHeight - 12, 8);
+
+    shieldGenGraphics.generateTexture('assaultShieldGen', shieldGenWidth, shieldGenHeight);
+    shieldGenGraphics.destroy();
+
+    // ========================
+    // ASSAULT BASE TURRET
+    // ========================
+    const baseTurretGraphics = scene.add.graphics();
+    const turretWidth = 48;
+    const turretHeight = 38;
+    const turretCenterX = turretWidth / 2;
+
+    baseTurretGraphics.fillStyle(0x1f2937, 1);
+    baseTurretGraphics.fillRoundedRect(2, 18, turretWidth - 4, turretHeight - 20, 6);
+
+    baseTurretGraphics.fillStyle(0x374151, 1);
+    baseTurretGraphics.fillRoundedRect(10, 8, turretWidth - 20, 16, 6);
+
+    baseTurretGraphics.fillStyle(0x0f172a, 1);
+    baseTurretGraphics.fillRect(turretCenterX - 4, 2, 8, 14);
+
+    baseTurretGraphics.fillStyle(0xf97316, 0.9);
+    baseTurretGraphics.fillCircle(turretCenterX, 14, 4);
+
+    baseTurretGraphics.lineStyle(2, 0x94a3b8, 1);
+    baseTurretGraphics.strokeRoundedRect(2, 18, turretWidth - 4, turretHeight - 20, 6);
+
+    baseTurretGraphics.generateTexture('assaultTurret', turretWidth, turretHeight);
+    baseTurretGraphics.destroy();
+
+    // ========================
     // PARTICLES & STARS
     // ========================
     const particleGraphics = scene.add.graphics();
