@@ -55,7 +55,7 @@
 - **Special nodes:**
   - Challenge Missions (nodes are visual only, not functional)
 - **Mechanics:**
-  - **Assault Missions:** Complete implementation (base destruction objectives)
+  - **Assault Missions:** Full base assault objectives and set-piece base components
   - **Victory Condition:** Secure all districts → Unlock Mothership assault mission (unlock messaging works; mission missing)
 
 ---
@@ -86,13 +86,14 @@
 - Bonus rewards for zero civilian casualties
 
 #### Assault Missions (Occupied Districts)
-**Implementation Status: 25% Complete** ⬆️ (was 0%)
+**Implementation Status: 35% Complete** ⬆️ (was 0%)
 
 ✅ **Implemented:**
 - Assault mission mode override for occupied districts
 - Base core objective with HP and victory condition
 - Assault HUD objective display (base core HP)
 - Continuous defender reinforcements during assault missions
+- Successful assault clears district back to friendly state
 
 ❌ **Not Implemented:**
 - Destroy all enemy forces in the district
@@ -101,7 +102,7 @@
   - Defensive Turrets (auto-targeting)
   - Garrison Forces (elite units defending base)
   - Core Reactor (primary target)
-- Failure: Retreat and retry (district remains occupied)
+- Failure flow for assaults beyond game-over (retreat/retry loop, mid-mission extraction)
 - Minimal comrade presence (most converted to mutants)
 - High-value power-ups inside base
 - Risky infiltration opportunities
@@ -111,9 +112,12 @@
 - Radar HUD (Defender-style)
 - Parallax cityscape (basic version)
 
+⚠️ **Partially Implemented:**
+- Mission type affects enemy composition (occupied/assault threat mix and reinforcements)
+
 ❌ **Not Implemented:**
 - Dynamic weather/day-night cycle
-- Mission type affects enemy composition and objectives
+- Mission type affects objectives beyond base-core assault framing
 
 ---
 
@@ -140,12 +144,12 @@
 
 ### 3.1 Core Loop
 
-**Implementation Status: 55% Complete** ⬆️ (was 50%)
+**Implementation Status: 60% Complete** ⬆️ (was 50%)
 
 ✅ **Implemented:**
 1. **System Map:** District selection, status viewing, battleship tracking
-2. **Mission Selection:** Can select any district (defense mission type only)
-3. **Combat Mission:** Ship combat, human rescue, 15-wave completion
+2. **Mission Selection:** Defense or assault missions selected based on district state
+3. **Combat Mission:** Ship combat, human rescue, 15-wave completion or assault base objective
 4. **Extract/Upgrade:** Return to system map, shop access, district status checks
 5. **Campaign Progression:** Mothership node unlocks when all districts friendly
 
@@ -155,11 +159,11 @@
    - Strategic priority recommendations
 
 2. **Mission Selection:**
-   - **Assault Mission:** Destroy enemy base in occupied district (complete mission type)
+   - Clear differentiation of threat/occupied consequences and assault goals in mission UI
 
 3. **Combat Mission:**
    - Fight on foot **with rescued operatives** (operative squad system missing)
-   - **Assault missions require destroying fortified ground base**
+   - **Assault missions require destroying fortified ground base components**
 
 4. **Campaign Progression:**
    - Assault Mothership mission → Victory
@@ -322,12 +326,13 @@
 
 ### 5.2. Assault Missions (Occupied Districts)
 
-**Implementation Status: 25% Complete** ⬆️ (was 0%)
+**Implementation Status: 35% Complete** ⬆️ (was 0%)
 
 ✅ **Implemented:**
 - Assault mission mode override for occupied districts
 - Base core target with HP and mission-complete condition
 - Assault reinforcement spawns during mission
+- Assault mission completion restores district to friendly
 
 ❌ **Not Implemented - Complete Mission Type:**
 
@@ -414,16 +419,14 @@
 - District threat timers expiring into occupied state
 - Successful defense resets district to friendly
 - Failed defense marks district as occupied
+- Failed defense unlocks assault mission flow (occupied districts launch assault missions)
+- Successful assault returns district to friendly state
 
 ❌ **Not Implemented:**
-- **Consequence System:**
-  - Failed defense → New assault mission appears
 - **Strategic Layer:**
   - Prioritization UI for defenses vs. reclamation
   - District value indicators (resources, strategic position)
   - Key district loss consequences (increased battleship aggression)
-- **District state transitions:**
-  - Successful assault → Returns to friendly (assault missions don't exist)
 - Global difficulty spike based on number of occupied districts
 
 ### 7.2. Mothership Assault (Final Mission)
@@ -514,7 +517,7 @@
 
 ### 9.1. Radar / HUD
 
-**Implementation Status: 75% Complete** ⬆️ (was 70%)
+**Implementation Status: 80% Complete** ⬆️ (was 70%)
 
 ✅ **Implemented:**
 - Mini-radar showing player, enemies, humans, pickups
@@ -522,10 +525,10 @@
 - Core HUD elements (score, wave count, timer, bombs, lives)
 - Power-up status readout
 - **Mission Objective Indicator (Defense):** Wave count (X/15)
+- **Mission Objective Indicator (Assault):** Base health bar
 
 ❌ **Not Implemented:**
 - **Combat View:**
-  - **Mission Objective Indicator (Assault):** Base health bar
   - Off-screen arrows for priority targets
 - **System Map:**
   - Red highlight/badge for occupied districts (color exists, not emphasized)
@@ -690,34 +693,34 @@
 - **Not Started:** 1/12 (8%) ⬇️
 
 **Design Document Alignment:**
-- ✅ **Implemented:** ~50% ⬆️ (was ~45%)
-- ⚠️ **Partially Implemented:** ~35%
-- ❌ **Not Implemented:** ~15% ⬇️ (was ~20%)
+- ✅ **Implemented:** ~53% ⬆️ (was ~45%)
+- ⚠️ **Partially Implemented:** ~34%
+- ❌ **Not Implemented:** ~13% ⬇️ (was ~20%)
 
 **Major Milestones Achieved:**
 1. ✅ District three-state system fully implemented
 2. ✅ 15-wave defense structure implemented
-3. ✅ Mothership unlock condition implemented
-4. ✅ Battleship roaming system implemented
-5. ✅ Wave counter HUD implemented
+3. ✅ Assault mission framework (base core objective + assault HUD + reinforcements)
+4. ✅ Mothership unlock condition implemented
+5. ✅ Battleship roaming system implemented
 
 **Immediate Next Steps (Recommended Order):**
-1. ✅ **Add battleship as wave 15 boss encounter**
-2. ✅ **Create assault mission type framework** (base destruction objectives)
-3. **Implement district state transitions** (threatened → friendly on defense success)
-4. **Build Mothership final assault mission** (3-phase boss fight)
+1. **Expand assault bases with components** (shield generators, turrets, garrison forces, core reactor phases)
+2. **Build Mothership final assault mission** (3-phase boss fight + victory flow)
+3. **Add strategic campaign layer** (district value indicators, priority UI, global difficulty scaling)
+4. **Implement operative squad/ground combat depth** (roles, cover, sabotage mechanics)
 
 **Estimated Remaining Work:**
-- **High Priority Features:** ~40% remaining
+- **High Priority Features:** ~35% remaining
 - **Medium Priority Features:** ~60% remaining  
 - **Low Priority Features:** ~80% remaining
-- **Overall MVP:** ~50% complete
+- **Overall MVP:** ~55% complete
 
 **Critical Missing Features for Design Document Compliance:**
-1. Assault mission implementation (complete system)
-2. Mothership final boss mission
-3. Strategic campaign layer and victory path
-4. Ground base destruction mechanics
-5. Operative squad system
-6. District-specific themes and variations
-7. Additional game modes and challenges
+1. Assault mission implementation (complete base components + assault flow)
+2. Mothership final boss mission and campaign victory flow
+3. Strategic campaign layer (priority UI, district values, difficulty scaling)
+4. Ground base destruction mechanics (shield generators, turrets, garrison)
+5. Operative squad system and ground combat depth
+6. District-specific themes and visual variations
+7. Additional game modes and challenge systems
