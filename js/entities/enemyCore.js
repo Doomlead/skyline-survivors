@@ -86,13 +86,41 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     return enemy;
 }
 
+const CLASSIC_LIGHT_ENEMIES = ['drone', 'swarmer', 'baiter', 'pod'];
+const CLASSIC_HEAVY_ENEMIES = ['lander', 'bomber', 'kamikaze', 'turret'];
+const CLASSIC_ELITE_ENEMIES = [
+    'mutant',
+    'shield',
+    'seeker',
+    'spawner',
+    'shielder',
+    'bouncer',
+    'sniper',
+    'swarmLeader',
+    'regenerator'
+];
+
+function getClassicWaveEnemyPool(wave) {
+    if (wave <= 5) {
+        return CLASSIC_LIGHT_ENEMIES;
+    }
+    if (wave <= 10) {
+        return CLASSIC_HEAVY_ENEMIES;
+    }
+    if (wave <= 14) {
+        return CLASSIC_ELITE_ENEMIES;
+    }
+    return ENEMY_TYPES;
+}
+
 // Picks an enemy type, honoring mission directive weights when provided
 // so districts can influence the composition of incoming threats.
-function getMissionWeightedEnemyType() {
+function getMissionWeightedEnemyType(allowedTypes = null) {
     const mix = gameState.missionDirectives?.threatMix;
     if (mix && mix.length > 0) {
         const bag = [];
         mix.forEach(entry => {
+            if (allowedTypes && !allowedTypes.includes(entry.type)) return;
             const weight = Math.max(1, entry.weight || 1);
             for (let i = 0; i < weight; i++) {
                 bag.push(entry.type);
@@ -102,13 +130,16 @@ function getMissionWeightedEnemyType() {
             return Phaser.Utils.Array.GetRandom(bag);
         }
     }
+    if (allowedTypes && allowedTypes.length > 0) {
+        return Phaser.Utils.Array.GetRandom(allowedTypes);
+    }
     return Phaser.Utils.Array.GetRandom(ENEMY_TYPES);
 }
 
 // Spawns an enemy at a random edge or near a human to keep pressure on the player.
-function spawnRandomEnemy(scene) {
+function spawnRandomEnemy(scene, allowedTypes = null) {
     const humans = scene.humans;
-    const type = getMissionWeightedEnemyType();
+    const type = getMissionWeightedEnemyType(allowedTypes);
     let x, y;
     
     if (Math.random() < 0.7) {
@@ -152,11 +183,12 @@ function spawnEnemyWave(scene) {
         const groupSize = 3;
         const initialDelay = 8000;
         const groupDelay = 4000;
+        const allowedTypes = getClassicWaveEnemyPool(gameState.wave);
         for (let i = 0; i < waveSize; i++) {
             const groupIndex = Math.floor(i / groupSize);
             const delay = initialDelay + groupIndex * groupDelay;
             scene.time.delayedCall(delay, () => {
-                spawnRandomEnemy(scene);
+                spawnRandomEnemy(scene, allowedTypes);
             });
         }
     } else {
