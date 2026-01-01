@@ -393,9 +393,11 @@
 **Dynamic Threats:**
 - **Battleships** roam the map, targeting friendly districts
 
-❌ **Missing:**
+✅ **Implemented:**
 - Districts under battleship attack become threatened
 - Timer countdown shows when district will fall if not defended
+
+❌ **Missing:**
 - Ignoring threats → District captured → New assault mission appears
 
 **Strategic Layer:**
@@ -631,7 +633,7 @@
 ✅ Motherships were mini-bosses (implemented but need redesign)
 
 **New System:**
-❌ **Districts have three states:** Friendly, Threatened, Occupied (not implemented)
+✅ **Districts have three states:** Friendly, Threatened, Occupied
 ❌ **Two mission types:**
   - **Defense:** 15 waves
   - **Assault:** Destroy enemy ground base (not implemented)
@@ -647,7 +649,7 @@
 
 ### Critical Path to MVP (Priority Order):
 
-1. ❌ **HIGH PRIORITY:** Implement district three-state system (Friendly/Threatened/Occupied)
+1. ✅ **HIGH PRIORITY:** Implement district three-state system (Friendly/Threatened/Occupied)
 2. ❌ **HIGH PRIORITY:** Create assault mission type with base destruction mechanics
 3. ❌ **HIGH PRIORITY:** Implement battleships as wave 15 boss (rename complete)
 4. ✅ **HIGH PRIORITY:** Add Mothership node (unlocked when all districts friendly)
