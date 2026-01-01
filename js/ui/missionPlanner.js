@@ -477,12 +477,15 @@
     }
 
     function prepareLaunchPayload(mode) {
-        const current = setMode(mode || ensureMission().mode || 'classic');
+        const requestedMode = mode || ensureMission().mode || 'classic';
+        const current = setMode(requestedMode);
         const cfg = getDistrictConfigById(current.district);
         const state = cfg ? getDistrictState(cfg.id) : null;
+        const effectiveMode = state?.status === 'occupied' ? 'assault' : current.mode;
         return {
             ...current,
-            directives: cfg ? buildMissionDirectives(cfg, state, mode) : current.directives,
+            mode: effectiveMode,
+            directives: cfg ? buildMissionDirectives(cfg, state, effectiveMode) : current.directives,
             districtState: state ? { ...state } : null,
             mapState
         };

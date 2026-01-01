@@ -8,6 +8,84 @@ let gameSceneInitialized = false;
 // Store canonical positions separately from render positions
 // This is the key to making wrap-around work properly
 
+const ASSAULT_BASE_CONFIG = {
+    baseHp: 70,
+    defenderCount: 6,
+    spawnInterval: 2200
+};
+
+function setupAssaultObjective(scene) {
+    if (!scene || !scene.assaultTargets) return;
+    const objective = gameState.assaultObjective;
+    if (!objective) return;
+
+    objective.active = true;
+    objective.spawnTimer = 0;
+    const scaledHp = Math.round(ASSAULT_BASE_CONFIG.baseHp * (gameState.spawnMultiplier || 1));
+    objective.baseHpMax = scaledHp;
+    objective.baseHp = scaledHp;
+
+    const baseX = CONFIG.worldWidth * 0.5;
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(baseX / 200) * 30;
+    const baseY = Math.max(140, groundLevel - terrainVariation - 24);
+
+    const base = scene.assaultTargets.create(baseX, baseY, 'assaultBase');
+    base.setDepth(FG_DEPTH_BASE + 1);
+    base.setImmovable(true);
+    base.body.setAllowGravity(false);
+    base.body.setVelocity(0, 0);
+    base.hp = scaledHp;
+    base.maxHp = scaledHp;
+    scene.assaultBase = base;
+
+    showRebuildObjectiveBanner(scene, 'ASSAULT OBJECTIVE: Destroy the base core', '#f97316');
+    spawnAssaultDefenders(scene, baseX);
+}
+
+function spawnAssaultDefenders(scene, baseX) {
+    const defenderTypes = ['turret', 'shield', 'spawner', 'kamikaze', 'bouncer'];
+    for (let i = 0; i < ASSAULT_BASE_CONFIG.defenderCount; i++) {
+        const type = Phaser.Utils.Array.GetRandom(defenderTypes);
+        const offsetX = Phaser.Math.Between(-260, 260);
+        const spawnX = wrapValue(baseX + offsetX, CONFIG.worldWidth);
+        const spawnY = CONFIG.worldHeight * 0.25 + Phaser.Math.Between(-40, 80);
+        spawnEnemy(scene, type, spawnX, spawnY);
+    }
+}
+
+function updateAssaultObjective(scene, delta) {
+    const objective = gameState.assaultObjective;
+    if (!objective || !objective.active) return;
+    objective.spawnTimer += delta;
+    if (objective.spawnTimer >= ASSAULT_BASE_CONFIG.spawnInterval) {
+        objective.spawnTimer = 0;
+        const assaultMix = ['mutant', 'shield', 'spawner', 'kamikaze', 'seeker', 'turret'];
+        spawnRandomEnemy(scene, assaultMix);
+    }
+}
+
+function hitAssaultTarget(projectile, target) {
+    const objective = gameState.assaultObjective;
+    if (!objective || !objective.active || !target.active) {
+        if (projectile && projectile.active) projectile.destroy();
+        return;
+    }
+    target.hp -= projectile.damage || 1;
+    objective.baseHp = Math.max(0, target.hp);
+    if (target.hp <= 0) {
+        objective.active = false;
+        objective.baseHp = 0;
+        createExplosion(this, target.x, target.y, 0xff6b35);
+        target.destroy();
+        this.assaultBase = null;
+        const baseReward = getMissionScaledReward(5000);
+        gameState.score += baseReward;
+        winGame(this);
+    }
+    if (projectile && projectile.active) projectile.destroy();
+}
+
 function initializeGame(scene) {
     for (let i = 0; i < gameState.humans; i++) {
         spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
@@ -15,7 +93,9 @@ function initializeGame(scene) {
     if (!gameState.bossQueue || gameState.bossQueue.length === 0) {
         initializeBossQueue();
     }
-    if (gameState.mode === 'survival') {
+    if (gameState.mode === 'assault') {
+        setupAssaultObjective(scene);
+    } else if (gameState.mode === 'survival') {
         gameState.timeRemaining = gameState.timeRemaining || gameState.totalSurvivalDuration;
     } else {
         gameState.wave = gameState.wave || 1;
@@ -220,21 +300,22 @@ function removeGhostSprite(scene, entity) {
 }
 
 // Main function to handle entity visibility across wrap boundaries
-function updateEntityWrapping(scene) {
-    const {
-        player,
-        veritech,
-        pilot,
-        enemies,
-        projectiles,
-        enemyProjectiles,
-        powerUps,
-        humans,
-        drones,
-        bosses,
-        battleships,
-        explosions
-    } = scene;
+    function updateEntityWrapping(scene) {
+        const {
+            player,
+            veritech,
+            pilot,
+            enemies,
+            projectiles,
+            enemyProjectiles,
+            powerUps,
+            humans,
+            drones,
+            bosses,
+            battleships,
+            explosions,
+            assaultTargets
+        } = scene;
     const mainCam = scene.cameras.main;
     const scrollX = mainCam.scrollX;
     const camWidth = mainCam.width;
@@ -307,6 +388,7 @@ function updateEntityWrapping(scene) {
     processGroup(drones);
     processGroup(bosses);
     processGroup(battleships);
+    processGroup(assaultTargets);
     
     if (explosions && explosions.children) {
         explosions.children.entries.forEach(processEntity);
@@ -377,6 +459,7 @@ function create() {
     this.explosions = this.add.group();
     this.bosses = this.physics.add.group();
     this.battleships = this.physics.add.group();
+    this.assaultTargets = this.physics.add.group();
 
     this.particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
 
@@ -421,6 +504,7 @@ function create() {
     this.physics.add.overlap(this.projectiles, this.enemies, hitEnemy, null, this);
     this.physics.add.overlap(this.projectiles, this.bosses, hitBoss, null, this);
     this.physics.add.overlap(this.projectiles, this.battleships, hitBattleship, null, this);
+    this.physics.add.overlap(this.projectiles, this.assaultTargets, hitAssaultTarget, null, this);
     this.physics.add.overlap(this.veritech, this.enemies, playerHitEnemy, null, this);
     this.physics.add.overlap(this.veritech, this.bosses, playerHitBoss, null, this);
     this.physics.add.overlap(this.veritech, this.battleships, playerHitBattleship, null, this);
@@ -470,6 +554,9 @@ function update(time, delta) {
     if (gameState.mode === 'survival') {
         gameState.timeRemaining -= delta;
         if (gameState.timeRemaining <= 0) winGame(this);
+    }
+    if (gameState.mode === 'assault') {
+        updateAssaultObjective(this, delta);
     }
 
     updatePlayer(this, time, delta);

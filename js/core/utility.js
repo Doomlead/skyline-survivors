@@ -218,13 +218,14 @@ function getScreenPosition(scene, worldX, worldY) {
 
 function startGame(mode = 'classic') {
     const missionPayload = window.missionPlanner ? missionPlanner.prepareLaunchPayload(mode) : null;
+    const effectiveMode = missionPayload?.mode || mode;
     resetGameState();
-    gameState.mode = mode;
+    gameState.mode = effectiveMode;
     applyMissionPayload(missionPayload);
     if (window.metaProgression?.applyLoadoutEffects) {
         gameState.metaAppliedLoadout = metaProgression.applyLoadoutEffects(gameState, playerState);
     }
-    if (mode === 'survival') gameState.timeRemaining = gameState.totalSurvivalDuration;
+    if (effectiveMode === 'survival') gameState.timeRemaining = gameState.totalSurvivalDuration;
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
 

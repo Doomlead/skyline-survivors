@@ -89,6 +89,12 @@ const gameState = {
     spawnMultiplier: 1,
     metaAppliedLoadout: null,
     metaRewardsGranted: false,
+    assaultObjective: {
+        active: false,
+        baseHp: 0,
+        baseHpMax: 0,
+        spawnTimer: 0
+    },
     rebuildObjective: {
         active: false,
         stage: null,
@@ -224,6 +230,12 @@ function resetGameState() {
     gameState.spawnMultiplier = 1;
     gameState.metaAppliedLoadout = null;
     gameState.metaRewardsGranted = false;
+    gameState.assaultObjective = {
+        active: false,
+        baseHp: 0,
+        baseHpMax: 0,
+        spawnTimer: 0
+    };
     gameState.rebuildObjective = {
         active: false,
         stage: null,

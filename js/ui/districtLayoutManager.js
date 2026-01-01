@@ -193,11 +193,25 @@ const DistrictLayoutManager = (function() {
         updateElement('district-urgency', directives?.urgency?.toUpperCase() || 'NORMAL');
         updateElement('district-reward-mult', (directives?.rewardMultiplier || 1).toFixed(2) + 'x');
         updateElement('district-spawn-rate', (directives?.spawnMultiplier || 1).toFixed(2) + 'x');
+
+        const isAssault = district?.state?.status === 'occupied';
+        if (isAssault && selectedMode !== 'assault') {
+            selectedMode = 'assault';
+            if (typeof missionPlanner !== 'undefined') {
+                missionPlanner.setMode('assault');
+            }
+        } else if (!isAssault && selectedMode === 'assault') {
+            selectedMode = 'classic';
+            if (typeof missionPlanner !== 'undefined') {
+                missionPlanner.setMode('classic');
+            }
+        }
+        updateModeButtons(selectedMode);
         
         const launchBtn = document.getElementById('district-launch-btn');
         if (launchBtn) {
             launchBtn.disabled = false;
-            const modeLabel = selectedMode === 'survival' ? 'Survival' : 'Wave';
+            const modeLabel = selectedMode === 'survival' ? 'Survival' : selectedMode === 'assault' ? 'Assault' : 'Wave';
             launchBtn.textContent = `Launch ${modeLabel} — ${district?.config?.name || city}`;
         }
         
@@ -241,16 +255,22 @@ const DistrictLayoutManager = (function() {
         
         const waveBtn = document.getElementById('district-mode-wave');
         const survivalBtn = document.getElementById('district-mode-survival');
+        const isAssault = mode === 'assault';
         
         if (waveBtn) {
             waveBtn.classList.toggle('active', mode === 'classic');
+            waveBtn.disabled = isAssault;
         }
         if (survivalBtn) {
             survivalBtn.classList.toggle('active', mode === 'survival');
+            survivalBtn.disabled = isAssault;
         }
     }
     
     function selectMode(mode) {
+        if (selectedMode === 'assault' && mode !== 'assault') {
+            return;
+        }
         selectedMode = mode;
         updateModeButtons(mode);
         
@@ -261,8 +281,8 @@ const DistrictLayoutManager = (function() {
         const launchBtn = document.getElementById('district-launch-btn');
         if (launchBtn && !launchBtn.disabled) {
             const currentText = launchBtn.textContent;
-            const modeLabel = mode === 'survival' ? 'Survival' : 'Wave';
-            launchBtn.textContent = currentText.replace(/^Launch (Wave|Survival)/, `Launch ${modeLabel}`);
+            const modeLabel = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Wave';
+            launchBtn.textContent = currentText.replace(/^Launch (Wave|Survival|Assault)/, `Launch ${modeLabel}`);
         }
     }
     
