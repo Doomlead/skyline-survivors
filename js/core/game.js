@@ -232,6 +232,7 @@ function updateEntityWrapping(scene) {
         humans,
         drones,
         bosses,
+        battleships,
         explosions
     } = scene;
     const mainCam = scene.cameras.main;
@@ -305,6 +306,7 @@ function updateEntityWrapping(scene) {
     processGroup(humans);
     processGroup(drones);
     processGroup(bosses);
+    processGroup(battleships);
     
     if (explosions && explosions.children) {
         explosions.children.entries.forEach(processEntity);
@@ -374,6 +376,7 @@ function create() {
     this.drones = this.physics.add.group();
     this.explosions = this.add.group();
     this.bosses = this.physics.add.group();
+    this.battleships = this.physics.add.group();
 
     this.particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
 
@@ -417,14 +420,17 @@ function create() {
     // Physics overlaps
     this.physics.add.overlap(this.projectiles, this.enemies, hitEnemy, null, this);
     this.physics.add.overlap(this.projectiles, this.bosses, hitBoss, null, this);
+    this.physics.add.overlap(this.projectiles, this.battleships, hitBattleship, null, this);
     this.physics.add.overlap(this.veritech, this.enemies, playerHitEnemy, null, this);
     this.physics.add.overlap(this.veritech, this.bosses, playerHitBoss, null, this);
+    this.physics.add.overlap(this.veritech, this.battleships, playerHitBattleship, null, this);
     this.physics.add.overlap(this.veritech, this.enemyProjectiles, playerHitProjectile, null, this);
     this.physics.add.overlap(this.veritech, this.powerUps, collectPowerUp, null, this);
     this.physics.add.overlap(this.veritech, this.humans, rescueHuman, null, this);
 
     this.physics.add.overlap(this.pilot, this.enemies, playerHitEnemy, null, this);
     this.physics.add.overlap(this.pilot, this.bosses, playerHitBoss, null, this);
+    this.physics.add.overlap(this.pilot, this.battleships, playerHitBattleship, null, this);
     this.physics.add.overlap(this.pilot, this.enemyProjectiles, playerHitProjectile, null, this);
     this.physics.add.overlap(this.pilot, this.powerUps, collectPowerUp, null, this);
     this.physics.add.overlap(this.pilot, this.humans, rescueHuman, null, this);
@@ -518,6 +524,7 @@ function update(time, delta) {
     updateDrones(this, time);
     updateHumans(this);
     updateBosses(this, time, delta);
+    updateBattleships(this, time, delta);
     checkSurvivalBosses(this);
     updatePowerUpTimers(this, delta);
 
