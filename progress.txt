@@ -87,13 +87,14 @@
 - Bonus rewards for zero civilian casualties
 
 #### Assault Missions (Occupied Districts)
-**Implementation Status: 65% Complete** ⬆️ (was 60%)
+**Implementation Status: 70% Complete** ⬆️ (was 60%)
 
 ✅ **Implemented:**
 - Assault mission mode override for occupied districts
 - Base core objective with HP and victory condition
 - Shield generators that must be destroyed to expose the core
 - Defensive base turrets with auto-fire
+- Garrison defender squads spawned around the base (rifle/shield/medic/etc.)
 - Assault HUD objective display (base core HP)
 - Continuous defender reinforcements during assault missions
 - Successful assault clears district back to friendly state
@@ -102,7 +103,6 @@
 
 ❌ **Not Implemented:**
 - **Ground base components:**
-  - Garrison Forces (elite units defending base)
   - Multi-phase core reactor beyond current base core
 - Failure flow for assaults beyond game-over (retreat/retry loop, mid-mission extraction)
 - Minimal comrade presence (most converted to mutants)
@@ -384,7 +384,7 @@ Inventory Power-Ups
 
 ### 5.2. Assault Missions (Occupied Districts)
 
-**Implementation Status: 65% Complete** ⬆️ (was 60%)
+**Implementation Status: 70% Complete** ⬆️ (was 60%)
 
 ✅ **Implemented:**
 - **Objective:** Destroy the enemy ground base
@@ -394,6 +394,7 @@ Inventory Power-Ups
   - Shield generators that gate core damage (must destroy first)
   - Defensive base turrets with auto-fire
   - Core Reactor as primary target
+- Garrison defender squads guarding the base
 - Assault reinforcement spawns during mission
 - Assault mission completion restores district to friendly
 - Base core destruction bonus reward
@@ -404,7 +405,6 @@ Inventory Power-Ups
 
 **Structure:**
 - **Ground Base Components:**
-  - Garrison Forces (elite units defending base)
   - Multi-phase core reactor beyond current base core
 
 **Tactics:**
@@ -558,7 +558,7 @@ Inventory Power-Ups
 |------------|----------|-----------------|--------|
 | **Cyber-Mutants** | Blink/teleport, hybrid tech | Assault missions | Not implemented |
 | **Kaiju Units** | Multi-limb bosses; destroy limbs for advantage | Special events | Not implemented |
-| **Base Defenders** | Elite units protecting ground bases | Assault missions only | Not implemented |
+| **Base Defenders** | Elite units protecting ground bases | Assault missions only | ✅ Implemented (garrison defender squads) |
 
 ### 8.3. Base Defenses (Assault Only)
 
@@ -568,9 +568,9 @@ Inventory Power-Ups
 - **Turrets:** Auto-targeting defense systems (assault base emplacements)
 - **Shield Generators:** Protect core reactor (must destroy to expose core)
 - **Core Reactor:** Primary target with HP and shield gating
+- **Garrison Forces:** Elite troops defending base perimeter
 
 ❌ **Not Implemented:**
-- **Garrison Forces:** Elite troops defending base perimeter
 - Multi-phase core reactor behavior beyond current base core
 
 ---
@@ -760,7 +760,7 @@ Inventory Power-Ups
   - Defense Missions
   - District State System
 - **Substantially Complete:** 2/12 (17%) ⬆️
-  - Assault Missions (core loop functional)
+  - Assault Missions (core loop + garrison defenders)
   - System Map (all mechanics working)
 - **Partially Complete:** 5/12 (42%)
   - Ground Combat
@@ -776,13 +776,13 @@ Inventory Power-Ups
 ## Design Document Alignment
 
 **Overall Implementation:**
-- ✅ **Implemented:** ~60% ⬆️ (was ~55%)
-- ⚠️ **Partially Implemented:** ~30%
+- ✅ **Implemented:** ~62% ⬆️ (was ~55%)
+- ⚠️ **Partially Implemented:** ~28%
 - ❌ **Not Implemented:** ~10% ⬇️ (was ~12%)
 
 **By Category:**
 - **Core Gameplay Loop:** 85% complete
-- **Mission Systems:** 75% complete (Defense 90%, Assault 65%)
+- **Mission Systems:** 78% complete (Defense 90%, Assault 70%)
 - **Meta Systems:** 65% complete
 - **Player Mechanics:** 70% complete (Ship 100%, Ground 35%)
 - **Enemy Design:** 85% complete
@@ -801,10 +801,11 @@ Inventory Power-Ups
 5. **Battleship system** - Roaming threats + wave 15 boss fully functional
 6. **Mothership unlock condition** - Activates when all districts friendly
 7. **Defense/assault/liberate gameplay loop** - End-to-end campaign flow (minus final boss)
+8. **Assault garrison defenders** - Base defender squads with multiple roles
 
 ### 🎯 Recent Achievements:
 - ⬆️ Defense missions: 85% → 90% (wave tier progression + battleship boss)
-- ⬆️ Assault missions: 0% → 65% (full base destruction with components)
+- ⬆️ Assault missions: 0% → 70% (base destruction + garrison defenders)
 - ⬆️ System map: 60% → 70% (complete state transition flow)
 - ⬆️ Core loop: 50% → 70% (defend/assault/liberate all functional)
 
@@ -840,7 +841,6 @@ Inventory Power-Ups
 ### 📋 Post-MVP Polish (Optional)
 
 **Phase 1: Assault Mission Depth (1 week)**
-- Add garrison force spawns
 - Implement multi-phase core reactor
 - Add high-value power-up drops in bases
 - Polish assault difficulty scaling
@@ -862,7 +862,7 @@ Inventory Power-Ups
 ## Estimated Remaining Work
 
 ### MVP Completion:
-- **Current Progress:** ~90% complete
+- **Current Progress:** ~92% complete
 - **Remaining Critical Work:** 
   - Mothership Boss Mission: 2-4 days
   - Victory Screen: 1 day
@@ -891,6 +891,5 @@ Inventory Power-Ups
 1. **Mothership final boss mission** - ONLY feature preventing complete MVP
 
 ### 📋 Core Gameplay Polish:
-2. **Assault mission garrison forces** - Elite defending units
-3. **Multi-phase core reactor** - Added challenge to assault missions
-4. **Strategic campaign layer** - Priority UI, district values, difficulty scaling
+2. **Multi-phase core reactor** - Added challenge to assault missions
+3. **Strategic campaign layer** - Priority UI, district values, difficulty scaling
