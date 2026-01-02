@@ -273,12 +273,46 @@
 **Implementation Status: 60% Complete**
 
 ✅ **Implemented:**
-- Laser: Single → Spread → Wave Beam
-- Drones (basic implementation)
-- Shield system
-- Homing Missiles
-- Overdrive mode
-- Additional modifiers: rear/side/rapid/multi/piercing/speed/magnet/double/invincibility/timeSlow
+Ship Power-Ups & Effects
+Offensive / Weapon Power-Ups
+
+    Laser Upgrade: Increases laser tier up to tier 2, which changes the projectile type fired (see playerState.powerUps.laser tier usage in firing logic).
+
+    Force Drone: Adds a combat drone escort (up to 3 drones total) by spawning a forceDrone sprite when collected.
+
+    Homing Missiles: Enables missile firing behavior
+
+    Rear Shot: Enables rear-firing shot pattern
+
+    Side Shot: Enables lateral shot pattern
+
+    Multi‑Shot: Enables multi-projectile firing pattern
+
+    Piercing Shots: Enables piercing projectiles
+
+    Double Damage: Temporarily doubles weapon damage
+
+Rate / Speed Power-Ups
+
+    Overdrive: Temporarily sets a very fast firing cadence
+
+    Rapid Fire: Temporarily speeds up firing
+
+    Speed Boost: Temporarily boosts player movement speed 
+
+Defensive / Utility Power-Ups
+
+    Shield: Grants a shield hit that absorbs damage 
+
+    Invincibility: Temporary invulnerability 
+
+    Time Slow: Temporarily slows enemies/projectiles (p.timeSlow = 8000 ms), applied as a global speed multiplier.
+
+    Power Magnet: Temporarily pulls nearby power-ups toward the player 
+
+Inventory Power-Ups
+
+    Smart Bomb: Adds one bomb to the player stock
 
 ❌ **Not Implemented:**
 
