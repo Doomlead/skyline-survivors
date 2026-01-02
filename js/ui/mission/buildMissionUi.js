@@ -67,7 +67,7 @@ class BuildMissionUi {
             this.modeButtons.add([rect, text]);
         };
 
-        createButton(-90, 'Wave Mode', 0x7dd3fc, 'classic');
+        createButton(-90, 'Defense Mode', 0x7dd3fc, 'classic');
         createButton(90, 'Survival Mode', 0x22d3ee, 'survival');
 
         this.modeHint = this.scene.add.text(width * 0.42, 208,
@@ -282,6 +282,21 @@ class BuildMissionUi {
         });
     }
 
+    setModeButtonsEnabled(enabled) {
+        if (!this.modeButtonRefs) return;
+        this.modeButtonRefs.forEach(({ rect, text }) => {
+            rect.disableInteractive();
+            if (enabled) {
+                rect.setInteractive({ useHandCursor: true });
+                rect.setAlpha(1);
+                text.setAlpha(1);
+            } else {
+                rect.setAlpha(0.4);
+                text.setAlpha(0.4);
+            }
+        });
+    }
+
     updateDetail(title, body) {
         if (this.detailTitle) this.detailTitle.setText(title);
         if (this.detailBody) this.detailBody.setText(body);
@@ -310,17 +325,18 @@ class BuildMissionUi {
     updateMissionUi(mission, selectedMode, selectedDistrict, mapNodes) {
         if (!mission || !this.panelSummary) return;
 
-        const modeToUse = mission.mode || selectedMode;
+        const assaultLocked = selectedDistrict?.state?.status === 'occupied';
+        const modeToUse = assaultLocked ? 'assault' : (mission.mode || selectedMode);
         const { city, latitude, longitude, seed, directives } = mission;
-        const mode = mission.mode || selectedMode;
-        const modeLabel = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Wave';
+        const mode = assaultLocked ? 'assault' : (mission.mode || selectedMode);
+        const modeLabel = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Defense';
         const directiveLabel = directives?.urgency ? `${directives.urgency.toUpperCase()} THREAT` : 'Threat mix pending';
         const rewardLabel = directives?.rewardMultiplier ? `${directives.rewardMultiplier.toFixed(2)}x rewards · ${directives.reward}` : 'Standard rewards';
         const launchLabel = mode === 'survival'
             ? 'Launch Survival Run (Space)'
             : mode === 'assault'
                 ? 'Launch Assault Run (Space)'
-                : 'Launch Wave Run (Space)';
+                : 'Launch Defense Run (Space)';
 
         this.panelSummary.setText(
             `${city}\nLat ${latitude.toFixed(1)} · Lon ${longitude.toFixed(1)}\nSeed ${seed.slice(0, 6)}`
@@ -332,6 +348,7 @@ class BuildMissionUi {
         if (this.launchButton?.text) {
             this.launchButton.text.setText(launchLabel);
         }
+        this.setModeButtonsEnabled(!assaultLocked);
         this.updateModeButtonStyles(modeToUse);
     }
 
@@ -339,8 +356,9 @@ class BuildMissionUi {
         const btn = document.getElementById('build-launch');
         if (!btn) return;
         const hasSelection = !!selectedDistrict;
-        const mode = mission?.mode || selectedMode;
-        const labelMode = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Wave';
+        const assaultLocked = selectedDistrict?.state?.status === 'occupied';
+        const mode = assaultLocked ? 'assault' : (mission?.mode || selectedMode);
+        const labelMode = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Defense';
         const districtName = selectedDistrict?.config?.name || 'mission';
         btn.disabled = !hasSelection;
         btn.textContent = hasSelection

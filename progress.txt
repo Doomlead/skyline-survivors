@@ -41,6 +41,7 @@
   - **Mothership** (Final Endgame Target - locked until all districts secured)
   - Relay stations, distress beacons
 - District selection and launch flow
+- Occupied districts force assault launch mode with updated UI labeling
 - Threat indicators with pulsing urgency rings and under-attack highlights
 - District timers and state persistence
 - Roaming battleship markers with travel/assault phases
@@ -87,7 +88,7 @@
 - Bonus rewards for zero civilian casualties
 
 #### Assault Missions (Occupied Districts)
-**Implementation Status: 70% Complete** ⬆️ (was 60%)
+**Implementation Status: 75% Complete** ⬆️ (was 60%)
 
 ✅ **Implemented:**
 - Assault mission mode override for occupied districts
@@ -95,7 +96,7 @@
 - Shield generators that must be destroyed to expose the core
 - Defensive base turrets with auto-fire
 - Garrison defender squads spawned around the base (rifle/shield/medic/etc.)
-- Assault HUD objective display (base core HP)
+- Assault HUD objective display with base core bar + shield count
 - Continuous defender reinforcements during assault missions
 - Successful assault clears district back to friendly state
 - Base destruction score reward on core defeat
@@ -384,7 +385,7 @@ Inventory Power-Ups
 
 ### 5.2. Assault Missions (Occupied Districts)
 
-**Implementation Status: 70% Complete** ⬆️ (was 60%)
+**Implementation Status: 75% Complete** ⬆️ (was 60%)
 
 ✅ **Implemented:**
 - **Objective:** Destroy the enemy ground base
@@ -399,7 +400,7 @@ Inventory Power-Ups
 - Assault mission completion restores district to friendly
 - Base core destruction bonus reward
 - **Success:** District returns to friendly control
-- Assault HUD display showing base core HP
+- Assault HUD display showing base core HP + shield status
 
 ❌ **Not Implemented:**
 
@@ -579,7 +580,7 @@ Inventory Power-Ups
 
 ### 9.1. Radar / HUD
 
-**Implementation Status: 85% Complete** ⬆️ (was 80%)
+**Implementation Status: 87% Complete** ⬆️ (was 80%)
 
 ✅ **Implemented:**
 - Mini-radar showing player, enemies, humans, pickups
@@ -588,7 +589,7 @@ Inventory Power-Ups
 - Core HUD elements (score, wave count, timer, bombs, lives)
 - Power-up status readout
 - **Mission Objective Indicator (Defense):** Wave count (X/15)
-- **Mission Objective Indicator (Assault):** Base health bar
+- **Mission Objective Indicator (Assault):** Base health bar + shield status
 
 ❌ **Not Implemented:**
 - **Combat View:**

@@ -4,6 +4,7 @@
 
 let scoreEl, waveEl, timerEl, bombsEl, livesEl, powerupsEl;
 let districtEl, threatEl, rewardEl;
+let assaultHudEl, assaultCoreFillEl, assaultCoreLabelEl, assaultShieldLabelEl;
 let radarCanvas, radarCtx;
 
 function createUI(scene) {
@@ -17,6 +18,10 @@ function createUI(scene) {
     districtEl = document.getElementById('district-el');
     threatEl = document.getElementById('threat-el');
     rewardEl = document.getElementById('reward-el');
+    assaultHudEl = document.getElementById('assault-hud');
+    assaultCoreFillEl = document.getElementById('assault-core-fill');
+    assaultCoreLabelEl = document.getElementById('assault-core-label');
+    assaultShieldLabelEl = document.getElementById('assault-shield-label');
     
     radarCanvas = document.getElementById('radar-canvas');
     if (radarCanvas) {
@@ -31,6 +36,7 @@ function updateUI(scene) {
     scoreEl.innerText = gameState.score.toString().padStart(6, '0');
 
     if (gameState.mode === 'survival') {
+        if (assaultHudEl) assaultHudEl.classList.add('hidden');
         const activeHumans = humansGroup ? humansGroup.countActive(true) : gameState.humans;
         waveEl.style.display = 'block';
         waveEl.innerText = 'HUMANS: ' + String(activeHumans).padStart(3, '0');
@@ -46,11 +52,24 @@ function updateUI(scene) {
         const objective = gameState.assaultObjective;
         const baseHp = objective?.baseHp ?? 0;
         const baseMax = objective?.baseHpMax ?? 0;
-        waveEl.innerText = `BASE CORE: ${String(Math.max(0, Math.ceil(baseHp)))} / ${String(Math.max(0, Math.ceil(baseMax)))}`;
+        waveEl.innerText = 'ASSAULT: BASE CORE TARGET';
+        if (assaultHudEl) assaultHudEl.classList.remove('hidden');
+        if (assaultCoreFillEl) {
+            const pct = baseMax > 0 ? Math.max(0, Math.min(1, baseHp / baseMax)) : 0;
+            assaultCoreFillEl.style.width = `${Math.round(pct * 100)}%`;
+        }
+        if (assaultCoreLabelEl) {
+            assaultCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(baseHp))}/${Math.max(0, Math.ceil(baseMax))}`;
+        }
+        if (assaultShieldLabelEl) {
+            const shields = objective?.shieldsRemaining ?? 0;
+            assaultShieldLabelEl.innerText = `Shields: ${shields}`;
+        }
     } else {
         // Classic mode
         timerEl.style.display = 'none';
         waveEl.style.display = 'block';
+        if (assaultHudEl) assaultHudEl.classList.add('hidden');
         
         const enemiesLeft = Math.max(0, (gameState.enemiesToKillThisWave || 0) - (gameState.killsThisWave || 0));
         const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;

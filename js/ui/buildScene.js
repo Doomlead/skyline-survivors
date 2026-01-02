@@ -136,6 +136,18 @@ class BuildScene extends Phaser.Scene {
             missionPlanner.updateDistrictState(district.config.id, district.state);
             this.mission = missionPlanner.selectDistrict(district.config.id, center.lon, district.state);
         }
+
+        if (district?.state?.status === 'occupied') {
+            this.selectedMode = 'assault';
+            if (window.missionPlanner) {
+                this.mission = missionPlanner.setMode('assault');
+            }
+        } else if (this.selectedMode === 'assault') {
+            this.selectedMode = 'classic';
+            if (window.missionPlanner) {
+                this.mission = missionPlanner.setMode('classic');
+            }
+        }
         
         this.syncHTMLPanels();
 
@@ -192,7 +204,7 @@ class BuildScene extends Phaser.Scene {
             return;
         }
         
-        const mode = this.selectedMode;
+        const mode = this.selectedDistrict?.state?.status === 'occupied' ? 'assault' : this.selectedMode;
         if (window.missionPlanner) {
             missionPlanner.selectDistrict(
                 this.selectedDistrict.config.id,
@@ -209,9 +221,13 @@ class BuildScene extends Phaser.Scene {
     }
 
     selectMode(mode) {
-        this.selectedMode = mode;
+        if (this.selectedDistrict?.state?.status === 'occupied' && mode !== 'assault') {
+            this.selectedMode = 'assault';
+        } else {
+            this.selectedMode = mode;
+        }
         if (typeof missionPlanner !== 'undefined') {
-            this.mission = missionPlanner.setMode(mode);
+            this.mission = missionPlanner.setMode(this.selectedMode);
         }
         this.syncHTMLPanels();
     }
