@@ -16,7 +16,10 @@ const ASSAULT_BASE_CONFIG = {
     turretCount: 3,
     defenderCount: 6,
     spawnInterval: 2200,
-    turretFireInterval: 1300
+    turretFireInterval: 1300,
+    reinforcementInterval: 6800,
+    reinforcementBatch: 2,
+    reinforcementCap: 10
 };
 
 function createAssaultComponent(scene, x, y, texture, role, hp) {
@@ -41,6 +44,7 @@ function setupAssaultObjective(scene) {
     objective.spawnTimer = 0;
     objective.turretFireTimer = 0;
     objective.shieldHitCooldown = 0;
+    objective.reinforcementTimer = 0;
     const scaledHp = Math.round(ASSAULT_BASE_CONFIG.baseHp * (gameState.spawnMultiplier || 1));
     objective.baseHpMax = scaledHp;
     objective.baseHp = scaledHp;
@@ -52,6 +56,7 @@ function setupAssaultObjective(scene) {
 
     const base = createAssaultComponent(scene, baseX, baseY, 'assaultBase', 'core', scaledHp);
     scene.assaultBase = base;
+    objective.baseX = baseX;
 
     objective.shieldsRemaining = ASSAULT_BASE_CONFIG.shieldGeneratorCount;
     const shieldOffset = 120;
@@ -90,11 +95,30 @@ function updateAssaultObjective(scene, delta) {
     if (!objective || !objective.active) return;
     objective.spawnTimer += delta;
     objective.turretFireTimer += delta;
+    objective.reinforcementTimer += delta;
     objective.shieldHitCooldown = Math.max(0, objective.shieldHitCooldown - delta);
     if (objective.spawnTimer >= ASSAULT_BASE_CONFIG.spawnInterval) {
         objective.spawnTimer = 0;
         const assaultMix = ['mutant', 'shield', 'spawner', 'kamikaze', 'seeker', 'turret'];
         spawnRandomEnemy(scene, assaultMix);
+    }
+
+    if (objective.reinforcementTimer >= ASSAULT_BASE_CONFIG.reinforcementInterval) {
+        objective.reinforcementTimer = 0;
+        const currentCount = scene.garrisonDefenders?.countActive(true) || 0;
+        if (currentCount < ASSAULT_BASE_CONFIG.reinforcementCap) {
+            const reinforcements = Math.min(
+                ASSAULT_BASE_CONFIG.reinforcementBatch,
+                ASSAULT_BASE_CONFIG.reinforcementCap - currentCount
+            );
+            for (let i = 0; i < reinforcements; i++) {
+                const type = Phaser.Utils.Array.GetRandom(GARRISON_DEFENDER_TYPES || ['rifle']);
+                const offsetX = Phaser.Math.Between(-240, 240);
+                const spawnX = wrapValue((objective.baseX || CONFIG.worldWidth * 0.5) + offsetX, CONFIG.worldWidth);
+                const spawnY = CONFIG.worldHeight * 0.25 + Phaser.Math.Between(-30, 60);
+                spawnGarrisonDefender(scene, type, spawnX, spawnY);
+            }
+        }
     }
 
     if (objective.turretFireTimer >= ASSAULT_BASE_CONFIG.turretFireInterval) {

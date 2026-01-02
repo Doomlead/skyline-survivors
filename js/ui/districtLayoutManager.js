@@ -7,6 +7,7 @@ const DistrictLayoutManager = (function() {
     let phaserCanvas = null;
     let originalParent = null;
     let selectedMode = 'classic';
+    let assaultLocked = false;
     
     function init() {
         // Find the Phaser canvas once it's created
@@ -174,6 +175,8 @@ const DistrictLayoutManager = (function() {
             updateElement('district-urgency', '--');
             updateElement('district-reward-mult', '1.00x');
             updateElement('district-spawn-rate', '1.00x');
+            assaultLocked = false;
+            updateModeButtons(selectedMode);
             
             const launchBtn = document.getElementById('district-launch-btn');
             if (launchBtn) {
@@ -195,6 +198,7 @@ const DistrictLayoutManager = (function() {
         updateElement('district-spawn-rate', (directives?.spawnMultiplier || 1).toFixed(2) + 'x');
 
         const isAssault = district?.state?.status === 'occupied';
+        assaultLocked = isAssault;
         if (isAssault && selectedMode !== 'assault') {
             selectedMode = 'assault';
             if (typeof missionPlanner !== 'undefined') {
@@ -211,7 +215,7 @@ const DistrictLayoutManager = (function() {
         const launchBtn = document.getElementById('district-launch-btn');
         if (launchBtn) {
             launchBtn.disabled = false;
-            const modeLabel = selectedMode === 'survival' ? 'Survival' : selectedMode === 'assault' ? 'Assault' : 'Wave';
+            const modeLabel = getModeLabel(selectedMode);
             launchBtn.textContent = `Launch ${modeLabel} — ${district?.config?.name || city}`;
         }
         
@@ -259,16 +263,16 @@ const DistrictLayoutManager = (function() {
         
         if (waveBtn) {
             waveBtn.classList.toggle('active', mode === 'classic');
-            waveBtn.disabled = isAssault;
+            waveBtn.disabled = isAssault || assaultLocked;
         }
         if (survivalBtn) {
             survivalBtn.classList.toggle('active', mode === 'survival');
-            survivalBtn.disabled = isAssault;
+            survivalBtn.disabled = isAssault || assaultLocked;
         }
     }
     
     function selectMode(mode) {
-        if (selectedMode === 'assault' && mode !== 'assault') {
+        if (assaultLocked && mode !== 'assault') {
             return;
         }
         selectedMode = mode;
@@ -281,9 +285,13 @@ const DistrictLayoutManager = (function() {
         const launchBtn = document.getElementById('district-launch-btn');
         if (launchBtn && !launchBtn.disabled) {
             const currentText = launchBtn.textContent;
-            const modeLabel = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Wave';
-            launchBtn.textContent = currentText.replace(/^Launch (Wave|Survival|Assault)/, `Launch ${modeLabel}`);
+            const modeLabel = getModeLabel(mode);
+            launchBtn.textContent = currentText.replace(/^Launch (Defense|Survival|Assault)/, `Launch ${modeLabel}`);
         }
+    }
+
+    function getModeLabel(mode) {
+        return mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Defense';
     }
     
     function getSelectedMode() {

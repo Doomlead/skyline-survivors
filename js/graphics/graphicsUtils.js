@@ -209,35 +209,47 @@ function createUtilityGraphics(scene) {
     // ASSAULT BASE CORE (Objective)
     // ========================
     const baseGraphics = scene.add.graphics();
-    const baseWidth = 160;
-    const baseHeight = 70;
+    const baseWidth = 170;
+    const baseHeight = 78;
     const baseCenterX = baseWidth / 2;
     const baseCenterY = baseHeight / 2;
 
-    baseGraphics.fillStyle(0x111827, 1);
-    baseGraphics.fillRoundedRect(0, 10, baseWidth, baseHeight - 10, 12);
+    baseGraphics.fillStyle(0x0b1220, 1);
+    baseGraphics.fillRoundedRect(0, 12, baseWidth, baseHeight - 12, 14);
 
     baseGraphics.fillStyle(0x1f2937, 1);
-    baseGraphics.fillRoundedRect(12, 0, baseWidth - 24, 22, 10);
+    baseGraphics.fillRoundedRect(12, 2, baseWidth - 24, 24, 10);
+
+    baseGraphics.fillStyle(0x111827, 1);
+    baseGraphics.fillRect(16, 30, baseWidth - 32, 30);
 
     baseGraphics.fillStyle(0x0f172a, 1);
-    baseGraphics.fillRect(16, 26, baseWidth - 32, 26);
+    baseGraphics.fillRect(22, 38, baseWidth - 44, 12);
 
-    baseGraphics.lineStyle(2, 0x38bdf8, 0.8);
-    baseGraphics.strokeRoundedRect(0, 10, baseWidth, baseHeight - 10, 12);
-    baseGraphics.strokeRoundedRect(12, 0, baseWidth - 24, 22, 10);
+    baseGraphics.lineStyle(2, 0x38bdf8, 0.7);
+    baseGraphics.strokeRoundedRect(0, 12, baseWidth, baseHeight - 12, 14);
+    baseGraphics.strokeRoundedRect(12, 2, baseWidth - 24, 24, 10);
 
-    baseGraphics.fillStyle(0x22d3ee, 0.9);
-    baseGraphics.fillCircle(baseCenterX, baseCenterY + 6, 12);
-    baseGraphics.fillStyle(0x7dd3fc, 0.8);
-    baseGraphics.fillCircle(baseCenterX, baseCenterY + 6, 6);
+    baseGraphics.fillStyle(0x0ea5e9, 0.6);
+    baseGraphics.fillCircle(baseCenterX - 32, baseCenterY + 10, 6);
+    baseGraphics.fillCircle(baseCenterX + 32, baseCenterY + 10, 6);
+
+    baseGraphics.fillStyle(0x22d3ee, 0.95);
+    baseGraphics.fillCircle(baseCenterX, baseCenterY + 8, 14);
+    baseGraphics.fillStyle(0x7dd3fc, 0.9);
+    baseGraphics.fillCircle(baseCenterX, baseCenterY + 8, 6);
 
     baseGraphics.lineStyle(2, 0x0ea5e9, 0.7);
-    baseGraphics.strokeCircle(baseCenterX, baseCenterY + 6, 18);
+    baseGraphics.strokeCircle(baseCenterX, baseCenterY + 8, 20);
 
     baseGraphics.fillStyle(0x94a3b8, 1);
-    baseGraphics.fillRect(22, baseHeight - 16, 22, 10);
-    baseGraphics.fillRect(baseWidth - 44, baseHeight - 16, 22, 10);
+    baseGraphics.fillRect(22, baseHeight - 18, 26, 10);
+    baseGraphics.fillRect(baseWidth - 48, baseHeight - 18, 26, 10);
+
+    baseGraphics.fillStyle(0x475569, 1);
+    baseGraphics.fillRect(baseCenterX - 10, 8, 20, 8);
+    baseGraphics.fillRect(6, baseHeight - 14, 14, 8);
+    baseGraphics.fillRect(baseWidth - 20, baseHeight - 14, 14, 8);
 
     baseGraphics.generateTexture('assaultBase', baseWidth, baseHeight);
     baseGraphics.destroy();

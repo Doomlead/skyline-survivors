@@ -96,7 +96,9 @@ const gameState = {
         spawnTimer: 0,
         shieldsRemaining: 0,
         shieldHitCooldown: 0,
-        turretFireTimer: 0
+        turretFireTimer: 0,
+        reinforcementTimer: 0,
+        baseX: 0
     },
     rebuildObjective: {
         active: false,
@@ -237,7 +239,12 @@ function resetGameState() {
         active: false,
         baseHp: 0,
         baseHpMax: 0,
-        spawnTimer: 0
+        spawnTimer: 0,
+        shieldsRemaining: 0,
+        shieldHitCooldown: 0,
+        turretFireTimer: 0,
+        reinforcementTimer: 0,
+        baseX: 0
     };
     gameState.rebuildObjective = {
         active: false,
