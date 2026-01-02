@@ -160,29 +160,175 @@ A modern reimagining of Defender/Stargate fused with Strike Force, Vampire Survi
 
 ---
 
-### 4.3. Power-Up & Weapon System
+# Power-Up & Weapon System - Revised Design
 
-#### 4.3.1. Power Sources
-- Airborne Power Capsules: Dropped by enemies
-- Surface Items: Scattered on ground (fly low to collect)
-- **Base Destruction Rewards:** Major power-ups from destroyed enemy bases
+## 4.3. Power-Up & Weapon System
 
-#### 4.3.2. Upgrade Paths
-
-| System | Upgrade Tier |
-|--------|--------------|
-| Laser | Single → Twin → Spread → Wave Beam |
-| Force Drone | Front → Orbit → Detached |
-| Shield | Ablative segments → Timed invulnerability |
-| Homing Missiles | Basic → Swarms → Guided Barrage |
-| Overdrive | +Duration → +Damage → Screen-Filling Chaos |
-
-#### 4.3.3. Combo Examples
-- Force Drone + Spread Laser: Rotating projectile ring
-- Afterburner + Shield: "Ram Mode" - crash into base defenses safely
-- Homing Missiles + Overdrive: Apocalypse swarm - base siege weapon
+### 4.3.1. Power Sources
+- **Airborne Power Capsules**: Dropped by enemies
+- **Surface Items**: Scattered on ground (fly low to collect)
+- **Base Destruction Rewards**: Major power-ups from destroyed enemy bases
 
 ---
+
+### 4.3.2. Upgrade Paths
+
+#### Tiered Weapon Systems
+These power-ups increase in level when collected multiple times, creating distinct upgrade paths:
+
+**Laser System - Projectile Type Path**
+| Tier | Effect |
+|------|--------|
+| 0 | Single forward shot |
+| 1 | Piercing shots (penetrate enemies) |
+| 2 | Wave beam (sine wave pattern) |
+
+**Shot Pattern - Spread Path**
+| Tier | Effect |
+|------|--------|
+| 0 | Single forward shot |
+| 1 | **Twin** shots (2 parallel forward) |
+| 2 | Spread shots (3-way fan) |
+| 3 | Multi-shot (5-way wide spread) |
+
+**Coverage - Additional Angles Path**
+| Tier | Effect |
+|------|--------|
+| 0 | Forward only |
+| 1 | Rear shot added |
+| 2 | Side shots added (left/right) |
+
+**Homing Missiles**
+| Tier | Effect |
+|------|--------|
+| 0 | No missiles |
+| 1 | Basic homing missiles |
+| 2 | Swarms (multiple missiles) |
+| 3 | Guided barrage (intelligent targeting) |
+
+**Force Drone**
+| Tier | Effect |
+|------|--------|
+| 0 | No drone |
+| 1 | Front position (shields player) |
+| 2 | Orbit mode (circles player) |
+| 3 | Detached mode (independent fire) |
+
+---
+
+#### Single-Level Power-Ups
+These provide immediate effects, timed buffs, or toggle abilities:
+
+**Defensive Systems:**
+- **Shield**: Ablative protection segments
+- **Invincibility**: Timed invulnerability
+
+**Offensive Modifiers:**
+- **Double Damage**: Timed damage boost
+- **Piercing Shots**: Bullets pass through enemies (integrated into Laser tier 1)
+
+**Utility & Support:**
+- **Speed Boost**: Timed movement speed increase
+- **Power Magnet**: Timed auto-collection of power-ups
+- **Time Slow**: Timed enemy slowdown effect
+
+**Special Weapons:**
+- **Smart Bomb**: Screen-clearing attack (limited charges, increases stock)
+- **Overdrive**: Timed massive firepower boost
+
+---
+
+### 4.3.3. Power-Up Interaction & Synergies
+
+#### Multi-Path Stacking
+Players can collect upgrades from multiple paths simultaneously:
+- **Laser Tier 2 (Wave) + Shot Pattern Tier 3 (Multi-Shot)** = 5 wave beams
+- **Coverage Tier 2 (Rear + Side) + Spread Tier 2** = Multi-directional spread coverage
+- **Homing Tier 3 + Multi-Shot Tier 3** = Swarm of homing missiles from multiple angles
+
+#### Combo Examples
+
+**"Bullet Hell Defense"**
+- Multi-Shot (Tier 3) + Side Shots + Rear Shot
+- Effect: Complete 360° coverage with dense projectile patterns
+
+**"Precision Sniper"**
+- Piercing (Laser Tier 1) + Twin Shots + Double Damage
+- Effect: High-damage penetrating shots for line-clearing
+
+**"Wave of Destruction"**
+- Wave Beam (Laser Tier 2) + Multi-Shot + Overdrive
+- Effect: Screen-filling sine waves with massive damage
+
+**"Assault Siege Loadout"** (Critical for Base Destruction)
+- Homing Barrage (Tier 3) + Multi-Shot + Overdrive
+- Effect: Apocalypse swarm - overwhelming missile barrage for base assault
+- **Use Case**: Destroying assault mission ground bases and shield generators
+
+**"Guardian Fortress"** (Guardian Mode Synergy)
+- Force Drone (Tier 3) + Shield + Multi-Shot
+- Effect: Stationary death platform with orbital protection
+- **Use Case**: Holding position during base assault or wave defense
+
+**"Ram Mode"** (Aggressive Close-Range)
+- Shield + Speed Boost + Invincibility (timed)
+- Effect: Crash into base defenses safely at high speed
+- **Use Case**: Breaking through defensive turret lines
+
+---
+
+### 4.3.4. Strategic Power-Up Management
+
+**Defense Missions:**
+- Prioritize coverage (Multi-Shot, Rear/Side Shots) for 360° threat handling
+- Force Drones provide critical protection during rescue operations
+- Smart Bombs save lives during overwhelming waves
+
+**Assault Missions:**
+- Homing Missiles excel at destroying shield generators and turrets
+- Piercing shots effective against lined-up defensive structures
+- Overdrive + damage buffs essential for core reactor destruction
+- Speed boosts help navigate through dense base defenses
+
+**Resource Scarcity:**
+- Power-ups respawn between waves in defense missions
+- Assault missions have limited power-ups (risk/reward for exploration)
+- Destroyed bases yield major power-up rewards
+
+---
+
+### 4.3.5. Power-Up Persistence & Loss
+
+**Maintained Through:**
+- Wave completion
+- Successful extraction
+- Ship rebuilds (carries over to next deployment)
+
+**Lost On:**
+- Ship destruction (partial loss - some core upgrades retained)
+- Mission failure (full reset)
+- Voluntary reset at shop (refund credits)
+
+**Permanent Unlocks (Meta Progression):**
+- Starting weapon tier increases (unlock higher starting levels)
+- Enhanced power-up drop rates
+- Guaranteed power-up types in specific mission contexts
+
+
+## Implementation Notes
+
+### Current Implementation Status:
+âœ… **Fully Implemented:**
+- Laser: Single → Piercing → Wave (3 tiers)
+- Force Drone: 0 → 1 → 2 → 3 (4 tiers)
+- All single-level power-ups (Shield, Homing, Overdrive, Rear/Side/Multi-Shot, Piercing, Speed, Magnet, Smart Bomb, Double Damage, Invincibility, Time Slow)
+
+âš ï¸ **Design Clarification Needed:**
+- **Shot Pattern Path** currently implemented as part of single-level pickups (Spread, Multi-Shot)
+- **Coverage Path** currently implemented as single-level toggles (Rear Shot, Side Shot)
+- **Homing Missiles** currently single-level, needs tier progression
+- Design suggests these should be tiered progression systems
+
 
 ## 5. Mission Types
 
