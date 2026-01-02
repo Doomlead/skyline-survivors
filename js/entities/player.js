@@ -444,8 +444,8 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, pier
 }
 
 function updateProjectiles(scene) {
-    const { projectiles, enemyProjectiles, enemies, player } = scene;
-    if (!projectiles || !enemyProjectiles || !enemies || !player) return;
+    const { projectiles, enemyProjectiles, enemies, garrisonDefenders, player } = scene;
+    if (!projectiles || !enemyProjectiles || !player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const destroyIfGrounded = (proj) => {
         const terrainVariation = Math.sin(proj.x / 200) * 30;
@@ -463,7 +463,11 @@ function updateProjectiles(scene) {
         if (proj.projectileType === 'homing') {
             let nearestEnemy = null;
             let nearestDist = Infinity;
-            enemies.children.entries.forEach(enemy => {
+            const candidates = [];
+            if (enemies) candidates.push(...enemies.children.entries);
+            if (garrisonDefenders) candidates.push(...garrisonDefenders.children.entries);
+            candidates.forEach(enemy => {
+                if (!enemy.active) return;
                 const dist = Phaser.Math.Distance.Between(proj.x, proj.y, enemy.x, enemy.y);
                 if (dist < nearestDist && dist < 300) {
                     nearestDist = dist;

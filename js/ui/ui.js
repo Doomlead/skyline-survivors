@@ -109,7 +109,7 @@ function formatMetaTimer(seconds) {
 
 function updateRadar(scene) {
     if (!radarCtx || !scene) return;
-    const { enemies, humans } = scene;
+    const { enemies, garrisonDefenders, humans } = scene;
     const player = getActivePlayer(scene);
     if (!player) return;
     
@@ -183,6 +183,32 @@ function updateRadar(scene) {
             // Make bosses/heavy units slightly larger on radar
             const size = (enemy.enemyType === 'shield' || enemy.enemyType === 'spawner' || enemy.enemyType === 'turret') ? 3.5 : 2;
             radarCtx.arc(ex, ey, size, 0, Math.PI * 2);
+            radarCtx.fill();
+        });
+    }
+
+    // 3b. Draw Garrison Defenders
+    if (garrisonDefenders) {
+        garrisonDefenders.children.entries.forEach(defender => {
+            if (!defender.active) return;
+            const dx = defender.x * scaleX;
+            const dy = (defender.y / CONFIG.worldHeight) * height;
+            let color = '#ffbb44';
+            switch (defender.garrisonType) {
+                case 'rifle': color = '#f97316'; break;
+                case 'shield': color = '#38bdf8'; break;
+                case 'heavy': color = '#fb7185'; break;
+                case 'sniper': color = '#e2e8f0'; break;
+                case 'medic': color = '#7dd3fc'; break;
+                case 'engineer': color = '#f59e0b'; break;
+                case 'jetpack': color = '#60a5fa'; break;
+                case 'drone': color = '#22d3ee'; break;
+                case 'walker': color = '#94a3b8'; break;
+                case 'hound': color = '#fb923c'; break;
+            }
+            radarCtx.fillStyle = color;
+            radarCtx.beginPath();
+            radarCtx.arc(dx, dy, 2.5, 0, Math.PI * 2);
             radarCtx.fill();
         });
     }
