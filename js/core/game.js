@@ -75,13 +75,13 @@ function setupAssaultObjective(scene) {
 }
 
 function spawnAssaultDefenders(scene, baseX) {
-    const defenderTypes = ['turret', 'shield', 'spawner', 'kamikaze', 'bouncer'];
+    const defenderTypes = GARRISON_DEFENDER_TYPES || ['rifle'];
     for (let i = 0; i < ASSAULT_BASE_CONFIG.defenderCount; i++) {
         const type = Phaser.Utils.Array.GetRandom(defenderTypes);
         const offsetX = Phaser.Math.Between(-260, 260);
         const spawnX = wrapValue(baseX + offsetX, CONFIG.worldWidth);
         const spawnY = CONFIG.worldHeight * 0.25 + Phaser.Math.Between(-40, 80);
-        spawnEnemy(scene, type, spawnX, spawnY);
+        spawnGarrisonDefender(scene, type, spawnX, spawnY);
     }
 }
 
@@ -380,6 +380,7 @@ function removeGhostSprite(scene, entity) {
             powerUps,
             humans,
             drones,
+            garrisonDefenders,
             bosses,
             battleships,
             explosions,
@@ -450,6 +451,7 @@ function removeGhostSprite(scene, entity) {
     
     // Process all entity groups
     processGroup(enemies);
+    processGroup(garrisonDefenders);
     processGroup(projectiles);
     processGroup(enemyProjectiles);
     processGroup(powerUps);
@@ -529,6 +531,7 @@ function create() {
     this.bosses = this.physics.add.group();
     this.battleships = this.physics.add.group();
     this.assaultTargets = this.physics.add.group();
+    this.garrisonDefenders = this.physics.add.group();
 
     this.particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
 
@@ -571,10 +574,12 @@ function create() {
 
     // Physics overlaps
     this.physics.add.overlap(this.projectiles, this.enemies, hitEnemy, null, this);
+    this.physics.add.overlap(this.projectiles, this.garrisonDefenders, hitGarrisonDefender, null, this);
     this.physics.add.overlap(this.projectiles, this.bosses, hitBoss, null, this);
     this.physics.add.overlap(this.projectiles, this.battleships, hitBattleship, null, this);
     this.physics.add.overlap(this.projectiles, this.assaultTargets, hitAssaultTarget, null, this);
     this.physics.add.overlap(this.veritech, this.enemies, playerHitEnemy, null, this);
+    this.physics.add.overlap(this.veritech, this.garrisonDefenders, playerHitGarrisonDefender, null, this);
     this.physics.add.overlap(this.veritech, this.bosses, playerHitBoss, null, this);
     this.physics.add.overlap(this.veritech, this.battleships, playerHitBattleship, null, this);
     this.physics.add.overlap(this.veritech, this.enemyProjectiles, playerHitProjectile, null, this);
@@ -582,6 +587,7 @@ function create() {
     this.physics.add.overlap(this.veritech, this.humans, rescueHuman, null, this);
 
     this.physics.add.overlap(this.pilot, this.enemies, playerHitEnemy, null, this);
+    this.physics.add.overlap(this.pilot, this.garrisonDefenders, playerHitGarrisonDefender, null, this);
     this.physics.add.overlap(this.pilot, this.bosses, playerHitBoss, null, this);
     this.physics.add.overlap(this.pilot, this.battleships, playerHitBattleship, null, this);
     this.physics.add.overlap(this.pilot, this.enemyProjectiles, playerHitProjectile, null, this);
@@ -679,6 +685,7 @@ function update(time, delta) {
     updatePowerUpMagnet(this);
     updateDrones(this, time);
     updateHumans(this);
+    updateGarrisonDefenders(this, time, delta);
     updateBosses(this, time, delta);
     updateBattleships(this, time, delta);
     checkSurvivalBosses(this);
