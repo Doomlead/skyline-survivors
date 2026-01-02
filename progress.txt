@@ -527,6 +527,7 @@
 ✅ **Implemented:**
 - Mini-radar showing player, enemies, humans, pickups
 - System map with district threat indicators (friendly/threatened/occupied colors)
+- Battleship position markers on the globe view
 - Core HUD elements (score, wave count, timer, bombs, lives)
 - Power-up status readout
 - **Mission Objective Indicator (Defense):** Wave count (X/15)
@@ -537,7 +538,7 @@
   - Off-screen arrows for priority targets
 - **System Map:**
   - Red highlight/badge for occupied districts (color exists, not emphasized)
-  - Battleship positions and movement paths visualization
+  - Battleship movement paths visualization
   - District timer countdown (to fall) display on globe view (timer exists in district detail panel)
 
 ### 9.2. Scoring & Rewards
