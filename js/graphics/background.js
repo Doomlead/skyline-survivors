@@ -533,6 +533,16 @@ var BackgroundGenerator = (function() {
         var baseNoise = this.generateLoopingNoise(textureWidth, 35, 28, 0.5);
         var midNoise = this.generateLoopingNoise(textureWidth, 25, 18, 1.2);
         var topNoise = this.generateLoopingNoise(textureWidth, 28, 14, 2.1);
+        var topNoiseStep = 28;
+        var topNoiseOffset = 4;
+
+        this.terrainProfile = {
+            topNoise: topNoise,
+            groundY: groundY,
+            step: topNoiseStep,
+            textureWidth: textureWidth,
+            topOffset: topNoiseOffset
+        };
 
         // Base terrain
         graphics.fillStyle(0x1a1210, 1);
@@ -567,7 +577,7 @@ var BackgroundGenerator = (function() {
         for (var i = 0; i < topNoise.length; i++) {
             var x = i * 28;
             if (x > textureWidth) break;
-            graphics.lineTo(x, groundY - topNoise[i] - 4);
+            graphics.lineTo(x, groundY - topNoise[i] - topNoiseOffset);
         }
         graphics.lineTo(textureWidth, worldHeight);
         graphics.closePath();
@@ -858,6 +868,20 @@ function createBackground(scene) {
     parallaxManagerInstance.createLayers();
 
     scene.groundLevel = generatorConfig.worldHeight - 80;
+}
+
+function getTerrainHeightAtX(x) {
+    if (!backgroundGeneratorInstance || !backgroundGeneratorInstance.terrainProfile) {
+        return null;
+    }
+    var profile = backgroundGeneratorInstance.terrainProfile;
+    var textureWidth = profile.textureWidth;
+    if (!textureWidth) return null;
+
+    var normalizedX = x % textureWidth;
+    if (normalizedX < 0) normalizedX += textureWidth;
+    var noiseIdx = Math.floor(normalizedX / profile.step) % profile.topNoise.length;
+    return profile.groundY - profile.topNoise[noiseIdx] - profile.topOffset;
 }
 
 function initParallaxTracking(playerX) {

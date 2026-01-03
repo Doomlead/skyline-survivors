@@ -24,6 +24,17 @@ const ASSAULT_BASE_TEXTURES = [
     'assaultBaseDreadnought'
 ];
 
+function wrapAssaultX(scene, x) {
+    if (scene?.wrapSystem?.wrapValue) {
+        return scene.wrapSystem.wrapValue(x);
+    }
+    const worldWidth = CONFIG?.worldWidth || 0;
+    if (!worldWidth) return x;
+    let wrapped = x % worldWidth;
+    if (wrapped < 0) wrapped += worldWidth;
+    return wrapped;
+}
+
 function getAssaultBaseTextureKey(objective) {
     if (objective?.baseVariant && ASSAULT_BASE_TEXTURES.includes(objective.baseVariant)) {
         return objective.baseVariant;
@@ -44,6 +55,13 @@ function createAssaultComponent(scene, x, y, texture, role, hp) {
     return component;
 }
 
+function showAssaultObjectiveBanner(scene, message, color) {
+    const manager = scene?.gameManager;
+    if (manager && typeof manager.showRebuildObjectiveBanner === 'function') {
+        manager.showRebuildObjectiveBanner(scene, message, color);
+    }
+}
+
 function setupAssaultObjective(scene) {
     if (!scene || !scene.assaultTargets) return;
     const objective = gameState.assaultObjective;
@@ -58,13 +76,20 @@ function setupAssaultObjective(scene) {
     objective.baseHpMax = scaledHp;
     objective.baseHp = scaledHp;
 
+    const baseTexture = getAssaultBaseTextureKey(objective);
+    objective.baseVariant = baseTexture;
     const baseX = CONFIG.worldWidth * 0.5;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const terrainVariation = Math.sin(baseX / 200) * 30;
-    const baseY = Math.max(140, groundLevel - terrainVariation - 24);
+    const terrainY = typeof getTerrainHeightAtX === 'function'
+        ? getTerrainHeightAtX(baseX)
+        : null;
+    const fallbackGroundY = groundLevel - terrainVariation - 4;
+    const baseGroundY = typeof terrainY === 'number' ? terrainY : fallbackGroundY;
+    const baseTextureSource = scene.textures.get(baseTexture)?.getSourceImage();
+    const baseHeight = baseTextureSource?.height || 88;
+    const baseY = Math.max(140, baseGroundY - baseHeight / 2);
 
-    const baseTexture = getAssaultBaseTextureKey(objective);
-    objective.baseVariant = baseTexture;
     const base = createAssaultComponent(scene, baseX, baseY, baseTexture, 'core', scaledHp);
     scene.assaultBase = base;
     objective.baseX = baseX;
@@ -73,7 +98,7 @@ function setupAssaultObjective(scene) {
     const shieldOffset = 120;
     for (let i = 0; i < ASSAULT_BASE_CONFIG.shieldGeneratorCount; i++) {
         const direction = i % 2 === 0 ? -1 : 1;
-        const shieldX = wrapValue(baseX + direction * shieldOffset, CONFIG.worldWidth);
+        const shieldX = wrapAssaultX(scene, baseX + direction * shieldOffset);
         const shieldY = baseY - 10;
         createAssaultComponent(scene, shieldX, shieldY, 'assaultShieldGen', 'shield', ASSAULT_BASE_CONFIG.shieldGeneratorHp);
     }
@@ -81,12 +106,12 @@ function setupAssaultObjective(scene) {
     const turretSpread = 170;
     for (let i = 0; i < ASSAULT_BASE_CONFIG.turretCount; i++) {
         const offset = turretSpread * ((i / (ASSAULT_BASE_CONFIG.turretCount - 1)) - 0.5);
-        const turretX = wrapValue(baseX + offset, CONFIG.worldWidth);
+        const turretX = wrapAssaultX(scene, baseX + offset);
         const turretY = baseY + 34;
         createAssaultComponent(scene, turretX, turretY, 'assaultTurret', 'turret', ASSAULT_BASE_CONFIG.turretHp);
     }
 
-    showRebuildObjectiveBanner(scene, 'ASSAULT OBJECTIVE: Destroy the base core', '#f97316');
+    showAssaultObjectiveBanner(scene, 'ASSAULT OBJECTIVE: Destroy the base core', '#f97316');
     spawnAssaultDefenders(scene, baseX);
 }
 
@@ -116,7 +141,7 @@ function hitAssaultTarget(projectile, target) {
             objective.shieldsRemaining = Math.max(0, objective.shieldsRemaining - 1);
             createExplosion(this, target.x, target.y, 0x22d3ee);
             if (objective.shieldsRemaining === 0) {
-                showRebuildObjectiveBanner(this, 'Shield generators down - core exposed', '#22d3ee');
+                showAssaultObjectiveBanner(this, 'Shield generators down - core exposed', '#22d3ee');
             }
             target.destroy();
         } else if (target.assaultRole === 'turret') {
