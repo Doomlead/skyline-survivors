@@ -6,12 +6,14 @@
 // Create global instances
 const gameManager = new GameManager();
 const wrapSystem = new WrapSystem(CONFIG.worldWidth);
+const playerCamera = new PlayerCamera(CONFIG.worldWidth);
 
 // Phaser Scene Configuration
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: SCENE_KEYS.game, active: false });
         this.wrapSystem = wrapSystem;
+        this.playerCamera = playerCamera;
         this.gameManager = gameManager;
     }
 
@@ -223,7 +225,7 @@ class GameScene extends Phaser.Scene {
         }
 
         // Update camera with wrapping
-        this.wrapSystem.updateCameraPosition(mainCam, activePlayer);
+        this.playerCamera.update(mainCam, activePlayer);
         if (gameState.mode === 'assault') {
             mainCam.scrollY = 0;
         }
