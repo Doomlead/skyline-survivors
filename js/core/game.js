@@ -352,6 +352,7 @@ function create() {
     
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
+    this.cameras.main.setScroll(0, 0);
     
     // Generate backgrounds FIRST
     createBackground(this);
@@ -468,6 +469,9 @@ function update(time, delta) {
     const mainCam = this.cameras.main;
     if (mainCam && mainCam.zoom !== 1) {
         mainCam.setZoom(1);
+    }
+    if (mainCam && gameState.mode === 'assault' && mainCam.scrollY !== 0) {
+        mainCam.scrollY = 0;
     }
     
     if (gameState.gameOver) {
