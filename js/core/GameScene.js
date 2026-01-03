@@ -38,7 +38,7 @@ class GameScene extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
         this.cameras.main.setScroll(0, 0);
         this.cameras.main.setZoom(1);
-        this.cameras.main.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight);
+        this.cameras.main.setBounds(0, 0, CONFIG.worldWidth + this.cameras.main.width, CONFIG.worldHeight);
         
         // Generate backgrounds
         createBackground(this);
