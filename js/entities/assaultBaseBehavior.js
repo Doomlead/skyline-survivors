@@ -2,12 +2,23 @@
 // Assault Base Behavior - Spawns and Attacks
 // ------------------------
 
+function wrapAssaultX(scene, x) {
+    if (scene?.wrapSystem?.wrapValue) {
+        return scene.wrapSystem.wrapValue(x);
+    }
+    const worldWidth = CONFIG?.worldWidth || 0;
+    if (!worldWidth) return x;
+    let wrapped = x % worldWidth;
+    if (wrapped < 0) wrapped += worldWidth;
+    return wrapped;
+}
+
 function spawnAssaultDefenders(scene, baseX) {
     const defenderTypes = GARRISON_DEFENDER_TYPES || ['rifle'];
     for (let i = 0; i < ASSAULT_BASE_CONFIG.defenderCount; i++) {
         const type = Phaser.Utils.Array.GetRandom(defenderTypes);
         const offsetX = Phaser.Math.Between(-260, 260);
-        const spawnX = wrapValue(baseX + offsetX, CONFIG.worldWidth);
+        const spawnX = wrapAssaultX(scene, baseX + offsetX);
         const spawnY = CONFIG.worldHeight * 0.25 + Phaser.Math.Between(-40, 80);
         spawnGarrisonDefender(scene, type, spawnX, spawnY);
     }
@@ -37,7 +48,7 @@ function updateAssaultObjective(scene, delta) {
             for (let i = 0; i < reinforcements; i++) {
                 const type = Phaser.Utils.Array.GetRandom(GARRISON_DEFENDER_TYPES || ['rifle']);
                 const offsetX = Phaser.Math.Between(-240, 240);
-                const spawnX = wrapValue((objective.baseX || CONFIG.worldWidth * 0.5) + offsetX, CONFIG.worldWidth);
+                const spawnX = wrapAssaultX(scene, (objective.baseX || CONFIG.worldWidth * 0.5) + offsetX);
                 const spawnY = CONFIG.worldHeight * 0.25 + Phaser.Math.Between(-30, 60);
                 spawnGarrisonDefender(scene, type, spawnX, spawnY);
             }
