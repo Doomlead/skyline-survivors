@@ -184,7 +184,7 @@ function updatePlayer(scene, time, delta) {
             pilotState.vx *= 0.8;
         }
 
-        if (up && pilotState.grounded) {
+        if (up && pilotState.grounded && (left || right || !(spaceKey.isDown || vInput.fire))) {
             pilotState.vy = jumpForce;
             pilotState.grounded = false;
         }
@@ -215,7 +215,12 @@ function updatePlayer(scene, time, delta) {
     const activePlayer = syncActivePlayer(scene);
 
     if ((spaceKey.isDown || vInput.fire) && time > playerState.lastFire + playerState.fireRate) {
-        const angle = veritechState.active && veritechState.mode === 'guardian' ? veritechState.aimAngle : null;
+        let angle = null;
+        if (pilotState.active) {
+            angle = getPilotAimAngle(left, right, up, down, pilotState.grounded);
+        } else if (veritechState.active && veritechState.mode === 'guardian') {
+            angle = veritechState.aimAngle;
+        }
         fireWeapon(scene, angle);
         if (audioManager) {
             audioManager.playSound(playerState.powerUps.laser > 0 ? 'playerFireSpread' : 'playerFire');
@@ -275,6 +280,23 @@ function updatePlayer(scene, time, delta) {
     } else if (particleManager) {
         particleManager.stopExhaustTrail();
     }
+}
+
+function getPilotAimAngle(left, right, up, down, grounded) {
+    let aimX = 0;
+    let aimY = 0;
+
+    if (left) aimX = -1;
+    if (right) aimX = 1;
+
+    if (up) aimY = -1;
+    if (down && !grounded) aimY = 1;
+
+    if (aimX === 0 && aimY === 0) {
+        aimX = pilotState.facing;
+    }
+
+    return Math.atan2(aimY, aimX);
 }
 
 function fireWeapon(scene, angleOverride = null) {
