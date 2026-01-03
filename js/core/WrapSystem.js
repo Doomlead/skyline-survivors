@@ -174,22 +174,6 @@ class WrapSystem {
         this.ghostSprites.clear();
     }
 
-    /**
-     * Update camera position with wrapping
-     */
-    updateCameraPosition(camera, activePlayer) {
-        let desiredScrollX = activePlayer.x - camera.width / 2;
-        const maxScroll = this.worldWidth - camera.width;
-        
-        // Handle wrap-around camera positioning
-        if (desiredScrollX < 0) {
-            desiredScrollX = this.worldWidth + desiredScrollX;
-        } else if (desiredScrollX > maxScroll) {
-            desiredScrollX = desiredScrollX - this.worldWidth;
-        }
-        
-        camera.scrollX = desiredScrollX;
-    }
 }
 
 // Export for use in other files
