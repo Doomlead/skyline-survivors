@@ -55,6 +55,13 @@ function createAssaultComponent(scene, x, y, texture, role, hp) {
     return component;
 }
 
+function showAssaultObjectiveBanner(scene, message, color) {
+    const manager = scene?.gameManager;
+    if (manager && typeof manager.showRebuildObjectiveBanner === 'function') {
+        manager.showRebuildObjectiveBanner(scene, message, color);
+    }
+}
+
 function setupAssaultObjective(scene) {
     if (!scene || !scene.assaultTargets) return;
     const objective = gameState.assaultObjective;
@@ -104,7 +111,7 @@ function setupAssaultObjective(scene) {
         createAssaultComponent(scene, turretX, turretY, 'assaultTurret', 'turret', ASSAULT_BASE_CONFIG.turretHp);
     }
 
-    showRebuildObjectiveBanner(scene, 'ASSAULT OBJECTIVE: Destroy the base core', '#f97316');
+    showAssaultObjectiveBanner(scene, 'ASSAULT OBJECTIVE: Destroy the base core', '#f97316');
     spawnAssaultDefenders(scene, baseX);
 }
 
@@ -134,7 +141,7 @@ function hitAssaultTarget(projectile, target) {
             objective.shieldsRemaining = Math.max(0, objective.shieldsRemaining - 1);
             createExplosion(this, target.x, target.y, 0x22d3ee);
             if (objective.shieldsRemaining === 0) {
-                showRebuildObjectiveBanner(this, 'Shield generators down - core exposed', '#22d3ee');
+                showAssaultObjectiveBanner(this, 'Shield generators down - core exposed', '#22d3ee');
             }
             target.destroy();
         } else if (target.assaultRole === 'turret') {
