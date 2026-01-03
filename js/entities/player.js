@@ -71,6 +71,7 @@ function updatePlayer(scene, time, delta) {
         cursors,
         spaceKey,
         shiftKey,
+        ctrlKey,
         bKey,
         eKey,
         rKey,
@@ -184,7 +185,8 @@ function updatePlayer(scene, time, delta) {
             pilotState.vx *= 0.8;
         }
 
-        if (up && pilotState.grounded && (left || right || !(spaceKey.isDown || vInput.fire))) {
+        const jumpPressed = (ctrlKey && ctrlKey.isDown) || vInput.up;
+        if (jumpPressed && pilotState.grounded && (left || right || !(spaceKey.isDown || vInput.fire))) {
             pilotState.vy = jumpForce;
             pilotState.grounded = false;
         }
