@@ -796,10 +796,11 @@ var ParallaxManager = (function() {
     };
 
     ParallaxManager.prototype.initTracking = function(playerX) {
-        // Initialize with camera scroll position instead of player position
+        // Initialize with camera scroll position unless an explicit starting X is provided
         var mainCam = this.scene.cameras.main;
-        this._prevPlayerX = mainCam.scrollX;
-        this._accumScrollX = 0;
+        var startingX = typeof playerX === 'number' ? playerX : mainCam.scrollX;
+        this._prevPlayerX = startingX;
+        this._accumScrollX = startingX;
     };
 
     ParallaxManager.prototype.update = function(playerX) {

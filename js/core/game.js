@@ -456,7 +456,8 @@ function create() {
     initializeGame(this);
     this.gameScene = this;
 
-    initParallaxTracking();
+    const mainCam = this.cameras.main;
+    initParallaxTracking(mainCam ? mainCam.scrollX : 0);
 }
 
 function update(time, delta) {
@@ -533,6 +534,9 @@ function update(time, delta) {
     }
     
     mainCam.scrollX = desiredScrollX;
+    if (gameState.mode === 'assault') {
+        mainCam.scrollY = 0;
+    }
 
     // Wrap all entities and create ghosts for boundary visibility
     updateEntityWrapping(this);
