@@ -527,10 +527,8 @@ function playerHitEnemy(playerSprite, enemy) {
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
         destroyEnemy(this, enemy);
-        screenShake(this, 10, 200);
         if (audioManager) audioManager.playSound('hitPlayer');
     } else {
-        screenShake(this, 15, 300);
         playerDie(this);
     }
 }
@@ -544,11 +542,9 @@ function playerHitProjectile(playerSprite, projectile) {
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
         projectile.destroy();
-        screenShake(this, 8, 150);
         if (audioManager) audioManager.playSound('hitPlayer');
     } else {
         projectile.destroy();
-        screenShake(this, 12, 250);
         playerDie(this);
     }
 }
@@ -565,7 +561,6 @@ function playerDie(scene) {
     } else {
         createExplosion(scene, player.x, player.y);
     }
-    screenShake(scene, 20, 500);
 
     if (isVeritechActive) {
         veritechState.destroyed = true;
