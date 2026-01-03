@@ -503,6 +503,35 @@ Inventory Power-Ups
   - **Phase 1:** Exterior defense ring (battleship gauntlet)
   - **Phase 2:** Interior corridors with traps and elite forces
   - **Phase 3:** Core boss fight (Mothership Queen/AI)
+- **Detailed Plan (Framing the Mothership Phases):**
+  - **Phase 1: Exterior Assault (Ship Combat)**
+    - **Objective:** Breach the mothership exterior defenses to unlock entry.
+    - **Flow:** Begin in ship mode only, fight a gauntlet of defensive fleets and hull emplacements.
+    - **Signature beats:** Rotating shield nodes, exterior turret ring, optional mini-boss encounter to drop entry code.
+    - **Success criteria:** Destroy all exterior shield nodes → mothership docking bay opens.
+    - **Failure criteria:** Player death or time-out → retreat to system map.
+  - **Transition 1 → 2: Docking/Boarding**
+    - **Event:** Cinematic/teleport dock sequence to swap to interior state.
+    - **State change:** Lock ship combat temporarily; emphasize on-foot play.
+  - **Phase 2: Interior Procedural Corridors (On-Foot Focus)**
+    - **Objective:** Navigate procedurally generated corridors to reach the core chamber.
+    - **Flow:** On-foot traversal with trap rooms, elite patrols, and limited safe nodes.
+    - **Signature beats:** Security gates, power conduit puzzles, ambush rooms, optional side rooms for buffs.
+    - **Success criteria:** Clear required interior objectives (e.g., disable 2-3 internal power relays).
+    - **Failure criteria:** Player death → retry Phase 2 entry or retreat to system map.
+  - **Transition 2 → 3: Core Chamber Breach**
+    - **Event:** Blast door opening + short breaching cut-in.
+    - **State change:** Lock arena boundaries; enable boss logic and UI.
+  - **Phase 3: Core Boss Fight (On-Foot or Hybrid)**
+    - **Objective:** Destroy the Mothership core/AI with multi-step boss mechanics.
+    - **Flow:** Multi-phase core fight (shielded core → exposed core → final overload).
+    - **Signature beats:** Core shield cycles, add spawns, environmental hazards, timed damage windows.
+    - **Success criteria:** Core destroyed → campaign victory.
+    - **Failure criteria:** Player death → retry Phase 3 or retreat to system map.
+  - **Difficulty/Progression Hooks**
+    - Tie Phase 1 enemy density to campaign difficulty scaling.
+    - Phase 2 procedural room pool grows with higher difficulty tiers.
+    - Phase 3 boss modifiers unlocked by perfect-run status.
 - **End Conditions:**
   - **Victory:** Destroy Mothership core → Campaign complete
   - **Perfect Run:** Complete campaign without losing any district → Special ending
