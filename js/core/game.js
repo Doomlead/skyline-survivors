@@ -635,6 +635,11 @@ function update(time, delta) {
     
     // Don't update if scene isn't fully initialized
     if (!player || !this.enemies) return;
+
+    const mainCam = this.cameras.main;
+    if (mainCam && mainCam.zoom !== 1) {
+        mainCam.setZoom(1);
+    }
     
     if (gameState.gameOver) {
         if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
@@ -677,7 +682,6 @@ function update(time, delta) {
 
     // Camera positioning - clamp scrollX to prevent negative values
     // This keeps the camera within valid world coordinates
-    const mainCam = this.cameras.main;
     let desiredScrollX = activePlayer.x - mainCam.width / 2;
     
     // Clamp camera to world bounds (this is key!)
