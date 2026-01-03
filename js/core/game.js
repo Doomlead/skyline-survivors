@@ -352,6 +352,7 @@ function create() {
     
     // World bounds - disable left/right for wrapping
     this.physics.world.setBounds(0, 0, CONFIG.worldWidth, CONFIG.worldHeight, false, false, true, true);
+    this.cameras.main.setScroll(0, 0);
     
     // Generate backgrounds FIRST
     createBackground(this);
@@ -529,6 +530,9 @@ function update(time, delta) {
     }
     
     mainCam.scrollX = desiredScrollX;
+    if (gameState.mode === 'assault') {
+        mainCam.scrollY = 0;
+    }
 
     // Wrap all entities and create ghosts for boundary visibility
     updateEntityWrapping(this);
