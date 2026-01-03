@@ -236,8 +236,10 @@ function playerHitBoss(playerSprite, boss) {
         playerState.powerUps.shield = 0;
         boss.hp -= 2;
         if (boss.hp <= 0) destroyBoss(scene, boss);
+        screenShake(scene, 10, 200);
         if (audioManager) audioManager.playSound('hitPlayer');
     } else {
+        screenShake(scene, 18, 320);
         playerDie(scene);
     }
 }
@@ -246,6 +248,7 @@ function destroyBoss(scene, boss) {
     const { bosses, enemies } = scene;
     if (!bosses) return;
     // Massive death effect
+    screenShake(scene, 25, 500);
     
     for (let i = 0; i < 3; i++) {
         setTimeout(() => {
@@ -398,9 +401,11 @@ function hitBossProjectile(playerSprite, projectile) {
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
         projectile.destroy();
+        screenShake(this, 10, 150);
         if (audioManager) audioManager.playSound('hitPlayer');
     } else {
         projectile.destroy();
+        screenShake(this, 15, 300);
         playerDie(this);
     }
 }

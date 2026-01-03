@@ -272,8 +272,10 @@ function playerHitBattleship(playerSprite, battleship) {
         playerState.powerUps.shield = 0;
         battleship.hp -= 1;
         if (battleship.hp <= 0) destroyBattleship(scene, battleship);
+        screenShake(scene, 12, 200);
         if (audioManager) audioManager.playSound('hitPlayer');
     } else {
+        screenShake(scene, 18, 320);
         playerDie(scene);
     }
 }
@@ -371,6 +373,7 @@ function destroyBattleship(scene, battleship) {
     const { battleships } = scene;
     if (!battleships) return;
 
+    screenShake(scene, 18, 400);
 
     for (let i = 0; i < 2; i++) {
         setTimeout(() => {

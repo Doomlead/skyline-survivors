@@ -1,4 +1,6 @@
-// Manages TileSprite layers and seamless scrolling using accumulated offsets
+// ═══════════════════════════════════════════════════════════════════════════
+// parralaxManager.js - Manages TileSprite layers and seamless scrolling using accumulated offsets
+// ═══════════════════════════════════════════════════════════════════════════
 
 class ParallaxManager {
     constructor(scene, config) {
@@ -6,7 +8,9 @@ class ParallaxManager {
         this.config = config;
         this.layers = [];
         this._prevPlayerX = 0;
+        this._prevPlayerY = 0; // NEW: Track previous Y
         this._accumScrollX = 0;
+        this._accumScrollY = 0; // NEW: Accumulate Y scroll
     }
 
     createLayers() {
@@ -42,13 +46,17 @@ class ParallaxManager {
         }
     }
 
-    initTracking(playerX) {
+    initTracking(playerX, playerY) {
         this._prevPlayerX = playerX;
         this._accumScrollX = 0;
+        this._prevPlayerY = playerY || 0; // NEW: Init Y
+        this._accumScrollY = 0;           // NEW: Init Y
     }
 
-    update(playerX) {
+    update(playerX, playerY) {
         const worldWidth = this.config.worldWidth;
+        
+        // --- Horizontal Logic (Existing) ---
         let dx = playerX - this._prevPlayerX;
         const halfWorld = worldWidth * 0.5;
         if (dx > halfWorld) {
@@ -60,14 +68,23 @@ class ParallaxManager {
         this._accumScrollX += dx;
         this._prevPlayerX = playerX;
 
+        // --- Vertical Logic (NEW) ---
+        // We assume no vertical wrapping in this game world, so simple delta works
+        let dy = (playerY !== undefined) ? (playerY - this._prevPlayerY) : 0;
+        this._accumScrollY += dy;
+        this._prevPlayerY = playerY;
+
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
+            // Set speedY to 1.0 so background locks perfectly to vertical camera movement
+            layer.sprite.tilePositionY = this._accumScrollY * 1.0;
         }
     }
 
     refresh() {
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
+            layer.sprite.tilePositionY = this._accumScrollY * 1.0;
         }
     }
 

@@ -533,16 +533,6 @@ var BackgroundGenerator = (function() {
         var baseNoise = this.generateLoopingNoise(textureWidth, 35, 28, 0.5);
         var midNoise = this.generateLoopingNoise(textureWidth, 25, 18, 1.2);
         var topNoise = this.generateLoopingNoise(textureWidth, 28, 14, 2.1);
-        var topNoiseStep = 28;
-        var topNoiseOffset = 4;
-
-        this.terrainProfile = {
-            topNoise: topNoise,
-            groundY: groundY,
-            step: topNoiseStep,
-            textureWidth: textureWidth,
-            topOffset: topNoiseOffset
-        };
 
         // Base terrain
         graphics.fillStyle(0x1a1210, 1);
@@ -577,7 +567,7 @@ var BackgroundGenerator = (function() {
         for (var i = 0; i < topNoise.length; i++) {
             var x = i * 28;
             if (x > textureWidth) break;
-            graphics.lineTo(x, groundY - topNoise[i] - topNoiseOffset);
+            graphics.lineTo(x, groundY - topNoise[i] - 4);
         }
         graphics.lineTo(textureWidth, worldHeight);
         graphics.closePath();
@@ -763,88 +753,103 @@ var BackgroundGenerator = (function() {
     return BackgroundGenerator;
 })();
 
-// ------------------------
-// Parallax Manager Class
-// ------------------------
+// ═══════════════════════════════════════════════════════════════════════════
+// parralaxManager.js - Manages TileSprite layers and seamless scrolling using accumulated offsets
+// ═══════════════════════════════════════════════════════════════════════════
 
-var ParallaxManager = (function() {
-    function ParallaxManager(scene, config) {
+class ParallaxManager {
+    constructor(scene, config) {
         this.scene = scene;
         this.config = config;
         this.layers = [];
         this._prevPlayerX = 0;
+        this._prevPlayerY = 0; // NEW: Track previous Y
         this._accumScrollX = 0;
+        this._accumScrollY = 0; // NEW: Accumulate Y scroll
     }
 
-    ParallaxManager.prototype.createLayers = function() {
-        var camWidth = this.config.width;
-        var camHeight = this.config.height;
+    createLayers() {
+        const { worldWidth, worldHeight } = this.config;
+        const camWidth = this.config.width;
+        const camHeight = this.config.height;
 
-        for (var i = 0; i < LAYER_ORDER.length; i++) {
-            var layerName = LAYER_ORDER[i];
-            var layerConfig = BACKGROUND_LAYERS[layerName];
+        for (const layerName of LAYER_ORDER) {
+            const layerConfig = BACKGROUND_LAYERS[layerName];
 
             if (!this.scene.textures.exists(layerConfig.key)) {
-                console.warn('[ParallaxManager] Texture ' + layerConfig.key + ' not found');
                 continue;
             }
 
-            var tileSprite = this.scene.add.tileSprite(0, 0, camWidth, camHeight, layerConfig.key);
+            const texture = this.scene.textures.get(layerConfig.key);
+            const frame = texture.getSourceImage();
+            const texHeight = frame.height;
+
+            const tileSprite = this.scene.add.tileSprite(0, 0, camWidth, camHeight, layerConfig.key);
 
             tileSprite.setOrigin(0, 0);
             tileSprite.setScrollFactor(0);
             tileSprite.setDepth(layerConfig.depth);
 
+            const scaleY = camHeight / texHeight;
+            tileSprite.setScale(1, scaleY);
+
             this.layers.push({
                 sprite: tileSprite,
                 speedX: layerConfig.speedX,
-                name: layerName
+                name: layerName,
             });
         }
+    }
 
-        console.log('[ParallaxManager] Created ' + this.layers.length + ' parallax layers');
-    };
+    initTracking(playerX, playerY) {
+        this._prevPlayerX = playerX;
+        this._accumScrollX = 0;
+        this._prevPlayerY = playerY || 0; // NEW: Init Y
+        this._accumScrollY = 0;           // NEW: Init Y
+    }
 
-    ParallaxManager.prototype.initTracking = function(playerX) {
-        // Initialize with camera scroll position unless an explicit starting X is provided
-        var mainCam = this.scene.cameras.main;
-        var startingX = typeof playerX === 'number' ? playerX : mainCam.scrollX;
-        this._prevPlayerX = startingX;
-        this._accumScrollX = startingX;
-    };
-
-    ParallaxManager.prototype.update = function(playerX) {
-        // Use camera scroll instead of player position
-        // Camera scrollX handles wrapping naturally
-        var mainCam = this.scene.cameras.main;
-        var currentScrollX = mainCam.scrollX;
+    update(playerX, playerY) {
+        const worldWidth = this.config.worldWidth;
         
-        // Calculate actual delta from camera movement
-        var dx = currentScrollX - this._prevPlayerX;
-        
-        // Update tracking
-        this._accumScrollX += dx;
-        this._prevPlayerX = currentScrollX;
-        
-        // Apply parallax speeds
-        for (var i = 0; i < this.layers.length; i++) {
-            var layer = this.layers[i];
-            layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
+        // --- Horizontal Logic (Existing) ---
+        let dx = playerX - this._prevPlayerX;
+        const halfWorld = worldWidth * 0.5;
+        if (dx > halfWorld) {
+            dx -= worldWidth;
+        } else if (dx < -halfWorld) {
+            dx += worldWidth;
         }
-    };
 
-    ParallaxManager.prototype.destroy = function() {
-        for (var i = 0; i < this.layers.length; i++) {
-            if (this.layers[i].sprite) {
-                this.layers[i].sprite.destroy();
-            }
+        this._accumScrollX += dx;
+        this._prevPlayerX = playerX;
+
+        // --- Vertical Logic (NEW) ---
+        // We assume no vertical wrapping in this game world, so simple delta works
+        let dy = (playerY !== undefined) ? (playerY - this._prevPlayerY) : 0;
+        this._accumScrollY += dy;
+        this._prevPlayerY = playerY;
+
+        for (const layer of this.layers) {
+            layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
+            // Set speedY to 1.0 so background locks perfectly to vertical camera movement
+            layer.sprite.tilePositionY = this._accumScrollY * 1.0;
+        }
+    }
+
+    refresh() {
+        for (const layer of this.layers) {
+            layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
+            layer.sprite.tilePositionY = this._accumScrollY * 1.0;
+        }
+    }
+
+    destroy() {
+        for (const layer of this.layers) {
+            layer.sprite.destroy();
         }
         this.layers = [];
-    };
-
-    return ParallaxManager;
-})();
-
+    }
+}
 // ------------------------
 // Module-level instances and Global Functions
 // ------------------------
@@ -870,29 +875,17 @@ function createBackground(scene) {
     scene.groundLevel = generatorConfig.worldHeight - 80;
 }
 
-function getTerrainHeightAtX(x) {
-    if (!backgroundGeneratorInstance || !backgroundGeneratorInstance.terrainProfile) {
-        return null;
-    }
-    var profile = backgroundGeneratorInstance.terrainProfile;
-    var textureWidth = profile.textureWidth;
-    if (!textureWidth) return null;
-
-    var normalizedX = x % textureWidth;
-    if (normalizedX < 0) normalizedX += textureWidth;
-    var noiseIdx = Math.floor(normalizedX / profile.step) % profile.topNoise.length;
-    return profile.groundY - profile.topNoise[noiseIdx] - profile.topOffset;
-}
-
-function initParallaxTracking(playerX) {
+function initParallaxTracking(playerX, playerY) {
     if (parallaxManagerInstance) {
-        parallaxManagerInstance.initTracking(playerX);
+        // Pass both X and Y to the manager
+        parallaxManagerInstance.initTracking(playerX, playerY);
     }
 }
 
-function updateParallax(playerX) {
+function updateParallax(playerX, playerY) {
     if (parallaxManagerInstance) {
-        parallaxManagerInstance.update(playerX);
+        // Pass both X and Y to the manager
+        parallaxManagerInstance.update(playerX, playerY);
     }
 }
 
