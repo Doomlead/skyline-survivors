@@ -201,10 +201,8 @@ function playerHitGarrisonDefender(playerSprite, defender) {
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
         destroyGarrisonDefender(this, defender);
-        screenShake(this, 10, 200);
         if (audioManager) audioManager.playSound('hitPlayer');
     } else {
-        screenShake(this, 15, 300);
         playerDie(this);
     }
 }

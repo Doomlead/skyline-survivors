@@ -76,24 +76,6 @@ function createSpawnEffect(scene, x, y, enemyType) {
     });
 }
 
-function screenShake(scene, intensity = 10, duration = 200) {
-    if (!scene.cameras || !scene.cameras.main) return;
-    const camera = scene.cameras.main;
-    const originalX = camera.scrollX;
-    const originalY = camera.scrollY;
-    camera.setScroll(
-        originalX + (Math.random() - 0.5) * intensity,
-        originalY + (Math.random() - 0.5) * intensity
-    );
-    scene.tweens.add({
-        targets: camera,
-        scrollX: originalX,
-        scrollY: originalY,
-        duration: duration,
-        ease: 'Power2.easeOut'
-    });
-}
-
 function createPowerUpCollectionEffect(scene, x, y, powerUpType) {
     const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const flash = scene.add.circle(x, y, 30, 0xffffff, reduceFlashes ? 0.4 : 0.8);
@@ -121,11 +103,6 @@ function createPowerUpCollectionEffect(scene, x, y, powerUpType) {
             delay: i * 50,
             onComplete: () => particle.destroy()
         });
-    }
-    const powerfulTypes = ['double', 'invincibility', 'timeSlow', 'overdrive'];
-    if (powerfulTypes.includes(powerUpType)) {
-        const shakeIntensity = reduceFlashes ? 4 : 8;
-        screenShake(scene, shakeIntensity, 150);
     }
 }
 
