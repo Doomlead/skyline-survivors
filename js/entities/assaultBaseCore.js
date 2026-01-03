@@ -24,6 +24,17 @@ const ASSAULT_BASE_TEXTURES = [
     'assaultBaseDreadnought'
 ];
 
+function wrapAssaultX(scene, x) {
+    if (scene?.wrapSystem?.wrapValue) {
+        return scene.wrapSystem.wrapValue(x);
+    }
+    const worldWidth = CONFIG?.worldWidth || 0;
+    if (!worldWidth) return x;
+    let wrapped = x % worldWidth;
+    if (wrapped < 0) wrapped += worldWidth;
+    return wrapped;
+}
+
 function getAssaultBaseTextureKey(objective) {
     if (objective?.baseVariant && ASSAULT_BASE_TEXTURES.includes(objective.baseVariant)) {
         return objective.baseVariant;
@@ -80,7 +91,7 @@ function setupAssaultObjective(scene) {
     const shieldOffset = 120;
     for (let i = 0; i < ASSAULT_BASE_CONFIG.shieldGeneratorCount; i++) {
         const direction = i % 2 === 0 ? -1 : 1;
-        const shieldX = wrapValue(baseX + direction * shieldOffset, CONFIG.worldWidth);
+        const shieldX = wrapAssaultX(scene, baseX + direction * shieldOffset);
         const shieldY = baseY - 10;
         createAssaultComponent(scene, shieldX, shieldY, 'assaultShieldGen', 'shield', ASSAULT_BASE_CONFIG.shieldGeneratorHp);
     }
@@ -88,7 +99,7 @@ function setupAssaultObjective(scene) {
     const turretSpread = 170;
     for (let i = 0; i < ASSAULT_BASE_CONFIG.turretCount; i++) {
         const offset = turretSpread * ((i / (ASSAULT_BASE_CONFIG.turretCount - 1)) - 0.5);
-        const turretX = wrapValue(baseX + offset, CONFIG.worldWidth);
+        const turretX = wrapAssaultX(scene, baseX + offset);
         const turretY = baseY + 34;
         createAssaultComponent(scene, turretX, turretY, 'assaultTurret', 'turret', ASSAULT_BASE_CONFIG.turretHp);
     }
