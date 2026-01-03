@@ -456,7 +456,8 @@ function create() {
     initializeGame(this);
     this.gameScene = this;
 
-    initParallaxTracking();
+    const mainCam = this.cameras.main;
+    initParallaxTracking(mainCam ? mainCam.scrollX : 0);
 }
 
 function update(time, delta) {
