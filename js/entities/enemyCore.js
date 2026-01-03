@@ -414,12 +414,34 @@ function destroyEnemy(scene, enemy) {
     }
 
     if (gameState.mode === 'classic') {
+        const activeEnemies = enemies.countActive(true);
+        const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
+        const bossWaves = [5, 10];
+        const isBossWave = bossWaves.includes(gameState.wave) && gameState.classicBossFlags?.[gameState.wave];
+        const isBattleshipWave = gameState.wave === waveLimit && gameState.classicBossFlags?.[gameState.wave];
+
+        if (isBossWave) {
+            const bossesLeft = scene.bosses?.countActive(true) ?? 0;
+            if (!gameState.bossActive && bossesLeft === 0 && activeEnemies === 0) {
+                completeBossWave(scene);
+            }
+            return;
+        }
+
+        if (isBattleshipWave) {
+            const battleshipsLeft = scene.battleships?.countActive(true) ?? 0;
+            if (!gameState.battleshipActive && battleshipsLeft === 0 && activeEnemies === 0) {
+                completeBattleshipWave(scene);
+            }
+            return;
+        }
+
         if (enemy.countsTowardsWave !== false) {
             gameState.killsThisWave = (gameState.killsThisWave || 0) + 1;
         }
         
         const enemiesLeft = Math.max(0, (gameState.enemiesToKillThisWave || 0) - (gameState.killsThisWave || 0));
-        if (enemiesLeft <= 0 && enemies.countActive(true) === 0) {
+        if (enemiesLeft <= 0 && activeEnemies === 0) {
             completeWave(scene);
         }
     }
