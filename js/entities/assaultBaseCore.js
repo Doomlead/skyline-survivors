@@ -58,13 +58,20 @@ function setupAssaultObjective(scene) {
     objective.baseHpMax = scaledHp;
     objective.baseHp = scaledHp;
 
+    const baseTexture = getAssaultBaseTextureKey(objective);
+    objective.baseVariant = baseTexture;
     const baseX = CONFIG.worldWidth * 0.5;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const terrainVariation = Math.sin(baseX / 200) * 30;
-    const baseY = Math.max(140, groundLevel - terrainVariation - 24);
+    const terrainY = typeof getTerrainHeightAtX === 'function'
+        ? getTerrainHeightAtX(baseX)
+        : null;
+    const fallbackGroundY = groundLevel - terrainVariation - 4;
+    const baseGroundY = typeof terrainY === 'number' ? terrainY : fallbackGroundY;
+    const baseTextureSource = scene.textures.get(baseTexture)?.getSourceImage();
+    const baseHeight = baseTextureSource?.height || 88;
+    const baseY = Math.max(140, baseGroundY - baseHeight / 2);
 
-    const baseTexture = getAssaultBaseTextureKey(objective);
-    objective.baseVariant = baseTexture;
     const base = createAssaultComponent(scene, baseX, baseY, baseTexture, 'core', scaledHp);
     scene.assaultBase = base;
     objective.baseX = baseX;
