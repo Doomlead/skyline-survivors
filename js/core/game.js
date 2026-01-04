@@ -1,5 +1,5 @@
 // ------------------------
-// Main game scene and initialization
+// File: js/core/game.js
 // ------------------------
 
 // Flag to track if GameScene has been properly initialized

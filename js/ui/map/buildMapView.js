@@ -49,12 +49,15 @@ class BuildMapView {
         this._isBuilt = false;
     }
 
-    preload() { }
+    preload() { 
+        // Ensure we are clean before we start
+        this.cleanup();
+    }
 
     build(width, height) {
         console.log('[BuildMapView.build] Called with dimensions:', { width, height, _isBuilt: this._isBuilt });
         
-        // Clean up any existing objects
+        // Clean up any existing objects to prevent duplicate logic/graphics
         this.cleanup();
 
         // Calculate dimensions immediately
@@ -115,6 +118,8 @@ class BuildMapView {
     }
 
     cleanup() {
+        this._isBuilt = false; // Stop updates immediately
+
         this.mapNodes.forEach(node => {
             if (node.pulse) node.pulse.stop();
             if (node.node) node.node.destroy();
@@ -125,61 +130,42 @@ class BuildMapView {
         this.mapNodes = [];
         this.districts = [];
         this.selectedDistrict = null;
+        
         this.battleshipMarkers.forEach(marker => marker.destroy());
         this.battleshipMarkers = [];
+        
         if (this.planetContainer) {
-            this.planetContainer.destroy(true);
+            this.planetContainer.destroy(true); // true = destroy children
             this.planetContainer = null;
         }
         if (this.backdropGrid) this.backdropGrid.destroy();
         if (this.backdropGlow) this.backdropGlow.destroy();
         
-        // Reset the build flag so we can rebuild
-        this._isBuilt = false;
+        // Graphics refs (destroyed by container usually, but null them out)
+        this.atmosphereGraphics = null;
+        this.oceanGraphics = null;
     }
 	
 	calculateDimensions(width, height) {
-    const layout = GLOBE_LAYOUT;
-    
-    // Fallback to reasonable defaults if width/height are 0 or NaN
-    const safeWidth = width || window.innerWidth;
-    const safeHeight = height || window.innerHeight;
+        const layout = GLOBE_LAYOUT;
+        
+        const safeWidth = width || window.innerWidth;
+        const safeHeight = height || window.innerHeight;
 
-    this.centerX = safeWidth * layout.centerXRatio;
-    this.centerY = safeHeight * layout.centerYRatio;
+        this.centerX = safeWidth * layout.centerXRatio;
+        this.centerY = safeHeight * layout.centerYRatio;
 
-    // Use the smaller dimension to ensure the globe fits both ways
-    const minDim = Math.min(safeWidth, safeHeight);
-    const baseRadius = minDim * layout.radiusScale;
-    
-    this.globeRadius = Phaser.Math.Clamp(
-        baseRadius, 
-        layout.minRadius, 
-        layout.maxRadius
-    );
-
-    console.log(`[BuildMapView] Resizing: ${safeWidth}x${safeHeight} -> Radius: ${this.globeRadius}`);
-}
-
-    /*calculateDimensions(width, height) {
-        // Since the globe is in the center panel of the district layout,
-        // center it within the available space
-        this.centerX = width * GLOBE_LAYOUT.centerXRatio;
-        this.centerY = height * GLOBE_LAYOUT.centerYRatio;
-
+        const minDim = Math.min(safeWidth, safeHeight);
+        const baseRadius = minDim * layout.radiusScale;
+        
         this.globeRadius = Phaser.Math.Clamp(
-            height * GLOBE_LAYOUT.radiusScale,
-            GLOBE_LAYOUT.minRadius,
-            GLOBE_LAYOUT.maxRadius
+            baseRadius, 
+            layout.minRadius, 
+            layout.maxRadius
         );
 
-        console.log('[BuildMapView] Globe dimensions', {
-            radius: this.globeRadius,
-            diameter: this.globeRadius * 2,
-            centerX: this.centerX,
-            centerY: this.centerY
-        });
-    }*/
+        console.log(`[BuildMapView] Resizing: ${safeWidth}x${safeHeight} -> Radius: ${this.globeRadius}`);
+    }
 
     createStars() {
         if (!this.scene.textures.exists('build-star')) {
@@ -356,7 +342,6 @@ class BuildMapView {
     }
 
     drawAllLand() {
-        // Safe check for data to prevent crash
         if (typeof WORLD_DATA === 'undefined') {
             console.warn('WORLD_DATA missing - cannot draw land');
             return;
@@ -578,7 +563,6 @@ class BuildMapView {
         if (typeof missionPlanner === 'undefined') return;
 
         // Configuration relative to globe size
-        // 1.0 = on rim, 1.5 = far out
         this.nodeConfigs = [
             { id: 'battleship', label: 'Battleship', angle: -40, distScale: 1.6, color: 0xf472b6 },
             { id: 'shop', label: 'Shop', angle: 70, distScale: 1.8, color: 0x22d3ee },
@@ -646,7 +630,9 @@ class BuildMapView {
     }
 
     update(time, delta, mission) {
-        if (typeof missionPlanner === 'undefined') return mission;
+        // Critical safety check: Don't update if we aren't fully built
+        if (!this._isBuilt || typeof missionPlanner === 'undefined') return mission;
+        
         const dt = delta / 1000;
         missionPlanner.tickDistricts(dt);
         missionPlanner.tickBattleships(dt);
@@ -667,8 +653,13 @@ class BuildMapView {
             if (node.id !== 'mothership') return;
             const ready = !!allFriendly;
             node.state = { ...(node.state || {}), status: ready ? 'ready' : 'locked', timer: 0 };
-            node.timerText.setText(ready ? 'READY' : 'LOCKED');
-            node.timerText.setColor(ready ? '#a5f3fc' : '#94a3b8');
+            
+            // Safety check for destroyed text objects
+            if (node.timerText && node.timerText.active) {
+                node.timerText.setText(ready ? 'READY' : 'LOCKED');
+                node.timerText.setColor(ready ? '#a5f3fc' : '#94a3b8');
+            }
+            
             node.node.setAlpha(ready ? 1 : 0.35);
             node.label.setAlpha(ready ? 1 : 0.5);
             if (ready && !node.isEnabled) {
@@ -686,10 +677,13 @@ class BuildMapView {
             const stored = missionPlanner.getMapNodeState(node.id) || node.state;
             node.state = stored;
             
-            const timerLabel = node.state.status === 'destroyed' ? 'DESTROYED' : node.state.timer > 0 ? this.scene.formatTimer(node.state.timer) : 'STABLE';
-            const color = node.state.status === 'destroyed' ? '#f87171' : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
-            node.timerText.setText(timerLabel);
-            node.timerText.setColor(color);
+            // Safety check for destroyed text objects
+            if (node.timerText && node.timerText.active) {
+                const timerLabel = node.state.status === 'destroyed' ? 'DESTROYED' : node.state.timer > 0 ? this.scene.formatTimer(node.state.timer) : 'STABLE';
+                const color = node.state.status === 'destroyed' ? '#f87171' : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
+                node.timerText.setText(timerLabel);
+                node.timerText.setColor(color);
+            }
         });
 
         const battleships = missionPlanner.getBattleships();

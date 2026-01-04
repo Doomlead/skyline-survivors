@@ -1,5 +1,5 @@
 // ------------------------
-// BuildScene
+// File: js/ui/buildScene.js
 // ------------------------
 
 class BuildScene extends Phaser.Scene {
@@ -19,15 +19,23 @@ class BuildScene extends Phaser.Scene {
     create() {
         console.log('=== BuildScene.create() ===');
         
-        // 1. Tell the UI manager to move the canvas
+        // 1. Clean up old state first
+        if (this.mapModule) {
+            this.mapModule.cleanup();
+        }
+
+        // 2. Tell the UI manager to move the canvas
         if (window.DistrictLayoutManager) {
             DistrictLayoutManager.switchToDistrictLayout();
         }
         
-        // 2. WAIT for the browser to finish moving the canvas 
+        // 3. WAIT for the browser to finish moving the canvas 
         // before we try to measure the screen and draw the globe.
         setTimeout(() => {
-            this.performCreate();
+            // Check if scene is still active after timeout (user might have clicked away)
+            if (this.sys.isActive()) {
+                this.performCreate();
+            }
         }, 150); 
     }
     
@@ -50,6 +58,7 @@ class BuildScene extends Phaser.Scene {
         // 4. Build the Globe
         this.mapModule.build(width, height);
         this.syncHTMLPanels();
+        this.createSceneOverlay(width, height);
 
         // Keyboard Controls
         this._spaceHandler = () => this.launchMission();
@@ -88,12 +97,19 @@ class BuildScene extends Phaser.Scene {
                 this.input.keyboard.off('keydown-R', this._rerollHandler);
                 this._rerollHandler = null;
             }
+            // Ensure map cleans up its own event listeners/objects
+            if (this.mapModule) {
+                this.mapModule.cleanup();
+            }
         });
 
     }
 
 
     createSceneOverlay(width, height) {
+        if (this.hintText) this.hintText.destroy();
+        if (this.titleText) this.titleText.destroy();
+
         this.hintText = this.add.text(width / 2, height - 20, 'Click a glowing district to select · Press SPACE to launch', {
             fontFamily: 'Orbitron',
             fontSize: '11px',

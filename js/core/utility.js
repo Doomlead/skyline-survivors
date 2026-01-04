@@ -1,5 +1,5 @@
 // ------------------------
-// Utility functions
+// File: js/core/utility.js
 // ------------------------
 
 function wrapWorldBounds(sprite) {
@@ -319,31 +319,44 @@ function openSettingsMenu() {
 }
 
 function enterDistrictMap(options = false) {
-    const overlayLaunch = typeof options === 'object' ? !!options.fromOverlay : !!options;
     const fromVictory = typeof options === 'object' ? !!options.fromVictory : false;
     
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
     
-    // Switch to district layout
+    // 1. Switch DOM Layout
     if (window.DistrictLayoutManager) {
         DistrictLayoutManager.switchToDistrictLayout();
     }
 
+    // 2. Manage Scenes
     if (window.game && game.scene) {
         const mainScene = game.scene.getScene(SCENE_KEYS.game);
+        
+        // Stop or Pause the Action Game
         if (mainScene && mainScene.scene.isActive()) {
             if (fromVictory) {
                 mainScene.scene.stop();
             } else {
                 mainScene.scene.pause();
+                // Ensure the game scene is hidden so it doesn't bleed through
+                mainScene.scene.setVisible(false);
             }
         }
+        
+        // Stop Menu if active
         if (game.scene.isActive(SCENE_KEYS.menu)) {
             game.scene.stop(SCENE_KEYS.menu);
         }
+        
+        // 3. Start/Restart the Build Scene
+        // Using 'start' ensures the scene runs its create() method again,
+        // rebuilding the map with updated data.
         game.scene.start(SCENE_KEYS.build);
         game.scene.bringToTop(SCENE_KEYS.build);
+        
+        // REMOVED: game.scene.setVisible(...) - This was causing the crash. 
+        // Scene visibility is handled by the Scene object, not the SceneManager.
     }
 }
 
@@ -364,10 +377,17 @@ function closeBuildView() {
             game.scene.stop(SCENE_KEYS.build);
         }
         const mainScene = game.scene.getScene(SCENE_KEYS.game);
-        if (mainScene && mainScene.scene.isPaused()) {
-            mainScene.scene.resume();
+        if (mainScene) {
+            // Resume or Start Game
+            if (mainScene.scene.isPaused()) {
+                mainScene.scene.resume();
+                mainScene.scene.setVisible(true); // Make sure it's visible again
+            } else if (!mainScene.scene.isActive()) {
+                // If it was stopped (e.g. from victory), maybe don't auto-start,
+                // but if we are "Closing" the map, we usually return to context.
+                // For now, assume resume logic is primary.
+            }
         }
-        
     }
 
     const toggleBtn = document.getElementById('build-toggle');

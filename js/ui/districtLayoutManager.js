@@ -1,5 +1,5 @@
 // ------------------------
-// File: js/ui/districtLayoutManager.js - Fixed
+// File: js/ui/districtLayoutManager.js 
 // ------------------------
 
 const DistrictLayoutManager = (function() {
