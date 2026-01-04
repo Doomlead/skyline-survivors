@@ -146,7 +146,9 @@ function hitGarrisonDefender(projectile, defender) {
     if (audioManager) audioManager.playSound('hitEnemy');
     if (particleManager) particleManager.bulletExplosion(defender.x, defender.y);
     if (defender.hp <= 0) destroyGarrisonDefender(this, defender);
-    projectile.destroy();
+    if (projectile && projectile.active && !projectile.isPiercing) {
+        projectile.destroy();
+    }
 }
 
 function destroyGarrisonDefender(scene, defender) {
