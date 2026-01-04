@@ -344,6 +344,7 @@ function enterDistrictMap(options = false) {
         }
         game.scene.start(SCENE_KEYS.build);
         game.scene.bringToTop(SCENE_KEYS.build);
+        game.scene.setVisible(true, SCENE_KEYS.build);
     }
 }
 
