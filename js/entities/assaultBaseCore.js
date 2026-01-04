@@ -133,5 +133,7 @@ function hitAssaultTarget(projectile, target) {
             winGame(this);
         }
     }
-    if (projectile && projectile.active) projectile.destroy();
+    if (projectile && projectile.active && !projectile.isPiercing) {
+        projectile.destroy();
+    }
 }

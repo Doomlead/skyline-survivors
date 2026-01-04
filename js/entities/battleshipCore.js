@@ -255,7 +255,9 @@ function hitBattleship(projectile, battleship) {
     }
 
     if (battleship.hp <= 0) destroyBattleship(scene, battleship);
-    projectile.destroy();
+    if (projectile && projectile.active && !projectile.isPiercing) {
+        projectile.destroy();
+    }
 }
 
 function playerHitBattleship(playerSprite, battleship) {
