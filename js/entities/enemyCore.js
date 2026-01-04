@@ -290,7 +290,9 @@ function hitEnemy(projectile, enemy) {
         particleManager.bulletExplosion(enemy.x, enemy.y);
     }
     if (enemy.hp <= 0) destroyEnemy(this, enemy);
-    projectile.destroy();
+    if (projectile && projectile.active && !projectile.isPiercing) {
+        projectile.destroy();
+    }
 }
 
 // Fully resolves an enemy death: special effects, spawn logic, scoring, and
