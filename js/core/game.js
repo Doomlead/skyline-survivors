@@ -30,6 +30,47 @@ function initializeGame(scene) {
     updateUI(scene);
 }
 
+function applyKeyBindings(scene) {
+    const bindings = userSettings.keyBindings || DEFAULT_KEY_BINDINGS;
+    const keyCodes = Phaser.Input.Keyboard.KeyCodes;
+    const resolveKeyCode = (action) => keyCodes[bindings[action] || DEFAULT_KEY_BINDINGS[action]];
+
+    if (scene.boundKeys) {
+        Object.values(scene.boundKeys).forEach((key) => {
+            if (key) scene.input.keyboard.removeKey(key);
+        });
+    }
+
+    const boundKeys = {
+        left: scene.input.keyboard.addKey(resolveKeyCode('moveLeft')),
+        right: scene.input.keyboard.addKey(resolveKeyCode('moveRight')),
+        up: scene.input.keyboard.addKey(resolveKeyCode('moveUp')),
+        down: scene.input.keyboard.addKey(resolveKeyCode('moveDown')),
+        fire: scene.input.keyboard.addKey(resolveKeyCode('fire')),
+        transform: scene.input.keyboard.addKey(resolveKeyCode('transform')),
+        jump: scene.input.keyboard.addKey(resolveKeyCode('jump')),
+        bomb: scene.input.keyboard.addKey(resolveKeyCode('bomb')),
+        eject: scene.input.keyboard.addKey(resolveKeyCode('eject')),
+        enter: scene.input.keyboard.addKey(resolveKeyCode('enter')),
+        hyperspace: scene.input.keyboard.addKey(resolveKeyCode('hyperspace')),
+        pause: scene.input.keyboard.addKey(resolveKeyCode('pause'))
+    };
+
+    scene.boundKeys = boundKeys;
+    scene.leftKey = boundKeys.left;
+    scene.rightKey = boundKeys.right;
+    scene.upKey = boundKeys.up;
+    scene.downKey = boundKeys.down;
+    scene.fireKey = boundKeys.fire;
+    scene.transformKey = boundKeys.transform;
+    scene.jumpKey = boundKeys.jump;
+    scene.bombKey = boundKeys.bomb;
+    scene.ejectKey = boundKeys.eject;
+    scene.enterKey = boundKeys.enter;
+    scene.hyperspaceKey = boundKeys.hyperspace;
+    scene.pauseKey = boundKeys.pause;
+}
+
 function preload() {
     createGraphics(this);
 }
@@ -398,15 +439,8 @@ function create() {
     this.particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
 
     // Input
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
-    this.ctrlKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
-    this.bKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
-    this.eKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-    this.qKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
-    this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-    this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+    applyKeyBindings(this);
+    this.refreshKeyBindings = () => applyKeyBindings(this);
 
     if (this._restartHandler) {
         this.input.keyboard.off('keydown-R', this._restartHandler);
@@ -491,7 +525,7 @@ function update(time, delta) {
         return;
     }
     if (gameState.paused) {
-        if (Phaser.Input.Keyboard.JustDown(this.pKey)) togglePause(this);
+        if (!this.isRebindingKey && Phaser.Input.Keyboard.JustDown(this.pauseKey)) togglePause(this);
         return;
     }
     if (window.missionPlanner) {
