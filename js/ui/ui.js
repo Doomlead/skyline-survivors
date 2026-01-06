@@ -451,7 +451,7 @@ function togglePause(scene) {
             .setStrokeStyle(2, 0x00ffff, 0.6)
             .setVisible(false);
         const keyMapDetails = scene.add.text(centerX, centerY + 230,
-            'ARROW KEYS: Move/Aim\nUP: Jump/Aim Up\nDOWN: Aim Down (air)\nSPACE: Fire\nSHIFT: Transform\nMOUSE: Aim (Guardian)\nB: Bomb  E: Eject  R: Enter Mech\nQ: Hyperspace  P: Pause  M: Main Menu', {
+            'ARROW KEYS: Move/Aim (Guardian; diagonals)\nUP: Jump/Aim Up\nDOWN: Aim Down (air)\nSPACE: Fire (move + shoot)\nSHIFT: Transform\nB: Bomb  E: Eject  R: Enter Mech\nQ: Hyperspace  P: Pause  M: Main Menu', {
             fontSize: '13px', fontFamily: 'Orbitron', color: '#e2e8f0', align: 'center',
             wordWrap: { width: 340, useAdvancedWrap: true }
         }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setVisible(false);

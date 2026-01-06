@@ -157,13 +157,8 @@ function updatePlayer(scene, time, delta) {
             veritechState.vy = 0;
         }
 
-        const pointer = scene.input.activePointer;
-        if (pointer) {
-            const pointerWorldX = Number.isFinite(pointer.worldX)
-                ? pointer.worldX
-                : pointer.x + scene.cameras.main.scrollX;
-            const pointerWorldY = Number.isFinite(pointer.worldY) ? pointer.worldY : pointer.y;
-            veritechState.aimAngle = Phaser.Math.Angle.Between(veritech.x, veritech.y, pointerWorldX, pointerWorldY);
+        if (veritechState.mode === 'guardian') {
+            veritechState.aimAngle = getGuardianAimAngle(left, right, up, down);
         }
 
         veritech.flipX = veritechState.facing < 0;
@@ -298,6 +293,15 @@ function getPilotAimAngle(left, right, up, down, grounded) {
         aimX = pilotState.facing;
     }
 
+    return Math.atan2(aimY, aimX);
+}
+
+function getGuardianAimAngle(left, right, up, down) {
+    const aimX = (left ? -1 : 0) + (right ? 1 : 0);
+    const aimY = (up ? -1 : 0) + (down ? 1 : 0);
+    if (aimX === 0 && aimY === 0) {
+        return veritechState.facing < 0 ? Math.PI : 0;
+    }
     return Math.atan2(aimY, aimX);
 }
 
