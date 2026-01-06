@@ -68,47 +68,50 @@ function updatePlayer(scene, time, delta) {
     const {
         veritech,
         pilot,
-        cursors,
-        spaceKey,
-        shiftKey,
-        ctrlKey,
-        bKey,
-        eKey,
-        rKey,
-        qKey,
-        pKey,
+        leftKey,
+        rightKey,
+        upKey,
+        downKey,
+        fireKey,
+        transformKey,
+        jumpKey,
+        bombKey,
+        ejectKey,
+        enterKey,
+        hyperspaceKey,
+        pauseKey,
         particleManager,
         audioManager
     } = scene;
-    if (!veritech || !cursors) return;
+    if (!veritech || !leftKey || !rightKey || !upKey || !downKey) return;
 
     const vInput = window.virtualInput || { left: false, right: false, up: false, down: false, fire: false };
-    const left = cursors.left.isDown || vInput.left;
-    const right = cursors.right.isDown || vInput.right;
-    const up = cursors.up.isDown || vInput.up;
-    const down = cursors.down.isDown || vInput.down;
+    const left = leftKey.isDown || vInput.left;
+    const right = rightKey.isDown || vInput.right;
+    const up = upKey.isDown || vInput.up;
+    const down = downKey.isDown || vInput.down;
 
     if (veritechState.transformCooldown > 0) {
         veritechState.transformCooldown -= delta;
     }
 
-    if (Phaser.Input.Keyboard.JustDown(shiftKey) && veritechState.active && veritechState.transformCooldown <= 0) {
+    if (Phaser.Input.Keyboard.JustDown(transformKey) && veritechState.active && veritechState.transformCooldown <= 0) {
         const nextMode = veritechState.mode === 'fighter' ? 'guardian' : 'fighter';
         setVeritechMode(scene, nextMode);
         veritechState.transformCooldown = 350;
     }
 
-    if (eKey && Phaser.Input.Keyboard.JustDown(eKey) && veritechState.active) {
+    if (ejectKey && Phaser.Input.Keyboard.JustDown(ejectKey) && veritechState.active) {
         ejectPilot(scene);
     }
 
-    if (rKey && Phaser.Input.Keyboard.JustDown(rKey) && pilotState.active) {
+    if (enterKey && Phaser.Input.Keyboard.JustDown(enterKey) && pilotState.active) {
         enterVeritech(scene);
     }
 
-    if (bKey && Phaser.Input.Keyboard.JustDown(bKey)) useSmartBomb(scene);
-    if (Phaser.Input.Keyboard.JustDown(qKey)) useHyperspace(scene);
-    if (Phaser.Input.Keyboard.JustDown(pKey)) togglePause(scene);
+    if (bombKey && Phaser.Input.Keyboard.JustDown(bombKey)) useSmartBomb(scene);
+    if (hyperspaceKey && Phaser.Input.Keyboard.JustDown(hyperspaceKey)) useHyperspace(scene);
+    if (pauseKey && Phaser.Input.Keyboard.JustDown(pauseKey)) togglePause(scene);
 
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const minY = 20;
@@ -180,8 +183,8 @@ function updatePlayer(scene, time, delta) {
             pilotState.vx *= 0.8;
         }
 
-        const jumpPressed = (ctrlKey && ctrlKey.isDown) || vInput.up;
-        if (jumpPressed && pilotState.grounded && (left || right || !(spaceKey.isDown || vInput.fire))) {
+        const jumpPressed = (jumpKey && jumpKey.isDown) || vInput.up;
+        if (jumpPressed && pilotState.grounded && (left || right || !(fireKey.isDown || vInput.fire))) {
             pilotState.vy = jumpForce;
             pilotState.grounded = false;
         }
@@ -211,7 +214,7 @@ function updatePlayer(scene, time, delta) {
 
     const activePlayer = syncActivePlayer(scene);
 
-    if ((spaceKey.isDown || vInput.fire) && time > playerState.lastFire + playerState.fireRate) {
+    if ((fireKey.isDown || vInput.fire) && time > playerState.lastFire + playerState.fireRate) {
         let angle = null;
         if (pilotState.active) {
             angle = getPilotAimAngle(left, right, up, down, pilotState.grounded);

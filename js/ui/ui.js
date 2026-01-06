@@ -7,6 +7,77 @@ let districtEl, threatEl, rewardEl;
 let assaultHudEl, assaultCoreFillEl, assaultCoreLabelEl, assaultShieldLabelEl;
 let radarCanvas, radarCtx;
 
+const KEY_BINDING_ACTIONS = [
+    { id: 'moveLeft', label: 'Move Left' },
+    { id: 'moveRight', label: 'Move Right' },
+    { id: 'moveUp', label: 'Move Up' },
+    { id: 'moveDown', label: 'Move Down' },
+    { id: 'fire', label: 'Fire' },
+    { id: 'transform', label: 'Transform' },
+    { id: 'jump', label: 'Jump' },
+    { id: 'bomb', label: 'Bomb' },
+    { id: 'eject', label: 'Eject' },
+    { id: 'enter', label: 'Enter Mech' },
+    { id: 'hyperspace', label: 'Hyperspace' },
+    { id: 'pause', label: 'Pause' }
+];
+
+function formatKeyLabel(keyName) {
+    if (!keyName) return 'Unassigned';
+    switch (keyName) {
+        case 'LEFT':
+            return 'Left Arrow';
+        case 'RIGHT':
+            return 'Right Arrow';
+        case 'UP':
+            return 'Up Arrow';
+        case 'DOWN':
+            return 'Down Arrow';
+        case 'SPACE':
+            return 'Space';
+        case 'SHIFT':
+            return 'Shift';
+        case 'CTRL':
+            return 'Ctrl';
+        case 'ESC':
+            return 'Esc';
+        default:
+            return keyName;
+    }
+}
+
+function normalizeKeyName(event) {
+    if (!event || !event.key) return null;
+    switch (event.key) {
+        case ' ':
+            return 'SPACE';
+        case 'ArrowLeft':
+            return 'LEFT';
+        case 'ArrowRight':
+            return 'RIGHT';
+        case 'ArrowUp':
+            return 'UP';
+        case 'ArrowDown':
+            return 'DOWN';
+        case 'Shift':
+            return 'SHIFT';
+        case 'Control':
+            return 'CTRL';
+        case 'Escape':
+            return 'ESC';
+        case 'Enter':
+            return 'ENTER';
+        case 'Tab':
+            return 'TAB';
+        default:
+            break;
+    }
+    if (event.key.length === 1) {
+        return event.key.toUpperCase();
+    }
+    return event.key.toUpperCase();
+}
+
 function createUI(scene) {
     // Get references to DOM elements created in index.html
     scoreEl = document.getElementById('score-el');
@@ -382,6 +453,7 @@ function togglePause(scene) {
     
     if (gameState.paused) {
         scene.physics.pause();
+        scene.isRebindingKey = false;
         
         const centerX = scene.cameras.main.width / 2;
         const centerY = scene.cameras.main.height / 2;
@@ -393,15 +465,21 @@ function togglePause(scene) {
             fontSize: '48px', fontFamily: 'Orbitron', color: '#00ffff', stroke: '#000000', strokeThickness: 6
         }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
         
-        const resumeText = scene.add.text(centerX - 120, centerY - 20, '[ P ] RESUME', {
+        const resumeText = scene.add.text(centerX - 200, centerY - 20, '[ P ] RESUME', {
             fontSize: '20px', fontFamily: 'Orbitron', color: '#00ff00', stroke: '#000000', strokeThickness: 4
         }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
         
-        const menuText = scene.add.text(centerX + 120, centerY - 20, '[ M ] MAIN MENU', {
+        const menuText = scene.add.text(centerX + 200, centerY - 20, '[ M ] MAIN MENU', {
             fontSize: '20px', fontFamily: 'Orbitron', color: '#ffff00', stroke: '#000000', strokeThickness: 4
         }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
+
+        const keyMapButtonBg = scene.add.rectangle(centerX, centerY - 20, 200, 34, 0x0ea5e9, 0.25)
+            .setScrollFactor(0)
+            .setDepth(998)
+            .setStrokeStyle(2, 0x38bdf8, 0.7)
+            .setInteractive({ useHandCursor: true });
         
-        const keyMapButton = scene.add.text(centerX, centerY + 160, '[ K ] KEY MAPPING', {
+        const keyMapButton = scene.add.text(centerX, centerY - 20, 'HIDE KEY BINDINGS', {
             fontSize: '18px', fontFamily: 'Orbitron', color: '#38bdf8', stroke: '#000000', strokeThickness: 3
         }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
@@ -445,35 +523,121 @@ function togglePause(scene) {
             fontSize: '14px', fontFamily: 'Orbitron', color: userSettings.reduceFlashes ? '#22c55e' : '#38bdf8'
         }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(999);
 
-        const keyMapPanel = scene.add.rectangle(centerX, centerY + 230, 360, 140, 0x0b1220, 0.9)
+        const keyMapPanel = scene.add.rectangle(centerX, centerY + 140, 460, 220, 0x0b1220, 0.92)
             .setScrollFactor(0)
             .setDepth(998)
             .setStrokeStyle(2, 0x00ffff, 0.6)
-            .setVisible(false);
-        const keyMapDetails = scene.add.text(centerX, centerY + 230,
-            'ARROW KEYS: Move/Aim (Guardian; diagonals)\nUP: Jump/Aim Up\nDOWN: Aim Down (air)\nSPACE: Fire (move + shoot)\nSHIFT: Transform\nB: Bomb  E: Eject  R: Enter Mech\nQ: Hyperspace  P: Pause  M: Main Menu', {
-            fontSize: '13px', fontFamily: 'Orbitron', color: '#e2e8f0', align: 'center',
-            wordWrap: { width: 340, useAdvancedWrap: true }
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setVisible(false);
+            .setVisible(true);
+        const panelTop = keyMapPanel.y - keyMapPanel.height / 2;
+        const panelLeft = keyMapPanel.x - keyMapPanel.width / 2;
+        const keyMapHint = scene.add.text(centerX, panelTop + 12,
+            'Click a key to rebind. Press Esc to cancel.', {
+                fontSize: '12px', fontFamily: 'Orbitron', color: '#94a3b8'
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(999).setVisible(true);
+
+        const keyMapLabelTexts = [];
+        const keyMapValueTexts = [];
+        const entriesPerColumn = Math.ceil(KEY_BINDING_ACTIONS.length / 2);
+        KEY_BINDING_ACTIONS.forEach((action, index) => {
+            const column = index < entriesPerColumn ? 0 : 1;
+            const row = column === 0 ? index : index - entriesPerColumn;
+            const xBase = column === 0 ? panelLeft + 18 : panelLeft + keyMapPanel.width / 2 + 12;
+            const y = panelTop + 36 + row * 26;
+
+            const label = scene.add.text(xBase, y, `${action.label}:`, {
+                fontSize: '13px', fontFamily: 'Orbitron', color: '#e2e8f0'
+            }).setOrigin(0, 0).setScrollFactor(0).setDepth(999).setVisible(true);
+
+            const value = scene.add.text(xBase + 150, y, `[ ${formatKeyLabel(userSettings.keyBindings[action.id])} ]`, {
+                fontSize: '13px', fontFamily: 'Orbitron', color: '#38bdf8'
+            }).setOrigin(0, 0).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true }).setVisible(true);
+
+            value.on('pointerover', () => value.setColor('#7dd3fc'));
+            value.on('pointerout', () => value.setColor('#38bdf8'));
+
+            keyMapLabelTexts.push(label);
+            keyMapValueTexts.push({ actionId: action.id, text: value });
+        });
 
         scene.pauseUI = { 
-            overlay, pauseTitle, resumeText, menuText, keyMapButton,
+            overlay, pauseTitle, resumeText, menuText, keyMapButton, keyMapButtonBg,
             volumeTitle, musicLabel, musicSlider, musicKnob, sfxLabel, sfxSlider, sfxKnob,
             flashLabel, flashToggle, flashThumb, flashText,
-            keyMapPanel, keyMapDetails
+            keyMapPanel, keyMapHint, keyMapLabelTexts, keyMapValueTexts
         };
 
         resumeText.on('pointerdown', () => togglePause(scene));
         menuText.on('pointerdown', () => returnToMainMenu(scene));
         
         let dragTarget = null;
+
+        const updateKeyMapValues = () => {
+            keyMapValueTexts.forEach(({ actionId, text }) => {
+                text.setText(`[ ${formatKeyLabel(userSettings.keyBindings[actionId])} ]`);
+            });
+        };
+
+        const setKeyMapVisibility = (visible) => {
+            keyMapPanel.setVisible(visible);
+            keyMapHint.setVisible(visible);
+            keyMapLabelTexts.forEach(text => text.setVisible(visible));
+            keyMapValueTexts.forEach(({ text }) => text.setVisible(visible));
+            keyMapButton.setText(visible ? 'HIDE KEY BINDINGS' : 'SHOW KEY BINDINGS');
+        };
+
+        const cancelRebind = () => {
+            scene.isRebindingKey = false;
+            keyMapHint.setText('Click a key to rebind. Press Esc to cancel.').setColor('#94a3b8');
+            if (scene.keyRebindHandler) {
+                scene.input.keyboard.off('keydown', scene.keyRebindHandler);
+                scene.keyRebindHandler = null;
+            }
+        };
+
+        const startKeyRebind = (actionId, actionLabel) => {
+            if (!keyMapPanel.visible) setKeyMapVisibility(true);
+            if (scene.keyRebindHandler) {
+                scene.input.keyboard.off('keydown', scene.keyRebindHandler);
+                scene.keyRebindHandler = null;
+            }
+            scene.isRebindingKey = true;
+            keyMapHint.setText(`Press a key for ${actionLabel} (Esc to cancel).`).setColor('#fbbf24');
+
+            scene.keyRebindHandler = (event) => {
+                if (event.key === 'Escape') {
+                    cancelRebind();
+                    return;
+                }
+                const normalized = normalizeKeyName(event);
+                if (!normalized || !Phaser.Input.Keyboard.KeyCodes[normalized]) {
+                    keyMapHint.setText('Unsupported key. Try another.').setColor('#f87171');
+                    return;
+                }
+                const existingAction = Object.keys(userSettings.keyBindings).find(key => userSettings.keyBindings[key] === normalized);
+                if (existingAction && existingAction !== actionId) {
+                    const conflict = KEY_BINDING_ACTIONS.find(action => action.id === existingAction);
+                    keyMapHint.setText(`Already bound to ${conflict?.label || existingAction}.`).setColor('#f87171');
+                    return;
+                }
+                userSettings.keyBindings[actionId] = normalized;
+                persistUserSettings();
+                if (scene.refreshKeyBindings) scene.refreshKeyBindings();
+                updateKeyMapValues();
+                cancelRebind();
+            };
+            scene.input.keyboard.on('keydown', scene.keyRebindHandler);
+        };
+
         const toggleKeyMap = () => {
-            const next = !keyMapPanel.visible;
-            keyMapPanel.setVisible(next);
-            keyMapDetails.setVisible(next);
+            setKeyMapVisibility(!keyMapPanel.visible);
         };
 
         keyMapButton.on('pointerdown', toggleKeyMap);
+        keyMapButtonBg.on('pointerdown', toggleKeyMap);
+        keyMapValueTexts.forEach(({ actionId, text }) => {
+            const actionLabel = KEY_BINDING_ACTIONS.find(action => action.id === actionId)?.label || actionId;
+            text.on('pointerdown', () => startKeyRebind(actionId, actionLabel));
+        });
         musicKnob.on('pointerdown', () => { dragTarget = 'music'; });
         sfxKnob.on('pointerdown', () => { dragTarget = 'sfx'; });
         flashToggle.on('pointerdown', () => toggleFlashReduction(flashThumb, flashText));
@@ -505,9 +669,15 @@ function togglePause(scene) {
         scene.pauseHandlers = { onPointerUp, onPointerMove };
         
         if (scene.menuKeyHandler) scene.input.keyboard.off('keydown-M', scene.menuKeyHandler);
-        scene.menuKeyHandler = () => returnToMainMenu(scene);
+        scene.menuKeyHandler = () => {
+            if (scene.isRebindingKey) return;
+            returnToMainMenu(scene);
+        };
         scene.input.keyboard.once('keydown-M', scene.menuKeyHandler);
-        scene.keyMapHandler = () => toggleKeyMap();
+        scene.keyMapHandler = () => {
+            if (scene.isRebindingKey) return;
+            toggleKeyMap();
+        };
         scene.input.keyboard.on('keydown-K', scene.keyMapHandler);
 
     } else {
@@ -518,7 +688,17 @@ function togglePause(scene) {
 
 function cleanupPauseUI(scene) {
     if (scene.pauseUI) {
-        Object.values(scene.pauseUI).forEach(el => el.destroy());
+        Object.values(scene.pauseUI).forEach(el => {
+            if (!el) return;
+            if (Array.isArray(el)) {
+                el.forEach(item => {
+                    const target = item?.text || item;
+                    if (target && target.destroy) target.destroy();
+                });
+                return;
+            }
+            if (el.destroy) el.destroy();
+        });
         scene.pauseUI = null;
     }
     if (scene.pauseHandlers) {
@@ -526,6 +706,11 @@ function cleanupPauseUI(scene) {
         scene.input.off('pointermove', scene.pauseHandlers.onPointerMove);
         scene.pauseHandlers = null;
     }
+    if (scene.keyRebindHandler) {
+        scene.input.keyboard.off('keydown', scene.keyRebindHandler);
+        scene.keyRebindHandler = null;
+    }
+    scene.isRebindingKey = false;
     if (scene.menuKeyHandler) {
         scene.input.keyboard.off('keydown-M', scene.menuKeyHandler);
         scene.menuKeyHandler = null;
