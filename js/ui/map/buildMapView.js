@@ -7,7 +7,7 @@ const GLOBE_LAYOUT = {
     centerYRatio: 0.75,
     radiusScale: 0.23,
     minRadius: 100,
-    maxRadius: 400
+    maxRadius: 280
 };
 
 class BuildMapView {
@@ -155,8 +155,12 @@ class BuildMapView {
         this.centerX = safeWidth * layout.centerXRatio;
         this.centerY = safeHeight * layout.centerYRatio;
 
-        const minDim = Math.min(safeWidth, safeHeight);
-        const baseRadius = minDim * layout.radiusScale;
+        // NEW LOGIC: We calculate size primarily based on Width.
+        // Even if Height is huge (doubled), we ignore the extra height for radius calculation.
+        // This ensures the container grows, but the globe does not.
+        const constrainingDimension = Math.min(safeWidth, safeHeight * 0.6); 
+
+        const baseRadius = constrainingDimension * layout.radiusScale; // Uses the scale 0.18
         
         this.globeRadius = Phaser.Math.Clamp(
             baseRadius, 

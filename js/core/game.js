@@ -345,6 +345,7 @@ function create() {
     // Hide the BuildScene if it's active
     if (this.scene.isActive(SCENE_KEYS.build)) {
         this.scene.setVisible(false, SCENE_KEYS.build);
+        this.scene.sleep(SCENE_KEYS.build); // Ensure it stops updating
     }
     
     // Mark that the game scene has been properly initialized
@@ -642,34 +643,32 @@ window.addEventListener('orientationchange', () => {
 // ------------------------
 function applyResponsiveResize(options = {}) {
     const { force = false } = options;
-    // 1. Safety check: If the game or scale manager isn't ready, abort.
+    
+    // 1. Safety check
     if (!game || !game.scale || !game.canvas) return;
 
-    // 2. District Mode check:
-    // If we are currently looking at the District Map, we DO NOT want to resize 
-    // based on the window. The DistrictLayoutManager handles the size (100% of the panel).
-    if (!force && window.DistrictLayoutManager && 
+    // 2. District Mode Logic:
+    // If we are in District Mode, simply force the canvas to fill the container.
+    // This allows the globe to use the full resolution of your new larger container.
+    if (window.DistrictLayoutManager && 
         window.DistrictLayoutManager.getCurrentLayout && 
         window.DistrictLayoutManager.getCurrentLayout() === 'district') {
-        return;
+        
+        const container = document.getElementById('district-game-container');
+        if (container && container.clientWidth > 0 && container.clientHeight > 0) {
+            // Resize Phaser to match the container exactly
+            game.scale.resize(container.clientWidth, container.clientHeight);
+            game.scale.refresh();
+        }
+        return; 
     }
 
-    // 3. NEW: Check if GameScene is active and already initialized
-    // Don't resize an active game that's already been set up
-    const gameScene = game.scene.getScene(SCENE_KEYS.game);
-    if (!force && gameScene && gameScene.scene.isActive() && gameSceneInitialized) {
-        console.log('[ResponsiveResize] Blocked: GameScene already initialized and active');
-        return;
-    }
-
-    // 4. Normal Game Mode logic:
-    // Calculate the best fit for the window (e.g. 1000x500 or smaller for mobile)
+    // 3. Normal Game Mode Logic:
     const { width, height } = getResponsiveScale();
     
-    // Only resize if the dimensions are valid (prevents 0x0 errors)
+    // Only resize if the dimensions are valid
     if (width > 0 && height > 0) {
         console.log(`[ResponsiveResize] Updating game size to: ${width}x${height}`);
-        console.log('[ResponsiveResize] Resizing game canvas for responsive layout');
         
         // Force Phaser to use these dimensions
         game.scale.resize(width, height);
