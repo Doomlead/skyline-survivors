@@ -400,6 +400,10 @@ function togglePause(scene) {
         const menuText = scene.add.text(centerX + 120, centerY - 20, '[ M ] MAIN MENU', {
             fontSize: '20px', fontFamily: 'Orbitron', color: '#ffff00', stroke: '#000000', strokeThickness: 4
         }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
+        
+        const keyMapButton = scene.add.text(centerX, centerY + 160, '[ K ] KEY MAPPING', {
+            fontSize: '18px', fontFamily: 'Orbitron', color: '#38bdf8', stroke: '#000000', strokeThickness: 3
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
         // Volume Controls
         const volumeTitle = scene.add.text(centerX, centerY + 30, 'VOLUME', {
@@ -441,16 +445,35 @@ function togglePause(scene) {
             fontSize: '14px', fontFamily: 'Orbitron', color: userSettings.reduceFlashes ? '#22c55e' : '#38bdf8'
         }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(999);
 
+        const keyMapPanel = scene.add.rectangle(centerX, centerY + 230, 360, 140, 0x0b1220, 0.9)
+            .setScrollFactor(0)
+            .setDepth(998)
+            .setStrokeStyle(2, 0x00ffff, 0.6)
+            .setVisible(false);
+        const keyMapDetails = scene.add.text(centerX, centerY + 230,
+            'ARROW KEYS: Move/Aim\nUP: Jump/Aim Up\nDOWN: Aim Down (air)\nSPACE: Fire\nSHIFT: Transform\nMOUSE: Aim (Guardian)\nB: Bomb  E: Eject  R: Enter Mech\nQ: Hyperspace  P: Pause  M: Main Menu', {
+            fontSize: '13px', fontFamily: 'Orbitron', color: '#e2e8f0', align: 'center',
+            wordWrap: { width: 340, useAdvancedWrap: true }
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setVisible(false);
+
         scene.pauseUI = { 
-            overlay, pauseTitle, resumeText, menuText, 
+            overlay, pauseTitle, resumeText, menuText, keyMapButton,
             volumeTitle, musicLabel, musicSlider, musicKnob, sfxLabel, sfxSlider, sfxKnob,
-            flashLabel, flashToggle, flashThumb, flashText
+            flashLabel, flashToggle, flashThumb, flashText,
+            keyMapPanel, keyMapDetails
         };
 
         resumeText.on('pointerdown', () => togglePause(scene));
         menuText.on('pointerdown', () => returnToMainMenu(scene));
         
         let dragTarget = null;
+        const toggleKeyMap = () => {
+            const next = !keyMapPanel.visible;
+            keyMapPanel.setVisible(next);
+            keyMapDetails.setVisible(next);
+        };
+
+        keyMapButton.on('pointerdown', toggleKeyMap);
         musicKnob.on('pointerdown', () => { dragTarget = 'music'; });
         sfxKnob.on('pointerdown', () => { dragTarget = 'sfx'; });
         flashToggle.on('pointerdown', () => toggleFlashReduction(flashThumb, flashText));
@@ -484,6 +507,8 @@ function togglePause(scene) {
         if (scene.menuKeyHandler) scene.input.keyboard.off('keydown-M', scene.menuKeyHandler);
         scene.menuKeyHandler = () => returnToMainMenu(scene);
         scene.input.keyboard.once('keydown-M', scene.menuKeyHandler);
+        scene.keyMapHandler = () => toggleKeyMap();
+        scene.input.keyboard.on('keydown-K', scene.keyMapHandler);
 
     } else {
         scene.physics.resume();
@@ -504,6 +529,10 @@ function cleanupPauseUI(scene) {
     if (scene.menuKeyHandler) {
         scene.input.keyboard.off('keydown-M', scene.menuKeyHandler);
         scene.menuKeyHandler = null;
+    }
+    if (scene.keyMapHandler) {
+        scene.input.keyboard.off('keydown-K', scene.keyMapHandler);
+        scene.keyMapHandler = null;
     }
 }
 
