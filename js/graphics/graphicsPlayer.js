@@ -1,418 +1,193 @@
 // ------------------------
-// Player Graphics - Ship
+// Player Graphics - Veritech
 // ------------------------
 
 function createPlayerGraphics(scene) {
+    // Shared Color Palette (Ensures consistency between modes)
+    const PALETTE = {
+        hull: 0xcccccc,        // Main body (Light Grey/White)
+        hullDark: 0x999999,    // Shaded hull
+        accent: 0x3366cc,      // Stripe color (Blue - similar to previous file)
+        glass: 0x44aaff,       // Cockpit glass
+        glassHi: 0xccffff,     // Glass reflection
+        metal: 0x4a4a5a,       // Engine/Gun/Joints
+        metalDark: 0x2a2a35,   // Darker metal
+        thruster: 0xffaa00,    // Engine glow
+        black: 0x111111        // Panel lines/Deep shadow
+    };
+
+    // Helper to draw a "pixel" rectangle
+    // This mocks pixel art by drawing sharp blocks
+    const drawPixel = (g, x, y, w, h, color, alpha = 1) => {
+        g.fillStyle(color, alpha);
+        g.fillRect(x, y, w, h);
+    };
+
+    // ==========================================
+    // 1. JET FIGHTER MODE (Fighter)
+    // ==========================================
     const g = scene.add.graphics();
-    const w = 64, h = 32;
-    const cy = h / 2; // Center Y = 16
+    const w = 80, h = 40; // Slightly larger canvas for detail
+    
+    // -- Drop Shadow --
+    drawPixel(g, 20, 28, 50, 6, 0x000000, 0.4);
 
-    // ========================
-    // DROP SHADOW
-    // ========================
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(32, cy + 3, 50, 12);
+    // -- Engine Afterburners (Rear) --
+    // Top Engine Flame
+    drawPixel(g, 0, 12, 10, 4, 0xff5500, 0.8);
+    drawPixel(g, 2, 13, 6, 2, 0xffff00, 1);
+    // Bottom Engine Flame
+    drawPixel(g, 0, 22, 10, 4, 0xff5500, 0.8);
+    drawPixel(g, 2, 23, 6, 2, 0xffff00, 1);
 
-    // ========================
-    // ENGINE EXHAUST FLAMES
-    // ========================
+    // -- Rear Legs/Thrusters (Folded back) --
+    // Top Leg
+    drawPixel(g, 10, 8, 30, 10, PALETTE.hull);
+    drawPixel(g, 10, 11, 28, 4, PALETTE.accent); // Stripe
+    drawPixel(g, 38, 8, 4, 10, PALETTE.metal);   // Nozzle ring
     
-    // Outer flame (red)
-    g.fillStyle(0xff3300, 0.9);
-    g.beginPath();
-    g.moveTo(6, cy - 4);
-    g.lineTo(-6, cy);
-    g.lineTo(6, cy + 4);
-    g.closePath();
-    g.fillPath();
-    
-    // Middle flame (orange)
-    g.fillStyle(0xff7700, 1);
-    g.beginPath();
-    g.moveTo(6, cy - 3);
-    g.lineTo(-2, cy);
-    g.lineTo(6, cy + 3);
-    g.closePath();
-    g.fillPath();
-    
-    // Inner flame (yellow)
-    g.fillStyle(0xffcc00, 1);
-    g.beginPath();
-    g.moveTo(6, cy - 2);
-    g.lineTo(2, cy);
-    g.lineTo(6, cy + 2);
-    g.closePath();
-    g.fillPath();
-    
-    // Hot core
-    g.fillStyle(0xffffff, 0.9);
-    g.fillEllipse(5, cy, 2, 1.5);
-    
-    // Flame glow
-    g.fillStyle(0xff5500, 0.2);
-    g.fillEllipse(-2, cy, 12, 8);
+    // Bottom Leg
+    drawPixel(g, 10, 20, 30, 10, PALETTE.hull);
+    drawPixel(g, 10, 23, 28, 4, PALETTE.accent); // Stripe
+    drawPixel(g, 38, 20, 4, 10, PALETTE.metal);   // Nozzle ring
 
-    // ========================
-    // ENGINE BLOCK
-    // ========================
+    // -- Wings (Variable Sweep) --
+    // Far Wing (Left/Top) - darker because it's behind
+    drawPixel(g, 20, 2, 25, 8, PALETTE.hullDark); 
+    drawPixel(g, 42, 2, 2, 8, PALETTE.accent);    // Wing tip
     
-    // Main engine housing
-    g.fillStyle(0x2a2a3d, 1);
-    g.fillRect(4, cy - 6, 10, 12);
-    
-    // Engine face plate
-    g.fillStyle(0x3d3d55, 1);
-    g.fillRect(6, cy - 5, 6, 10);
-    
-    // Engine nozzle rim
-    g.lineStyle(2, 0x4a4a66, 1);
-    g.beginPath();
-    g.moveTo(5, cy - 5);
-    g.lineTo(5, cy + 5);
-    g.strokePath();
-    
-    // Engine vents
-    g.fillStyle(0x1a1a28, 1);
-    g.fillRect(8, cy - 4, 3, 2);
-    g.fillRect(8, cy + 2, 3, 2);
-    
-    // Engine glow lines
-    g.fillStyle(0x00aaff, 0.4);
-    g.fillRect(6, cy - 1, 4, 2);
+    // Near Wing (Right/Bottom)
+    drawPixel(g, 15, 24, 30, 2, PALETTE.hull);    // Wing edge
+    drawPixel(g, 18, 26, 25, 6, PALETTE.hull);    // Main wing
+    drawPixel(g, 40, 26, 3, 6, PALETTE.accent);   // Wing tip
+    drawPixel(g, 42, 24, 2, 2, 0x00ff00);         // Nav light
 
-    // ========================
-    // MAIN FUSELAGE (BODY)
-    // ========================
-    
-    // Bottom hull (darker)
-    g.fillStyle(0x1a5070, 1);
-    g.beginPath();
-    g.moveTo(12, cy);
-    g.lineTo(14, cy + 7);
-    g.lineTo(50, cy + 5);
-    g.lineTo(58, cy + 2);
-    g.lineTo(58, cy);
-    g.closePath();
-    g.fillPath();
-    
-    // Top hull (lighter - lit side)
-    g.fillStyle(0x2a8cb0, 1);
-    g.beginPath();
-    g.moveTo(12, cy);
-    g.lineTo(14, cy - 7);
-    g.lineTo(50, cy - 5);
-    g.lineTo(58, cy - 2);
-    g.lineTo(58, cy);
-    g.closePath();
-    g.fillPath();
-    
-    // Hull center stripe
-    g.fillStyle(0x40b0d8, 1);
-    g.fillRect(14, cy - 1, 44, 2);
-    
-    // Hull highlight
-    g.fillStyle(0x60d0f0, 0.6);
-    g.fillRect(20, cy - 3, 30, 1);
+    // -- Vertical Stabilizers (Tail Fins) --
+    // We only see the side of one clearly
+    drawPixel(g, 12, 4, 14, 8, PALETTE.hull);
+    drawPixel(g, 14, 5, 10, 4, PALETTE.accent);   // Stripe
+    drawPixel(g, 16, 6, 4, 2, PALETTE.black);     // Insignia placeholder
 
-    // ========================
-    // NOSE CONE
-    // ========================
-    
-    // Nose top
-    g.fillStyle(0x35a0c8, 1);
-    g.beginPath();
-    g.moveTo(56, cy - 3);
-    g.lineTo(64, cy);
-    g.lineTo(56, cy);
-    g.closePath();
-    g.fillPath();
-    
-    // Nose bottom
-    g.fillStyle(0x1a6080, 1);
-    g.beginPath();
-    g.moveTo(56, cy);
-    g.lineTo(64, cy);
-    g.lineTo(56, cy + 3);
-    g.closePath();
-    g.fillPath();
-    
-    // Nose tip highlight
-    g.fillStyle(0xffffff, 0.7);
-    g.fillCircle(62, cy - 1, 1);
+    // -- Main Fuselage & Nose --
+    drawPixel(g, 35, 14, 25, 10, PALETTE.hull);   // Body Center
+    drawPixel(g, 55, 15, 15, 8, PALETTE.hull);    // Nose Cone base
+    drawPixel(g, 70, 16, 6, 6, PALETTE.metal);    // Nose tip radar
+    drawPixel(g, 76, 17, 2, 4, 0xffffff);         // Tip highlight
 
-    // ========================
-    // TOP FIN/WING
-    // ========================
+    // -- Intake Vents (Shoulders) --
+    drawPixel(g, 40, 12, 10, 4, PALETTE.black);   // Top Intake
+    drawPixel(g, 40, 22, 10, 4, PALETTE.black);   // Bottom Intake
     
-    // Fin base (darker)
-    g.fillStyle(0x1a6080, 1);
-    g.beginPath();
-    g.moveTo(20, cy - 6);
-    g.lineTo(28, cy - 14);
-    g.lineTo(40, cy - 12);
-    g.lineTo(44, cy - 5);
-    g.closePath();
-    g.fillPath();
+    // -- Cockpit (Canopy) --
+    drawPixel(g, 48, 12, 14, 6, PALETTE.glass);
+    drawPixel(g, 52, 13, 8, 2, PALETTE.glassHi);  // Glare
     
-    // Fin surface (lighter)
-    g.fillStyle(0x2890b0, 1);
-    g.beginPath();
-    g.moveTo(22, cy - 6);
-    g.lineTo(29, cy - 13);
-    g.lineTo(38, cy - 11);
-    g.lineTo(42, cy - 6);
-    g.closePath();
-    g.fillPath();
-    
-    // Fin edge highlight
-    g.lineStyle(1, 0x50c0e0, 0.8);
-    g.beginPath();
-    g.moveTo(28, cy - 14);
-    g.lineTo(40, cy - 12);
-    g.strokePath();
-    
-    // Fin nav light (red - port)
-    g.fillStyle(0xff0000, 1);
-    g.fillCircle(30, cy - 13, 1.5);
-    g.fillStyle(0xff0000, 0.3);
-    g.fillCircle(30, cy - 13, 3);
+    // -- Gun Pod (GU-11) --
+    // Slung underneath the fuselage
+    drawPixel(g, 35, 25, 20, 4, PALETTE.metalDark);
+    drawPixel(g, 55, 26, 6, 2, PALETTE.metal);    // Barrel
 
-    // ========================
-    // BOTTOM FIN/WING
-    // ========================
-    
-    // Fin base
-    g.fillStyle(0x145060, 1);
-    g.beginPath();
-    g.moveTo(20, cy + 6);
-    g.lineTo(28, cy + 14);
-    g.lineTo(40, cy + 12);
-    g.lineTo(44, cy + 5);
-    g.closePath();
-    g.fillPath();
-    
-    // Fin surface
-    g.fillStyle(0x1a7090, 1);
-    g.beginPath();
-    g.moveTo(22, cy + 6);
-    g.lineTo(29, cy + 13);
-    g.lineTo(38, cy + 11);
-    g.lineTo(42, cy + 6);
-    g.closePath();
-    g.fillPath();
-    
-    // Fin nav light (green - starboard)
-    g.fillStyle(0x00ff00, 1);
-    g.fillCircle(30, cy + 13, 1.5);
-    g.fillStyle(0x00ff00, 0.3);
-    g.fillCircle(30, cy + 13, 3);
+    // -- Panel Lines / Details --
+    drawPixel(g, 45, 14, 1, 10, PALETTE.black, 0.3); // Neck seam
+    drawPixel(g, 60, 15, 1, 8, PALETTE.black, 0.3);  // Radome seam
 
-    // ========================
-    // COCKPIT
-    // ========================
-    
-    // Cockpit frame
-    g.fillStyle(0x1a3a4a, 1);
-    g.beginPath();
-    g.moveTo(36, cy - 6);
-    g.lineTo(52, cy - 4);
-    g.lineTo(52, cy - 1);
-    g.lineTo(36, cy - 2);
-    g.closePath();
-    g.fillPath();
-    
-    // Cockpit glass
-    g.fillStyle(0x00e0ff, 0.8);
-    g.beginPath();
-    g.moveTo(38, cy - 5);
-    g.lineTo(50, cy - 4);
-    g.lineTo(50, cy - 2);
-    g.lineTo(38, cy - 3);
-    g.closePath();
-    g.fillPath();
-    
-    // Glass reflection
-    g.fillStyle(0xffffff, 0.8);
-    g.fillEllipse(42, cy - 4.5, 4, 1);
-    g.fillStyle(0x80ffff, 0.4);
-    g.fillEllipse(46, cy - 3, 3, 1);
-    
-    // Cockpit frame line
-    g.lineStyle(1, 0x0a2a3a, 1);
-    g.beginPath();
-    g.moveTo(44, cy - 5);
-    g.lineTo(44, cy - 2);
-    g.strokePath();
-
-    // ========================
-    // MAIN CANNON
-    // ========================
-    
-    // Cannon mount
-    g.fillStyle(0x3a3a50, 1);
-    g.fillRect(44, cy + 2, 12, 3);
-    
-    // Cannon barrel
-    g.fillStyle(0x4a4a65, 1);
-    g.fillRect(56, cy + 2.5, 8, 2);
-    
-    // Cannon tip
-    g.fillStyle(0x2a2a40, 1);
-    g.fillRect(62, cy + 2.5, 2, 2);
-    
-    // Cannon energy glow
-    g.fillStyle(0x00ff88, 0.9);
-    g.fillCircle(64, cy + 3.5, 1);
-    g.fillStyle(0x00ff88, 0.3);
-    g.fillCircle(64, cy + 3.5, 2.5);
-    
-    // Cannon detail lines
-    g.lineStyle(1, 0x5a5a75, 0.7);
-    g.beginPath();
-    g.moveTo(48, cy + 2);
-    g.lineTo(48, cy + 5);
-    g.strokePath();
-    g.beginPath();
-    g.moveTo(52, cy + 2);
-    g.lineTo(52, cy + 5);
-    g.strokePath();
-
-    // ========================
-    // PANEL LINES & DETAILS
-    // ========================
-    
-    // Hull panel lines
-    g.lineStyle(1, 0x104050, 0.6);
-    g.beginPath();
-    g.moveTo(24, cy - 5);
-    g.lineTo(24, cy + 5);
-    g.strokePath();
-    g.beginPath();
-    g.moveTo(34, cy - 5);
-    g.lineTo(34, cy + 5);
-    g.strokePath();
-    g.beginPath();
-    g.moveTo(48, cy - 4);
-    g.lineTo(48, cy + 2);
-    g.strokePath();
-    
-    // Intake vent
-    g.fillStyle(0x0a3040, 1);
-    g.fillRect(16, cy - 4, 6, 2);
-    g.fillRect(16, cy + 2, 6, 2);
-    
-    // Small detail dots (rivets/bolts)
-    g.fillStyle(0x50a0c0, 0.7);
-    g.fillCircle(18, cy - 1, 0.8);
-    g.fillCircle(18, cy + 1, 0.8);
-    g.fillCircle(28, cy, 0.8);
-    g.fillCircle(40, cy, 0.8);
-
-    // ========================
-    // SHIELD GENERATOR (center detail)
-    // ========================
-    g.fillStyle(0x3050a0, 1);
-    g.fillCircle(26, cy, 3);
-    g.fillStyle(0x5080ff, 0.7);
-    g.fillCircle(26, cy, 2);
-    g.fillStyle(0xaaccff, 0.9);
-    g.fillCircle(26, cy, 1);
-    
-    // Shield glow
-    g.fillStyle(0x5080ff, 0.15);
-    g.fillCircle(26, cy, 5);
-
-    // ========================
-    // ACCENT STRIPE
-    // ========================
-    g.fillStyle(0xff6600, 1);
-    g.beginPath();
-    g.moveTo(14, cy - 6);
-    g.lineTo(16, cy - 6);
-    g.lineTo(54, cy - 4);
-    g.lineTo(54, cy - 3);
-    g.lineTo(16, cy - 5);
-    g.lineTo(14, cy - 5);
-    g.closePath();
-    g.fillPath();
-
-    // ========================
-    // FINAL EDGE HIGHLIGHTS
-    // ========================
-    
-    // Top edge rim light
-    g.lineStyle(1, 0x80e0ff, 0.4);
-    g.beginPath();
-    g.moveTo(14, cy - 7);
-    g.lineTo(50, cy - 5);
-    g.lineTo(58, cy - 2);
-    g.strokePath();
-    
-    // Nose edge
-    g.lineStyle(1, 0xffffff, 0.3);
-    g.beginPath();
-    g.moveTo(58, cy - 2);
-    g.lineTo(64, cy);
-    g.strokePath();
-
-    // ========================
-    // GENERATE TEXTURE
-    // ========================
     g.generateTexture('veritech_fighter', w, h);
     g.destroy();
 
-    // ========================
-    // GUARDIAN MODE (MECH)
-    // ========================
-    const guardian = scene.add.graphics();
-    const gw = 48, gh = 44;
-    const gx = gw / 2;
-    const gy = gh / 2;
 
-    guardian.fillStyle(0x1f1f2a, 0.5);
-    guardian.fillEllipse(gx, gh - 6, 36, 10);
+    // ==========================================
+    // 2. GUARDIAN MODE (Gerwalk)
+    // ==========================================
+    // Half-Jet, Half-Robot. Distinctive "Chicken Walker" legs.
+    const gg = scene.add.graphics();
+    const gw = 72, gh = 64; 
+    
+    // -- Drop Shadow --
+    drawPixel(gg, 20, 50, 40, 8, 0x000000, 0.4);
 
-    guardian.fillStyle(0xdddddd, 1);
-    guardian.fillRect(gx - 10, gy - 6, 20, 18);
-    guardian.fillStyle(0x888888, 1);
-    guardian.fillRect(gx - 16, gy - 2, 6, 10);
-    guardian.fillRect(gx + 10, gy - 2, 6, 10);
+    // -- The Legs (Distinctive feature) --
+    // Far Leg (Background)
+    drawPixel(gg, 20, 30, 8, 14, PALETTE.metalDark); // Thigh
+    drawPixel(gg, 12, 40, 12, 6, PALETTE.hullDark);  // Shin
+    drawPixel(gg, 8, 46, 14, 4, PALETTE.metalDark);  // Foot
 
-    guardian.fillStyle(0x444444, 1);
-    guardian.fillRect(gx - 8, gy + 12, 8, 12);
-    guardian.fillRect(gx + 0, gy + 12, 8, 12);
-    guardian.fillStyle(0x222222, 1);
-    guardian.fillRect(gx - 10, gy + 22, 12, 6);
-    guardian.fillRect(gx + -2, gy + 22, 12, 6);
+    // -- The Arms/Gun Pod --
+    // Gun Pod (Held in hand)
+    drawPixel(gg, 45, 38, 24, 6, PALETTE.metalDark); // Main Gun Body
+    drawPixel(gg, 69, 40, 3, 2, 0xffaa00);           // Muzzle heat
+    
+    // Right Arm (Holding gun)
+    drawPixel(gg, 38, 28, 8, 12, PALETTE.hull);      // Shoulder
+    drawPixel(gg, 40, 34, 6, 8, PALETTE.metal);      // Forearm
 
-    guardian.fillStyle(0xff3333, 1);
-    guardian.fillRect(gx - 12, gy - 14, 24, 6);
-    guardian.fillStyle(0x00ccff, 1);
-    guardian.fillRect(gx - 6, gy - 10, 12, 6);
+    // -- Main Body (Nose dipped down) --
+    // Fuselage
+    drawPixel(gg, 25, 15, 25, 12, PALETTE.hull);
+    
+    // Nose Cone (Angled slightly down)
+    drawPixel(gg, 45, 18, 18, 10, PALETTE.hull);
+    drawPixel(gg, 63, 20, 4, 6, PALETTE.metal);      // Tip
+    
+    // Cockpit
+    drawPixel(gg, 40, 14, 12, 5, PALETTE.glass);
+    drawPixel(gg, 42, 15, 6, 2, PALETTE.glassHi);
+    
+    // -- Backpack / Fins --
+    drawPixel(gg, 15, 5, 10, 15, PALETTE.hull);      // Pack body
+    drawPixel(gg, 12, 2, 4, 12, PALETTE.accent);     // Fin stripe
+    drawPixel(gg, 10, 0, 2, 14, PALETTE.metal);      // Antenna
 
-    guardian.generateTexture('veritech_guardian', gw, gh);
-    guardian.destroy();
+    // -- Near Leg (Foreground) --
+    // Thigh (angled forward)
+    drawPixel(gg, 28, 30, 12, 8, PALETTE.hull);      
+    drawPixel(gg, 30, 32, 8, 4, PALETTE.accent);     // Stripe on leg
+    
+    // Knee Joint
+    drawPixel(gg, 24, 34, 8, 8, PALETTE.metal);
+    
+    // Shin (angled back)
+    drawPixel(gg, 16, 38, 14, 10, PALETTE.hull);
+    drawPixel(gg, 18, 40, 10, 2, PALETTE.black, 0.5); // Vent
+    
+    // Foot (Thruster mode)
+    drawPixel(gg, 10, 48, 18, 6, PALETTE.metal);     // Foot base
+    drawPixel(gg, 8, 54, 22, 2, PALETTE.metalDark);  // Sole
+    
+    // Foot Thruster Flame (Hovering)
+    drawPixel(gg, 14, 56, 10, 4, PALETTE.thruster, 0.6);
 
-    // ========================
-    // PILOT
-    // ========================
-    const pilot = scene.add.graphics();
-    const pw = 18, ph = 22;
-    const px = pw / 2;
-    const py = ph / 2;
+    // -- Wings (Swept back fully in Guardian mode) --
+    drawPixel(gg, 20, 12, 15, 4, PALETTE.hullDark); // Wing root visible
 
-    pilot.fillStyle(0xffffff, 1);
-    pilot.fillCircle(px, 5, 4);
-    pilot.fillStyle(0x000000, 1);
-    pilot.fillRect(px - 1, 4, 4, 2);
-    pilot.fillStyle(0xff6600, 1);
-    pilot.fillRect(px - 4, 8, 8, 8);
-    pilot.fillStyle(0xffffff, 1);
-    pilot.fillRect(px - 3, 10, 6, 3);
-    pilot.fillStyle(0xffffff, 1);
-    pilot.fillRect(px - 5, 16, 4, 6);
-    pilot.fillRect(px + 1, 16, 4, 6);
+    gg.generateTexture('veritech_guardian', gw, gh);
+    gg.destroy();
 
-    pilot.generateTexture('pilot', pw, ph);
-    pilot.destroy();
+
+    // ==========================================
+    // 3. PILOT (Detailed)
+    // ==========================================
+    const gp = scene.add.graphics();
+    const pw = 24, ph = 24;
+    const cx = 12;
+
+    // Flight Suit (White/Orange straps - Rick Hunter style)
+    drawPixel(gp, cx-4, 10, 8, 10, 0xffffff); // Torso
+    drawPixel(gp, cx-4, 12, 8, 2, 0xff6600);  // Chest strap
+    drawPixel(gp, cx-1, 12, 2, 4, 0xaaaaaa);  // Buckle
+
+    // Helmet
+    drawPixel(gp, cx-5, 2, 10, 9, 0xffffff);  // Helmet White
+    drawPixel(gp, cx-4, 4, 8, 4, 0x111111);   // Visor Black
+    drawPixel(gp, cx-2, 4, 2, 2, 0x00ffff);   // HUD reflection
+    drawPixel(gp, cx-6, 5, 2, 4, 0xcc0000);   // Ear piece red
+    drawPixel(gp, cx+4, 5, 2, 4, 0xcc0000);   // Ear piece red
+    
+    // Arms/Legs
+    drawPixel(gp, cx-6, 11, 2, 6, 0xffffff);  // L Arm
+    drawPixel(gp, cx+4, 11, 2, 6, 0xffffff);  // R Arm
+    drawPixel(gp, cx-4, 20, 3, 4, 0xcccccc);  // L Leg
+    drawPixel(gp, cx+1, 20, 3, 4, 0xcccccc);  // R Leg
+
+    gp.generateTexture('pilot', pw, ph);
+    gp.destroy();
 }
