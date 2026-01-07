@@ -441,6 +441,7 @@ function create() {
     // Input
     applyKeyBindings(this);
     this.refreshKeyBindings = () => applyKeyBindings(this);
+    this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
     if (this._restartHandler) {
         this.input.keyboard.off('keydown-R', this._restartHandler);
@@ -460,6 +461,10 @@ function create() {
         if (this._restartHandler) {
             this.input.keyboard.off('keydown-R', this._restartHandler);
             this._restartHandler = null;
+        }
+        if (this.rKey) {
+            this.input.keyboard.removeKey(this.rKey);
+            this.rKey = null;
         }
         if (this.particleManager) {
             this.particleManager.destroy();
@@ -518,7 +523,7 @@ function update(time, delta) {
     }
     
     if (gameState.gameOver) {
-        if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
+        if (this.rKey && Phaser.Input.Keyboard.JustDown(this.rKey)) {
             resetGameState();
             this.scene.restart();
         }
