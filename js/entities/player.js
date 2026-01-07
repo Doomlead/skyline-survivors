@@ -1,5 +1,5 @@
 // ------------------------
-// Player mechanics and controls
+// file: js/entities/player.js
 // ------------------------
 
 function getActivePlayer(scene) {

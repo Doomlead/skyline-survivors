@@ -1,5 +1,5 @@
 // ------------------------
-// Game configuration and state
+// file: js/config/config.js
 // ------------------------
 
 const SCENE_KEYS = {
