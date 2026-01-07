@@ -9,7 +9,29 @@
 var backgroundGeneratorInstance = null;
 var parallaxManagerInstance = null;
 
-function createBackground(scene) {
+var BACKGROUND_STYLE_GENERATORS = {
+    cyberpunk: BackgroundGeneratorCyberpunk,
+    wasteland: BackgroundGeneratorWasteland,
+    industrial: BackgroundGeneratorIndustrial,
+};
+
+var BACKGROUND_STYLE_OPTIONS = Object.keys(BACKGROUND_STYLE_GENERATORS);
+
+function resolveBackgroundStyle(style) {
+    var requested = style || CONFIG.backgroundStyle;
+    if (requested) {
+        var normalized = requested.toLowerCase();
+        if (BACKGROUND_STYLE_GENERATORS[normalized]) {
+            return normalized;
+        }
+        console.warn('[BackgroundManager] Unknown background style "' + requested + '", falling back to random selection.');
+    }
+
+    var index = Math.floor(Math.random() * BACKGROUND_STYLE_OPTIONS.length);
+    return BACKGROUND_STYLE_OPTIONS[index];
+}
+
+function createBackground(scene, style) {
     var generatorConfig = {
         worldWidth: CONFIG.worldWidth,
         worldHeight: CONFIG.worldHeight,
@@ -18,7 +40,11 @@ function createBackground(scene) {
         backgroundSeed: CONFIG.backgroundSeed || 1337,
     };
 
-    backgroundGeneratorInstance = new BackgroundGenerator(scene, generatorConfig);
+    var styleToUse = resolveBackgroundStyle(style);
+    var GeneratorClass = BACKGROUND_STYLE_GENERATORS[styleToUse];
+
+    console.log('[BackgroundManager] Creating ' + styleToUse.toUpperCase() + ' background');
+    backgroundGeneratorInstance = new GeneratorClass(scene, generatorConfig);
     backgroundGeneratorInstance.generateAllTextures();
 
     parallaxManagerInstance = new ParallaxManager(scene, generatorConfig);
