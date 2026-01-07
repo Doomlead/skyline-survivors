@@ -165,7 +165,7 @@
 
 2. **Combat Mission:**
    - Fight on foot **with rescued operatives** (operative squad system missing)
-   - **Assault missions** still lack garrison forces and multi-phase core behavior
+   - **Assault missions** still lack multi-phase core behavior
 
 3. **Campaign Progression:**
    - Assault Mothership mission → Victory
@@ -753,7 +753,7 @@ Inventory Power-Ups
 |---------|-------------|---------------------|
 | **Districts - Three States** | Friendly, Threatened, Occupied | ✅ **Fully Implemented** |
 | **Mission Types - Defense** | 15 waves with tier progression | ✅ **Fully Implemented** |
-| **Mission Types - Assault** | Destroy enemy ground base | ⚠️ **Substantially Implemented** (core + shields + turrets ✅, garrison ❌) |
+| **Mission Types - Assault** | Destroy enemy ground base | ⚠️ **Substantially Implemented** (core + shields + turrets + garrison ✅) |
 | **Battleships** | Mini-bosses that attack districts | ✅ **Fully Implemented** (roaming ✅, wave 15 boss ✅) |
 | **Mothership** | Final boss unlocked when all districts secured | ⚠️ **Partially Implemented** (unlock ✅, mission ❌) |
 | **Strategic Layer** | Balance defending vs. reclaiming | ❌ **Not Implemented** |
@@ -790,8 +790,8 @@ Inventory Power-Ups
   - Defense Missions
   - District State System
 - **Substantially Complete:** 2/12 (17%) ⬆️
-  - Assault Missions (core loop + garrison defenders)
-  - System Map (all mechanics working)
+  - Assault Missions (core loop + garrison defenders + HUD)
+  - System Map (core mechanics working, strategic layer missing)
 - **Partially Complete:** 5/12 (42%)
   - Ground Combat
   - Meta Progression
@@ -806,14 +806,14 @@ Inventory Power-Ups
 ## Design Document Alignment
 
 **Overall Implementation:**
-- ✅ **Implemented:** ~62% ⬆️ (was ~55%)
-- ⚠️ **Partially Implemented:** ~28%
+- ✅ **Implemented:** ~60% ⬆️ (was ~55%)
+- ⚠️ **Partially Implemented:** ~30%
 - ❌ **Not Implemented:** ~10% ⬇️ (was ~12%)
 
 **By Category:**
 - **Core Gameplay Loop:** 85% complete
-- **Mission Systems:** 78% complete (Defense 90%, Assault 70%)
-- **Meta Systems:** 65% complete
+- **Mission Systems:** 80% complete (Defense 90%, Assault 75%)
+- **Meta Systems:** 60% complete
 - **Player Mechanics:** 70% complete (Ship 100%, Ground 35%)
 - **Enemy Design:** 85% complete
 - **Environmental:** 20% complete
@@ -826,7 +826,7 @@ Inventory Power-Ups
 ### ✅ Completed Major Systems:
 1. **District three-state system** - Friendly/Threatened/Occupied fully functional
 2. **15-wave defense structure** - Complete with tier progression (light/heavy/elite)
-3. **Assault mission core loop** - Base destruction with shields + turrets working
+3. **Assault mission core loop** - Base destruction with shields + turrets + garrison defenders
 4. **Complete district state transition flow** - All win/loss outcomes implemented
 5. **Battleship system** - Roaming threats + wave 15 boss fully functional
 6. **Mothership unlock condition** - Activates when all districts friendly
@@ -843,16 +843,15 @@ Inventory Power-Ups
 
 ## Immediate Next Steps (Recommended Order)
 
-### 🚨 CRITICAL: Complete MVP (5-8 days)
+### 🚨 CRITICAL: Complete MVP (6-10 days)
 
-**Priority 1: Mothership Final Boss (2-4 days)**
-- Create Mothership boss entity with HP system
-- Implement basic movement pattern (orbit or patrol)
-- Add attack pattern (projectile volleys)
-- Death triggers victory condition
-- *This is the ONLY blocker to a complete MVP*
+**Priority 1: Mothership Final Boss Mission (3-5 days)**
+- Build Phase 1 exterior assault + phase transitions
+- Implement Phase 2 interior encounters (on-foot focus) with objective gating
+- Build Phase 3 core boss with multi-step HP and shield phases
+- Tie victory condition to Mothership core destruction
 
-**Priority 2: Victory Screen (1 day)**
+**Priority 2: Campaign Victory Screen (1 day)**
 - "Campaign Complete!" message
 - Display campaign stats:
   - Time played
@@ -862,7 +861,11 @@ Inventory Power-Ups
 - "Return to Menu" button
 - Save victory to run history
 
-**Priority 3: Integration Testing (2-3 days)**
+**Priority 3: Assault Mission Failure Flow (1-2 days)**
+- Add retreat/retry loop for assault missions (district stays occupied)
+- Add mid-mission extraction or forced retreat to system map
+
+**Priority 4: Integration Testing (2-3 days)**
 - Full campaign playthrough testing
 - Balance pass on Mothership difficulty
 - Bug fixes and polish
@@ -892,22 +895,23 @@ Inventory Power-Ups
 ## Estimated Remaining Work
 
 ### MVP Completion:
-- **Current Progress:** ~92% complete
-- **Remaining Critical Work:** 
-  - Mothership Boss Mission: 2-4 days
+- **Current Progress:** ~88% complete
+- **Remaining Critical Work:**
+  - Mothership Boss Mission: 3-5 days
   - Victory Screen: 1 day
+  - Assault failure/retreat flow: 1-2 days
   - Testing & Polish: 2-3 days
-- **Total Time to Complete MVP:** 5-8 days
+- **Total Time to Complete MVP:** 6-10 days
 
 ### Full Design Document:
-- **High Priority Features:** ~30% remaining
-  - Assault mission polish
-  - Strategic campaign layer
-  - Enhanced rewards system
-- **Medium Priority Features:** ~60% remaining
-  - Ground combat depth
-  - Power-up progression tiers
-  - Environmental variety
+- **High Priority Features:** ~35% remaining
+  - Assault mission polish (multi-phase core, base rewards)
+  - Strategic campaign layer + planetary control tracker
+  - Enhanced rewards system + victory flow polish
+- **Medium Priority Features:** ~65% remaining
+  - Ground combat depth (operatives, weapons, cover)
+  - Power-up progression tiers (homing, drone, laser)
+  - Environmental variety (weather, day/night, district themes)
 - **Low Priority Features:** ~85% remaining
   - Additional game modes
   - District themes
@@ -918,8 +922,9 @@ Inventory Power-Ups
 ## Critical Missing Features for Design Document Compliance
 
 ### 🚨 MVP Blocker:
-1. **Mothership final boss mission** - ONLY feature preventing complete MVP
+1. **Mothership final boss mission** - Required for the campaign win condition
 
 ### 📋 Core Gameplay Polish:
-2. **Multi-phase core reactor** - Added challenge to assault missions
+2. **Assault mission failure/retreat loop** - Needed for proper occupied-district pacing
 3. **Strategic campaign layer** - Priority UI, district values, difficulty scaling
+4. **Multi-phase base reactor** - Added challenge to assault missions
