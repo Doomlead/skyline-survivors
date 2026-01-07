@@ -164,6 +164,10 @@ const DistrictLayoutManager = (function() {
         const defenseEquipped = loadout.defense?.find(o => o.equipped)?.name || 'Standard';
         updateElement('district-offense-slot', offenseEquipped);
         updateElement('district-defense-slot', defenseEquipped);
+
+        if (window.DistrictShop?.refresh) {
+            window.DistrictShop.refresh();
+        }
         
         updateModeButtons(selectedMode);
     }

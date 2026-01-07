@@ -143,6 +143,68 @@
             font-weight: bold;
         }
 
+        .district-shop-group {
+            margin-top: 10px;
+        }
+
+        .district-shop-subhead {
+            font-size: 10px;
+            color: #7dd3fc;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .district-shop-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(29, 202, 255, 0.3);
+            margin-bottom: 6px;
+        }
+
+        .district-shop-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .district-shop-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .district-shop-title {
+            font-size: 11px;
+            color: #e0f2fe;
+        }
+
+        .district-shop-desc {
+            font-size: 10px;
+            color: #94a3b8;
+        }
+
+        .district-shop-button {
+            border: 1px solid rgba(34, 211, 238, 0.7);
+            background: rgba(15, 23, 42, 0.9);
+            color: #dbeafe;
+            font-size: 10px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .district-shop-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: rgba(148, 163, 184, 0.4);
+        }
+
 		
 		#district-game-container {
 			flex: 1;
@@ -447,6 +509,23 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="district-panel-section" id="district-shop-panel">
+                        <h4>District Shop</h4>
+                        <p>Spend meta credits to unlock mission-start powerups and swap loadouts.</p>
+                        <div class="district-shop-group">
+                            <div class="district-shop-subhead">Offense Loadouts</div>
+                            <div id="district-shop-loadouts-offense"></div>
+                        </div>
+                        <div class="district-shop-group">
+                            <div class="district-shop-subhead">Defense Loadouts</div>
+                            <div id="district-shop-loadouts-defense"></div>
+                        </div>
+                        <div class="district-shop-group">
+                            <div class="district-shop-subhead">Unlockable Powerups</div>
+                            <div id="district-shop-items"></div>
+                        </div>
+                    </div>
                     
                     <div class="district-panel-section">
                         <h4>District Status</h4>
@@ -531,6 +610,7 @@
     <script src="js/ui/mainMenuScene.js"></script>
     <script src="js/ui/map/worldData.js"></script>
     <script src="js/ui/map/buildMapView.js"></script>
+    <script src="js/ui/districtShop.js"></script>
     <script src="js/ui/districtLayoutManager.js"></script>
     <script src="js/ui/mission/buildMissionUi.js"></script>
     <script src="js/ui/buildScene.js"></script>
