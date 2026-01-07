@@ -163,6 +163,6 @@ function createBaiterGraphics(scene) {
 
     baiterGraphics.generateTexture('baiter', btw, bth);
     baiterGraphics.destroy();
-    }
+    
 
 }
