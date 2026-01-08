@@ -2,20 +2,6 @@
 // File: js/ui/map/buildMapView.js
 // ------------------------
 
-import { createBackdrop, createStars, refreshBackdrop } from './globeBackdrop.js';
-import {
-    createBattleshipMarkers,
-    drawDistricts,
-    drawMarkers,
-    drawDistrictThreatPulse,
-    focusDistrict,
-    getDistrictCenterCoords,
-    initializeDistricts,
-    setupDistrictInteraction
-} from './globeDistricts.js';
-import { createOrbitNodes, flashConnector, updateOrbitNodesPositions } from './globeOrbitNodes.js';
-import { renderGlobe } from './globeRendering.js';
-
 const GLOBE_LAYOUT = {
     centerXRatio: .75,
     centerYRatio: 0.75,
@@ -186,25 +172,45 @@ class BuildMapView {
     }
 
     createStars() {
-        createStars(this.scene);
+        if (!this.scene.textures.exists('build-star')) {
+            const g = this.scene.add.graphics();
+            g.fillStyle(0xffffff, 1);
+            g.fillCircle(2, 2, 2);
+            g.generateTexture('build-star', 4, 4);
+            g.destroy();
+        }
+
+        this.scene.add.particles(0, 0, 'build-star', {
+            x: { min: 0, max: this.scene.scale.width },
+            y: { min: 0, max: this.scene.scale.height },
+            quantity: 2,
+            speedY: 6,
+            lifespan: 6000,
+            alpha: { start: 0.7, end: 0 },
+            scale: { start: 0.8, end: 0.4 },
+            blendMode: 'ADD'
+        });
     }
 
     createBackdrop(width, height) {
-        const { backdropGrid, backdropGlow } = createBackdrop(this.scene, width, height);
-        this.backdropGrid = backdropGrid;
-        this.backdropGlow = backdropGlow;
+        this.backdropGrid = this.scene.add.graphics();
+        this.backdropGrid.lineStyle(1, 0x102a3f, 0.4);
+        const spacing = 60;
+        for (let x = 0; x < width * 2; x += spacing) { 
+            this.backdropGrid.lineBetween(x, 0, x, height * 2);
+        }
+        for (let y = 0; y < height * 2; y += spacing) {
+            this.backdropGrid.lineBetween(0, y, width * 2, y);
+        }
+
+        this.backdropGlow = this.scene.add.circle(width / 2, height / 2 + 20, 180, 0x0b2a3b, 0.25);
+        this.backdropGlow.setBlendMode(Phaser.BlendModes.ADD);
     }
 
     refreshBackdrop(width, height) {
-        const { backdropGrid, backdropGlow } = refreshBackdrop(
-            this.scene,
-            width,
-            height,
-            this.backdropGrid,
-            this.backdropGlow
-        );
-        this.backdropGrid = backdropGrid;
-        this.backdropGlow = backdropGlow;
+        if (this.backdropGrid) this.backdropGrid.destroy();
+        if (this.backdropGlow) this.backdropGlow.destroy();
+        this.createBackdrop(width, height);
     }
 
     setupGlobeInput() {
@@ -268,51 +274,363 @@ class BuildMapView {
     }
 
     renderGlobe() {
-        renderGlobe(this);
+        if (!this.atmosphereGraphics) return;
+
+        this.atmosphereGraphics.clear();
+        this.oceanGraphics.clear();
+        this.gridGraphics.clear();
+        this.landGraphics.clear();
+        this.borderGraphics.clear();
+        this.districtGraphics.clear();
+        this.markerGraphics.clear();
+
+        this.drawAtmosphere();
+        this.drawOcean();
+        this.drawGrid();
+        this.drawAllLand();
+        this.drawDistricts();
+        this.drawMarkers();
+        this.drawGlobeRim();
+    }
+
+    drawAtmosphere() {
+        for (let i = 5; i > 0; i--) {
+            this.atmosphereGraphics.lineStyle(3, 0x4ade80, 0.03 * i);
+            this.atmosphereGraphics.strokeCircle(0, 0, this.globeRadius + i * 4);
+        }
+    }
+
+    drawOcean() {
+        this.oceanGraphics.fillStyle(0x0a3d62, 1);
+        this.oceanGraphics.fillCircle(0, 0, this.globeRadius);
+        this.oceanGraphics.fillStyle(0x1a5276, 0.5);
+        this.oceanGraphics.fillCircle(-this.globeRadius * 0.2, -this.globeRadius * 0.2, this.globeRadius * 0.7);
+    }
+
+    drawGrid() {
+        this.gridGraphics.lineStyle(0.5, 0x3498db, 0.12);
+        for (let lat = -80; lat <= 80; lat += 20) this.drawLatLine(lat);
+        for (let lon = -180; lon < 180; lon += 20) this.drawLonLine(lon);
+        this.gridGraphics.lineStyle(1, 0x22d3ee, 0.25);
+        this.drawLatLine(0);
+    }
+
+    drawLatLine(lat) {
+        const points = [];
+        for (let lon = -180; lon <= 180; lon += 5) {
+            const p = this.project3D(lat, lon);
+            if (p.visible) points.push(p);
+            else if (points.length > 1) { this.strokePoints(points, this.gridGraphics); points.length = 0; }
+            else points.length = 0;
+        }
+        if (points.length > 1) this.strokePoints(points, this.gridGraphics);
+    }
+
+    drawLonLine(lon) {
+        const points = [];
+        for (let lat = -90; lat <= 90; lat += 5) {
+            const p = this.project3D(lat, lon);
+            if (p.visible) points.push(p);
+            else if (points.length > 1) { this.strokePoints(points, this.gridGraphics); points.length = 0; }
+            else points.length = 0;
+        }
+        if (points.length > 1) this.strokePoints(points, this.gridGraphics);
+    }
+
+    strokePoints(points, graphics) {
+        if (points.length < 2) return;
+        graphics.beginPath();
+        graphics.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) graphics.lineTo(points[i].x, points[i].y);
+        graphics.strokePath();
+    }
+
+    drawAllLand() {
+        if (typeof WORLD_DATA === 'undefined') {
+            console.warn('WORLD_DATA missing - cannot draw land');
+            return;
+        }
+        
+        const landMasses = Object.entries(WORLD_DATA).map(([name, coords]) => {
+            const projected = coords.map(([lat, lon]) => this.project3D(lat, lon));
+            const avgZ = projected.reduce((sum, p) => sum + p.z, 0) / projected.length;
+            return { name, coords, projected, avgZ };
+        }).sort((a, b) => a.avgZ - b.avgZ);
+
+        for (const { name, projected } of landMasses) {
+            const colors = (typeof LAND_COLORS !== 'undefined' ? LAND_COLORS[name] : null) || { fill: 0x2d5a27, stroke: 0x1e3d1a };
+            this.drawLandMass(projected, colors);
+        }
+    }
+
+    drawLandMass(projectedPoints, colors) {
+        const visiblePoints = projectedPoints.filter(p => p.visible);
+        if (visiblePoints.length < 3) return;
+
+        const segments = [];
+        let current = [];
+        for (let i = 0; i < projectedPoints.length; i++) {
+            const p = projectedPoints[i];
+            if (p.visible) current.push(p);
+            else if (current.length > 0) { segments.push([...current]); current = []; }
+        }
+        if (current.length > 0) segments.push(current);
+
+        if (segments.length > 1 && projectedPoints[0].visible && projectedPoints[projectedPoints.length - 1].visible) {
+            const first = segments.shift();
+            const last = segments[segments.length - 1];
+            segments[segments.length - 1] = [...last, ...first];
+        }
+
+        for (const segment of segments) {
+            if (segment.length < 3) continue;
+            this.landGraphics.fillStyle(colors.fill, 0.9);
+            this.landGraphics.beginPath();
+            this.landGraphics.moveTo(segment[0].x, segment[0].y);
+            for (let i = 1; i < segment.length; i++) this.landGraphics.lineTo(segment[i].x, segment[i].y);
+            this.landGraphics.closePath();
+            this.landGraphics.fillPath();
+
+            this.borderGraphics.lineStyle(1.2, colors.stroke, 0.9);
+            this.borderGraphics.beginPath();
+            this.borderGraphics.moveTo(segment[0].x, segment[0].y);
+            for (let i = 1; i < segment.length; i++) this.borderGraphics.lineTo(segment[i].x, segment[i].y);
+            this.borderGraphics.closePath();
+            this.borderGraphics.strokePath();
+        }
+    }
+
+    drawGlobeRim() {
+        this.atmosphereGraphics.lineStyle(2, 0x0ea5e9, 0.6);
+        this.atmosphereGraphics.strokeCircle(0, 0, this.globeRadius);
     }
 
     initializeDistricts() {
-        initializeDistricts(this);
+        if (typeof missionPlanner === 'undefined') return;
+        const sectorConfigs = missionPlanner.getDistrictConfigs();
+        this.districts = [];
+        sectorConfigs.forEach(config => {
+            const state = missionPlanner.getDistrictState(config.id);
+            this.districts.push({ config, state });
+        });
     }
 
     createBattleshipMarkers() {
-        createBattleshipMarkers(this);
+        if (typeof missionPlanner === 'undefined' || !this.planetContainer) return;
+        this.battleshipMarkers.forEach(marker => marker.destroy());
+        this.battleshipMarkers = [];
+        const ships = missionPlanner.getBattleships();
+        ships.forEach(() => {
+            const hull = this.scene.add.triangle(0, 0, 0, -12, -10, 10, 10, 10, 0xf43f5e, 0.95);
+            hull.setStrokeStyle(2, 0xffffff, 0.9);
+            hull.setBlendMode(Phaser.BlendModes.ADD);
+            hull.setDepth(6);
+            this.planetContainer.add(hull);
+            this.scene.tweens.add({
+                targets: hull,
+                scale: 1.15,
+                duration: 800,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+            this.battleshipMarkers.push(hull);
+        });
     }
 
     getDistrictCenterCoords(config) {
-        return getDistrictCenterCoords(config);
+        if (!config) return { lat: 0, lon: 0 };
+        if (config.center) return config.center;
+        if (config.polygon?.length) {
+            const sum = config.polygon.reduce((acc, point) => ({
+                lat: acc.lat + (point.lat || 0),
+                lon: acc.lon + (point.lon || 0)
+            }), { lat: 0, lon: 0 });
+            const count = config.polygon.length || 1;
+            return { lat: sum.lat / count, lon: sum.lon / count };
+        }
+        return { lat: 0, lon: 0 };
     }
 
     drawDistricts() {
-        drawDistricts(this);
+        if (!this.districts.length) return;
+        this.districts.forEach(district => {
+            const center = this.getDistrictCenterCoords(district.config);
+            const projected = this.project3D(center.lat, center.lon);
+            if (!projected.visible) return;
+
+            const isSelected = this.selectedDistrict === district;
+            const isOccupied = district.state.status === 'occupied';
+            const baseRadius = 8;
+            const radius = isSelected ? baseRadius * 1.3 : baseRadius;
+            const alpha = isOccupied ? 0.5 : 0.8;
+
+            this.drawDistrictThreatPulse(district, projected, radius);
+            if (district.state.underAttack && !isOccupied) {
+                const attackPulse = (Math.sin(this.scene.time.now / 200) + 1) / 2;
+                const attackRadius = radius * (2.1 + attackPulse * 0.6);
+                this.districtGraphics.lineStyle(2.5, 0xef4444, 0.7);
+                this.districtGraphics.strokeCircle(projected.x, projected.y, attackRadius);
+            }
+
+            this.districtGraphics.fillStyle(district.config.color, alpha * 0.3);
+            this.districtGraphics.fillCircle(projected.x, projected.y, radius * 2);
+            this.districtGraphics.fillStyle(district.config.color, alpha);
+            this.districtGraphics.fillCircle(projected.x, projected.y, radius);
+            this.districtGraphics.lineStyle(isSelected ? 2.5 : 1.5, 0xffffff, alpha * 0.8);
+            this.districtGraphics.strokeCircle(projected.x, projected.y, radius);
+
+            district.projectedX = projected.x;
+            district.projectedY = projected.y;
+            district.projectedRadius = radius * 2;
+        });
+        this.setupDistrictInteraction();
     }
 
     drawDistrictThreatPulse(district, projected, radius) {
-        drawDistrictThreatPulse(this, district, projected, radius);
+        if (!district?.state || district.state.status !== 'threatened') return;
+        const maxTimer = district.config?.timer || 1;
+        if (maxTimer <= 0) return;
+        const remaining = Math.max(0, district.state.timer ?? 0);
+        const urgency = Phaser.Math.Clamp(1 - remaining / maxTimer, 0, 1);
+        const pulseSpeed = Phaser.Math.Linear(0.002, 0.006, urgency);
+        const pulse = (Math.sin(this.scene.time.now * pulseSpeed) + 1) / 2;
+        const pulseRadius = radius * (1.6 + pulse * 0.6);
+        const pulseAlpha = Phaser.Math.Linear(0.15, 0.55, pulse) * Phaser.Math.Linear(0.7, 1, urgency);
+        const pulseColor = urgency > 0.65 ? 0xf87171 : urgency > 0.35 ? 0xfbbf24 : 0xfef08a;
+
+        this.districtGraphics.lineStyle(2, pulseColor, pulseAlpha);
+        this.districtGraphics.strokeCircle(projected.x, projected.y, pulseRadius);
     }
 
     setupDistrictInteraction() {
-        setupDistrictInteraction(this);
+        if (this._districtClickHandler) this.scene.input.off('pointerdown', this._districtClickHandler);
+        this._districtClickHandler = (pointer) => {
+            const localX = pointer.x - this.centerX;
+            const localY = pointer.y - this.centerY;
+            for (const district of this.districts) {
+                if (district.projectedX === undefined) continue;
+                const dist = Phaser.Math.Distance.Between(localX, localY, district.projectedX, district.projectedY);
+                if (dist < district.projectedRadius) {
+                    this.focusDistrict(district);
+                    return;
+                }
+            }
+        };
+        this.scene.input.on('pointerdown', this._districtClickHandler);
     }
 
     drawMarkers() {
-        drawMarkers(this);
+        if (!this.selectedDistrict) return;
+        const center = this.getDistrictCenterCoords(this.selectedDistrict.config);
+        const projected = this.project3D(center.lat, center.lon);
+        if (!projected.visible) return;
+
+        const pingRadius = 12 + Math.sin(this.scene.time.now / 200) * 4;
+        this.markerGraphics.fillStyle(0xff8fab, 0.3);
+        this.markerGraphics.fillCircle(projected.x, projected.y, pingRadius);
+        this.markerGraphics.fillStyle(0xff4d6d, 1);
+        this.markerGraphics.fillCircle(projected.x, projected.y, 5);
+        this.markerGraphics.lineStyle(2, 0xffffff, 0.9);
+        this.markerGraphics.strokeCircle(projected.x, projected.y, 5);
     }
 
     focusDistrict(district, skipTweens = false) {
-        focusDistrict(this, district, skipTweens);
+        if (this.selectedDistrict === district) return;
+        this.selectedDistrict = district;
+        this.onDistrictFocused?.(district);
+
+        const center = this.getDistrictCenterCoords(district.config);
+        const targetRotY = -center.lon * Math.PI / 180;
+        const targetRotX = center.lat * Math.PI / 180 * 0.5;
+
+        if (!skipTweens) {
+            this.scene.tweens.add({
+                targets: this,
+                rotationY: targetRotY,
+                rotationX: targetRotX,
+                duration: 600,
+                ease: 'Sine.easeInOut'
+            });
+            this.scene.tweens.add({
+                targets: this.scene.cameras.main,
+                zoom: 1.08,
+                duration: 300,
+                yoyo: true,
+                ease: 'Sine.easeOut'
+            });
+        }
+        this.autoRotate = false;
     }
 
     createOrbitNodes() {
-        createOrbitNodes(this);
+        if (typeof missionPlanner === 'undefined') return;
+
+        // Configuration relative to globe size
+        this.nodeConfigs = [
+            { id: 'battleship', label: 'Battleship', angle: -40, distScale: 1.6, color: 0xf472b6 },
+            { id: 'shop', label: 'Shop', angle: 70, distScale: 1.8, color: 0x22d3ee },
+            { id: 'relay', label: 'Relay', angle: 160, distScale: 1.7, color: 0x93c5fd },
+            { id: 'distress', label: 'Distress Node', angle: 240, distScale: 1.5, color: 0xfacc15 },
+            { id: 'mothership', label: 'Mothership', angle: 300, distScale: 1.95, color: 0x818cf8 }
+        ];
+
+        this.nodeConfigs.forEach(config => {
+            const connector = this.scene.add.graphics();
+            const node = this.scene.add.circle(0, 0, 12, config.color, 0.9);
+            node.setStrokeStyle(2, 0xffffff, 0.8);
+            node.setBlendMode(Phaser.BlendModes.ADD);
+            const pulse = this.scene.tweens.add({ targets: node, scale: 1.25, duration: 700, yoyo: true, repeat: -1 });
+
+            const label = this.scene.add.text(0, 0, config.label, {
+                fontFamily: 'Orbitron', fontSize: '12px', color: '#c7e6ff', align: 'center'
+            }).setOrigin(0.5).setDepth(5);
+
+            const timerText = this.scene.add.text(0, 0, '--', {
+                fontFamily: 'Orbitron', fontSize: '11px', color: '#ffffff'
+            }).setOrigin(0.5).setDepth(5);
+
+            const nodeState = missionPlanner.ensureMapNodeState(config);
+
+            this.mapNodes.push({ id: config.id, config, node, label, timerText, pulse, connector, state: nodeState, isEnabled: true });
+
+            node.setInteractive({ useHandCursor: true });
+            node.on('pointerdown', () => {
+                this.flashConnector(connector);
+                const liveState = missionPlanner.getMapNodeState(config.id) || nodeState;
+                this.onOrbitNodeSelected?.(config.id, liveState);
+            });
+        });
+
+        this.updateOrbitNodesPositions();
     }
 
     updateOrbitNodesPositions() {
-        updateOrbitNodesPositions(this);
+        this.mapNodes.forEach(mapNode => {
+            const config = mapNode.config;
+            const radius = this.globeRadius * config.distScale; 
+            
+            const x = this.centerX + Math.cos(Phaser.Math.DegToRad(config.angle)) * radius;
+            const y = this.centerY + Math.sin(Phaser.Math.DegToRad(config.angle)) * radius;
+
+            mapNode.node.setPosition(x, y);
+            mapNode.label.setPosition(x, y - 26);
+            mapNode.timerText.setPosition(x, y + 18);
+            
+            mapNode.connector.clear();
+            mapNode.connector.lineStyle(1.5, 0x1dcaff, 0.3);
+            mapNode.connector.lineBetween(this.centerX, this.centerY, x, y);
+        });
     }
 
     flashConnector(connector) {
-        flashConnector(this, connector);
+        this.scene.tweens.add({
+            targets: connector,
+            alpha: { from: 0.35, to: 1 },
+            duration: 250,
+            yoyo: true,
+            ease: 'Sine.easeInOut'
+        });
     }
 
     update(time, delta, mission) {
