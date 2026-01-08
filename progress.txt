@@ -425,11 +425,12 @@ Inventory Power-Ups
 ## 6. Environment Design
 
 ### 6.1. Parallax Cityscape
-**Implementation Status: 40% Complete**
+**Implementation Status: 55% Complete** ⬆️ (was 40%)
 
 ✅ **Implemented:**
-- Procedurally generated parallax background layers
-- Basic cityscape visuals
+- Procedurally generated multi-layer parallax backgrounds (sky, atmosphere, stars, horizon city, mid city, terrain)
+- Multiple procedural background styles (cyberpunk, industrial, wasteland)
+- Consistent ground/terrain layer used for gameplay bounds
 
 ❌ **Not Implemented:**
 - **Foreground:** Destroyable buildings, hidden pickups
@@ -439,7 +440,10 @@ Inventory Power-Ups
 
 ### 6.2. District Themes
 
-**Implementation Status: 0% Complete**
+**Implementation Status: 10% Complete** ⬆️ (was 0%)
+
+⚠️ **Partially Implemented:**
+- Multiple background style generators exist, but are not mapped to districts or gameplay modifiers
 
 ❌ **Not Implemented - Complete System:**
 
@@ -784,21 +788,22 @@ Inventory Power-Ups
 ## Overall Completion Statistics
 
 **Core Systems:**
-- **Fully Complete:** 4/12 (33%) ⬆️
+- **Fully Complete:** 4/13 (31%) ⬆️
   - Normal Fighter Form
   - Guardian Form
   - Defense Missions
   - District State System
-- **Substantially Complete:** 2/12 (17%) ⬆️
+- **Substantially Complete:** 2/13 (15%) ⬆️
   - Assault Missions (core loop + garrison defenders + HUD)
   - System Map (core mechanics working, strategic layer missing)
-- **Partially Complete:** 5/12 (42%)
+- **Partially Complete:** 6/13 (46%) ⬆️
   - Ground Combat
   - Meta Progression
   - Power-Up System
   - Scoring & Rewards
   - Campaign Mode
-- **Not Started:** 1/12 (8%)
+  - Environment Design (multi-layer parallax, no weather/day-night)
+- **Not Started:** 1/13 (8%)
   - Additional Game Modes
 
 ---
@@ -806,9 +811,9 @@ Inventory Power-Ups
 ## Design Document Alignment
 
 **Overall Implementation:**
-- ✅ **Implemented:** ~60% ⬆️ (was ~55%)
-- ⚠️ **Partially Implemented:** ~30%
-- ❌ **Not Implemented:** ~10% ⬇️ (was ~12%)
+- ✅ **Implemented:** ~61% ⬆️ (was ~60%)
+- ⚠️ **Partially Implemented:** ~29%
+- ❌ **Not Implemented:** ~10%
 
 **By Category:**
 - **Core Gameplay Loop:** 85% complete
@@ -816,7 +821,7 @@ Inventory Power-Ups
 - **Meta Systems:** 60% complete
 - **Player Mechanics:** 70% complete (Ship 100%, Ground 35%)
 - **Enemy Design:** 85% complete
-- **Environmental:** 20% complete
+- **Environmental:** 30% complete ⬆️ (multi-layer parallax in place; no weather/day-night)
 - **Additional Modes:** 0% complete
 
 ---
@@ -831,13 +836,12 @@ Inventory Power-Ups
 5. **Battleship system** - Roaming threats + wave 15 boss fully functional
 6. **Mothership unlock condition** - Activates when all districts friendly
 7. **Defense/assault/liberate gameplay loop** - End-to-end campaign flow (minus final boss)
-8. **Assault garrison defenders** - Base defender squads with multiple roles
+8. **Procedural parallax environment stack** - Multi-layer sky/city/terrain backgrounds with multiple style generators
 
 ### 🎯 Recent Achievements:
-- ⬆️ Defense missions: 85% → 90% (wave tier progression + battleship boss)
-- ⬆️ Assault missions: 0% → 70% (base destruction + garrison defenders)
+- ⬆️ Environmental stack: 40% → 55% (multi-layer sky/atmosphere/stars + multiple styles)
+- ⬆️ Assault missions: 60% → 75% (base shields, turrets, garrison defenders, HUD)
 - ⬆️ System map: 60% → 70% (complete state transition flow)
-- ⬆️ Core loop: 50% → 70% (defend/assault/liberate all functional)
 
 ---
 
@@ -851,25 +855,19 @@ Inventory Power-Ups
 - Build Phase 3 core boss with multi-step HP and shield phases
 - Tie victory condition to Mothership core destruction
 
-**Priority 2: Campaign Victory Screen (1 day)**
-- "Campaign Complete!" message
-- Display campaign stats:
-  - Time played
-  - Districts saved
-  - Enemies defeated
-  - Score achieved
-- "Return to Menu" button
+**Priority 2: Campaign Victory Flow (1 day)**
+- "Campaign Complete!" message + stats panel
 - Save victory to run history
+- Return-to-menu path
 
 **Priority 3: Assault Mission Failure Flow (1-2 days)**
 - Add retreat/retry loop for assault missions (district stays occupied)
 - Add mid-mission extraction or forced retreat to system map
 
-**Priority 4: Integration Testing (2-3 days)**
+**Priority 4: Integration + Balance Pass (2-3 days)**
 - Full campaign playthrough testing
-- Balance pass on Mothership difficulty
+- Balance pass on Mothership difficulty + assault reinforcements
 - Bug fixes and polish
-- Victory flow testing
 
 ### 📋 Post-MVP Polish (Optional)
 
@@ -890,15 +888,19 @@ Inventory Power-Ups
 - Ground weapons variety
 - Special operative roles
 
+**Phase 4: Environment Variety (1 week)**
+- District-specific background selection (tie styles to districts)
+- Day/night cycle or weather modifiers
+
 ---
 
 ## Estimated Remaining Work
 
 ### MVP Completion:
-- **Current Progress:** ~88% complete
+- **Current Progress:** ~86% complete ⬇️ (adjusted after audit)
 - **Remaining Critical Work:**
   - Mothership Boss Mission: 3-5 days
-  - Victory Screen: 1 day
+  - Campaign Victory Flow: 1 day
   - Assault failure/retreat flow: 1-2 days
   - Testing & Polish: 2-3 days
 - **Total Time to Complete MVP:** 6-10 days
@@ -917,14 +919,20 @@ Inventory Power-Ups
   - District themes
   - Challenge systems
 
+## MVP Completion
+
+- **Status:** ~86% complete (core loop intact, final boss + victory flow missing)
+- **Primary Blockers:** Mothership mission, victory flow, assault retreat/retry loop
+
 ---
 
 ## Critical Missing Features for Design Document Compliance
 
-### 🚨 MVP Blocker:
+### 🚨 MVP Blockers:
 1. **Mothership final boss mission** - Required for the campaign win condition
+2. **Campaign victory flow** - Win screen + progression finalization
 
 ### 📋 Core Gameplay Polish:
-2. **Assault mission failure/retreat loop** - Needed for proper occupied-district pacing
-3. **Strategic campaign layer** - Priority UI, district values, difficulty scaling
-4. **Multi-phase base reactor** - Added challenge to assault missions
+3. **Assault mission failure/retreat loop** - Needed for proper occupied-district pacing
+4. **Strategic campaign layer** - Priority UI, district values, difficulty scaling
+5. **Multi-phase base reactor** - Added challenge to assault missions
