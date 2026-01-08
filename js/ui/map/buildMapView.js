@@ -2,10 +2,19 @@
 // File: js/ui/map/buildMapView.js
 // ------------------------
 
-const globeBackdrop = window.GlobeBackdrop || {};
-const globeDistricts = window.GlobeDistricts || {};
-const globeOrbitNodes = window.GlobeOrbitNodes || {};
-const globeRendering = window.GlobeRendering || {};
+import { createBackdrop, createStars, refreshBackdrop } from './globeBackdrop.js';
+import {
+    createBattleshipMarkers,
+    drawDistricts,
+    drawMarkers,
+    drawDistrictThreatPulse,
+    focusDistrict,
+    getDistrictCenterCoords,
+    initializeDistricts,
+    setupDistrictInteraction
+} from './globeDistricts.js';
+import { createOrbitNodes, flashConnector, updateOrbitNodesPositions } from './globeOrbitNodes.js';
+import { renderGlobe } from './globeRendering.js';
 
 const GLOBE_LAYOUT = {
     centerXRatio: .75,
@@ -177,17 +186,17 @@ class BuildMapView {
     }
 
     createStars() {
-        globeBackdrop.createStars(this.scene);
+        createStars(this.scene);
     }
 
     createBackdrop(width, height) {
-        const { backdropGrid, backdropGlow } = globeBackdrop.createBackdrop(this.scene, width, height);
+        const { backdropGrid, backdropGlow } = createBackdrop(this.scene, width, height);
         this.backdropGrid = backdropGrid;
         this.backdropGlow = backdropGlow;
     }
 
     refreshBackdrop(width, height) {
-        const { backdropGrid, backdropGlow } = globeBackdrop.refreshBackdrop(
+        const { backdropGrid, backdropGlow } = refreshBackdrop(
             this.scene,
             width,
             height,
@@ -259,51 +268,51 @@ class BuildMapView {
     }
 
     renderGlobe() {
-        globeRendering.renderGlobe(this);
+        renderGlobe(this);
     }
 
     initializeDistricts() {
-        globeDistricts.initializeDistricts(this);
+        initializeDistricts(this);
     }
 
     createBattleshipMarkers() {
-        globeDistricts.createBattleshipMarkers(this);
+        createBattleshipMarkers(this);
     }
 
     getDistrictCenterCoords(config) {
-        return globeDistricts.getDistrictCenterCoords(config);
+        return getDistrictCenterCoords(config);
     }
 
     drawDistricts() {
-        globeDistricts.drawDistricts(this);
+        drawDistricts(this);
     }
 
     drawDistrictThreatPulse(district, projected, radius) {
-        globeDistricts.drawDistrictThreatPulse(this, district, projected, radius);
+        drawDistrictThreatPulse(this, district, projected, radius);
     }
 
     setupDistrictInteraction() {
-        globeDistricts.setupDistrictInteraction(this);
+        setupDistrictInteraction(this);
     }
 
     drawMarkers() {
-        globeDistricts.drawMarkers(this);
+        drawMarkers(this);
     }
 
     focusDistrict(district, skipTweens = false) {
-        globeDistricts.focusDistrict(this, district, skipTweens);
+        focusDistrict(this, district, skipTweens);
     }
 
     createOrbitNodes() {
-        globeOrbitNodes.createOrbitNodes(this);
+        createOrbitNodes(this);
     }
 
     updateOrbitNodesPositions() {
-        globeOrbitNodes.updateOrbitNodesPositions(this);
+        updateOrbitNodesPositions(this);
     }
 
     flashConnector(connector) {
-        globeOrbitNodes.flashConnector(this, connector);
+        flashConnector(this, connector);
     }
 
     update(time, delta, mission) {
