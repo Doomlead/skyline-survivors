@@ -86,8 +86,8 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     return enemy;
 }
 
-const CLASSIC_LIGHT_ENEMIES = ['drone', 'swarmer', 'baiter', 'pod'];
-const CLASSIC_HEAVY_ENEMIES = ['lander', 'bomber', 'kamikaze', 'turret'];
+const CLASSIC_LIGHT_ENEMIES = ['lander','drone', 'swarmer', 'baiter', 'pod'];
+const CLASSIC_HEAVY_ENEMIES = [ 'sniper','bomber', 'kamikaze', 'turret'];
 const CLASSIC_ELITE_ENEMIES = [
     'mutant',
     'shield',
@@ -95,22 +95,25 @@ const CLASSIC_ELITE_ENEMIES = [
     'spawner',
     'shielder',
     'bouncer',
-    'sniper',
     'swarmLeader',
     'regenerator'
 ];
 
+// NEW WAVING SYSTEM: 
+// Waves 1-3: Only Light enemies
+// Waves 4-6: Light + Heavy enemies  
+// Waves 7+: All enemy tiers
 function getClassicWaveEnemyPool(wave) {
-    if (wave <= 5) {
+    if (wave <= 3) {
+        // Waves 1-3: Only light enemies
         return CLASSIC_LIGHT_ENEMIES;
+    } else if (wave <= 6) {
+        // Waves 4-6: Light + Heavy enemies
+        return [...CLASSIC_LIGHT_ENEMIES, ...CLASSIC_HEAVY_ENEMIES];
+    } else {
+        // Waves 7+: All enemy tiers
+        return [...CLASSIC_LIGHT_ENEMIES, ...CLASSIC_HEAVY_ENEMIES, ...CLASSIC_ELITE_ENEMIES];
     }
-    if (wave <= 10) {
-        return CLASSIC_HEAVY_ENEMIES;
-    }
-    if (wave <= 14) {
-        return CLASSIC_ELITE_ENEMIES;
-    }
-    return ENEMY_TYPES;
 }
 
 // Picks an enemy type, honoring mission directive weights when provided

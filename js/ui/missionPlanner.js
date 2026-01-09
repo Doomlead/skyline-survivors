@@ -1,5 +1,5 @@
 // ------------------------
-// mission planner
+// js/ui/missionPlanner.js
 // ------------------------
 
 (function() {
