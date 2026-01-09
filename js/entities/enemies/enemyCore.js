@@ -116,38 +116,28 @@ function getClassicWaveEnemyPool(wave) {
 
 // Picks an enemy type, honoring mission directive weights when provided
 // so districts can influence the composition of incoming threats.
-// ---------- inside getMissionWeightedEnemyType ----------
 function getMissionWeightedEnemyType(allowedTypes = null) {
-    const mix = gameState.missionDirectives?.threatMix;
-    console.log('[GME] allowedTypes:', allowedTypes);
-    console.log('[GME] threatMix:', mix);
+    // FIX: If the wave system provides an explicit list of allowed types,
+    // we prioritize that to ensure wave progression works correctly.
+    // We only fallback to mission directives if allowedTypes is null (e.g. free play).
+    if (allowedTypes && allowedTypes.length > 0) {
+        return Phaser.Utils.Array.GetRandom(allowedTypes);
+    }
 
+    // Original logic for when no wave restrictions are active
+    const mix = gameState.missionDirectives?.threatMix;
     if (mix && mix.length > 0) {
         const bag = [];
         mix.forEach(entry => {
-            if (allowedTypes && !allowedTypes.includes(entry.type)) {
-                console.log('[GME] filtered out', entry.type, 'not in allowedTypes');
-                return;
-            }
             const weight = Math.max(1, entry.weight || 1);
             for (let i = 0; i < weight; i++) bag.push(entry.type);
         });
         if (bag.length > 0) {
-            const pick = Phaser.Utils.Array.GetRandom(bag);
-            console.log('[GME] picked from mix →', pick);
-            return pick;
+            return Phaser.Utils.Array.GetRandom(bag);
         }
     }
 
-    if (allowedTypes && allowedTypes.length > 0) {
-        const pick = Phaser.Utils.Array.GetRandom(allowedTypes);
-        console.log('[GME] picked from allowedTypes →', pick);
-        return pick;
-    }
-
-    const fallbackPick = Phaser.Utils.Array.GetRandom(ENEMY_TYPES);
-    console.log('[GME] fallback to ENEMY_TYPES →', fallbackPick);
-    return fallbackPick;
+    return Phaser.Utils.Array.GetRandom(ENEMY_TYPES);
 }
 
 // Spawns an enemy at a random edge or near a human to keep pressure on the player.
