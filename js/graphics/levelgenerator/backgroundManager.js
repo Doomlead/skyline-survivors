@@ -12,7 +12,9 @@ var parallaxManagerInstance = null;
 var BACKGROUND_STYLE_GENERATORS = {
     cyberpunk: BackgroundGeneratorCyberpunk,
     wasteland: BackgroundGeneratorWasteland,
+    wasteland2: BackgroundGeneratorWasteland2,
     industrial: BackgroundGeneratorIndustrial,
+    destroyedindustrial: BackgroundGeneratorDestroyedIndustrial,
 };
 
 var BACKGROUND_STYLE_OPTIONS = Object.keys(BACKGROUND_STYLE_GENERATORS);
