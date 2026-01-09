@@ -86,8 +86,8 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     return enemy;
 }
 
-const CLASSIC_LIGHT_ENEMIES = ['lander','drone', 'swarmer', 'baiter', 'pod'];
-const CLASSIC_HEAVY_ENEMIES = [ 'sniper','bomber', 'kamikaze', 'turret'];
+const CLASSIC_LIGHT_ENEMIES = ['drone', 'swarmer', 'baiter', 'pod', 'lander'];
+const CLASSIC_HEAVY_ENEMIES = ['sniper', 'bomber', 'kamikaze', 'turret'];
 const CLASSIC_ELITE_ENEMIES = [
     'mutant',
     'shield',
@@ -99,44 +99,55 @@ const CLASSIC_ELITE_ENEMIES = [
     'regenerator'
 ];
 
-// NEW WAVING SYSTEM: 
-// Waves 1-3: Only Light enemies
-// Waves 4-6: Light + Heavy enemies  
-// Waves 7+: All enemy tiers
+// UPDATED LOGIC:
+// Waves 1-3: Light only
+// Waves 4-6: Light + Heavy
+// Waves 7+: Light + Heavy + Elite
 function getClassicWaveEnemyPool(wave) {
     if (wave <= 3) {
-        // Waves 1-3: Only light enemies
         return CLASSIC_LIGHT_ENEMIES;
-    } else if (wave <= 6) {
-        // Waves 4-6: Light + Heavy enemies
-        return [...CLASSIC_LIGHT_ENEMIES, ...CLASSIC_HEAVY_ENEMIES];
-    } else {
-        // Waves 7+: All enemy tiers
-        return [...CLASSIC_LIGHT_ENEMIES, ...CLASSIC_HEAVY_ENEMIES, ...CLASSIC_ELITE_ENEMIES];
     }
+    if (wave <= 6) {
+        return [...CLASSIC_LIGHT_ENEMIES, ...CLASSIC_HEAVY_ENEMIES];
+    }
+    // Wave 7 and onwards
+    return [...CLASSIC_LIGHT_ENEMIES, ...CLASSIC_HEAVY_ENEMIES, ...CLASSIC_ELITE_ENEMIES];
 }
 
 // Picks an enemy type, honoring mission directive weights when provided
 // so districts can influence the composition of incoming threats.
+// ---------- inside getMissionWeightedEnemyType ----------
 function getMissionWeightedEnemyType(allowedTypes = null) {
     const mix = gameState.missionDirectives?.threatMix;
+    console.log('[GME] allowedTypes:', allowedTypes);
+    console.log('[GME] threatMix:', mix);
+
     if (mix && mix.length > 0) {
         const bag = [];
         mix.forEach(entry => {
-            if (allowedTypes && !allowedTypes.includes(entry.type)) return;
-            const weight = Math.max(1, entry.weight || 1);
-            for (let i = 0; i < weight; i++) {
-                bag.push(entry.type);
+            if (allowedTypes && !allowedTypes.includes(entry.type)) {
+                console.log('[GME] filtered out', entry.type, 'not in allowedTypes');
+                return;
             }
+            const weight = Math.max(1, entry.weight || 1);
+            for (let i = 0; i < weight; i++) bag.push(entry.type);
         });
         if (bag.length > 0) {
-            return Phaser.Utils.Array.GetRandom(bag);
+            const pick = Phaser.Utils.Array.GetRandom(bag);
+            console.log('[GME] picked from mix →', pick);
+            return pick;
         }
     }
+
     if (allowedTypes && allowedTypes.length > 0) {
-        return Phaser.Utils.Array.GetRandom(allowedTypes);
+        const pick = Phaser.Utils.Array.GetRandom(allowedTypes);
+        console.log('[GME] picked from allowedTypes →', pick);
+        return pick;
     }
-    return Phaser.Utils.Array.GetRandom(ENEMY_TYPES);
+
+    const fallbackPick = Phaser.Utils.Array.GetRandom(ENEMY_TYPES);
+    console.log('[GME] fallback to ENEMY_TYPES →', fallbackPick);
+    return fallbackPick;
 }
 
 // Spawns an enemy at a random edge or near a human to keep pressure on the player.
