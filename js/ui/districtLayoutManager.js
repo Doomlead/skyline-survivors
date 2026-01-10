@@ -38,14 +38,10 @@ const DistrictLayoutManager = (function() {
             districtCenter.appendChild(phaserCanvas);
             phaserCanvas.style.width = '100%';
             phaserCanvas.style.height = '100%';
-
+            
             // Critical: Force Phaser to recognize the new container size
             setTimeout(() => {
-                if (window.game && window.game.scale) {
-                    const { clientWidth, clientHeight } = districtCenter;
-                    if (clientWidth > 0 && clientHeight > 0) {
-                        window.game.scale.resize(clientWidth, clientHeight);
-                    }
+                if (window.game) {
                     window.game.scale.refresh();
                 }
             }, 50);
