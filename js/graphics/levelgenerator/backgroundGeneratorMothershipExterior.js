@@ -91,49 +91,49 @@ var BackgroundGeneratorMothershipExterior = (function() {
         var worldHeight = dims ? dims.height : this.config.worldHeight;
         var bandHeight = 25;
 
-        // Deep space with alien energy field
+        // Deep space with subtle alien energy field
         for (var y = 0; y < worldHeight; y += bandHeight) {
             var t = y / worldHeight;
             var r, g, b;
 
             if (t < 0.3) {
                 // Deep purple void
-                r = Math.floor(15 + t * 25);
-                g = Math.floor(5 + t * 15);
-                b = Math.floor(35 + t * 45);
+                r = Math.floor(8 + t * 15);
+                g = Math.floor(4 + t * 12);
+                b = Math.floor(20 + t * 30);
             } else if (t < 0.5) {
                 // Transition to cyan energy field
                 var mt = (t - 0.3) / 0.2;
-                r = Math.floor(40 + mt * 20);
-                g = Math.floor(20 + mt * 50);
-                b = Math.floor(80 + mt * 40);
+                r = Math.floor(20 + mt * 18);
+                g = Math.floor(12 + mt * 35);
+                b = Math.floor(45 + mt * 40);
             } else if (t < 0.7) {
                 // Bright cyan center
                 var mt2 = (t - 0.5) / 0.2;
-                r = Math.floor(60 - mt2 * 20);
-                g = Math.floor(70 + mt2 * 30);
-                b = Math.floor(120 - mt2 * 20);
+                r = Math.floor(40 - mt2 * 10);
+                g = Math.floor(55 + mt2 * 20);
+                b = Math.floor(95 - mt2 * 25);
             } else {
                 // Return to purple depths
                 var bt = (t - 0.7) / 0.3;
-                r = Math.floor(40 - bt * 25);
-                g = Math.floor(100 - bt * 80);
-                b = Math.floor(100 - bt * 40);
+                r = Math.floor(28 - bt * 18);
+                g = Math.floor(60 - bt * 45);
+                b = Math.floor(70 - bt * 35);
             }
 
             graphics.fillStyle(Phaser.Display.Color.GetColor(r, g, b), 1);
             graphics.fillRect(0, y, textureWidth, bandHeight + 1);
         }
 
-        // Nebula clouds
-        for (var i = 0; i < 8; i++) {
+        // Nebula clouds (subtle, distant)
+        for (var i = 0; i < 6; i++) {
             var nx = random() * textureWidth;
             var ny = random() * worldHeight;
-            var size = 100 + random() * 200;
+            var size = 120 + random() * 180;
             
-            graphics.fillStyle(0x663399, 0.08);
+            graphics.fillStyle(0x3b1c5a, 0.07);
             graphics.fillCircle(nx, ny, size * 1.3);
-            graphics.fillStyle(0x4466aa, 0.06);
+            graphics.fillStyle(0x263d7a, 0.05);
             graphics.fillCircle(nx + 30, ny - 20, size);
         }
     };
@@ -182,11 +182,11 @@ var BackgroundGeneratorMothershipExterior = (function() {
         var worldHeight = dims ? dims.height : this.config.worldHeight;
 
         // Distant stars
-        for (var i = 0; i < 120; i++) {
+        for (var i = 0; i < 180; i++) {
             var x = random() * textureWidth;
             var y = random() * worldHeight;
             var brightness = 0.2 + random() * 0.6;
-            var color = random() > 0.7 ? 0xaaffff : 0xffffff;
+            var color = random() > 0.75 ? 0xaaffff : 0xffffff;
             
             graphics.fillStyle(color, brightness);
             var size = random() > 0.9 ? 2 : 1;
@@ -214,7 +214,7 @@ var BackgroundGeneratorMothershipExterior = (function() {
         }
 
         // Energy cores (distant ship lights)
-        for (var i = 0; i < 12; i++) {
+        for (var i = 0; i < 10; i++) {
             var ex = random() * textureWidth;
             var ey = random() * worldHeight;
             
@@ -428,6 +428,57 @@ var BackgroundGeneratorMothershipExterior = (function() {
         graphics.lineTo(textureWidth, worldHeight);
         graphics.closePath();
         graphics.fillPath();
+
+        // Massive breach in the hull (entry point)
+        var breachX = textureWidth * 0.68;
+        var breachY = groundY - 55;
+        var breachRadius = 85;
+        var innerRadius = 55;
+
+        // Blast scar outer ring
+        graphics.fillStyle(0x1a0d2a, 1);
+        graphics.fillCircle(breachX, breachY, breachRadius + 18);
+        graphics.fillStyle(0x2a1a3a, 1);
+        graphics.fillCircle(breachX, breachY, breachRadius + 8);
+
+        // Hollowed void
+        graphics.fillStyle(0x06040b, 1);
+        graphics.fillCircle(breachX + 6, breachY + 10, breachRadius);
+        graphics.fillStyle(0x0d0818, 1);
+        graphics.fillCircle(breachX + 8, breachY + 12, innerRadius);
+
+        // Glowing rim
+        graphics.lineStyle(5, 0x00ffff, 0.4);
+        graphics.strokeCircle(breachX, breachY, breachRadius);
+        graphics.lineStyle(2, 0xff66ff, 0.35);
+        graphics.strokeCircle(breachX, breachY, innerRadius + 6);
+        graphics.lineStyle(0);
+
+        // Jagged blast fragments
+        for (var b = 0; b < 18; b++) {
+            var angle = (Math.PI * 2 * b) / 18 + random() * 0.2;
+            var shardLength = 12 + random() * 18;
+            var sx = breachX + Math.cos(angle) * (breachRadius - 6);
+            var sy = breachY + Math.sin(angle) * (breachRadius - 6);
+            graphics.lineStyle(2, 0x4a3a5a, 0.7);
+            graphics.beginPath();
+            graphics.moveTo(sx, sy);
+            graphics.lineTo(sx + Math.cos(angle) * shardLength, sy + Math.sin(angle) * shardLength);
+            graphics.strokePath();
+            graphics.lineStyle(0);
+        }
+
+        // Entry glow and smoke trail
+        for (var g = 0; g < 6; g++) {
+            graphics.fillStyle(0x00ffff, 0.08 - g * 0.01);
+            graphics.fillCircle(breachX + 10, breachY + 10, breachRadius + 20 + g * 12);
+        }
+        for (var t = 0; t < 14; t++) {
+            var trailX = breachX - 40 - t * 18;
+            var trailY = breachY - 10 + Math.sin(t * 0.6) * 8;
+            graphics.fillStyle(0x33224a, 0.12 - t * 0.006);
+            graphics.fillEllipse(trailX, trailY, 22 + t * 6, 10 + t * 3);
+        }
 
         // Large energy vents
         for (var i = 0; i < 12; i++) {
