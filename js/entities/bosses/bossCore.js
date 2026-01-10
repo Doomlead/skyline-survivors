@@ -36,7 +36,7 @@ function createBossTrail(scene, boss) {
 }
 
 function initializeBossQueue() {
-    const pool = [...BOSS_TYPES];
+    const pool = BOSS_TYPES.filter(type => type !== 'mothershipCore');
     const queue = [];
 
     while (queue.length < 3 && pool.length > 0) {
@@ -77,10 +77,14 @@ function spawnBoss(scene, type, x, y) {
     if (type === 'apexKamikaze') boss.rotation = 0;
     if (type === 'fortressTurret') { boss.isPlanted = false; boss.barrelMode = 0; }
     if (type === 'overlordShield') boss.orbitAngle = 0;
+    if (type === 'mothershipCore') {
+        boss.corePhase = 0;
+        boss.lastPulse = 0;
+    }
     
     // Initial velocity for most bosses
     let speed = 0;
-    if (type !== 'fortressTurret') {
+    if (type !== 'fortressTurret' && type !== 'mothershipCore') {
         speed = 40;
     }
     boss.setVelocity((Math.random() - 0.5) * speed, (Math.random() - 0.5) * speed);
@@ -143,6 +147,56 @@ function startBossEncounter(scene, triggerInfo = {}) {
     }
 
     return spawnBoss(scene, bossType, spawnX, spawnY);
+}
+
+function setupMothershipEncounter(scene) {
+    if (!scene) return;
+    const objective = gameState.mothershipObjective;
+    if (!objective) return;
+
+    objective.active = true;
+    objective.bossKey = 'mothershipCore';
+    objective.reinforcementTimer = 0;
+    objective.phase = 0;
+
+    const spawnX = scene.cameras.main.scrollX + CONFIG.width / 2;
+    const spawnY = CONFIG.height * 0.35;
+    const boss = spawnBoss(scene, 'mothershipCore', spawnX, spawnY);
+    if (boss) {
+        gameState.bossActive = true;
+        gameState.currentBossKey = 'mothershipCore';
+        gameState.currentBossName = 'Mothership Core';
+        objective.bossHp = boss.hp;
+        objective.bossHpMax = boss.maxHP;
+    }
+
+    showRebuildObjectiveBanner(scene, 'FINAL ASSAULT: DESTROY THE MOTHERSHIP CORE', '#38bdf8');
+}
+
+function updateMothershipEncounter(scene, delta) {
+    const objective = gameState.mothershipObjective;
+    if (!objective?.active) return;
+
+    const boss = scene.bosses?.children?.entries?.find(entry => entry.active && entry.bossType === 'mothershipCore');
+    if (!boss) {
+        objective.active = false;
+        return;
+    }
+
+    objective.bossHp = boss.hp;
+    objective.bossHpMax = boss.maxHP;
+    objective.phase = boss.corePhase || 0;
+
+    objective.reinforcementTimer += delta;
+    const interval = objective.phase === 2 ? 2600 : objective.phase === 1 ? 3400 : 4200;
+    if (objective.reinforcementTimer >= interval) {
+        objective.reinforcementTimer = 0;
+        const reinforcements = ['shield', 'spawner', 'seeker', 'kamikaze', 'bomber'];
+        const type = Phaser.Utils.Array.GetRandom(reinforcements);
+        const spawnX = scene.cameras.main.scrollX + Math.random() * CONFIG.width;
+        const spawnY = CONFIG.height * 0.2 + Math.random() * CONFIG.height * 0.4;
+        spawnEnemy(scene, type, spawnX, spawnY, false);
+    }
 }
 
 function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngle) {
@@ -320,6 +374,16 @@ function destroyBoss(scene, boss) {
     spawnPowerUp(scene, boss.x, boss.y);
 
     boss.destroy();
+
+    if (boss.bossType === 'mothershipCore' && gameState.mode === 'mothership') {
+        const objective = gameState.mothershipObjective;
+        if (objective) {
+            objective.active = false;
+        }
+        scene.time.delayedCall(1200, () => {
+            winGame(scene);
+        });
+    }
 
     gameState.bossesDefeated = (gameState.bossesDefeated || 0) + 1;
     gameState.survivalBossesDefeated = gameState.mode === 'survival'

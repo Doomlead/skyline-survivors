@@ -425,12 +425,13 @@ Inventory Power-Ups
 ## 6. Environment Design
 
 ### 6.1. Parallax Cityscape
-**Implementation Status: 55% Complete** ⬆️ (was 40%)
+**Implementation Status: 60% Complete** ⬆️ (was 55%)
 
 ✅ **Implemented:**
 - Procedurally generated multi-layer parallax backgrounds (sky, atmosphere, stars, horizon city, mid city, terrain)
 - Multiple procedural background styles (cyberpunk, industrial, wasteland)
 - Consistent ground/terrain layer used for gameplay bounds
+- Mothership exterior/interior procedural layer sets wired into the background manager
 
 ❌ **Not Implemented:**
 - **Foreground:** Destroyable buildings, hidden pickups
@@ -496,11 +497,14 @@ Inventory Power-Ups
 
 ### 7.2. Mothership Assault (Final Mission)
 
-**Implementation Status: 10% Complete**
+**Implementation Status: 25% Complete** ⬆️ (was 10%)
 
 ✅ **Implemented:**
 - **Unlock Condition:** Mothership orbit node activates when all districts are friendly (none occupied)
 - Mothership node visible and selectable on system map
+- Mothership mission launch from orbit node with dedicated mission directives
+- Initial mothership boss visuals + behavior scaffold
+- Mothership assault HUD bar support
 
 ❌ **Not Implemented - Complete Mission:**
 - **Structure:**
@@ -837,11 +841,13 @@ Inventory Power-Ups
 6. **Mothership unlock condition** - Activates when all districts friendly
 7. **Defense/assault/liberate gameplay loop** - End-to-end campaign flow (minus final boss)
 8. **Procedural parallax environment stack** - Multi-layer sky/city/terrain backgrounds with multiple style generators
+9. **Mothership assault scaffolding** - Orbit launch directive + initial boss/HUD plumbing
 
 ### 🎯 Recent Achievements:
 - ⬆️ Environmental stack: 40% → 55% (multi-layer sky/atmosphere/stars + multiple styles)
 - ⬆️ Assault missions: 60% → 75% (base shields, turrets, garrison defenders, HUD)
 - ⬆️ System map: 60% → 70% (complete state transition flow)
+- ⬆️ Mothership assault: 10% → 25% (launch directives + initial boss + HUD support)
 
 ---
 

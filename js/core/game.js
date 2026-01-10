@@ -12,11 +12,13 @@ function initializeGame(scene) {
     for (let i = 0; i < gameState.humans; i++) {
         spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
     }
-    if (!gameState.bossQueue || gameState.bossQueue.length === 0) {
+    if (gameState.mode !== 'mothership' && (!gameState.bossQueue || gameState.bossQueue.length === 0)) {
         initializeBossQueue();
     }
     if (gameState.mode === 'assault') {
         setupAssaultObjective(scene);
+    } else if (gameState.mode === 'mothership') {
+        setupMothershipEncounter(scene);
     } else if (gameState.mode === 'survival') {
         gameState.timeRemaining = gameState.timeRemaining || gameState.totalSurvivalDuration;
     } else {
@@ -342,6 +344,9 @@ function update(time, delta) {
     }
     if (gameState.mode === 'assault') {
         updateAssaultObjective(this, delta);
+    }
+    if (gameState.mode === 'mothership') {
+        updateMothershipEncounter(this, delta);
     }
 
     updatePlayer(this, time, delta);

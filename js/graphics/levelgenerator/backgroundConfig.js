@@ -60,8 +60,6 @@ var LAYER_ORDER = [
     'terrain',
 ];
 
-// Add these to backgroundConfig.js
-
 var MOTHERSHIP_EXT_LAYERS = {
     deepHull: {
         key: 'ms_ext_deep',
@@ -83,6 +81,12 @@ var MOTHERSHIP_EXT_LAYERS = {
     }
 };
 
+var MOTHERSHIP_EXT_ORDER = [
+    'deepHull',
+    'activeHull',
+    'greebleDetail'
+];
+
 var MOTHERSHIP_INT_LAYERS = {
     corridorBack: {
         key: 'ms_int_back',
@@ -97,3 +101,31 @@ var MOTHERSHIP_INT_LAYERS = {
         generator: 'generateInfrastructure'
     }
 };
+
+var MOTHERSHIP_INT_ORDER = [
+    'corridorBack',
+    'infrastructure'
+];
+
+var BACKGROUND_LAYER_SETS = {
+    default: {
+        layers: BACKGROUND_LAYERS,
+        order: LAYER_ORDER
+    },
+    mothership_exterior: {
+        layers: MOTHERSHIP_EXT_LAYERS,
+        order: MOTHERSHIP_EXT_ORDER
+    },
+    mothership_interior: {
+        layers: MOTHERSHIP_INT_LAYERS,
+        order: MOTHERSHIP_INT_ORDER
+    }
+};
+
+function setActiveBackgroundLayers(styleKey) {
+    var setKey = styleKey && BACKGROUND_LAYER_SETS[styleKey] ? styleKey : 'default';
+    var selection = BACKGROUND_LAYER_SETS[setKey];
+    BACKGROUND_LAYERS = selection.layers;
+    LAYER_ORDER = selection.order;
+    return setKey;
+}

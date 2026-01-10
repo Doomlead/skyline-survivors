@@ -132,6 +132,14 @@ const gameState = {
         reinforcementTimer: 0,
         baseX: 0
     },
+    mothershipObjective: {
+        active: false,
+        bossKey: null,
+        bossHp: 0,
+        bossHpMax: 0,
+        reinforcementTimer: 0,
+        phase: 0
+    },
     rebuildObjective: {
         active: false,
         stage: null,
@@ -277,6 +285,14 @@ function resetGameState() {
         turretFireTimer: 0,
         reinforcementTimer: 0,
         baseX: 0
+    };
+    gameState.mothershipObjective = {
+        active: false,
+        bossKey: null,
+        bossHp: 0,
+        bossHpMax: 0,
+        reinforcementTimer: 0,
+        phase: 0
     };
     gameState.rebuildObjective = {
         active: false,

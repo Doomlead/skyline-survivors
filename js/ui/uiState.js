@@ -5,6 +5,7 @@
 let scoreEl, waveEl, timerEl, bombsEl, livesEl, powerupsEl;
 let districtEl, threatEl, rewardEl;
 let assaultHudEl, assaultCoreFillEl, assaultCoreLabelEl, assaultShieldLabelEl;
+let mothershipHudEl, mothershipCoreFillEl, mothershipCoreLabelEl, mothershipPhaseLabelEl;
 let radarCanvas, radarCtx;
 
 const KEY_BINDING_ACTIONS = [
