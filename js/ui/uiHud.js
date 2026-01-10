@@ -16,6 +16,10 @@ function createUI(scene) {
     assaultCoreFillEl = document.getElementById('assault-core-fill');
     assaultCoreLabelEl = document.getElementById('assault-core-label');
     assaultShieldLabelEl = document.getElementById('assault-shield-label');
+    mothershipHudEl = document.getElementById('mothership-hud');
+    mothershipCoreFillEl = document.getElementById('mothership-core-fill');
+    mothershipCoreLabelEl = document.getElementById('mothership-core-label');
+    mothershipPhaseLabelEl = document.getElementById('mothership-phase-label');
 
     radarCanvas = document.getElementById('radar-canvas');
     if (radarCanvas) {
@@ -31,6 +35,7 @@ function updateUI(scene) {
 
     if (gameState.mode === 'survival') {
         if (assaultHudEl) assaultHudEl.classList.add('hidden');
+        if (mothershipHudEl) mothershipHudEl.classList.add('hidden');
         const activeHumans = humansGroup ? humansGroup.countActive(true) : gameState.humans;
         waveEl.style.display = 'block';
         waveEl.innerText = 'HUMANS: ' + String(activeHumans).padStart(3, '0');
@@ -43,6 +48,7 @@ function updateUI(scene) {
     } else if (gameState.mode === 'assault') {
         timerEl.style.display = 'none';
         waveEl.style.display = 'block';
+        if (mothershipHudEl) mothershipHudEl.classList.add('hidden');
         const objective = gameState.assaultObjective;
         const baseHp = objective?.baseHp ?? 0;
         const baseMax = objective?.baseHpMax ?? 0;
@@ -59,10 +65,31 @@ function updateUI(scene) {
             const shields = objective?.shieldsRemaining ?? 0;
             assaultShieldLabelEl.innerText = `Shields: ${shields}`;
         }
+    } else if (gameState.mode === 'mothership') {
+        timerEl.style.display = 'none';
+        waveEl.style.display = 'block';
+        if (assaultHudEl) assaultHudEl.classList.add('hidden');
+        waveEl.innerText = 'FINAL ASSAULT: MOTHERSHIP CORE';
+        const objective = gameState.mothershipObjective;
+        const bossHp = objective?.bossHp ?? 0;
+        const bossMax = objective?.bossHpMax ?? 0;
+        if (mothershipHudEl) mothershipHudEl.classList.remove('hidden');
+        if (mothershipCoreFillEl) {
+            const pct = bossMax > 0 ? Math.max(0, Math.min(1, bossHp / bossMax)) : 0;
+            mothershipCoreFillEl.style.width = `${Math.round(pct * 100)}%`;
+        }
+        if (mothershipCoreLabelEl) {
+            mothershipCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}`;
+        }
+        if (mothershipPhaseLabelEl) {
+            const phase = (objective?.phase ?? 0) + 1;
+            mothershipPhaseLabelEl.innerText = `Phase ${phase}`;
+        }
     } else {
         timerEl.style.display = 'none';
         waveEl.style.display = 'block';
         if (assaultHudEl) assaultHudEl.classList.add('hidden');
+        if (mothershipHudEl) mothershipHudEl.classList.add('hidden');
 
         const enemiesLeft = Math.max(0, (gameState.enemiesToKillThisWave || 0) - (gameState.killsThisWave || 0));
         const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
@@ -101,7 +128,8 @@ function updateUI(scene) {
             const timerLabel = typeof directives.timer === 'number'
                 ? formatMetaTimer(directives.timer)
                 : 'N/A';
-            districtEl.innerText = `DISTRICT: ${directives.districtName || directives.districtId || 'Unknown'} (${directives.status || 'unknown'})`;
+            const districtName = directives.districtName || directives.districtId || 'Unknown';
+            districtEl.innerText = `DISTRICT: ${districtName} (${directives.status || 'unknown'})`;
             threatEl.innerText = `THREAT: ${directives.urgency ? directives.urgency.toUpperCase() : 'STABLE'} · T-${timerLabel}`;
             rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}`;
         } else {

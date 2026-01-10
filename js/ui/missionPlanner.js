@@ -101,6 +101,14 @@
         assaultDrain: 1.6
     };
 
+    const MOTHERSHIP_CONFIG = {
+        id: 'mothership',
+        name: 'Mothership',
+        reward: 'campaign victory',
+        threatMix: ['shield', 'spawner', 'seeker', 'kamikaze', 'bomber'],
+        backgroundStyle: 'mothership_exterior'
+    };
+
     let mission = null;
     let districtState = null;
     let battleshipState = null;
@@ -201,6 +209,9 @@
 
     function setMode(mode) {
         const current = ensureMission();
+        if (mode === 'mothership') {
+            return selectMothershipMission();
+        }
         mission = { ...current, mode };
         const cfg = getDistrictConfigById(mission.district);
         if (cfg) mission.directives = buildMissionDirectives(cfg, getDistrictState(cfg.id), mode);
@@ -429,6 +440,26 @@
         };
     }
 
+    function buildMothershipDirectives() {
+        const threatMix = MOTHERSHIP_CONFIG.threatMix.map(type => ({ type, weight: 2 }));
+        return {
+            districtId: MOTHERSHIP_CONFIG.id,
+            districtName: MOTHERSHIP_CONFIG.name,
+            reward: MOTHERSHIP_CONFIG.reward,
+            urgency: 'final',
+            rewardMultiplier: 2.5,
+            spawnMultiplier: 1.4,
+            humans: 0,
+            timer: null,
+            status: 'core breached',
+            mode: 'mothership',
+            missionType: 'mothership',
+            bossKey: 'mothershipCore',
+            backgroundStyle: MOTHERSHIP_CONFIG.backgroundStyle,
+            threatMix
+        };
+    }
+
     function tickDistricts(seconds = 0) {
         const state = safeLoadState();
         let mutated = false;
@@ -477,6 +508,16 @@
     }
 
     function prepareLaunchPayload(mode) {
+        if (mode === 'mothership' || mission?.district === 'mothership') {
+            const mothershipMission = selectMothershipMission();
+            return {
+                ...mothershipMission,
+                mode: 'mothership',
+                directives: mothershipMission.directives,
+                districtState: null,
+                mapState
+            };
+        }
         const requestedMode = mode || ensureMission().mode || 'classic';
         const current = setMode(requestedMode);
         const cfg = getDistrictConfigById(current.district);
@@ -489,6 +530,20 @@
             districtState: state ? { ...state } : null,
             mapState
         };
+    }
+
+    function selectMothershipMission() {
+        mission = {
+            city: MOTHERSHIP_CONFIG.name,
+            district: MOTHERSHIP_CONFIG.id,
+            longitude: 0,
+            latitude: 0,
+            mode: 'mothership',
+            seed: Phaser.Math.RND.uuid(),
+            directives: buildMothershipDirectives(),
+            districtState: null
+        };
+        return mission;
     }
 
     function ensureMapNodeState(config) {
@@ -537,6 +592,7 @@
         rerollCity,
         setMode,
         selectDistrict,
+        selectMothershipMission,
         getDistrictConfigs: () => DISTRICT_CONFIGS,
         getAllDistrictStates,
         areAllDistrictsFriendly,

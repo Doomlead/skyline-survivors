@@ -46,6 +46,7 @@ function createBackground(scene, style) {
     };
 
     var styleToUse = resolveBackgroundStyle(style);
+    setActiveBackgroundLayers(styleToUse);
     var GeneratorClass = BACKGROUND_STYLE_GENERATORS[styleToUse];
 
     console.log('[BackgroundManager] Creating ' + styleToUse.toUpperCase() + ' background');

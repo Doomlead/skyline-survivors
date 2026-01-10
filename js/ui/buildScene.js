@@ -310,7 +310,13 @@ class BuildScene extends Phaser.Scene {
                 return;
             }
             if (this.hintText) {
-                this.hintText.setText('Mothership coordinates acquired. Final assault staging soon.');
+                this.hintText.setText('Mothership coordinates acquired. Launching final assault.');
+            }
+            if (window.missionPlanner?.selectMothershipMission) {
+                this.mission = missionPlanner.selectMothershipMission();
+            }
+            if (window.startGame) {
+                startGame('mothership');
             }
         }
     }

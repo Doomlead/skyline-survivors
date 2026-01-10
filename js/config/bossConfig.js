@@ -75,6 +75,14 @@ const BOSS_TRAIL_CONFIGS = {
         alpha: { start: 0.5, end: 0 },
         lifespan: 400,
         frequency: 120
+    },
+    mothershipCore: {
+        tint: [0x7dd3fc, 0x38bdf8, 0x312e81],
+        speed: 18,
+        scale: { start: 0.9, end: 0 },
+        alpha: { start: 0.55, end: 0 },
+        lifespan: 420,
+        frequency: 90
     }
 };
 
@@ -89,7 +97,8 @@ const BOSS_HP_VALUES = {
     leviathanBaiter: 32,
     apexKamikaze: 15,
     fortressTurret: 40,
-    overlordShield: 45
+    overlordShield: 45,
+    mothershipCore: 120
 };
 
 const BOSS_SCORE_VALUES = {
@@ -101,7 +110,8 @@ const BOSS_SCORE_VALUES = {
     leviathanBaiter: 575,
     apexKamikaze: 400,
     fortressTurret: 650,
-    overlordShield: 750
+    overlordShield: 750,
+    mothershipCore: 2000
 };
 
 const BOSS_SCALE_VALUES = {
@@ -113,7 +123,8 @@ const BOSS_SCALE_VALUES = {
     leviathanBaiter: 3.8,
     apexKamikaze: 3.2,
     fortressTurret: 4.2,
-    overlordShield: 4.5
+    overlordShield: 4.5,
+    mothershipCore: 5.2
 };
 
 const BOSS_SHOT_CONFIGS = {
@@ -188,12 +199,21 @@ const BOSS_SHOT_CONFIGS = {
         damage: 2.5,  // Slow but powerful
         interval: 1800,
         pattern: 'radial'
+    },
+    mothershipCore: {
+        sources: 8,
+        projectileType: 'enemyProjectile',
+        speed: 240,
+        damage: 2.8,
+        interval: 1400,
+        pattern: 'radial'
     }
 };
 
 const BOSS_TYPES = [
     'megaLander', 'titanMutant', 'hiveDrone', 'behemothBomber', 'colossalPod',
-    'leviathanBaiter', 'apexKamikaze', 'fortressTurret', 'overlordShield'
+    'leviathanBaiter', 'apexKamikaze', 'fortressTurret', 'overlordShield',
+    'mothershipCore'
 ];
 
 function getBossHP(type) {

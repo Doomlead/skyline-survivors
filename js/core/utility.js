@@ -273,6 +273,7 @@ function applyMissionPayload(missionPayload) {
         gameState.rewardMultiplier = 1;
         gameState.spawnMultiplier = 1;
         gameState.missionDistrictState = null;
+        CONFIG.backgroundStyle = null;
         return;
     }
     gameState.missionContext = missionPayload;
@@ -280,6 +281,7 @@ function applyMissionPayload(missionPayload) {
     gameState.missionDistrictState = missionPayload.districtState || missionPayload.directives?.districtState || null;
     gameState.rewardMultiplier = missionPayload?.directives?.rewardMultiplier || 1;
     gameState.spawnMultiplier = missionPayload?.directives?.spawnMultiplier || 1;
+    CONFIG.backgroundStyle = missionPayload?.directives?.backgroundStyle || null;
     if (missionPayload?.directives?.humans) {
         gameState.humans = missionPayload.directives.humans;
     }
