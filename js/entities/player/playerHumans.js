@@ -19,7 +19,8 @@ function spawnHuman(scene, x) {
 
 function rescueHuman(playerSprite, human) {
     const audioManager = this.audioManager;
-    if (!human.isAbducted) return;
+    const isFalling = Boolean(human.body && human.body.gravity && human.body.gravity.y > 0);
+    if (!human.isAbducted && !isFalling) return;
     gameState.humansRescued++;
     const reward = getMissionScaledReward(1000);
     gameState.score += reward;
