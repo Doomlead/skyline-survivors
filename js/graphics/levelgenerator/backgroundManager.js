@@ -9,12 +9,15 @@
 var backgroundGeneratorInstance = null;
 var parallaxManagerInstance = null;
 
+// Update BACKGROUND_STYLE_GENERATORS in backgroundManager.js
 var BACKGROUND_STYLE_GENERATORS = {
     cyberpunk: BackgroundGeneratorCyberpunk,
     wasteland: BackgroundGeneratorWasteland,
     wasteland2: BackgroundGeneratorWasteland2,
     industrial: BackgroundGeneratorIndustrial,
     destroyedindustrial: BackgroundGeneratorDestroyedIndustrial,
+    mothership_exterior: BackgroundGeneratorMothershipExterior,
+    mothership_interior: BackgroundGeneratorMothershipInterior
 };
 
 var BACKGROUND_STYLE_OPTIONS = Object.keys(BACKGROUND_STYLE_GENERATORS);

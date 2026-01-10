@@ -59,3 +59,41 @@ var LAYER_ORDER = [
     'midCity',
     'terrain',
 ];
+
+// Add these to backgroundConfig.js
+
+var MOTHERSHIP_EXT_LAYERS = {
+    deepHull: {
+        key: 'ms_ext_deep',
+        speedX: 0.1,
+        depth: 5,
+        generator: 'generateDeepHullLayer'
+    },
+    activeHull: {
+        key: 'ms_ext_active',
+        speedX: 0.3,
+        depth: 6,
+        generator: 'generateActiveHullLayer'
+    },
+    greebleDetail: {
+        key: 'ms_ext_greeble',
+        speedX: 0.6,
+        depth: 7,
+        generator: 'generateGreebleLayer'
+    }
+};
+
+var MOTHERSHIP_INT_LAYERS = {
+    corridorBack: {
+        key: 'ms_int_back',
+        speedX: 0.2,
+        depth: 4,
+        generator: 'generateCorridorBack'
+    },
+    infrastructure: {
+        key: 'ms_int_infra',
+        speedX: 0.5,
+        depth: 5,
+        generator: 'generateInfrastructure'
+    }
+};
