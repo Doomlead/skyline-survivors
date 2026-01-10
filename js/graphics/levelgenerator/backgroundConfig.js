@@ -61,30 +61,54 @@ var LAYER_ORDER = [
 ];
 
 var MOTHERSHIP_EXT_LAYERS = {
-    deepHull: {
-        key: 'ms_ext_deep',
-        speedX: 0.1,
+    sky: {
+        key: 'ms_ext_sky',
+        speedX: 0.0,
+        depth: 0,
+        generator: 'generateSkyLayer',
+    },
+    atmosphere: {
+        key: 'ms_ext_atmosphere',
+        speedX: 0.02,
+        depth: 1,
+        generator: 'generateAtmosphereLayer',
+    },
+    stars: {
+        key: 'ms_ext_stars',
+        speedX: 0.05,
+        depth: 2,
+        generator: 'generateStarsLayer',
+    },
+    horizonCity: {
+        key: 'ms_ext_horizon',
+        speedX: 0.18,
+        depth: 3,
+        generator: 'generateHorizonCityLayer',
+        widthMultiplier: 1,
+    },
+    midCity: {
+        key: 'ms_ext_mid',
+        speedX: 0.4,
+        depth: 4,
+        generator: 'generateMidCityLayer',
+        widthMultiplier: 1,
+    },
+    terrain: {
+        key: 'ms_ext_terrain',
+        speedX: 1,
         depth: 5,
-        generator: 'generateDeepHullLayer'
+        generator: 'generateTerrainLayer',
+        widthMultiplier: 1,
     },
-    activeHull: {
-        key: 'ms_ext_active',
-        speedX: 0.3,
-        depth: 6,
-        generator: 'generateActiveHullLayer'
-    },
-    greebleDetail: {
-        key: 'ms_ext_greeble',
-        speedX: 0.6,
-        depth: 7,
-        generator: 'generateGreebleLayer'
-    }
 };
 
 var MOTHERSHIP_EXT_ORDER = [
-    'deepHull',
-    'activeHull',
-    'greebleDetail'
+    'sky',
+    'atmosphere',
+    'stars',
+    'horizonCity',
+    'midCity',
+    'terrain',
 ];
 
 var MOTHERSHIP_INT_LAYERS = {
