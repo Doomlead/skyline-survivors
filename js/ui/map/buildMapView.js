@@ -3,8 +3,8 @@
 // ------------------------
 
 const GLOBE_LAYOUT = {
-    centerXRatio: .75,
-    centerYRatio: 0.75,
+    centerXRatio: 0.5,
+    centerYRatio: 0.5,
     radiusScale: 0.23,
     minRadius: 100,
     maxRadius: 280
