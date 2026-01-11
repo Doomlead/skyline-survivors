@@ -409,6 +409,7 @@ function update(time, delta) {
     updateHumans(this);
     updateGarrisonDefenders(this, time, delta);
     updateBosses(this, time, delta);
+    updateMothershipBosses(this, time, delta);
     updateBattleships(this, time, delta);
     checkSurvivalBosses(this);
     updatePowerUpTimers(this, delta);
