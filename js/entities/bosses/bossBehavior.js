@@ -344,9 +344,6 @@ function updateBosses(scene, time, delta) {
             case 'overlordShield':
                 updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier);
                 break;
-            case 'mothershipCore':
-                updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier);
-                break;
         }
     });
 }
