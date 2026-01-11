@@ -297,6 +297,7 @@ function createGraphics(scene) {
 
     // Boss sprites for boss waves
     createBossGraphics(scene);
+    createMothershipGraphics(scene);
     
     createHumanGraphics(scene);
     createPowerUpGraphics(scene);
