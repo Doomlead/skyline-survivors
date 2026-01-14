@@ -568,8 +568,7 @@ class BuildMapView {
 
         // Configuration relative to globe size
         this.nodeConfigs = [
-            { id: 'battleship', label: 'Battleship', angle: -40, distScale: 1.35, color: 0xf472b6 },
-            { id: 'mothership', label: 'Mothership', angle: 300, distScale: 1.55, color: 0x818cf8 }
+            { id: 'mothership', label: 'Mothership',angle: 160, distScale: 1.4, color: 0x818cf8 }
         ];
 
         this.nodeConfigs.forEach(config => {
