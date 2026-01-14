@@ -568,12 +568,9 @@ class BuildMapView {
 
         // Configuration relative to globe size
         this.nodeConfigs = [
-    { id: 'battleship', label: 'Battleship', angle: -40, distScale: 1.35, color: 0xf472b6 },
-    { id: 'shop', label: 'Shop', angle: 70, distScale: 1.45, color: 0x22d3ee },
-    { id: 'relay', label: 'Relay', angle: 160, distScale: 1.4, color: 0x93c5fd },
-    { id: 'distress', label: 'Distress Node', angle: 240, distScale: 1.3, color: 0xfacc15 },
-    { id: 'mothership', label: 'Mothership', angle: 300, distScale: 1.55, color: 0x818cf8 }
-];
+            { id: 'battleship', label: 'Battleship', angle: -40, distScale: 1.35, color: 0xf472b6 },
+            { id: 'mothership', label: 'Mothership', angle: 300, distScale: 1.55, color: 0x818cf8 }
+        ];
 
         this.nodeConfigs.forEach(config => {
             const connector = this.scene.add.graphics();
