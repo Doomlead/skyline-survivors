@@ -59,6 +59,7 @@ function spawnBoss(scene, type, x, y) {
     const spawnY = Phaser.Math.Clamp(y, topLimit, Math.max(topLimit + 20, maxY));
     
     const boss = bosses.create(x, spawnY, type);
+    boss.setDepth(FG_DEPTH_BASE + 5);
     
     const scale = getBossScale(type);
     boss.setScale(scale);
