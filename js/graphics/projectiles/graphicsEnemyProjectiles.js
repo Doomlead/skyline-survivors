@@ -270,7 +270,39 @@ function createEnemyProjectileGraphics(scene) {
 
 
     // ========================
-    // 8. BAITER PROJECTILE (Laser Segment)
+    // 8. PIERCING PROJECTILE (Armor Piercer Bolt)
+    // ========================
+    const piercingProjGraphics = scene.add.graphics();
+    const pzw = 22, pzh = 8;
+    const pzcy = pzh / 2;
+
+    // Core streak
+    piercingProjGraphics.fillStyle(C_RED_BRIGHT, 1);
+    piercingProjGraphics.fillRect(2, pzcy - 2, 16, 4);
+
+    // Hot centerline
+    piercingProjGraphics.fillStyle(C_CORE_WHITE, 0.9);
+    piercingProjGraphics.fillRect(4, pzcy - 0.5, 12, 1);
+
+    // Tip flare
+    piercingProjGraphics.fillStyle(C_ORANGE_HEAT, 1);
+    piercingProjGraphics.beginPath();
+    piercingProjGraphics.moveTo(18, pzcy - 3);
+    piercingProjGraphics.lineTo(22, pzcy);
+    piercingProjGraphics.lineTo(18, pzcy + 3);
+    piercingProjGraphics.closePath();
+    piercingProjGraphics.fillPath();
+
+    // Trailing glow
+    piercingProjGraphics.fillStyle(C_RED_GLOW, 0.25);
+    piercingProjGraphics.fillEllipse(6, pzcy, 12, 6);
+
+    piercingProjGraphics.generateTexture('enemyProjectile_piercing', pzw, pzh);
+    piercingProjGraphics.destroy();
+
+
+    // ========================
+    // 9. BAITER PROJECTILE (Laser Segment)
     // ========================
     const baiterProjGraphics = scene.add.graphics();
     const baw = 20, bah = 8;
@@ -304,7 +336,7 @@ function createEnemyProjectileGraphics(scene) {
 
 
     // ========================
-    // 9. MINE (Naval Mine Style)
+    // 10. MINE (Naval Mine Style)
     // ========================
     const mineGraphics = scene.add.graphics();
     const mw_mine = 24, mh_mine = 24;
