@@ -419,7 +419,7 @@ class BuildMapView {
         if (typeof missionPlanner === 'undefined' || !this.planetContainer) return;
         this.battleshipMarkers.forEach(marker => marker.destroy());
         this.battleshipMarkers = [];
-        const ships = missionPlanner.getBattleships();
+        const ships = this.getActiveBattleships();
         ships.forEach(() => {
             const hull = this.scene.add.image(0, 0, 'mapBattleshipIcon');
             hull.setScale(0.9);
@@ -437,6 +437,11 @@ class BuildMapView {
             });
             this.battleshipMarkers.push(hull);
         });
+    }
+
+    getActiveBattleships() {
+        if (typeof missionPlanner === 'undefined') return [];
+        return missionPlanner.getBattleships().filter(ship => ship.active !== false);
     }
 
     getDistrictCenterCoords(config) {
@@ -688,7 +693,10 @@ class BuildMapView {
             }
         });
 
-        const battleships = missionPlanner.getBattleships();
+        const battleships = this.getActiveBattleships();
+        if (battleships.length !== this.battleshipMarkers.length) {
+            this.createBattleshipMarkers();
+        }
         battleships.forEach((ship, index) => {
             const marker = this.battleshipMarkers[index];
             if (!marker) return;
