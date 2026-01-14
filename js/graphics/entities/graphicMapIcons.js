@@ -53,9 +53,6 @@ function createMapBattleshipIcon(scene) {
     icon.lineStyle(1, 0xe0f2fe, 0.6);
     icon.strokeEllipse(cx, 17, 26, 10);
 
-    if (scene.textures.exists('mapBattleshipIcon')) {
-        scene.textures.remove('mapBattleshipIcon');
-    }
     icon.generateTexture('mapBattleshipIcon', w, h);
     icon.destroy();
 }
@@ -94,9 +91,6 @@ function createMapMothershipIcon(scene) {
     icon.lineStyle(1, 0xe0f2fe, 0.6);
     icon.strokeEllipse(cx, 18, 34, 18);
 
-    if (scene.textures.exists('mapMothershipIcon')) {
-        scene.textures.remove('mapMothershipIcon');
-    }
     icon.generateTexture('mapMothershipIcon', w, h);
     icon.destroy();
 }
