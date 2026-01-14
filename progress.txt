@@ -763,10 +763,10 @@ Inventory Power-Ups
 | **Mission Types - Defense** | 15 waves with tier progression | ✅ **Fully Implemented** |
 | **Mission Types - Assault** | Destroy enemy ground base | ⚠️ **Substantially Implemented** (core + shields + turrets + garrison ✅) |
 | **Battleships** | Mini-bosses that attack districts | ✅ **Fully Implemented** (roaming ✅, wave 15 boss ✅) |
-| **Mothership** | Final boss unlocked when all districts secured | ⚠️ **Partially Implemented** (unlock ✅, mission ❌) |
+| **Mothership** | Final boss unlocked when all districts secured | ⚠️ **Partially Implemented** (unlock ✅, single-phase core fight ✅, multi-phase ❌) |
 | **Strategic Layer** | Balance defending vs. reclaiming | ❌ **Not Implemented** |
 | **Dynamic Campaign** | Player failure creates challenges | ✅ **Core Loop Implemented** (districts can be occupied, assault missions exist) |
-| **Victory Path** | Secure planet → Assault Mothership → Win | ⚠️ **Partially Implemented** (path exists, final mission missing) |
+| **Victory Path** | Secure planet → Assault Mothership → Win | ⚠️ **Partially Implemented** (final mission exists, campaign-complete flow pending) |
 
 ---
 
@@ -782,7 +782,7 @@ Inventory Power-Ups
 | 4 | ✅ Mothership node unlock | **COMPLETE** | Unlock condition functional |
 | 5 | ✅ Defense mission tier progression | **COMPLETE** | Light/heavy/elite wave mix |
 | 6 | ✅ District state transitions | **COMPLETE** | All state changes functional |
-| 7 | ❌ Campaign victory condition | **NOT STARTED** | Destroy Mothership → Win |
+| 7 | ⚠️ Campaign victory condition | **PARTIAL** | Mothership win triggers mission-complete overlay; campaign-complete flow missing |
 | 8 | ❌ Strategic campaign layer | **NOT STARTED** | Priority UI, district values |
 | 9 | ❌ Ground combat depth | **NOT STARTED** | Operative squads, cover |
 | 10 | ❌ Additional game modes | **NOT STARTED** | Mission Mode, Boss Rush |
@@ -805,7 +805,7 @@ Inventory Power-Ups
   - Meta Progression
   - Power-Up System
   - Scoring & Rewards
-  - Campaign Mode
+  - Campaign Mode (Mothership mission playable as a single-phase core fight; lacks multi-phase structure/boarding)
   - Environment Design (multi-layer parallax, no weather/day-night)
 - **Not Started:** 1/13 (8%)
   - Additional Game Modes
@@ -815,13 +815,13 @@ Inventory Power-Ups
 ## Design Document Alignment
 
 **Overall Implementation:**
-- ✅ **Implemented:** ~61% ⬆️ (was ~60%)
-- ⚠️ **Partially Implemented:** ~29%
+- ✅ **Implemented:** ~62% ⬆️ (was ~61%)
+- ⚠️ **Partially Implemented:** ~28%
 - ❌ **Not Implemented:** ~10%
 
 **By Category:**
-- **Core Gameplay Loop:** 85% complete
-- **Mission Systems:** 80% complete (Defense 90%, Assault 75%)
+- **Core Gameplay Loop:** 88% complete (Mothership fight exists, but simplified)
+- **Mission Systems:** 82% complete (Defense 90%, Assault 75%, Mothership 30%)
 - **Meta Systems:** 60% complete
 - **Player Mechanics:** 70% complete (Ship 100%, Ground 35%)
 - **Enemy Design:** 85% complete
@@ -839,32 +839,32 @@ Inventory Power-Ups
 4. **Complete district state transition flow** - All win/loss outcomes implemented
 5. **Battleship system** - Roaming threats + wave 15 boss fully functional
 6. **Mothership unlock condition** - Activates when all districts friendly
-7. **Defense/assault/liberate gameplay loop** - End-to-end campaign flow (minus final boss)
+7. **Defense/assault/liberate gameplay loop** - End-to-end campaign flow (final boss exists, multi-phase design pending)
 8. **Procedural parallax environment stack** - Multi-layer sky/city/terrain backgrounds with multiple style generators
-9. **Mothership assault scaffolding** - Orbit launch directive + initial boss/HUD plumbing
+9. **Mothership assault playable** - Single-phase core fight with reinforcements + win overlay (missing multi-phase design)
 
 ### 🎯 Recent Achievements:
 - ⬆️ Environmental stack: 40% → 55% (multi-layer sky/atmosphere/stars + multiple styles)
 - ⬆️ Assault missions: 60% → 75% (base shields, turrets, garrison defenders, HUD)
 - ⬆️ System map: 60% → 70% (complete state transition flow)
-- ⬆️ Mothership assault: 10% → 25% (launch directives + initial boss + HUD support)
+- ⬆️ Mothership assault: 10% → 30% (single-phase core fight + HUD support)
 
 ---
 
 ## Immediate Next Steps (Recommended Order)
 
-### 🚨 CRITICAL: Complete MVP (6-10 days)
+### 🚨 CRITICAL: Complete MVP (5-8 days)
 
-**Priority 1: Mothership Final Boss Mission (3-5 days)**
+**Priority 1: Expand Mothership Final Boss Mission (3-4 days)**
 - Build Phase 1 exterior assault + phase transitions
 - Implement Phase 2 interior encounters (on-foot focus) with objective gating
-- Build Phase 3 core boss with multi-step HP and shield phases
-- Tie victory condition to Mothership core destruction
+- Upgrade Phase 3 core boss to multi-step HP/shield phases (current fight is single-phase)
+- Tie victory condition to dedicated campaign-complete flow (not just generic mission win)
 
 **Priority 2: Campaign Victory Flow (1 day)**
 - "Campaign Complete!" message + stats panel
 - Save victory to run history
-- Return-to-menu path
+- Return-to-menu + optional return-to-system-map path
 
 **Priority 3: Assault Mission Failure Flow (1-2 days)**
 - Add retreat/retry loop for assault missions (district stays occupied)
@@ -903,13 +903,13 @@ Inventory Power-Ups
 ## Estimated Remaining Work
 
 ### MVP Completion:
-- **Current Progress:** ~86% complete ⬇️ (adjusted after audit)
+- **Current Progress:** ~88% complete ⬆️ (adjusted after audit)
 - **Remaining Critical Work:**
-  - Mothership Boss Mission: 3-5 days
+  - Mothership Boss Mission (multi-phase upgrade): 3-4 days
   - Campaign Victory Flow: 1 day
   - Assault failure/retreat flow: 1-2 days
   - Testing & Polish: 2-3 days
-- **Total Time to Complete MVP:** 6-10 days
+- **Total Time to Complete MVP:** 5-8 days
 
 ### Full Design Document:
 - **High Priority Features:** ~35% remaining
@@ -927,16 +927,16 @@ Inventory Power-Ups
 
 ## MVP Completion
 
-- **Status:** ~86% complete (core loop intact, final boss + victory flow missing)
-- **Primary Blockers:** Mothership mission, victory flow, assault retreat/retry loop
+- **Status:** ~88% complete (core loop intact, Mothership fight present but simplified)
+- **Primary Blockers:** Multi-phase Mothership mission, campaign-complete flow, assault retreat/retry loop
 
 ---
 
 ## Critical Missing Features for Design Document Compliance
 
 ### 🚨 MVP Blockers:
-1. **Mothership final boss mission** - Required for the campaign win condition
-2. **Campaign victory flow** - Win screen + progression finalization
+1. **Multi-phase Mothership final boss mission** - Needs exterior → interior → core phases
+2. **Campaign victory flow** - Dedicated campaign-complete screen + progression finalization
 
 ### 📋 Core Gameplay Polish:
 3. **Assault mission failure/retreat loop** - Needed for proper occupied-district pacing
