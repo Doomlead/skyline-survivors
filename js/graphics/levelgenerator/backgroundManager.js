@@ -21,6 +21,7 @@ var BACKGROUND_STYLE_GENERATORS = {
 };
 
 var BACKGROUND_STYLE_OPTIONS = Object.keys(BACKGROUND_STYLE_GENERATORS);
+var MOTHERSHIP_STYLE_KEYS = ['mothership_exterior', 'mothership_interior'];
 
 function resolveBackgroundStyle(style) {
     var requested = style || CONFIG.backgroundStyle;
@@ -32,8 +33,16 @@ function resolveBackgroundStyle(style) {
         console.warn('[BackgroundManager] Unknown background style "' + requested + '", falling back to random selection.');
     }
 
-    var index = Math.floor(Math.random() * BACKGROUND_STYLE_OPTIONS.length);
-    return BACKGROUND_STYLE_OPTIONS[index];
+    if (typeof gameState !== 'undefined' && gameState.mode === 'mothership') {
+        return 'mothership_exterior';
+    }
+
+    var nonMothershipOptions = BACKGROUND_STYLE_OPTIONS.filter(function(option) {
+        return MOTHERSHIP_STYLE_KEYS.indexOf(option) === -1;
+    });
+    var options = nonMothershipOptions.length ? nonMothershipOptions : BACKGROUND_STYLE_OPTIONS;
+    var index = Math.floor(Math.random() * options.length);
+    return options[index];
 }
 
 function createBackground(scene, style) {

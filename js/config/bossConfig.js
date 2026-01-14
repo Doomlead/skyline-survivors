@@ -124,7 +124,7 @@ const BOSS_SCALE_VALUES = {
     apexKamikaze: 3.2,
     fortressTurret: 4.2,
     overlordShield: 4.5,
-    mothershipCore: 5.2
+    mothershipCore: 2.4
 };
 
 const BOSS_SHOT_CONFIGS = {
