@@ -308,7 +308,7 @@ function destroyBoss(scene, boss) {
             strokeThickness: 4,
             align: 'center'
         }
-    ).setOrigin(0.5);
+    ).setOrigin(0.5).setDepth(FG_DEPTH_BASE + 10);
     
     scene.tweens.add({
         targets: scorePopup,

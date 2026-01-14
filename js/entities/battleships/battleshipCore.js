@@ -396,7 +396,7 @@ function destroyBattleship(scene, battleship) {
             stroke: '#000000',
             strokeThickness: 3
         }
-    ).setOrigin(0.5);
+    ).setOrigin(0.5).setDepth(FG_DEPTH_BASE + 10);
 
     scene.tweens.add({
         targets: scorePopup,
