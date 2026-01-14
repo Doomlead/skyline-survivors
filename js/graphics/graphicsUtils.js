@@ -294,6 +294,7 @@ function createGraphics(scene) {
     createGarrisonDefenderGraphics(scene);
     createBattleshipGraphics(scene);
     createAssaultBaseGraphics(scene);
+    createMapIconGraphics(scene);
 
     // Boss sprites for boss waves
     createBossGraphics(scene);

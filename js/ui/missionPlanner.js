@@ -255,6 +255,7 @@
             const toId = pickRandomDistrictId(fromId);
             return {
                 id: `battleship-${index + 1}`,
+                active: true,
                 phase: 'travel',
                 fromId,
                 toId,
@@ -278,6 +279,7 @@
         let mutated = false;
 
         ships.forEach(ship => {
+            if (ship.active === false) return;
             if (ship.phase === 'travel') {
                 ship.timer -= seconds;
                 const progress = Phaser.Math.Clamp(1 - ship.timer / BATTLESHIP_CONFIG.travelTime, 0, 1);
@@ -300,6 +302,11 @@
                 const targetCenter = getDistrictCenter(targetConfig);
                 ship.lat = targetCenter.lat;
                 ship.lon = targetCenter.lon;
+                if (targetState?.status === 'occupied' || targetState?.lastOutcome === 'cleared') {
+                    ship.active = false;
+                    ship.timer = 0;
+                    return;
+                }
                 attackedDistrictIds.add(targetId);
 
                 if (targetState && targetState.status !== 'occupied') {
@@ -314,6 +321,8 @@
                         if (targetState.timer === 0) {
                             targetState.status = 'occupied';
                             targetState.lastOutcome = 'failed';
+                            ship.active = false;
+                            ship.timer = 0;
                         }
                         mutated = true;
                     }
@@ -345,6 +354,18 @@
 
     function getBattleships() {
         return ensureBattleshipState();
+    }
+
+    function retireBattleshipsForDistrict(districtId) {
+        if (!districtId) return;
+        const ships = ensureBattleshipState();
+        ships.forEach(ship => {
+            if (ship.active === false) return;
+            if (ship.phase === 'assault' && ship.fromId === districtId) {
+                ship.active = false;
+                ship.timer = 0;
+            }
+        });
     }
 
     function selectDistrict(name, longitudeOverride = null, providedState = null) {
@@ -492,10 +513,12 @@
             state.timer = cfg.timer + 60;
             state.clearedRuns = (state.clearedRuns || 0) + 1;
             state.lastOutcome = 'cleared';
+            retireBattleshipsForDistrict(currentMission.district);
         } else {
             state.lastOutcome = 'failed';
             state.status = 'occupied';
             state.timer = 0;
+            retireBattleshipsForDistrict(currentMission.district);
         }
 
         districtState.lastUpdated = Date.now();

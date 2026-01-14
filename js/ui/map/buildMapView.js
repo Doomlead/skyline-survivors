@@ -419,10 +419,11 @@ class BuildMapView {
         if (typeof missionPlanner === 'undefined' || !this.planetContainer) return;
         this.battleshipMarkers.forEach(marker => marker.destroy());
         this.battleshipMarkers = [];
-        const ships = missionPlanner.getBattleships();
+        const ships = this.getActiveBattleships();
         ships.forEach(() => {
-            const hull = this.scene.add.triangle(0, 0, 0, -12, -10, 10, 10, 10, 0xf43f5e, 0.95);
-            hull.setStrokeStyle(2, 0xffffff, 0.9);
+            const hull = this.scene.add.image(0, 0, 'mapBattleshipIcon');
+            hull.setScale(0.9);
+            hull.setAlpha(0.95);
             hull.setBlendMode(Phaser.BlendModes.ADD);
             hull.setDepth(6);
             this.planetContainer.add(hull);
@@ -436,6 +437,11 @@ class BuildMapView {
             });
             this.battleshipMarkers.push(hull);
         });
+    }
+
+    getActiveBattleships() {
+        if (typeof missionPlanner === 'undefined') return [];
+        return missionPlanner.getBattleships().filter(ship => ship.active !== false);
     }
 
     getDistrictCenterCoords(config) {
@@ -573,8 +579,9 @@ class BuildMapView {
 
         this.nodeConfigs.forEach(config => {
             const connector = this.scene.add.graphics();
-            const node = this.scene.add.circle(0, 0, 12, config.color, 0.9);
-            node.setStrokeStyle(2, 0xffffff, 0.8);
+            const node = this.scene.add.image(0, 0, 'mapMothershipIcon');
+            node.setScale(0.9);
+            node.setAlpha(0.95);
             node.setBlendMode(Phaser.BlendModes.ADD);
             const pulse = this.scene.tweens.add({ targets: node, scale: 1.25, duration: 700, yoyo: true, repeat: -1 });
 
@@ -686,7 +693,10 @@ class BuildMapView {
             }
         });
 
-        const battleships = missionPlanner.getBattleships();
+        const battleships = this.getActiveBattleships();
+        if (battleships.length !== this.battleshipMarkers.length) {
+            this.createBattleshipMarkers();
+        }
         battleships.forEach((ship, index) => {
             const marker = this.battleshipMarkers[index];
             if (!marker) return;

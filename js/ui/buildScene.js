@@ -56,6 +56,9 @@ class BuildScene extends Phaser.Scene {
         this.mapModule.onOrbitNodeSelected = (n) => this.handleOrbitNodeSelected(n);
 
         // 4. Build the Globe
+        if (typeof createMapIconGraphics === 'function') {
+            createMapIconGraphics(this);
+        }
         this.mapModule.build(width, height);
         this.syncHTMLPanels();
         this.createSceneOverlay(width, height);
