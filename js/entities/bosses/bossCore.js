@@ -4,7 +4,7 @@
 
 function createBossTrail(scene, boss) {
     if (!scene || !boss) return;
-    if (boss.bossType === 'fortressTurret') return; // Stationary bosses have no trail
+    if (boss.bossType === 'fortressTurret' || boss.bossType === 'mothershipCore') return; // Stationary bosses have no trail
 
     const cfg = BOSS_TRAIL_CONFIGS[boss.bossType] || BOSS_TRAIL_CONFIGS.megaLander;
     const emitter = scene.add.particles(0, 0, 'particle', {

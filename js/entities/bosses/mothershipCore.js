@@ -6,6 +6,21 @@ function initializeMothershipCore(boss) {
     if (!boss) return;
     boss.corePhase = 0;
     boss.lastPulse = 0;
+    boss.anchorX = boss.anchorX ?? boss.x;
+    boss.anchorY = boss.anchorY ?? boss.y;
+    boss.setVelocity(0, 0);
+    if (boss.body) {
+        boss.body.setImmovable(true);
+        boss.body.setAllowGravity(false);
+    }
+}
+
+function getMothershipBreachPosition(scene) {
+    const worldWidth = CONFIG.worldWidth;
+    const groundLevel = scene?.groundLevel ?? CONFIG.worldHeight - 80;
+    const breachX = worldWidth * 0.68;
+    const breachY = groundLevel - 55;
+    return { x: breachX, y: breachY };
 }
 
 function setupMothershipEncounter(scene) {
@@ -18,13 +33,21 @@ function setupMothershipEncounter(scene) {
     objective.reinforcementTimer = 0;
     objective.phase = 0;
 
-    const spawnX = scene.cameras.main.scrollX + CONFIG.width / 2;
-    const spawnY = CONFIG.height * 0.35;
+    const breachPosition = getMothershipBreachPosition(scene);
+    const spawnX = breachPosition.x;
+    const spawnY = breachPosition.y;
     const boss = spawnBoss(scene, 'mothershipCore', spawnX, spawnY);
     if (boss) {
         gameState.bossActive = true;
         gameState.currentBossKey = 'mothershipCore';
         gameState.currentBossName = 'Mothership Core';
+        boss.anchorX = spawnX;
+        boss.anchorY = spawnY;
+        boss.setVelocity(0, 0);
+        if (boss.body) {
+            boss.body.setImmovable(true);
+            boss.body.setAllowGravity(false);
+        }
         objective.bossHp = boss.hp;
         objective.bossHpMax = boss.maxHP;
     }

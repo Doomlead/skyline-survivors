@@ -4,12 +4,10 @@
 
 function updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
-    const centerX = scene.cameras.main.scrollX + CONFIG.width / 2;
-    const targetY = CONFIG.height * 0.35;
-    const sway = Math.sin(time * 0.0015) * 120;
-
-    boss.x = Phaser.Math.Linear(boss.x, centerX + sway, 0.02);
-    boss.y = Phaser.Math.Linear(boss.y, targetY + Math.sin(time * 0.001) * 25, 0.02);
+    const anchorX = boss.anchorX ?? boss.x;
+    const anchorY = boss.anchorY ?? boss.y;
+    boss.setPosition(anchorX, anchorY);
+    boss.setVelocity(0, 0);
 
     const hpRatio = boss.maxHp > 0 ? boss.hp / boss.maxHp : 1;
     const phase = hpRatio < 0.33 ? 2 : hpRatio < 0.66 ? 1 : 0;
@@ -36,28 +34,11 @@ function updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier) {
 }
 
 function updateMothershipBosses(scene, time, delta) {
-    const topLimit = 20;
     const { bosses } = scene;
     if (!bosses) return;
 
     bosses.children.entries.forEach(boss => {
         if (!boss.active || boss.bossType !== 'mothershipCore') return;
-
-        wrapWorldBounds(boss);
-
-        const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
-        const terrainVariation = Math.sin(boss.x / 200) * 30;
-        const minClearance = 60;
-        const bossGroundY = groundLevel - terrainVariation - minClearance;
-
-        if (boss.y > bossGroundY) {
-            boss.y = bossGroundY;
-            if (boss.body.velocity.y > 0) boss.setVelocityY(0);
-        }
-        if (boss.y < topLimit) {
-            boss.y = topLimit;
-            if (boss.body.velocity.y < 0) boss.setVelocityY(0);
-        }
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
 
