@@ -171,6 +171,22 @@
         }
     }
 
+    function resetCampaignState() {
+        districtState = null;
+        battleshipState = null;
+        mission = null;
+        mapState.nodes = {};
+        mapState.hasTimerData = false;
+        if (typeof localStorage !== 'undefined') {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (err) {
+                // Ignore persistence errors in environments without storage
+            }
+        }
+        safeLoadState();
+    }
+
     function randomCityMission() {
         const districtConfig = Phaser.Utils.Array.GetRandom(DISTRICT_CONFIGS);
         const district = getDistrictState(districtConfig.id);
@@ -622,6 +638,7 @@
         getDistrictState,
         updateDistrictState,
         buildMissionDirectives,
+        resetCampaignState,
         recordMissionOutcome,
         prepareLaunchPayload,
         tickDistricts,

@@ -335,6 +335,7 @@ function update(time, delta) {
         if (!this.isRebindingKey && Phaser.Input.Keyboard.JustDown(this.pauseKey)) togglePause(this);
         return;
     }
+    gameState.timePlayedMs = (gameState.timePlayedMs || 0) + delta;
     if (window.missionPlanner) {
         missionPlanner.tickDistricts(delta / 1000);
     }
