@@ -100,6 +100,7 @@ const gameState = {
     wave: 1,
     mode: 'classic',
     timeRemaining: 0,
+    timePlayedMs: 0,
     enemiesToKillThisWave: 0,
     killsThisWave: 0,
     nextExtraLife: 10000,
@@ -223,6 +224,7 @@ function resetGameState() {
     gameState.enemiesToKillThisWave = 0;
     gameState.killsThisWave = 0;
     gameState.timeRemaining = 0;
+    gameState.timePlayedMs = 0;
     gameState.nextExtraLife = 10000;
     playerState.fireRate = 200;
     playerState.lastFire = 0;

@@ -63,6 +63,11 @@ function winGame(scene) {
         audioManager.stopMusic();
     }
 
+    if (gameState.mode === 'mothership') {
+        showCampaignVictory(scene, metaResult);
+        return;
+    }
+
     const centerX = scene.cameras.main.width / 2;
     const centerY = scene.cameras.main.height / 2;
 
@@ -99,6 +104,92 @@ function winGame(scene) {
         scene.scene.restart();
     });
     menuButton.on('pointerdown', () => returnToMainMenu(scene));
+}
+
+function showCampaignVictory(scene, metaResult) {
+    const centerX = scene.cameras.main.width / 2;
+    const centerY = scene.cameras.main.height / 2;
+    const stats = getCampaignVictoryStats();
+
+    scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.78)
+        .setScrollFactor(0).setDepth(990);
+
+    scene.add.text(centerX, centerY - 160, 'PLANET LIBERATED', {
+        fontSize: '64px',
+        fontFamily: 'Orbitron',
+        color: '#facc15',
+        stroke: '#000000',
+        strokeThickness: 8
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
+
+    const statsText = [
+        `Districts Saved: ${stats.districtsSaved}${stats.totalDistricts ? ` / ${stats.totalDistricts}` : ''}`,
+        `Time Played: ${formatCampaignTime(stats.timePlayedMs)}`,
+        `Score: ${stats.score}`,
+        `Meta Credits: +${metaResult?.earnedCredits || 0} (Bank: ${metaProgression?.getMetaState?.().credits || 0})`
+    ].join('\n');
+
+    scene.add.text(centerX, centerY - 10, statsText, {
+        fontSize: '26px',
+        fontFamily: 'Orbitron',
+        color: '#e2e8f0',
+        align: 'center',
+        stroke: '#000000',
+        strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
+
+    const buttonY = centerY + 140;
+
+    const newCampaignButton = scene.add.text(centerX - 170, buttonY, 'NEW CAMPAIGN', {
+        fontSize: '22px',
+        fontFamily: 'Orbitron',
+        color: '#22c55e',
+        stroke: '#000000',
+        strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
+
+    const menuButton = scene.add.text(centerX + 170, buttonY, 'RETURN TO MENU', {
+        fontSize: '22px',
+        fontFamily: 'Orbitron',
+        color: '#38bdf8',
+        stroke: '#000000',
+        strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
+
+    newCampaignButton.on('pointerdown', () => {
+        resetGameState();
+        if (window.missionPlanner?.resetCampaignState) {
+            missionPlanner.resetCampaignState();
+        }
+        if (window.enterDistrictMap) {
+            enterDistrictMap({ fromVictory: true });
+        }
+    });
+
+    menuButton.on('pointerdown', () => returnToMainMenu(scene));
+}
+
+function getCampaignVictoryStats() {
+    const allDistricts = window.missionPlanner?.getAllDistrictStates?.() || [];
+    const districtsSaved = allDistricts.filter(entry => entry.state?.status === 'friendly').length;
+    return {
+        districtsSaved,
+        totalDistricts: allDistricts.length,
+        timePlayedMs: gameState.timePlayedMs || 0,
+        score: gameState.score
+    };
+}
+
+function formatCampaignTime(ms = 0) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 function recordMetaOutcome(success) {
