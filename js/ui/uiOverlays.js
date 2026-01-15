@@ -13,43 +13,70 @@ function gameOver(scene) {
         audioManager.stopMusic();
     }
 
+    if (gameState.mode === 'mothership') {
+        showCampaignDefeat(scene, metaResult);
+        return;
+    }
+
+    showMissionDefeat(scene, metaResult);
+}
+
+function showMissionDefeat(scene, metaResult) {
     const centerX = scene.cameras.main.width / 2;
     const centerY = scene.cameras.main.height / 2;
+    const isAssault = gameState.mode === 'assault';
+    const bannerText = isAssault ? 'ASSAULT UNSUCCESSFUL' : 'DISTRICT LOST';
+    const bannerColor = isAssault ? '#f97316' : '#ef4444';
+    const timePlayed = formatCampaignTime(gameState.timePlayedMs || 0);
+    const metaCredits = metaResult?.earnedCredits || 0;
+    const metaBank = metaProgression?.getMetaState?.().credits || 0;
 
     scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.7)
         .setScrollFactor(0).setDepth(990);
 
-    scene.add.text(centerX, centerY - 50, 'GAME OVER', {
-        fontSize: '64px', fontFamily: 'Orbitron', color: '#ff0000', stroke: '#000000', strokeThickness: 8
+    scene.add.text(centerX, centerY - 140, bannerText, {
+        fontSize: '60px',
+        fontFamily: 'Orbitron',
+        color: bannerColor,
+        stroke: '#000000',
+        strokeThickness: 8
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
-    scene.add.text(centerX, centerY + 30,
-        `Final Score: ${gameState.score}\nHumans Rescued: ${gameState.humansRescued}\n` +
-        `Meta Credits: +${metaResult?.earnedCredits || 0} (Bank: ${metaProgression?.getMetaState?.().credits || 0})`, {
-        fontSize: '24px', fontFamily: 'Orbitron', color: '#00ffff', align: 'center', stroke: '#000000', strokeThickness: 4
+    const statsLines = [];
+    if (!isAssault) {
+        statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
+    }
+    statsLines.push(`Time Played: ${timePlayed}`);
+    statsLines.push(`Score: ${gameState.score}`);
+    statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
+
+    scene.add.text(centerX, centerY - 20, statsLines.join('\n'), {
+        fontSize: '26px',
+        fontFamily: 'Orbitron',
+        color: '#e2e8f0',
+        align: 'center',
+        stroke: '#000000',
+        strokeThickness: 4
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
-    const buttonY = centerY + 120;
-
-    const restartButton = scene.add.text(centerX - 120, buttonY, '[ R ] RESTART', {
-        fontSize: '20px', fontFamily: 'Orbitron', color: '#00ff00', stroke: '#000000', strokeThickness: 4
+    const buttonY = centerY + 150;
+    const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
+        fontSize: '22px',
+        fontFamily: 'Orbitron',
+        color: '#facc15',
+        stroke: '#000000',
+        strokeThickness: 4
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
-    const menuButton = scene.add.text(centerX + 120, buttonY, '[ M ] MAIN MENU', {
-        fontSize: '20px', fontFamily: 'Orbitron', color: '#ffff00', stroke: '#000000', strokeThickness: 4
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
-
-    scene.input.keyboard.once('keydown-R', () => {
+    const handleReturn = () => {
         resetGameState();
-        scene.scene.restart();
-    });
-    scene.input.keyboard.once('keydown-M', () => returnToMainMenu(scene));
+        if (window.enterDistrictMap) {
+            enterDistrictMap({ fromVictory: true });
+        }
+    };
 
-    restartButton.on('pointerdown', () => {
-        resetGameState();
-        scene.scene.restart();
-    });
-    menuButton.on('pointerdown', () => returnToMainMenu(scene));
+    scene.input.keyboard.once('keydown-D', handleReturn);
+    returnButton.on('pointerdown', handleReturn);
 }
 
 function winGame(scene) {
@@ -67,43 +94,7 @@ function winGame(scene) {
         showCampaignVictory(scene, metaResult);
         return;
     }
-
-    const centerX = scene.cameras.main.width / 2;
-    const centerY = scene.cameras.main.height / 2;
-
-    scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.7)
-        .setScrollFactor(0).setDepth(990);
-
-    scene.add.text(centerX, centerY - 50, 'MISSION COMPLETE!', {
-        fontSize: '64px', fontFamily: 'Orbitron', color: '#00ff00', stroke: '#000000', strokeThickness: 8
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
-
-    scene.add.text(centerX, centerY + 30,
-        `Victory!\nFinal Score: ${gameState.score}\n` +
-        `Meta Credits: +${metaResult?.earnedCredits || 0} (Bank: ${metaProgression?.getMetaState?.().credits || 0})`, {
-        fontSize: '24px', fontFamily: 'Orbitron', color: '#00ffff', align: 'center', stroke: '#000000', strokeThickness: 4
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
-
-    const buttonY = centerY + 120;
-    const restartButton = scene.add.text(centerX - 120, buttonY, '[ R ] RESTART', {
-        fontSize: '20px', fontFamily: 'Orbitron', color: '#00ff00', stroke: '#000000', strokeThickness: 4
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
-
-    const menuButton = scene.add.text(centerX + 120, buttonY, '[ M ] MAIN MENU', {
-        fontSize: '20px', fontFamily: 'Orbitron', color: '#ffff00', stroke: '#000000', strokeThickness: 4
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
-
-    scene.input.keyboard.once('keydown-R', () => {
-        resetGameState();
-        scene.scene.restart();
-    });
-    scene.input.keyboard.once('keydown-M', () => returnToMainMenu(scene));
-
-    restartButton.on('pointerdown', () => {
-        resetGameState();
-        scene.scene.restart();
-    });
-    menuButton.on('pointerdown', () => returnToMainMenu(scene));
+    showMissionVictory(scene, metaResult);
 }
 
 function showCampaignVictory(scene, metaResult) {
@@ -167,6 +158,116 @@ function showCampaignVictory(scene, metaResult) {
     });
 
     menuButton.on('pointerdown', () => returnToMainMenu(scene));
+}
+
+function showCampaignDefeat(scene, metaResult) {
+    const centerX = scene.cameras.main.width / 2;
+    const centerY = scene.cameras.main.height / 2;
+    const stats = getCampaignVictoryStats();
+
+    scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.78)
+        .setScrollFactor(0).setDepth(990);
+
+    scene.add.text(centerX, centerY - 160, 'PLANET REMAINS SUBJUGATED', {
+        fontSize: '54px',
+        fontFamily: 'Orbitron',
+        color: '#ef4444',
+        stroke: '#000000',
+        strokeThickness: 8
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
+
+    const statsText = [
+        `Districts Saved: ${stats.districtsSaved}${stats.totalDistricts ? ` / ${stats.totalDistricts}` : ''}`,
+        `Time Played: ${formatCampaignTime(stats.timePlayedMs)}`,
+        `Score: ${stats.score}`
+    ].join('\n');
+
+    scene.add.text(centerX, centerY - 10, statsText, {
+        fontSize: '26px',
+        fontFamily: 'Orbitron',
+        color: '#e2e8f0',
+        align: 'center',
+        stroke: '#000000',
+        strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
+
+    const buttonY = centerY + 140;
+
+    const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
+        fontSize: '22px',
+        fontFamily: 'Orbitron',
+        color: '#facc15',
+        stroke: '#000000',
+        strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
+
+    const handleReturn = () => {
+        resetGameState();
+        if (window.enterDistrictMap) {
+            enterDistrictMap({ fromVictory: true });
+        }
+    };
+
+    scene.input.keyboard.once('keydown-D', handleReturn);
+    returnButton.on('pointerdown', handleReturn);
+}
+
+function showMissionVictory(scene, metaResult) {
+    const centerX = scene.cameras.main.width / 2;
+    const centerY = scene.cameras.main.height / 2;
+    const isAssault = gameState.mode === 'assault';
+    const bannerText = isAssault ? 'ASSAULT SUCCESSFUL' : 'DISTRICT DEFENDED';
+    const bannerColor = isAssault ? '#38bdf8' : '#4ade80';
+    const timePlayed = formatCampaignTime(gameState.timePlayedMs || 0);
+    const metaCredits = metaResult?.earnedCredits || 0;
+    const metaBank = metaProgression?.getMetaState?.().credits || 0;
+
+    scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.75)
+        .setScrollFactor(0).setDepth(990);
+
+    scene.add.text(centerX, centerY - 140, bannerText, {
+        fontSize: '60px',
+        fontFamily: 'Orbitron',
+        color: bannerColor,
+        stroke: '#000000',
+        strokeThickness: 8
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
+
+    const statsLines = [];
+    if (!isAssault) {
+        statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
+    }
+    statsLines.push(`Time Played: ${timePlayed}`);
+    statsLines.push(`Score: ${gameState.score}`);
+    statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
+
+    scene.add.text(centerX, centerY - 20, statsLines.join('\n'), {
+        fontSize: '26px',
+        fontFamily: 'Orbitron',
+        color: '#e2e8f0',
+        align: 'center',
+        stroke: '#000000',
+        strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
+
+    const buttonY = centerY + 150;
+    const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
+        fontSize: '22px',
+        fontFamily: 'Orbitron',
+        color: '#facc15',
+        stroke: '#000000',
+        strokeThickness: 4
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
+
+    const handleReturn = () => {
+        resetGameState();
+        if (window.enterDistrictMap) {
+            enterDistrictMap({ fromVictory: true });
+        }
+    };
+
+    scene.input.keyboard.once('keydown-D', handleReturn);
+    returnButton.on('pointerdown', handleReturn);
 }
 
 function getCampaignVictoryStats() {
