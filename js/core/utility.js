@@ -293,7 +293,17 @@ function getMissionScaledReward(base) {
 
 function enterMainMenu() {
     const menu = document.getElementById('menu-overlay');
-    if (menu) menu.style.display = 'flex';
+    const titleOverlay = document.getElementById('title-overlay');
+    const sawBriefing = typeof localStorage !== 'undefined'
+        ? localStorage.getItem('sawBriefing') === 'true'
+        : false;
+
+    if (!sawBriefing) {
+        if (menu) menu.style.display = 'none';
+        if (titleOverlay) titleOverlay.style.display = 'flex';
+    } else if (menu) {
+        menu.style.display = 'flex';
+    }
 
     if (window.game && game.scene) {
         if (game.scene.isActive(SCENE_KEYS.build)) {
@@ -302,7 +312,7 @@ function enterMainMenu() {
         if (game.scene.isActive(SCENE_KEYS.game)) {
             game.scene.stop(SCENE_KEYS.game);
         }
-        game.scene.start(SCENE_KEYS.menu);
+        game.scene.start(sawBriefing ? SCENE_KEYS.menu : SCENE_KEYS.title);
     }
 }
 
