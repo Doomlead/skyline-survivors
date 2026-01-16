@@ -467,6 +467,7 @@ class BuildMapView {
 
             const isSelected = this.selectedDistrict === district;
             const isOccupied = district.state.status === 'occupied';
+            const statusColor = this.getDistrictStatusColor(district.state);
             const baseRadius = 8;
             const radius = isSelected ? baseRadius * 1.3 : baseRadius;
             const alpha = isOccupied ? 0.5 : 0.8;
@@ -479,9 +480,9 @@ class BuildMapView {
                 this.districtGraphics.strokeCircle(projected.x, projected.y, attackRadius);
             }
 
-            this.districtGraphics.fillStyle(district.config.color, alpha * 0.3);
+            this.districtGraphics.fillStyle(statusColor, alpha * 0.3);
             this.districtGraphics.fillCircle(projected.x, projected.y, radius * 2);
-            this.districtGraphics.fillStyle(district.config.color, alpha);
+            this.districtGraphics.fillStyle(statusColor, alpha);
             this.districtGraphics.fillCircle(projected.x, projected.y, radius);
             this.districtGraphics.lineStyle(isSelected ? 2.5 : 1.5, 0xffffff, alpha * 0.8);
             this.districtGraphics.strokeCircle(projected.x, projected.y, radius);
@@ -491,6 +492,19 @@ class BuildMapView {
             district.projectedRadius = radius * 2;
         });
         this.setupDistrictInteraction();
+    }
+
+    getDistrictStatusColor(state) {
+        if (!state) return 0x22c55e;
+        switch (state.status) {
+            case 'occupied':
+                return 0xef4444;
+            case 'threatened':
+                return 0xfacc15;
+            case 'friendly':
+            default:
+                return 0x22c55e;
+        }
     }
 
     drawDistrictThreatPulse(district, projected, radius) {
