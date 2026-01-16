@@ -266,6 +266,119 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+
+        #menu-overlay {
+            display: none;
+        }
+
+        #title-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 6, 18, 0.92);
+            z-index: 60;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .terminal-briefing {
+            font-family: 'Orbitron', monospace;
+            background: rgba(5, 14, 31, 0.96);
+            color: #7dd3fc;
+            border: 2px solid #38bdf8;
+            border-radius: 12px;
+            padding: 28px 32px 24px;
+            max-width: 880px;
+            width: min(90vw, 880px);
+            box-shadow: 0 0 28px rgba(56, 189, 248, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terminal-screen {
+            position: relative;
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 18px 18px 12px;
+            border-radius: 8px;
+            background: rgba(7, 12, 28, 0.85);
+        }
+
+        .terminal-screen::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(15, 23, 42, 0.15),
+                rgba(15, 23, 42, 0.15) 1px,
+                rgba(15, 23, 42, 0) 3px,
+                rgba(15, 23, 42, 0) 5px
+            );
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .terminal-briefing pre {
+            white-space: pre-wrap;
+            font-size: 12px;
+            line-height: 1.6;
+            margin: 0;
+            text-shadow: 0 0 8px rgba(34, 211, 238, 0.35);
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 10px;
+            margin-left: 6px;
+            color: #7dd3fc;
+            animation: terminal-blink 1s steps(1) infinite;
+        }
+
+        @keyframes terminal-blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .terminal-actions {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .terminal-button {
+            border: 1px solid rgba(56, 189, 248, 0.7);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e0f2fe;
+            font-size: 11px;
+            padding: 10px 18px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .terminal-button:hover:not(:disabled) {
+            background: rgba(14, 116, 144, 0.8);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+        }
+
+        .terminal-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .terminal-skip {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 10px;
+        }
         
         /* Responsive adjustments */
         @media (max-width: 1200px) {
@@ -556,6 +669,20 @@
         </div>
     </div>
 
+    <!-- Title Briefing Overlay -->
+    <div id="title-overlay" aria-hidden="true">
+        <div class="terminal-briefing" role="dialog" aria-label="Mission briefing">
+            <button class="terminal-button terminal-skip" data-skip type="button">Skip</button>
+            <div class="terminal-screen">
+                <pre data-briefing-text></pre><span class="terminal-cursor" data-cursor>█</span>
+            </div>
+            <div class="terminal-actions">
+                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400">Press Space/Enter to continue</span>
+                <button class="terminal-button" data-authorize type="button">Authorize Launch</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Menu Overlay (Settings) -->
     <div id="menu-overlay" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
         <div class="bg-slate-900/90 border border-cyan-400 rounded-lg px-6 py-6 max-w-md w-[90%] text-center shadow-2xl">
@@ -647,6 +774,7 @@
     <script src="js/ui/uiOverlays.js"></script>
     <script src="js/ui/uiPauseMenu.js"></script>
     <script src="js/ui/missionPlanner.js"></script>
+    <script src="js/ui/titleScene.js"></script>
     <script src="js/ui/mainMenuScene.js"></script>
     <script src="js/ui/map/worldData.js"></script>
     <script src="js/ui/map/buildMapView.js"></script>
