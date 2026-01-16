@@ -464,7 +464,7 @@ const config = {
             debug: false
         }
     },
-    scene: [TitleScene, MainMenuScene, BuildScene, mainSceneConfig]
+    scene: [MainMenuScene, BuildScene, mainSceneConfig]
 };
 
 const game = new Phaser.Game(config);

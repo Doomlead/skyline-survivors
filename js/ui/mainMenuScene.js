@@ -4,7 +4,7 @@
 
 class MainMenuScene extends Phaser.Scene {
     constructor() {
-        super({ key: SCENE_KEYS.menu, active: false });
+        super({ key: SCENE_KEYS.menu, active: true });
     }
 
     create() {
