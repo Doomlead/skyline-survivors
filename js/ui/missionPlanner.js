@@ -84,6 +84,51 @@
             reward: 'cryogenic cores'
         },
         {
+            id: 'cascadia-ward',
+            name: 'Cascadia Ward',
+            center: { lat: 50, lon: -123 },
+            timer: 110,
+            color: 0x38bdf8,
+            threats: ['drone', 'bomber', 'shield'],
+            reward: 'sensor arrays'
+        },
+        {
+            id: 'sonoran-crescent',
+            name: 'Sonoran Crescent',
+            center: { lat: 31, lon: -111 },
+            timer: 130,
+            color: 0xf97316,
+            threats: ['kamikaze', 'lander', 'pod'],
+            reward: 'reactor coolant'
+        },
+        {
+            id: 'andes-ward',
+            name: 'Andes Ward',
+            center: { lat: -15, lon: -72 },
+            timer: 160,
+            color: 0x22d3ee,
+            threats: ['mutant', 'baiter', 'seeker'],
+            reward: 'recon uplinks'
+        },
+        {
+            id: 'amazonium-belt',
+            name: 'Amazonium Belt',
+            center: { lat: -4, lon: -60 },
+            timer: 140,
+            color: 0x4ade80,
+            threats: ['lander', 'swarmer', 'pod'],
+            reward: 'bio samples'
+        },
+        {
+            id: 'nordic-fjordwall',
+            name: 'Nordic Fjordwall',
+            center: { lat: 62, lon: 10 },
+            timer: 150,
+            color: 0x818cf8,
+            threats: ['turret', 'drone', 'shielder'],
+            reward: 'cryogenic cores'
+        },
+        {
             id: 'atlantic-arc',
             name: 'Atlantic Arc',
             center: { lat: 48, lon: -5 },
@@ -109,6 +154,15 @@
             reward: 'orbital relays'
         },
         {
+            id: 'balkan-vanguard',
+            name: 'Balkan Vanguard',
+            center: { lat: 44, lon: 21 },
+            timer: 95,
+            color: 0xf59e0b,
+            threats: ['lander', 'mutant', 'turret'],
+            reward: 'ballistics'
+        },
+        {
             id: 'sahara-gate',
             name: 'Sahara Gate',
             center: { lat: 18, lon: 15 },
@@ -132,6 +186,15 @@
             color: 0xeab308,
             threats: ['bomber', 'seeker', 'kamikaze'],
             reward: 'shield batteries'
+        },
+        {
+            id: 'congo-ring',
+            name: 'Congo Ring',
+            center: { lat: -2, lon: 23 },
+            timer: 150,
+            color: 0x10b981,
+            threats: ['swarmer', 'baiter', 'pod'],
+            reward: 'supply caches'
         },
         {
             id: 'savanna-guardian',
