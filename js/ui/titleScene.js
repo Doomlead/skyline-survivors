@@ -12,7 +12,9 @@ class TitleScene extends Phaser.Scene {
     }
 
     create() {
-        const sawBriefing = this.getBriefingSeen();
+        const sawBriefing = typeof localStorage !== 'undefined'
+            ? localStorage.getItem('sawBriefing')
+            : null;
 
         if (sawBriefing) {
             this.scene.start(SCENE_KEYS.menu);
@@ -31,8 +33,6 @@ class TitleScene extends Phaser.Scene {
         if (this.briefingEl) this.briefingEl.textContent = '';
         if (this.cursorEl) this.cursorEl.classList.remove('active');
         if (this.authorizeButton) this.authorizeButton.disabled = true;
-
-        const districtSummary = this.getDistrictStatusSummary();
 
         this.fullBriefingText = [
             '┌─────────────────────────────────────────────────┐',
@@ -88,25 +88,6 @@ class TitleScene extends Phaser.Scene {
         });
 
         this.events.once('shutdown', () => this.cleanup());
-    }
-
-    getDistrictStatusSummary() {
-        const planner = window.missionPlanner;
-        if (!planner) {
-            return { total: 0, occupied: 0, friendlyThreatened: 0 };
-        }
-
-        const states = planner.getAllDistrictStates?.() || [];
-        const total = states.length || planner.getDistrictConfigs?.()?.length || 0;
-        const occupied = states.filter((entry) => entry.state?.status === 'occupied').length;
-        const friendlyThreatened = Math.max(0, total - occupied);
-
-        return { total, occupied, friendlyThreatened };
-    }
-
-    getBriefingSeen() {
-        if (typeof localStorage === 'undefined') return false;
-        return localStorage.getItem('sawBriefing') === 'true';
     }
 
     advanceTypewriter() {

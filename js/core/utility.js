@@ -295,8 +295,8 @@ function enterMainMenu() {
     const menu = document.getElementById('menu-overlay');
     const titleOverlay = document.getElementById('title-overlay');
     const sawBriefing = typeof localStorage !== 'undefined'
-        ? localStorage.getItem('sawBriefing') === 'true'
-        : false;
+        ? localStorage.getItem('sawBriefing')
+        : null;
 
     if (!sawBriefing) {
         if (menu) menu.style.display = 'none';
