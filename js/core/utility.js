@@ -292,6 +292,22 @@ function getMissionScaledReward(base) {
 }
 
 function enterMainMenu() {
+    const sawBriefing = localStorage.getItem('sawBriefing') === 'true';
+
+    if (!sawBriefing && window.game && game.scene) {
+        const menu = document.getElementById('menu-overlay');
+        if (menu) menu.style.display = 'none';
+
+        if (game.scene.isActive(SCENE_KEYS.build)) {
+            game.scene.stop(SCENE_KEYS.build);
+        }
+        if (game.scene.isActive(SCENE_KEYS.game)) {
+            game.scene.stop(SCENE_KEYS.game);
+        }
+        game.scene.start(SCENE_KEYS.title);
+        return;
+    }
+
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'flex';
 
