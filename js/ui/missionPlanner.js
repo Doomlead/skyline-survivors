@@ -12,21 +12,76 @@
 
     const DISTRICT_CONFIGS = [
         {
-            id: 'pacific-rim-bastion',
-            name: 'Pacific Rim Bastion',
-            center: { lat: 38, lon: -134 },
-            polygon: [
-                { lat: 62, lon: -155 },
-                { lat: 45, lon: -160 },
-                { lat: 32, lon: -140 },
-                { lat: 18, lon: -125 },
-                { lat: 28, lon: -105 },
-                { lat: 50, lon: -115 }
-            ],
-            timer: 120,
-            color: 0x22e0ff,
-            threats: ['lander', 'mutant', 'drone'],
-            reward: 'tech caches'
+            id: 'cascadia-ward',
+            name: 'Pacific Rim',
+            center: { lat: 50, lon: -123 },
+            timer: 110,
+            color: 0x38bdf8,
+            threats: ['drone', 'bomber', 'shield'],
+            reward: 'sensor arrays'
+        },
+        {
+            id: 'central-america-bridge',
+            name: 'Central America Bridge',
+            center: { lat: 12, lon: -86 },
+            timer: 125,
+            color: 0x4ade80,
+            threats: ['lander', 'pod', 'swarmer'],
+            reward: 'supply relays'
+        },
+        {
+            id: 'atlantic-frontline',
+            name: 'Atlantic Frontline',
+            center: { lat: 40, lon: -74 },
+            timer: 135,
+            color: 0x60a5fa,
+            threats: ['drone', 'bomber', 'turret'],
+            reward: 'naval caches'
+        },
+        {
+            id: 'carolina-guard',
+            name: 'Carolina Guard',
+            center: { lat: 34, lon: -78 },
+            timer: 115,
+            color: 0xf97316,
+            threats: ['kamikaze', 'lander', 'seeker'],
+            reward: 'strike plans'
+        },
+        {
+            id: 'sonoran-crescent',
+            name: 'Sonoran Crescent',
+            center: { lat: 31, lon: -111 },
+            timer: 130,
+            color: 0xf97316,
+            threats: ['kamikaze', 'lander', 'pod'],
+            reward: 'reactor coolant'
+        },
+        {
+            id: 'andes-ward',
+            name: 'Andes Ward',
+            center: { lat: -15, lon: -72 },
+            timer: 160,
+            color: 0x22d3ee,
+            threats: ['mutant', 'baiter', 'seeker'],
+            reward: 'recon uplinks'
+        },
+        {
+            id: 'amazonium-belt',
+            name: 'Amazonium Belt',
+            center: { lat: -4, lon: -60 },
+            timer: 140,
+            color: 0x4ade80,
+            threats: ['lander', 'swarmer', 'pod'],
+            reward: 'bio samples'
+        },
+        {
+            id: 'nordic-fjordwall',
+            name: 'Nordic Fjordwall',
+            center: { lat: 62, lon: 10 },
+            timer: 150,
+            color: 0x818cf8,
+            threats: ['turret', 'drone', 'shielder'],
+            reward: 'cryogenic cores'
         },
         {
             id: 'cascadia-ward',
