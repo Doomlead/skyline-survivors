@@ -10,11 +10,6 @@ class TitleScene extends Phaser.Scene {
     }
 
     create() {
-        if (localStorage.getItem('sawBriefing') === 'true') {
-            this.scene.start(SCENE_KEYS.menu);
-            return;
-        }
-
         const overlay = document.getElementById('title-overlay');
         if (!overlay) {
             this.scene.start(SCENE_KEYS.menu);
@@ -95,7 +90,6 @@ class TitleScene extends Phaser.Scene {
         if (authorizeBtn) {
             authorizeBtn.addEventListener('click', () => {
                 if (!this.isBriefingComplete) return;
-                localStorage.setItem('sawBriefing', 'true');
                 overlay.style.display = 'none';
                 overlay.setAttribute('aria-hidden', 'true');
                 this.scene.start(SCENE_KEYS.menu);
