@@ -802,12 +802,12 @@ Inventory Power-Ups
   - Assault Missions (core loop + garrison defenders + HUD)
   - System Map (core mechanics working, strategic layer missing)
 - **Partially Complete:** 6/13 (46%)
-  - Ground Combat
-  - Meta Progression
-  - Power-Up System
-  - Scoring & Rewards
-  - Campaign Mode (Mothership mission playable with campaign victory overlay; lacks multi-phase structure/boarding)
-  - Environment Design (multi-layer parallax, no weather/day-night)
+  - Ground Combat (pilot ejection + basic movement/shooting; no squad roles/cover)
+  - Meta Progression (credits/unlocks/persistence; no strategic control tracker)
+  - Power-Up System (core drops + tiering; no jackpot/mystery tech)
+  - Scoring & Rewards (base scoring + rescue bonus; lacks deeper incentives)
+  - Campaign Mode (Mothership mission playable with HP-based phases; no exterior/interior multi-stage flow)
+  - Environment Design (multi-layer parallax styles; no weather/day-night or district-specific themes)
 - **Not Started:** 1/13 (8%)
   - Additional Game Modes
 
@@ -816,17 +816,17 @@ Inventory Power-Ups
 ## Design Document Alignment
 
 **Overall Implementation:**
-- ✅ **Implemented:** ~62% (adjusted after code audit)
-- ⚠️ **Partially Implemented:** ~28%
-- ❌ **Not Implemented:** ~10%
+- ✅ **Implemented:** ~58% (adjusted after code audit)
+- ⚠️ **Partially Implemented:** ~30%
+- ❌ **Not Implemented:** ~12%
 
 **By Category:**
-- **Core Gameplay Loop:** 85% complete (Mothership fight exists, but simplified)
-- **Mission Systems:** 80% complete (Defense 90%, Assault 75%, Mothership 30%)
-- **Meta Systems:** 60% complete
-- **Player Mechanics:** 70% complete (Ship 100%, Ground 35%)
-- **Enemy Design:** 85% complete
-- **Environmental:** 30% complete ⬆️ (multi-layer parallax in place; no weather/day-night)
+- **Core Gameplay Loop:** 80% complete (Mothership fight exists, but simplified)
+- **Mission Systems:** 75% complete (Defense 90%, Assault 75%, Mothership 35%)
+- **Meta Systems:** 55% complete
+- **Player Mechanics:** 65% complete (Ship 100%, Ground 30%)
+- **Enemy Design:** 80% complete
+- **Environmental:** 35% complete ⬆️ (multi-layer parallax in place; no weather/day-night)
 - **Additional Modes:** 0% complete
 
 ---
@@ -842,33 +842,38 @@ Inventory Power-Ups
 6. **Mothership unlock condition** - Activates when all districts friendly
 7. **Defense/assault/liberate gameplay loop** - End-to-end campaign flow (final boss exists, multi-phase design pending)
 8. **Procedural parallax environment stack** - Multi-layer sky/city/terrain backgrounds with multiple style generators
-9. **Mothership assault playable** - Core arena fight with HP-based phases + reinforcements + campaign victory/defeat overlays (missing multi-phase design)
+9. **Mothership assault playable** - Core arena fight with HP-based phases + reinforcements + campaign victory/defeat overlays (missing multi-stage flow)
 10. **Campaign victory flow** - Dedicated campaign victory overlay with stats + new campaign/menu options
 
 ### 🎯 Recent Achievements:
 - ⬆️ Environmental stack: 40% → 55% (multi-layer sky/atmosphere/stars + multiple styles)
 - ⬆️ Assault missions: 60% → 75% (base shields, turrets, garrison defenders, HUD)
 - ⬆️ System map: 60% → 70% (complete state transition flow)
-- ⬆️ Mothership assault: 10% → 30% (HP-based core phases + HUD support)
+- ⬆️ Mothership assault: 10% → 35% (HP-based core phases + HUD support)
 - ⬆️ Campaign victory: 0% → 100% (campaign win/defeat overlays with stats)
 
 ---
 
 ## Immediate Next Steps (Recommended Order)
 
-### 🚨 CRITICAL: Complete MVP (6-9 days)
+### 🚨 CRITICAL: Complete MVP (7-9 days)
 
-**Priority 1: Expand Mothership Final Boss Mission (4-5 days)**
-- Build Phase 1 exterior assault + phase transitions
-- Implement Phase 2 interior encounters (on-foot focus) with objective gating
-- Upgrade Phase 3 core boss to multi-step HP/shield phases (current fight is HP-based, single-arena)
+**Priority 1: Expand Mothership Final Boss Mission (4-6 days)**
+- Build Phase 1 exterior assault + phase transition setup
+- Implement Phase 2 interior encounter space (on-foot focus) with objective gating
+- Upgrade Phase 3 core boss to multi-step shield/HP phases (current fight is HP-based, single arena)
 - Add phase-gated UI beats and cinematic transition (dock/boarding)
 
 **Priority 2: Assault Mission Failure Flow Polish (1-2 days)**
 - Add mid-mission extraction or forced retreat prompts
 - Ensure assault failure messaging and retry loop feel distinct from general game-over
 
-**Priority 3: Integration + Balance Pass (2-3 days)**
+**Priority 3: Strategic Layer MVP Slice (2-3 days)**
+- Planetary control tracker UI (friendly vs occupied)
+- Simple district priority hints (low/medium/high urgency)
+- Update map panel with district value impact messaging
+
+**Priority 4: Integration + Balance Pass (1-2 days)**
 - Full campaign playthrough testing
 - Balance pass on Mothership difficulty + assault reinforcements
 - Bug fixes and polish
@@ -880,17 +885,15 @@ Inventory Power-Ups
 - Add high-value power-up drops in bases
 - Polish assault difficulty scaling
 
-**Phase 2: Strategic Layer (1 week)**
-- Priority UI for district selection
-- District value indicators
-- Visual planetary control tracker
-- Global difficulty scaling
+**Phase 2: Ground Combat Depth (2 weeks)**
+- Operative squad system (roles: medic/engineer/turret)
+- Cover mechanics + terrain interactions
+- Ground weapons variety + pickup types
 
-**Phase 3: Ground Combat (2 weeks)**
-- Operative squad system
-- Cover mechanics
-- Ground weapons variety
-- Special operative roles
+**Phase 3: Strategic Layer Expansion (1 week)**
+- District value indicators
+- Global difficulty scaling tied to occupied districts
+- Battleship “kidnap” mechanic for shop items
 
 **Phase 4: Environment Variety (1 week)**
 - District-specific background selection (tie styles to districts)
@@ -901,19 +904,20 @@ Inventory Power-Ups
 ## Estimated Remaining Work
 
 ### MVP Completion:
-- **Current Progress:** ~86% complete (adjusted after code audit)
+- **Current Progress:** ~84% complete (adjusted after code audit)
 - **Remaining Critical Work:**
-  - Mothership Boss Mission (multi-phase upgrade): 4-5 days
+  - Mothership Boss Mission (multi-phase upgrade): 4-6 days
   - Assault failure/retreat polish: 1-2 days
-  - Testing & Polish: 2-3 days
-- **Total Time to Complete MVP:** 6-8 days
+  - Strategic layer MVP slice: 2-3 days
+  - Testing & Polish: 1-2 days
+- **Total Time to Complete MVP:** 7-9 days
 
 ### Full Design Document:
-- **High Priority Features:** ~35% remaining
+- **High Priority Features:** ~38% remaining
   - Assault mission polish (multi-phase core, base rewards)
   - Strategic campaign layer + planetary control tracker
   - Enhanced rewards system + post-boss presentation polish
-- **Medium Priority Features:** ~65% remaining
+- **Medium Priority Features:** ~62% remaining
   - Ground combat depth (operatives, weapons, cover)
   - Power-up progression tiers (homing, drone, laser)
   - Environmental variety (weather, day/night, district themes)
@@ -924,8 +928,8 @@ Inventory Power-Ups
 
 ## MVP Completion
 
-- **Status:** ~86% complete (core loop intact, Mothership fight present but simplified)
-- **Primary Blockers:** Multi-phase Mothership mission, assault retreat/retry polish
+- **Status:** ~84% complete (core loop intact, Mothership fight present but simplified)
+- **Primary Blockers:** Multi-phase Mothership mission, assault retreat/retry polish, planetary control tracker slice
 
 ---
 
@@ -936,5 +940,6 @@ Inventory Power-Ups
 2. **Assault mission failure/retreat loop polish** - Mid-mission extraction/retreat prompts for proper occupied-district pacing
 
 ### 📋 Core Gameplay Polish:
-3. **Strategic campaign layer** - Priority UI, district values, difficulty scaling
+3. **Strategic campaign layer** - Planetary control tracker, priority hints, district values, difficulty scaling
 4. **Multi-phase base reactor** - Added challenge to assault missions
+5. **Ground operative squad system** - Roles/cover/medic/engineer behaviors
