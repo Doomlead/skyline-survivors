@@ -48,17 +48,56 @@ function initializeBossQueue() {
     gameState.bossesDefeated = 0;
 }
 
+function getSafeBossSpawnPosition(scene, desiredX, desiredY, bossType) {
+    const player = getActivePlayer(scene);
+    if (!player) return { x: desiredX, y: desiredY };
+
+    const minDistance = bossType === 'mothershipCore' ? 180 : 240;
+    const attempts = 6;
+    let bestCandidate = { x: desiredX, y: desiredY };
+    let bestDistance = 0;
+
+    for (let i = 0; i < attempts; i++) {
+        const offsetX = i === 0 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (minDistance + Math.random() * 120);
+        const offsetY = i === 0 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (minDistance * 0.45 + Math.random() * 80);
+        const candidateX = wrapValue(desiredX + offsetX, CONFIG.worldWidth);
+        const candidateY = Phaser.Math.Clamp(desiredY + offsetY, 40, CONFIG.worldHeight - 80);
+        const dx = wrappedDistance(player.x, candidateX, CONFIG.worldWidth);
+        const dy = player.y - candidateY;
+        const distance = Math.hypot(dx, dy);
+
+        if (distance >= minDistance) {
+            return { x: candidateX, y: candidateY };
+        }
+
+        if (distance > bestDistance) {
+            bestDistance = distance;
+            bestCandidate = { x: candidateX, y: candidateY };
+        }
+    }
+
+    return bestCandidate;
+}
+
+function applyBossDamage(boss, rawDamage) {
+    const damage = rawDamage || 1;
+    const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
+    return Math.max(0, damage * (1 - reduction));
+}
+
 function spawnBoss(scene, type, x, y) {
     const { bosses, audioManager } = scene;
     if (!bosses) return null;
+    const safeSpawn = getSafeBossSpawnPosition(scene, x, y, type);
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
-    const terrainVariation = Math.sin(x / 200) * 30;
+    const terrainVariation = Math.sin(safeSpawn.x / 200) * 30;
     const minClearance = 60;
     const topLimit = 30;
     const maxY = groundLevel - terrainVariation - minClearance;
-    const spawnY = Phaser.Math.Clamp(y, topLimit, Math.max(topLimit + 20, maxY));
+    const spawnY = Phaser.Math.Clamp(safeSpawn.y, topLimit, Math.max(topLimit + 20, maxY));
+    const spawnX = safeSpawn.x;
     
-    const boss = bosses.create(x, spawnY, type);
+    const boss = bosses.create(spawnX, spawnY, type);
     boss.setDepth(FG_DEPTH_BASE + 5);
     
     const scale = getBossScale(type);
@@ -89,7 +128,7 @@ function spawnBoss(scene, type, x, y) {
     }
     boss.setVelocity((Math.random() - 0.5) * speed, (Math.random() - 0.5) * speed);
     
-    createSpawnEffect(scene, x, spawnY, 'boss');
+    createSpawnEffect(scene, spawnX, spawnY, 'boss');
     if (audioManager) audioManager.playSound('enemySpawn');
 
     createBossTrail(scene, boss);
@@ -207,7 +246,7 @@ function hitBoss(projectile, boss) {
     const scene = projectile.scene;
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
-    boss.hp -= projectile.damage || 1;
+    boss.hp -= applyBossDamage(boss, projectile.damage);
 
     // Visual hit feedback
     scene.tweens.add({
@@ -233,14 +272,14 @@ function playerHitBoss(playerSprite, boss) {
     const audioManager = scene.audioManager;
 
     if (playerState.powerUps.invincibility > 0) {
-        boss.hp -= 3;
+        boss.hp -= applyBossDamage(boss, 3);
         if (boss.hp <= 0) destroyBoss(scene, boss);
         return;
     }
 
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
-        boss.hp -= 2;
+        boss.hp -= applyBossDamage(boss, 2);
         if (boss.hp <= 0) destroyBoss(scene, boss);
         screenShake(scene, 10, 200);
         if (audioManager) audioManager.playSound('hitPlayer');

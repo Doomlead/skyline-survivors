@@ -16,6 +16,10 @@ function createUI(scene) {
     assaultCoreFillEl = document.getElementById('assault-core-fill');
     assaultCoreLabelEl = document.getElementById('assault-core-label');
     assaultShieldLabelEl = document.getElementById('assault-shield-label');
+    bossHudEl = document.getElementById('boss-hud');
+    bossHpFillEl = document.getElementById('boss-hp-fill');
+    bossHpLabelEl = document.getElementById('boss-hp-label');
+    bossNameLabelEl = document.getElementById('boss-name-label');
     mothershipHudEl = document.getElementById('mothership-hud');
     mothershipCoreFillEl = document.getElementById('mothership-core-fill');
     mothershipCoreLabelEl = document.getElementById('mothership-core-label');
@@ -30,12 +34,42 @@ function createUI(scene) {
 function updateUI(scene) {
     if (!scoreEl) return;
     const humansGroup = scene?.humans;
+    const activeBoss = scene?.bosses?.children?.entries?.find(entry => entry.active && entry.bossType !== 'mothershipCore');
+
+    const formatBossName = (name) => {
+        if (!name) return 'Boss Target';
+        const spaced = name.replace(/([A-Z])/g, ' $1').replace(/[_-]+/g, ' ');
+        return spaced.replace(/\s+/g, ' ').trim().replace(/\b\w/g, char => char.toUpperCase());
+    };
+
+    const updateBossHud = (boss) => {
+        if (!bossHudEl) return;
+        if (!boss) {
+            bossHudEl.classList.add('hidden');
+            return;
+        }
+        bossHudEl.classList.remove('hidden');
+        const bossHp = boss?.hp ?? 0;
+        const bossMax = boss?.maxHP ?? 0;
+        if (bossHpFillEl) {
+            const pct = bossMax > 0 ? Math.max(0, Math.min(1, bossHp / bossMax)) : 0;
+            bossHpFillEl.style.width = `${Math.round(pct * 100)}%`;
+        }
+        if (bossHpLabelEl) {
+            bossHpLabelEl.innerText = `HP ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}`;
+        }
+        if (bossNameLabelEl) {
+            const name = gameState.currentBossName || boss?.bossType || 'Boss';
+            bossNameLabelEl.innerText = formatBossName(name);
+        }
+    };
 
     scoreEl.innerText = gameState.score.toString().padStart(6, '0');
 
     if (gameState.mode === 'survival') {
         if (assaultHudEl) assaultHudEl.classList.add('hidden');
         if (mothershipHudEl) mothershipHudEl.classList.add('hidden');
+        updateBossHud(activeBoss);
         const activeHumans = humansGroup ? humansGroup.countActive(true) : gameState.humans;
         waveEl.style.display = 'block';
         waveEl.innerText = 'HUMANS: ' + String(activeHumans).padStart(3, '0');
@@ -49,6 +83,7 @@ function updateUI(scene) {
         timerEl.style.display = 'none';
         waveEl.style.display = 'block';
         if (mothershipHudEl) mothershipHudEl.classList.add('hidden');
+        if (bossHudEl) bossHudEl.classList.add('hidden');
         const objective = gameState.assaultObjective;
         const baseHp = objective?.baseHp ?? 0;
         const baseMax = objective?.baseHpMax ?? 0;
@@ -69,6 +104,7 @@ function updateUI(scene) {
         timerEl.style.display = 'none';
         waveEl.style.display = 'block';
         if (assaultHudEl) assaultHudEl.classList.add('hidden');
+        if (bossHudEl) bossHudEl.classList.add('hidden');
         waveEl.innerText = 'FINAL ASSAULT: MOTHERSHIP CORE';
         const objective = gameState.mothershipObjective;
         const bossHp = objective?.bossHp ?? 0;
@@ -90,6 +126,7 @@ function updateUI(scene) {
         waveEl.style.display = 'block';
         if (assaultHudEl) assaultHudEl.classList.add('hidden');
         if (mothershipHudEl) mothershipHudEl.classList.add('hidden');
+        updateBossHud(activeBoss);
 
         const enemiesLeft = Math.max(0, (gameState.enemiesToKillThisWave || 0) - (gameState.killsThisWave || 0));
         const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
