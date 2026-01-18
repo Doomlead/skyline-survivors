@@ -106,27 +106,28 @@ function collectPowerUp(playerSprite, powerUp) {
             p.shield = 1;
             break;
         case 'missile':
-            p.missile = 1;
+            p.missile = Math.min((p.missile || 0) + 1, 3);
             break;
         case 'overdrive':
             p.overdrive = 10000;
             playerState.fireRate = 50;
             break;
         case 'rear':
-            p.rearShot = 1;
+            p.coverage = Math.min((p.coverage || 0) + 1, 2);
             break;
         case 'side':
-            p.sideShot = 1;
+            p.coverage = Math.min((p.coverage || 0) + 1, 2);
             break;
         case 'rapid':
             p.rapid = 10000;
             playerState.fireRate = 80;
             break;
         case 'multi':
-            p.multiShot = 1;
+            p.multiShot = Math.min((p.multiShot || 0) + 1, 3);
             break;
         case 'piercing':
             p.piercing = 1;
+            p.laser = Math.max(p.laser || 0, 1);
             break;
         case 'speed':
             p.speed = 10000;

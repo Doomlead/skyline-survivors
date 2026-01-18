@@ -8,61 +8,57 @@ function fireWeapon(scene, angleOverride = null) {
     if (!player || !projectiles || !drones) return;
     let speed = 600;
     if (playerState.powerUps.speed > 0) speed = 750;
+    const p = playerState.powerUps;
     const baseAngle = typeof angleOverride === 'number'
         ? angleOverride
         : (playerState.direction === 'right' ? 0 : Math.PI);
-    const fireX = player.x + Math.cos(baseAngle) * 25;
-    const fireY = player.y + Math.sin(baseAngle) * 25;
+    const { fireX, fireY } = getFireOrigin(player, baseAngle);
     const velocityX = Math.cos(baseAngle) * speed;
     const velocityY = Math.sin(baseAngle) * speed;
     const baseDamage = 1;
-    const damage = playerState.powerUps.double > 0 ? baseDamage * 2 : baseDamage;
+    const damage = p.double > 0 ? baseDamage * 2 : baseDamage;
+    const laserConfig = getLaserConfig(p);
+    const shotPattern = getShotPattern(p.multiShot || 0);
 
-    // Determine if piercing is active
-    const isPiercing = playerState.powerUps.piercing > 0;
+    fireShotPattern(scene, fireX, fireY, baseAngle, speed, damage, laserConfig, shotPattern);
 
-    switch (playerState.powerUps.laser) {
-        case 0:
-            // Normal shot - use piercing texture if active
-            createProjectile(scene, fireX, fireY, velocityX, velocityY, isPiercing ? 'piercing' : 'normal', damage);
-            break;
-        case 1:
-            // Spread shot - cyan diamond projectiles
-            createProjectile(scene, fireX, fireY, velocityX, velocityY, 'spread', damage);
-            createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.15) * speed, Math.sin(baseAngle - 0.15) * speed, 'spread', damage);
-            createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.15) * speed, Math.sin(baseAngle + 0.15) * speed, 'spread', damage);
-            break;
-        case 2:
-            // Wave shot - purple sinusoidal energy
-            createProjectile(scene, fireX, fireY, velocityX, velocityY, 'wave', damage, true);
-            break;
+    const coverageConfig = getCoverageConfig();
+    if (p.coverage > 0) {
+        const rearAngle = baseAngle + Math.PI;
+        const rearOrigin = getFireOrigin(player, rearAngle);
+        fireShotPattern(scene, rearOrigin.fireX, rearOrigin.fireY, rearAngle, speed, damage, coverageConfig, shotPattern);
     }
 
-    if (playerState.powerUps.missile > 0) {
-        createProjectile(scene, fireX, fireY, velocityX, velocityY, 'homing', damage);
+    if (p.coverage > 1) {
+        const leftAngle = baseAngle - Math.PI / 2;
+        const rightAngle = baseAngle + Math.PI / 2;
+        const leftOrigin = getFireOrigin(player, leftAngle);
+        const rightOrigin = getFireOrigin(player, rightAngle);
+        fireShotPattern(scene, leftOrigin.fireX, leftOrigin.fireY, leftAngle, speed, damage, coverageConfig, shotPattern);
+        fireShotPattern(scene, rightOrigin.fireX, rightOrigin.fireY, rightAngle, speed, damage, coverageConfig, shotPattern);
     }
-    if (playerState.powerUps.overdrive > 0) {
+
+    if (p.missile > 0) {
+        const missileAngles = getMissileAngles(p.missile);
+        missileAngles.forEach((offset, index) => {
+            const angle = baseAngle + offset;
+            const missileSpeed = speed - 50 + index * 5;
+            createProjectile(
+                scene,
+                fireX,
+                fireY,
+                Math.cos(angle) * missileSpeed,
+                Math.sin(angle) * missileSpeed,
+                'homing',
+                damage,
+                { homingTier: p.missile }
+            );
+        });
+    }
+    if (p.overdrive > 0) {
         // Overdrive shots - orange flame bolts
         createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.08) * speed, Math.sin(baseAngle - 0.08) * speed, 'overdrive', damage);
         createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.08) * speed, Math.sin(baseAngle + 0.08) * speed, 'overdrive', damage);
-    }
-    if (playerState.powerUps.rearShot > 0) {
-        const rearAngle = baseAngle + Math.PI;
-        createProjectile(scene, player.x, fireY, Math.cos(rearAngle) * speed, Math.sin(rearAngle) * speed, isPiercing ? 'piercing' : 'normal', damage);
-    }
-    if (playerState.powerUps.sideShot > 0) {
-        // Side shots - teal vertical bolts
-        const leftAngle = baseAngle - Math.PI / 2;
-        const rightAngle = baseAngle + Math.PI / 2;
-        createProjectile(scene, player.x, fireY, Math.cos(leftAngle) * speed, Math.sin(leftAngle) * speed, 'side', damage);
-        createProjectile(scene, player.x, fireY, Math.cos(rightAngle) * speed, Math.sin(rightAngle) * speed, 'side', damage);
-    }
-    if (playerState.powerUps.multiShot > 0) {
-        // Multi-shot - small yellow pellets
-        createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.2) * speed, Math.sin(baseAngle - 0.2) * speed, 'multi', damage);
-        createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.1) * speed, Math.sin(baseAngle - 0.1) * speed, 'multi', damage);
-        createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.1) * speed, Math.sin(baseAngle + 0.1) * speed, 'multi', damage);
-        createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.2) * speed, Math.sin(baseAngle + 0.2) * speed, 'multi', damage);
     }
 
     // Drone projectiles - green energy orbs
@@ -79,11 +75,95 @@ function fireWeapon(scene, angleOverride = null) {
     });
 }
 
-function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, piercing = false) {
+function getLaserConfig(powerUps) {
+    const basePiercing = powerUps.piercing > 0 || powerUps.laser >= 1;
+    switch (powerUps.laser) {
+        case 1:
+            return { type: 'piercing', piercing: true };
+        case 2:
+            return { type: 'wave', piercing: true };
+        case 0:
+        default:
+            return { type: basePiercing ? 'piercing' : 'normal', piercing: basePiercing };
+    }
+}
+
+function getCoverageConfig() {
+    return { type: 'normal', piercing: false };
+}
+
+function getFireOrigin(player, angle, distance = 25) {
+    return {
+        fireX: player.x + Math.cos(angle) * distance,
+        fireY: player.y + Math.sin(angle) * distance
+    };
+}
+
+function getShotPattern(tier) {
+    switch (tier) {
+        case 1:
+            return { mode: 'twin', offsets: [-8, 8] };
+        case 2:
+            return { mode: 'spread', angles: [-0.15, 0, 0.15] };
+        case 3:
+            return { mode: 'multi', angles: [-0.25, -0.125, 0, 0.125, 0.25] };
+        case 0:
+        default:
+            return { mode: 'single', angles: [0] };
+    }
+}
+
+function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, laserConfig, shotPattern) {
+    if (shotPattern.mode === 'twin') {
+        shotPattern.offsets.forEach(offset => {
+            const offsetX = Math.cos(baseAngle + Math.PI / 2) * offset;
+            const offsetY = Math.sin(baseAngle + Math.PI / 2) * offset;
+            createProjectile(
+                scene,
+                originX + offsetX,
+                originY + offsetY,
+                Math.cos(baseAngle) * speed,
+                Math.sin(baseAngle) * speed,
+                laserConfig.type,
+                damage,
+                { piercing: laserConfig.piercing }
+            );
+        });
+        return;
+    }
+    shotPattern.angles.forEach(angleOffset => {
+        const angle = baseAngle + angleOffset;
+        createProjectile(
+            scene,
+            originX,
+            originY,
+            Math.cos(angle) * speed,
+            Math.sin(angle) * speed,
+            laserConfig.type,
+            damage,
+            { piercing: laserConfig.piercing }
+        );
+    });
+}
+
+function getMissileAngles(tier) {
+    switch (tier) {
+        case 2:
+            return [-0.18, 0, 0.18];
+        case 3:
+            return [-0.25, -0.12, 0, 0.12, 0.25];
+        case 1:
+        default:
+            return [0];
+    }
+}
+
+function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, options = {}) {
     const { projectiles } = scene;
     if (!projectiles) return;
     let proj;
     let textureName;
+    const piercing = options.piercing || false;
     
     // Select texture based on projectile type
     switch (type) {
@@ -107,20 +187,16 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, pier
     proj.damage = damage;
     proj.isPiercing = piercing || playerState.powerUps.piercing > 0 || type === 'wave' || type === 'piercing';
     proj.birthTime = scene.time.now;
+    if (type === 'homing') {
+        proj.homingTier = options.homingTier || 1;
+    }
     
     // Flip sprite if moving left
     if (vx < 0) proj.flipX = true;
     
     // Add visual effects based on type - OPTIMIZED: reduced particle counts
     if (type === 'wave') {
-        scene.tweens.add({
-            targets: proj,
-            y: y + 15,
-            duration: 150,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
-        });
+        proj.waveStartTime = scene.time.now;
     } else if (type === 'homing') {
         const emitter = scene.add.particles(0, 0, 'particle', {
             follow: proj,
@@ -147,6 +223,10 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, pier
     
     if (playerState.powerUps.timeSlow > 0) {
         proj.setVelocity(vx * 1.5, vy * 1.5);
+    }
+    if (type === 'wave') {
+        proj.baseVx = proj.body.velocity.x;
+        proj.baseVy = proj.body.velocity.y;
     }
 
     // Override destroy to clean up particles
@@ -185,23 +265,37 @@ function updateProjectiles(scene) {
     projectiles.children.entries.forEach(proj => {
         wrapWorldBounds(proj);
         if (!proj.active || destroyIfGrounded(proj)) return;
+        if (proj.projectileType === 'wave' && typeof proj.baseVx === 'number') {
+            const elapsed = scene.time.now - (proj.waveStartTime || scene.time.now);
+            const baseSpeed = Math.hypot(proj.baseVx, proj.baseVy) || 1;
+            const perpX = -proj.baseVy / baseSpeed;
+            const perpY = proj.baseVx / baseSpeed;
+            const waveOffset = Math.sin(elapsed * 0.02) * 120;
+            proj.setVelocity(
+                proj.baseVx + perpX * waveOffset,
+                proj.baseVy + perpY * waveOffset
+            );
+        }
         if (proj.projectileType === 'homing') {
             let nearestEnemy = null;
             let nearestDist = Infinity;
             const candidates = [];
             if (enemies) candidates.push(...enemies.children.entries);
             if (garrisonDefenders) candidates.push(...garrisonDefenders.children.entries);
+            const homingTier = proj.homingTier || 1;
+            const maxRange = homingTier === 3 ? 450 : homingTier === 2 ? 360 : 300;
+            const homingSpeed = homingTier === 3 ? 650 : homingTier === 2 ? 550 : 500;
             candidates.forEach(enemy => {
                 if (!enemy.active) return;
                 const dist = Phaser.Math.Distance.Between(proj.x, proj.y, enemy.x, enemy.y);
-                if (dist < nearestDist && dist < 300) {
+                if (dist < nearestDist && dist < maxRange) {
                     nearestDist = dist;
                     nearestEnemy = enemy;
                 }
             });
             if (nearestEnemy) {
                 const angle = Phaser.Math.Angle.Between(proj.x, proj.y, nearestEnemy.x, nearestEnemy.y);
-                proj.setVelocity(Math.cos(angle) * 500, Math.sin(angle) * 500);
+                proj.setVelocity(Math.cos(angle) * homingSpeed, Math.sin(angle) * homingSpeed);
                 proj.rotation = angle;
             }
         }
