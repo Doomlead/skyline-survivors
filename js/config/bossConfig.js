@@ -87,6 +87,7 @@ const BOSS_TRAIL_CONFIGS = {
 };
 
 const BOSS_HP_MULTIPLIER = 4; // Increase boss health by 300%
+const BOSS_DAMAGE_REDUCTION = 0.5; // Reduce incoming damage by 50%
 
 const BOSS_HP_VALUES = {
     megaLander: 25,
