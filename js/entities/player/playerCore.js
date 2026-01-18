@@ -112,7 +112,7 @@ function playerDie(scene) {
         veritechState.active = true;
 
         const p = playerState.powerUps;
-        const weaponKeys = ['laser','drone','shield','missile','overdrive','rearShot','sideShot','rapid','multiShot','piercing','speed','magnet','double','timeSlow'];
+        const weaponKeys = ['laser','drone','shield','missile','overdrive','coverage','rapid','multiShot','piercing','speed','magnet','double','timeSlow'];
         const activeWeapons = weaponKeys.filter(k => p[k] && p[k] > 0);
         const toRemove = Math.ceil(activeWeapons.length / 2);
         Phaser.Utils.Array.Shuffle(activeWeapons);

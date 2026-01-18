@@ -57,7 +57,7 @@ const LOADOUT_LIBRARY = {
             description: 'Start with a combat drone escort and lateral fire support.',
             apply: (gameState, playerState) => {
                 playerState.powerUps.drone = Math.max(playerState.powerUps.drone, 1);
-                playerState.powerUps.sideShot = Math.max(playerState.powerUps.sideShot, 1);
+                playerState.powerUps.coverage = Math.max(playerState.powerUps.coverage, 2);
                 return ['Drone escort online', 'Side-shot casings loaded'];
             }
         },
