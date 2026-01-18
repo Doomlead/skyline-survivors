@@ -36,3 +36,20 @@ function playerHitProjectile(playerSprite, projectile) {
         playerDie(this);
     }
 }
+
+function droneHitEnemy(drone, enemy) {
+    if (!drone || !drone.active) return;
+    createExplosion(this, drone.x, drone.y, 0x22d3ee);
+    drone.destroy();
+    playerState.powerUps.drone = Math.max((playerState.powerUps.drone || 0) - 1, 0);
+}
+
+function droneHitProjectile(drone, projectile) {
+    if (!drone || !drone.active) return;
+    if (projectile && projectile.active) {
+        projectile.destroy();
+    }
+    createExplosion(this, drone.x, drone.y, 0x22d3ee);
+    drone.destroy();
+    playerState.powerUps.drone = Math.max((playerState.powerUps.drone || 0) - 1, 0);
+}

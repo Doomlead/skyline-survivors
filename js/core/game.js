@@ -290,6 +290,9 @@ function create() {
     this.physics.add.overlap(this.veritech, this.powerUps, collectPowerUp, null, this);
     this.physics.add.overlap(this.veritech, this.humans, rescueHuman, null, this);
 
+    this.physics.add.overlap(this.drones, this.enemies, droneHitEnemy, null, this);
+    this.physics.add.overlap(this.drones, this.enemyProjectiles, droneHitProjectile, null, this);
+
     this.physics.add.overlap(this.pilot, this.enemies, playerHitEnemy, null, this);
     this.physics.add.overlap(this.pilot, this.garrisonDefenders, playerHitGarrisonDefender, null, this);
     this.physics.add.overlap(this.pilot, this.bosses, playerHitBoss, null, this);
