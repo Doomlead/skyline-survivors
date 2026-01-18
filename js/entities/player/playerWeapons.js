@@ -22,10 +22,11 @@ function fireWeapon(scene, angleOverride = null) {
 
     fireShotPattern(scene, fireX, fireY, baseAngle, speed, damage, laserConfig, shotPattern);
 
+    const coverageConfig = getCoverageConfig();
     if (p.coverage > 0) {
         const rearAngle = baseAngle + Math.PI;
         const rearOrigin = getFireOrigin(player, rearAngle);
-        fireShotPattern(scene, rearOrigin.fireX, rearOrigin.fireY, rearAngle, speed, damage, laserConfig, shotPattern);
+        fireShotPattern(scene, rearOrigin.fireX, rearOrigin.fireY, rearAngle, speed, damage, coverageConfig, shotPattern);
     }
 
     if (p.coverage > 1) {
@@ -33,8 +34,8 @@ function fireWeapon(scene, angleOverride = null) {
         const rightAngle = baseAngle + Math.PI / 2;
         const leftOrigin = getFireOrigin(player, leftAngle);
         const rightOrigin = getFireOrigin(player, rightAngle);
-        fireShotPattern(scene, leftOrigin.fireX, leftOrigin.fireY, leftAngle, speed, damage, laserConfig, shotPattern);
-        fireShotPattern(scene, rightOrigin.fireX, rightOrigin.fireY, rightAngle, speed, damage, laserConfig, shotPattern);
+        fireShotPattern(scene, leftOrigin.fireX, leftOrigin.fireY, leftAngle, speed, damage, coverageConfig, shotPattern);
+        fireShotPattern(scene, rightOrigin.fireX, rightOrigin.fireY, rightAngle, speed, damage, coverageConfig, shotPattern);
     }
 
     if (p.missile > 0) {
@@ -85,6 +86,10 @@ function getLaserConfig(powerUps) {
         default:
             return { type: basePiercing ? 'piercing' : 'normal', piercing: basePiercing };
     }
+}
+
+function getCoverageConfig() {
+    return { type: 'normal', piercing: false };
 }
 
 function getFireOrigin(player, angle, distance = 25) {
@@ -191,14 +196,7 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     
     // Add visual effects based on type - OPTIMIZED: reduced particle counts
     if (type === 'wave') {
-        scene.tweens.add({
-            targets: proj,
-            y: y + 15,
-            duration: 150,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
-        });
+        proj.waveStartTime = scene.time.now;
     } else if (type === 'homing') {
         const emitter = scene.add.particles(0, 0, 'particle', {
             follow: proj,
@@ -225,6 +223,10 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     
     if (playerState.powerUps.timeSlow > 0) {
         proj.setVelocity(vx * 1.5, vy * 1.5);
+    }
+    if (type === 'wave') {
+        proj.baseVx = proj.body.velocity.x;
+        proj.baseVy = proj.body.velocity.y;
     }
 
     // Override destroy to clean up particles
@@ -263,6 +265,17 @@ function updateProjectiles(scene) {
     projectiles.children.entries.forEach(proj => {
         wrapWorldBounds(proj);
         if (!proj.active || destroyIfGrounded(proj)) return;
+        if (proj.projectileType === 'wave' && typeof proj.baseVx === 'number') {
+            const elapsed = scene.time.now - (proj.waveStartTime || scene.time.now);
+            const baseSpeed = Math.hypot(proj.baseVx, proj.baseVy) || 1;
+            const perpX = -proj.baseVy / baseSpeed;
+            const perpY = proj.baseVx / baseSpeed;
+            const waveOffset = Math.sin(elapsed * 0.02) * 120;
+            proj.setVelocity(
+                proj.baseVx + perpX * waveOffset,
+                proj.baseVy + perpY * waveOffset
+            );
+        }
         if (proj.projectileType === 'homing') {
             let nearestEnemy = null;
             let nearestDist = Infinity;
