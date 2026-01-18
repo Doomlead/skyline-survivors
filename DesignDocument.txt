@@ -196,19 +196,6 @@ Swarms (multiple missiles)
 3
 Guided barrage (intelligent targeting)
 
-Force Drone
-Tier
-Effect
-0
-No drone
-1
-Front position (shields player)
-2
-Orbit mode (circles player)
-3
-Detached mode (independent fire)
-
-
 Single-Level Power-Ups
 These provide immediate effects, timed buffs, or toggle abilities:
 Defensive Systems:
