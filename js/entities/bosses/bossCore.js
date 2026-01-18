@@ -52,16 +52,19 @@ function getSafeBossSpawnPosition(scene, desiredX, desiredY, bossType) {
     const player = getActivePlayer(scene);
     if (!player) return { x: desiredX, y: desiredY };
 
-    const minDistance = bossType === 'mothershipCore' ? 180 : 240;
+    const minDistance = bossType === 'mothershipCore' ? 180 : 1500;
     const attempts = 6;
-    let bestCandidate = { x: desiredX, y: desiredY };
-    let bestDistance = 0;
+    const baseDirection = Math.random() < 0.5 ? -1 : 1;
+    const baseX = wrapValue(player.x + baseDirection * minDistance, CONFIG.worldWidth);
+    const baseY = Phaser.Math.Clamp(desiredY, 40, CONFIG.worldHeight - 80);
+    let bestCandidate = { x: baseX, y: baseY };
+    let bestDistance = Math.hypot(wrappedDistance(player.x, baseX, CONFIG.worldWidth), player.y - baseY);
 
     for (let i = 0; i < attempts; i++) {
-        const offsetX = i === 0 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (minDistance + Math.random() * 120);
-        const offsetY = i === 0 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (minDistance * 0.45 + Math.random() * 80);
-        const candidateX = wrapValue(desiredX + offsetX, CONFIG.worldWidth);
-        const candidateY = Phaser.Math.Clamp(desiredY + offsetY, 40, CONFIG.worldHeight - 80);
+        const offsetX = i === 0 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (minDistance + Math.random() * 220);
+        const offsetY = i === 0 ? 0 : (Math.random() < 0.5 ? -1 : 1) * (minDistance * 0.2 + Math.random() * 120);
+        const candidateX = wrapValue(baseX + offsetX, CONFIG.worldWidth);
+        const candidateY = Phaser.Math.Clamp(baseY + offsetY, 40, CONFIG.worldHeight - 80);
         const dx = wrappedDistance(player.x, candidateX, CONFIG.worldWidth);
         const dy = player.y - candidateY;
         const distance = Math.hypot(dx, dy);

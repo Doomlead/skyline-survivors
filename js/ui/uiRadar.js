@@ -4,7 +4,7 @@
 
 function updateRadar(scene) {
     if (!radarCtx || !scene) return;
-    const { enemies, garrisonDefenders, humans } = scene;
+    const { enemies, garrisonDefenders, humans, bosses } = scene;
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -105,6 +105,18 @@ function updateRadar(scene) {
             const hy = (human.y / CONFIG.worldHeight) * height;
             radarCtx.beginPath();
             radarCtx.arc(hx, hy, 2, 0, Math.PI * 2);
+            radarCtx.fill();
+        });
+    }
+
+    if (bosses) {
+        bosses.children.entries.forEach(boss => {
+            if (!boss.active) return;
+            const bx = boss.x * scaleX;
+            const by = (boss.y / CONFIG.worldHeight) * height;
+            radarCtx.fillStyle = '#ff66cc';
+            radarCtx.beginPath();
+            radarCtx.arc(bx, by, 4, 0, Math.PI * 2);
             radarCtx.fill();
         });
     }
