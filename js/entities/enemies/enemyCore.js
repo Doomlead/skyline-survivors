@@ -293,6 +293,10 @@ function hitEnemy(projectile, enemy) {
     if (projectile.projectileType === 'homing' && particleManager) {
         particleManager.bulletExplosion(enemy.x, enemy.y);
     }
+    if (projectile.projectileType === 'homing' && projectile.homingTier === 3 && !projectile.hasClustered) {
+        projectile.hasClustered = true;
+        spawnClusterMissiles(this, projectile, enemy);
+    }
     if (enemy.hp <= 0) destroyEnemy(this, enemy);
     if (projectile && projectile.active && !projectile.isPiercing) {
         projectile.destroy();

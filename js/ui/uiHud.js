@@ -145,7 +145,7 @@ function updateUI(scene) {
     if (p.drone > 0) powerUpText += `[DRONES:${p.drone}] `;
     if (p.shield > 0) powerUpText += `[SHIELD] `;
     if (p.missile > 0) {
-        const missileTypes = ['', 'MISSILE', 'SWARM', 'BARRAGE'];
+        const missileTypes = ['', 'STRAIGHT', 'HOMING', 'CLUSTER'];
         powerUpText += `[${missileTypes[p.missile]}] `;
     }
     if (p.overdrive > 0) powerUpText += `[OVERDRIVE:${Math.ceil(p.overdrive/1000)}s] `;
