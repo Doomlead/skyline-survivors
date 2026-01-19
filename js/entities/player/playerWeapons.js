@@ -40,21 +40,17 @@ function fireWeapon(scene, angleOverride = null) {
     }
 
     if (p.missile > 0) {
-        const missileAngles = getMissileAngles(p.missile);
-        missileAngles.forEach((offset, index) => {
-            const angle = baseAngle + offset;
-            const missileSpeed = speed - 50 + index * 5;
-            createProjectile(
-                scene,
-                fireX,
-                fireY,
-                Math.cos(angle) * missileSpeed,
-                Math.sin(angle) * missileSpeed,
-                'homing',
-                damage,
-                { homingTier: p.missile }
-            );
-        });
+        const missileSpeed = speed - 50;
+        createProjectile(
+            scene,
+            fireX,
+            fireY,
+            Math.cos(baseAngle) * missileSpeed,
+            Math.sin(baseAngle) * missileSpeed,
+            'homing',
+            damage,
+            { homingTier: p.missile }
+        );
     }
     if (p.overdrive > 0) {
         // Overdrive shots - orange flame bolts
@@ -158,16 +154,65 @@ function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, lase
     });
 }
 
-function getMissileAngles(tier) {
-    switch (tier) {
-        case 2:
-            return [-0.18, 0, 0.18];
-        case 3:
-            return [-0.25, -0.12, 0, 0.12, 0.25];
-        case 1:
-        default:
-            return [0];
+function getClusterTargets(scene, originX, originY, count, excludeTarget = null) {
+    const candidates = [];
+    if (scene.enemies) candidates.push(...scene.enemies.children.entries);
+    if (scene.garrisonDefenders) candidates.push(...scene.garrisonDefenders.children.entries);
+    if (scene.bosses) candidates.push(...scene.bosses.children.entries);
+    if (scene.battleships) candidates.push(...scene.battleships.children.entries);
+
+    return candidates
+        .filter(target => target.active && target !== excludeTarget)
+        .map(target => ({
+            target,
+            dist: Phaser.Math.Distance.Between(originX, originY, target.x, target.y)
+        }))
+        .sort((a, b) => a.dist - b.dist)
+        .slice(0, count)
+        .map(entry => entry.target);
+}
+
+function spawnClusterMissiles(scene, projectile, excludeTarget = null) {
+    if (!scene || !projectile) return;
+    const clusterCount = 3;
+    const originX = projectile.x;
+    const originY = projectile.y;
+    const damage = projectile.damage || 1;
+    const baseVelocity = projectile.body ? projectile.body.velocity : { x: 1, y: 0 };
+    const baseAngle = Phaser.Math.Angle.Between(0, 0, baseVelocity.x, baseVelocity.y);
+    const clusterSpeed = 520;
+    const targets = getClusterTargets(scene, originX, originY, clusterCount, excludeTarget);
+
+    if (targets.length > 0) {
+        targets.forEach(target => {
+            const angle = Phaser.Math.Angle.Between(originX, originY, target.x, target.y);
+            createProjectile(
+                scene,
+                originX,
+                originY,
+                Math.cos(angle) * clusterSpeed,
+                Math.sin(angle) * clusterSpeed,
+                'homing',
+                damage,
+                { homingTier: 2 }
+            );
+        });
+        return;
     }
+
+    [-0.2, 0, 0.2].forEach(offset => {
+        const angle = baseAngle + offset;
+        createProjectile(
+            scene,
+            originX,
+            originY,
+            Math.cos(angle) * clusterSpeed,
+            Math.sin(angle) * clusterSpeed,
+            'homing',
+            damage,
+            { homingTier: 2 }
+        );
+    });
 }
 
 function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, options = {}) {
@@ -295,8 +340,9 @@ function updateProjectiles(scene) {
             if (enemies) candidates.push(...enemies.children.entries);
             if (garrisonDefenders) candidates.push(...garrisonDefenders.children.entries);
             const homingTier = proj.homingTier || 1;
-            const maxRange = homingTier === 3 ? 450 : homingTier === 2 ? 360 : 300;
-            const homingSpeed = homingTier === 3 ? 650 : homingTier === 2 ? 550 : 500;
+            if (homingTier < 2) return;
+            const maxRange = 360;
+            const homingSpeed = 550;
             candidates.forEach(enemy => {
                 if (!enemy.active) return;
                 const dist = Phaser.Math.Distance.Between(proj.x, proj.y, enemy.x, enemy.y);

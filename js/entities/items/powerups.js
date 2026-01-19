@@ -55,7 +55,7 @@ function collectPowerUp(playerSprite, powerUp) {
         laser: 'LASER UPGRADE',
         drone: 'FORCE DRONE',
         shield: 'SHIELD',
-        missile: 'HOMING MISSILES',
+        missile: 'MISSILE SYSTEM',
         overdrive: 'OVERDRIVE',
         rear: 'REAR SHOT',
         side: 'SIDE SHOT',
