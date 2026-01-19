@@ -102,17 +102,23 @@ function updateUI(scene) {
     let powerUpText = '';
     const p = playerState.powerUps;
     if (p.laser > 0) {
-        const laserTypes = ['', 'SPREAD', 'WAVE'];
+        const laserTypes = ['', 'PIERCE', 'WAVE'];
         powerUpText += `[${laserTypes[p.laser]}] `;
     }
     if (p.drone > 0) powerUpText += `[DRONES:${p.drone}] `;
     if (p.shield > 0) powerUpText += `[SHIELD] `;
-    if (p.missile > 0) powerUpText += '[MISSILES] ';
+    if (p.missile > 0) {
+        const missileTypes = ['', 'MISSILE', 'SWARM', 'BARRAGE'];
+        powerUpText += `[${missileTypes[p.missile]}] `;
+    }
     if (p.overdrive > 0) powerUpText += `[OVERDRIVE:${Math.ceil(p.overdrive/1000)}s] `;
     if (p.rapid > 0) powerUpText += `[RAPID:${Math.ceil(p.rapid/1000)}s] `;
-    if (p.multiShot > 0) powerUpText += '[MULTI] ';
-    if (p.rearShot > 0) powerUpText += '[REAR] ';
-    if (p.sideShot > 0) powerUpText += '[SIDE] ';
+    if (p.multiShot > 0) {
+        const shotTypes = ['', 'TWIN', 'SPREAD', 'MULTI'];
+        powerUpText += `[${shotTypes[p.multiShot]}] `;
+    }
+    if (p.coverage > 0) powerUpText += '[REAR] ';
+    if (p.coverage > 1) powerUpText += '[SIDE] ';
     if (p.piercing > 0) powerUpText += '[PIERCING] ';
     if (p.speed > 0) powerUpText += `[SPEED:${Math.ceil(p.speed/1000)}s] `;
     if (p.magnet > 0) powerUpText += `[MAGNET:${Math.ceil(p.magnet/1000)}s] `;
