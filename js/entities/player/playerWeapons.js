@@ -18,7 +18,8 @@ function fireWeapon(scene, angleOverride = null) {
     const baseDamage = 1;
     const damage = p.double > 0 ? baseDamage * 2 : baseDamage;
     const laserConfig = getLaserConfig(p);
-    const shotPattern = getShotPattern(p.multiShot || 0);
+    const shotPattern = getPrimaryShotPattern(p);
+    const coveragePattern = getCoverageShotPattern();
 
     fireShotPattern(scene, fireX, fireY, baseAngle, speed, damage, laserConfig, shotPattern);
 
@@ -26,7 +27,7 @@ function fireWeapon(scene, angleOverride = null) {
     if (p.coverage > 0) {
         const rearAngle = baseAngle + Math.PI;
         const rearOrigin = getFireOrigin(player, rearAngle);
-        fireShotPattern(scene, rearOrigin.fireX, rearOrigin.fireY, rearAngle, speed, damage, coverageConfig, shotPattern);
+        fireShotPattern(scene, rearOrigin.fireX, rearOrigin.fireY, rearAngle, speed, damage, coverageConfig, coveragePattern);
     }
 
     if (p.coverage > 1) {
@@ -34,8 +35,8 @@ function fireWeapon(scene, angleOverride = null) {
         const rightAngle = baseAngle + Math.PI / 2;
         const leftOrigin = getFireOrigin(player, leftAngle);
         const rightOrigin = getFireOrigin(player, rightAngle);
-        fireShotPattern(scene, leftOrigin.fireX, leftOrigin.fireY, leftAngle, speed, damage, coverageConfig, shotPattern);
-        fireShotPattern(scene, rightOrigin.fireX, rightOrigin.fireY, rightAngle, speed, damage, coverageConfig, shotPattern);
+        fireShotPattern(scene, leftOrigin.fireX, leftOrigin.fireY, leftAngle, speed, damage, coverageConfig, coveragePattern);
+        fireShotPattern(scene, rightOrigin.fireX, rightOrigin.fireY, rightAngle, speed, damage, coverageConfig, coveragePattern);
     }
 
     if (p.missile > 0) {
@@ -90,6 +91,17 @@ function getLaserConfig(powerUps) {
 
 function getCoverageConfig() {
     return { type: 'normal', piercing: false };
+}
+
+function getPrimaryShotPattern(powerUps) {
+    if (powerUps.laser > 0) {
+        return getShotPattern(0);
+    }
+    return getShotPattern(powerUps.multiShot || 0);
+}
+
+function getCoverageShotPattern() {
+    return getShotPattern(0);
 }
 
 function getFireOrigin(player, angle, distance = 25) {
