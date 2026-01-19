@@ -6,7 +6,7 @@ function spawnPowerUp(scene, x, y) {
     const { powerUps } = scene;
     if (!powerUps) return;
     const powerUpPool = [
-        'laser','drone','shield','missile','overdrive','rear','side','rapid','multi','piercing','speed','magnet','bomb','double','invincibility','timeSlow'
+        'laser','drone','shield','missile','overdrive','rear','side','rapid','multiShot','piercing','speed','magnet','bomb','double','invincibility','timeSlow'
     ];
     const type = Phaser.Utils.Array.GetRandom(powerUpPool);
     const powerUp = powerUps.create(x, y, 'powerup_' + type);
@@ -60,7 +60,7 @@ function collectPowerUp(playerSprite, powerUp) {
         rear: 'REAR SHOT',
         side: 'SIDE SHOT',
         rapid: 'RAPID FIRE',
-        multi: 'MULTI-SHOT',
+        multiShot: 'MULTI-SHOT',
         piercing: 'PIERCING SHOTS',
         speed: 'SPEED BOOST',
         magnet: 'POWER MAGNET',
@@ -122,7 +122,7 @@ function collectPowerUp(playerSprite, powerUp) {
             p.rapid = 10000;
             playerState.fireRate = 80;
             break;
-        case 'multi':
+        case 'multiShot':
             p.multiShot = Math.min((p.multiShot || 0) + 1, 3);
             break;
         case 'piercing':
