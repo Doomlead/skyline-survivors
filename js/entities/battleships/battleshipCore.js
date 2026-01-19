@@ -253,6 +253,10 @@ function hitBattleship(projectile, battleship) {
     if (projectile.projectileType === 'homing' && particleManager) {
         particleManager.bulletExplosion(battleship.x, battleship.y);
     }
+    if (projectile.projectileType === 'homing' && projectile.homingTier === 3 && !projectile.hasClustered) {
+        projectile.hasClustered = true;
+        spawnClusterMissiles(scene, projectile, battleship);
+    }
 
     if (battleship.hp <= 0) destroyBattleship(scene, battleship);
     if (projectile && projectile.active && !projectile.isPiercing) {

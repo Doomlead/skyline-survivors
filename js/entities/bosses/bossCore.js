@@ -264,6 +264,10 @@ function hitBoss(projectile, boss) {
     if (projectile.projectileType === 'homing' && particleManager) {
         particleManager.bulletExplosion(boss.x, boss.y);
     }
+    if (projectile.projectileType === 'homing' && projectile.homingTier === 3 && !projectile.hasClustered) {
+        projectile.hasClustered = true;
+        spawnClusterMissiles(scene, projectile, boss);
+    }
     if (boss.hp <= 0) destroyBoss(scene, boss);
     if (projectile && projectile.active && !projectile.isPiercing) {
         projectile.destroy();
