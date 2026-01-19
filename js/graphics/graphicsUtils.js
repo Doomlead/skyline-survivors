@@ -45,7 +45,7 @@ function createPowerUpGraphics(scene) {
         rear:       0xa5655f,
         side:       0xa311ff,
         rapid:      0x11ffa3,
-        multi:      0xff116d,
+        multiShot:  0xff116d,
         piercing:   0x116dff,
         speed:      0xffa311,
         magnet:     0x2f0d00,
