@@ -242,7 +242,7 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     proj.setVelocity(vx, vy);
     proj.projectileType = type;
     proj.damage = damage;
-    proj.isPiercing = piercing || playerState.powerUps.piercing > 0 || type === 'wave' || type === 'piercing';
+    proj.isPiercing = piercing || (playerState.powerUps.piercing > 0 && type !== 'homing') || type === 'wave' || type === 'piercing';
     proj.birthTime = scene.time.now;
     if (type === 'homing') {
         proj.homingTier = options.homingTier || 1;
@@ -306,13 +306,20 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
 }
 
 function updateProjectiles(scene) {
-    const { projectiles, enemyProjectiles, enemies, garrisonDefenders, player } = scene;
+    const { projectiles, enemyProjectiles, enemies, garrisonDefenders, player, particleManager } = scene;
     if (!projectiles || !enemyProjectiles || !player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const destroyIfGrounded = (proj) => {
         const terrainVariation = Math.sin(proj.x / 200) * 30;
         const groundY = groundLevel - terrainVariation - 15;
         if (proj.y >= groundY) {
+            if (proj.projectileType === 'homing') {
+                if (particleManager) {
+                    particleManager.bulletExplosion(proj.x, proj.y);
+                } else {
+                    createExplosion(scene, proj.x, proj.y, 0xff6600);
+                }
+            }
             proj.destroy();
             return true;
         }
