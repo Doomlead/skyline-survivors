@@ -162,7 +162,7 @@ function updatePlayer(scene, time, delta) {
         fireWeapon(scene, angle);
         if (audioManager) {
             const p = playerState.powerUps;
-            const useSpreadSound = p.laser >= 2 || p.multiShot >= 2;
+            const useSpreadSound = p.laser === 0 && p.multiShot >= 2;
             audioManager.playSound(useSpreadSound ? 'playerFireSpread' : 'playerFire');
         }
         playerState.lastFire = time;
