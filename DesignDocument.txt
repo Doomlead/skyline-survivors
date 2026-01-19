@@ -192,9 +192,9 @@ No missiles
 1
 Basic homing missiles
 2
-Swarms (multiple missiles)
-3
 Guided barrage (intelligent targeting)
+3
+Clusters when missiles collide they do damage then break into smaller missiles that target closer enemies.( must be noted that all missiles should do the same damage as the regular Single forward shot).
 
 Single-Level Power-Ups
 These provide immediate effects, timed buffs, or toggle abilities:
