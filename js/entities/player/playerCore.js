@@ -118,7 +118,21 @@ function playerDie(scene) {
         Phaser.Utils.Array.Shuffle(activeWeapons);
         for (let i = 0; i < toRemove; i++) {
             const key = activeWeapons[i];
-            if (key) p[key] = 0;
+            if (key) {
+                p[key] = 0;
+                if (playerState.powerUpDecay && playerState.powerUpDecay[key] !== undefined) {
+                    playerState.powerUpDecay[key] = 0;
+                }
+            }
+        }
+        if (playerState.powerUpDecay) {
+            if (!p.coverage) playerState.powerUpDecay.coverage = 0;
+            if (!p.missile) playerState.powerUpDecay.missile = 0;
+        }
+        if (playerState.primaryWeapon === 'laser' && p.laser <= 0 && p.multiShot > 0) {
+            playerState.primaryWeapon = 'multiShot';
+        } else if (playerState.primaryWeapon === 'multiShot' && p.multiShot <= 0 && p.laser > 0) {
+            playerState.primaryWeapon = 'laser';
         }
         p.invincibility = 0;
         if (!p.overdrive && !p.rapid) playerState.fireRate = 200;

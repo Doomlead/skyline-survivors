@@ -18,6 +18,7 @@ function updatePlayer(scene, time, delta) {
         enterKey,
         hyperspaceKey,
         pauseKey,
+        switchPrimaryKey,
         particleManager,
         audioManager
     } = scene;
@@ -50,6 +51,16 @@ function updatePlayer(scene, time, delta) {
     if (bombKey && Phaser.Input.Keyboard.JustDown(bombKey)) useSmartBomb(scene);
     if (hyperspaceKey && Phaser.Input.Keyboard.JustDown(hyperspaceKey)) useHyperspace(scene);
     if (pauseKey && Phaser.Input.Keyboard.JustDown(pauseKey)) togglePause(scene);
+    if (switchPrimaryKey && Phaser.Input.Keyboard.JustDown(switchPrimaryKey)) {
+        const p = playerState.powerUps;
+        if (p.laser > 0 && p.multiShot > 0) {
+            playerState.primaryWeapon = playerState.primaryWeapon === 'laser' ? 'multiShot' : 'laser';
+        } else if (p.laser > 0) {
+            playerState.primaryWeapon = 'laser';
+        } else if (p.multiShot > 0) {
+            playerState.primaryWeapon = 'multiShot';
+        }
+    }
 
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const minY = 20;
@@ -162,7 +173,7 @@ function updatePlayer(scene, time, delta) {
         fireWeapon(scene, angle);
         if (audioManager) {
             const p = playerState.powerUps;
-            const useSpreadSound = p.laser === 0 && p.multiShot >= 2;
+            const useSpreadSound = playerState.primaryWeapon === 'multiShot' && p.multiShot >= 2;
             audioManager.playSound(useSpreadSound ? 'playerFireSpread' : 'playerFire');
         }
         playerState.lastFire = time;

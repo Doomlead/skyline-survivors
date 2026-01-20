@@ -24,6 +24,17 @@ function createUI(scene) {
     mothershipCoreFillEl = document.getElementById('mothership-core-fill');
     mothershipCoreLabelEl = document.getElementById('mothership-core-label');
     mothershipPhaseLabelEl = document.getElementById('mothership-phase-label');
+    decayHudEl = document.getElementById('decay-hud');
+    decayPrimaryFillEl = document.getElementById('decay-primary-fill');
+    decayPrimaryLabelEl = document.getElementById('decay-primary-label');
+    decayPrimaryTierEl = document.getElementById('decay-primary-tier');
+    decayCoverageFillEl = document.getElementById('decay-coverage-fill');
+    decayCoverageLabelEl = document.getElementById('decay-coverage-label');
+    decayMissileFillEl = document.getElementById('decay-missile-fill');
+    decayMissileLabelEl = document.getElementById('decay-missile-label');
+    decayOverdriveFillEl = document.getElementById('decay-overdrive-fill');
+    decayOverdriveLabelEl = document.getElementById('decay-overdrive-label');
+    decayStatusStripEl = document.getElementById('decay-status-strip');
 
     radarCanvas = document.getElementById('radar-canvas');
     if (radarCanvas) {
@@ -164,6 +175,74 @@ function updateUI(scene) {
     if (p.timeSlow > 0) powerUpText += `[SLOW:${Math.ceil(p.timeSlow/1000)}s] `;
 
     powerupsEl.innerText = powerUpText || '[NORMAL FIRE]';
+
+    if (decayHudEl) {
+        const decay = playerState.powerUpDecay || {};
+        const primaryWeapon = playerState.primaryWeapon || (p.laser > 0 ? 'laser' : 'multiShot');
+        const primaryTier = primaryWeapon === 'laser' ? p.laser : p.multiShot;
+        const primaryDuration = getDecayDurationMs(primaryWeapon, primaryTier);
+        const primaryRemaining = decay[primaryWeapon] || 0;
+        const primaryPct = primaryDuration > 0 ? Math.max(0, Math.min(1, primaryRemaining / primaryDuration)) : 0;
+        const isPrimaryLow = primaryPct > 0 && primaryPct <= 0.25;
+        const flashActive = playerState.decayFlash?.[primaryWeapon] > 0;
+        const usePulse = !isFlashReductionEnabled();
+
+        if (decayPrimaryLabelEl) {
+            decayPrimaryLabelEl.innerText = primaryWeapon === 'laser' ? 'LASER' : 'MULTI-SHOT';
+        }
+        if (decayPrimaryTierEl) {
+            decayPrimaryTierEl.innerText = primaryTier > 0 ? `T${primaryTier}` : 'T0';
+        }
+        if (decayPrimaryFillEl) {
+            decayPrimaryFillEl.style.width = `${Math.round(primaryPct * 100)}%`;
+            decayPrimaryFillEl.style.backgroundColor = isPrimaryLow ? '#f97316' : '#22d3ee';
+            decayPrimaryFillEl.classList.toggle('animate-pulse', usePulse && (isPrimaryLow || flashActive));
+        }
+
+        const coverageDuration = getDecayDurationMs('coverage', p.coverage);
+        const coverageRemaining = decay.coverage || 0;
+        const coveragePct = coverageDuration > 0 ? Math.max(0, Math.min(1, coverageRemaining / coverageDuration)) : 0;
+        if (decayCoverageFillEl) {
+            decayCoverageFillEl.style.width = `${Math.round(coveragePct * 100)}%`;
+            decayCoverageFillEl.style.backgroundColor = coveragePct <= 0.25 && coveragePct > 0 ? '#f97316' : '#34d399';
+            decayCoverageFillEl.classList.toggle('animate-pulse', usePulse && coveragePct > 0 && coveragePct <= 0.25);
+        }
+        if (decayCoverageLabelEl) {
+            decayCoverageLabelEl.innerText = p.coverage > 0 ? `Coverage T${p.coverage}` : 'Coverage';
+        }
+
+        const missileDuration = getDecayDurationMs('missile', p.missile);
+        const missileRemaining = decay.missile || 0;
+        const missilePct = missileDuration > 0 ? Math.max(0, Math.min(1, missileRemaining / missileDuration)) : 0;
+        if (decayMissileFillEl) {
+            decayMissileFillEl.style.width = `${Math.round(missilePct * 100)}%`;
+            decayMissileFillEl.style.backgroundColor = missilePct <= 0.25 && missilePct > 0 ? '#f97316' : '#e879f9';
+            decayMissileFillEl.classList.toggle('animate-pulse', usePulse && missilePct > 0 && missilePct <= 0.25);
+        }
+        if (decayMissileLabelEl) {
+            decayMissileLabelEl.innerText = p.missile > 0 ? `Homing T${p.missile}` : 'Homing';
+        }
+
+        if (decayOverdriveFillEl) {
+            const overdrivePct = p.overdrive > 0 ? Math.max(0, Math.min(1, p.overdrive / 10000)) : 0;
+            decayOverdriveFillEl.style.width = `${Math.round(overdrivePct * 100)}%`;
+            decayOverdriveFillEl.style.backgroundColor = overdrivePct <= 0.25 && overdrivePct > 0 ? '#f97316' : '#fb923c';
+            decayOverdriveFillEl.classList.toggle('animate-pulse', usePulse && overdrivePct > 0 && overdrivePct <= 0.25);
+        }
+        if (decayOverdriveLabelEl) {
+            decayOverdriveLabelEl.innerText = p.overdrive > 0 ? `Overdrive ${Math.ceil(p.overdrive / 1000)}s` : 'Overdrive';
+        }
+
+        if (decayStatusStripEl) {
+            const statusItems = [];
+            if (p.speed > 0) statusItems.push(`Speed ${Math.ceil(p.speed / 1000)}s`);
+            if (p.double > 0) statusItems.push(`2x ${Math.ceil(p.double / 1000)}s`);
+            if (p.invincibility > 0) statusItems.push(`Inv ${Math.ceil(p.invincibility / 1000)}s`);
+            if (p.timeSlow > 0) statusItems.push(`Slow ${Math.ceil(p.timeSlow / 1000)}s`);
+            if (p.magnet > 0) statusItems.push(`Magnet ${Math.ceil(p.magnet / 1000)}s`);
+            decayStatusStripEl.innerText = statusItems.length ? statusItems.join(' · ') : '';
+        }
+    }
 
     if (districtEl && threatEl && rewardEl) {
         const directives = gameState.missionDirectives;

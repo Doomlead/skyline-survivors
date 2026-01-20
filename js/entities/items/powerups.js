@@ -27,6 +27,31 @@ function spawnPowerUp(scene, x, y) {
     });
 }
 
+function refreshDecayTimer(path, tier) {
+    const duration = getDecayDurationMs(path, tier);
+    if (!duration) {
+        playerState.powerUpDecay[path] = 0;
+        return;
+    }
+    playerState.powerUpDecay[path] = duration;
+}
+
+function triggerDecayFlash(path) {
+    if (!playerState.decayFlash) return;
+    playerState.decayFlash[path] = 400;
+}
+
+function normalizePrimaryWeapon() {
+    const p = playerState.powerUps;
+    if (playerState.primaryWeapon === 'laser' && p.laser <= 0 && p.multiShot > 0) {
+        playerState.primaryWeapon = 'multiShot';
+    } else if (playerState.primaryWeapon === 'multiShot' && p.multiShot <= 0 && p.laser > 0) {
+        playerState.primaryWeapon = 'laser';
+    } else if (!playerState.primaryWeapon) {
+        playerState.primaryWeapon = p.laser > 0 ? 'laser' : (p.multiShot > 0 ? 'multiShot' : 'laser');
+    }
+}
+
 function updatePowerUps(scene) {
     const { powerUps, player } = scene;
     if (!powerUps || !player) return;
@@ -94,6 +119,10 @@ function collectPowerUp(playerSprite, powerUp) {
     switch (powerUp.powerUpType) {
         case 'laser':
             p.laser = Math.min((p.laser || 0) + 1, 2);
+            refreshDecayTimer('laser', p.laser);
+            if (!playerState.primaryWeapon || (playerState.primaryWeapon === 'multiShot' && p.multiShot <= 0)) {
+                playerState.primaryWeapon = 'laser';
+            }
             break;
         case 'drone': {
             p.drone = Math.min((p.drone || 0) + 1, 3);
@@ -107,6 +136,7 @@ function collectPowerUp(playerSprite, powerUp) {
             break;
         case 'missile':
             p.missile = Math.min((p.missile || 0) + 1, 3);
+            refreshDecayTimer('missile', p.missile);
             break;
         case 'overdrive':
             p.overdrive = 10000;
@@ -114,9 +144,11 @@ function collectPowerUp(playerSprite, powerUp) {
             break;
         case 'rear':
             p.coverage = Math.min((p.coverage || 0) + 1, 2);
+            refreshDecayTimer('coverage', p.coverage);
             break;
         case 'side':
             p.coverage = Math.min((p.coverage || 0) + 1, 2);
+            refreshDecayTimer('coverage', p.coverage);
             break;
         case 'rapid':
             p.rapid = 10000;
@@ -124,10 +156,18 @@ function collectPowerUp(playerSprite, powerUp) {
             break;
         case 'multiShot':
             p.multiShot = Math.min((p.multiShot || 0) + 1, 3);
+            refreshDecayTimer('multiShot', p.multiShot);
+            if (!playerState.primaryWeapon || (playerState.primaryWeapon === 'laser' && p.laser <= 0)) {
+                playerState.primaryWeapon = 'multiShot';
+            }
             break;
         case 'piercing':
             p.piercing = 1;
-            p.laser = Math.max(p.laser || 0, 1);
+            const nextLaserTier = Math.max(p.laser || 0, 1);
+            if (nextLaserTier !== p.laser) {
+                p.laser = nextLaserTier;
+                refreshDecayTimer('laser', p.laser);
+            }
             break;
         case 'speed':
             p.speed = 10000;
@@ -218,5 +258,48 @@ function updatePowerUpTimers(scene, delta) {
     if (playerState.powerUps.timeSlow > 0) {
         playerState.powerUps.timeSlow -= delta;
         if (playerState.powerUps.timeSlow <= 0) playerState.powerUps.timeSlow = 0;
+    }
+    updatePowerUpDecayTimers(delta);
+}
+
+function updatePowerUpDecayTimers(delta) {
+    const p = playerState.powerUps;
+    const decay = playerState.powerUpDecay;
+    if (!decay) return;
+    ['laser', 'multiShot', 'coverage', 'missile'].forEach((path) => {
+        if (decay[path] > 0) {
+            decay[path] = Math.max(0, decay[path] - delta);
+        }
+    });
+
+    if (decay.laser === 0 && p.laser > 0) {
+        p.laser = Math.max(0, p.laser - 1);
+        triggerDecayFlash('laser');
+        refreshDecayTimer('laser', p.laser);
+    }
+    if (decay.multiShot === 0 && p.multiShot > 0) {
+        p.multiShot = Math.max(0, p.multiShot - 1);
+        triggerDecayFlash('multiShot');
+        refreshDecayTimer('multiShot', p.multiShot);
+    }
+    if (decay.coverage === 0 && p.coverage > 0) {
+        p.coverage = Math.max(0, p.coverage - 1);
+        triggerDecayFlash('coverage');
+        refreshDecayTimer('coverage', p.coverage);
+    }
+    if (decay.missile === 0 && p.missile > 0) {
+        p.missile = Math.max(0, p.missile - 1);
+        triggerDecayFlash('missile');
+        refreshDecayTimer('missile', p.missile);
+    }
+
+    normalizePrimaryWeapon();
+
+    if (playerState.decayFlash) {
+        Object.keys(playerState.decayFlash).forEach((key) => {
+            if (playerState.decayFlash[key] > 0) {
+                playerState.decayFlash[key] = Math.max(0, playerState.decayFlash[key] - delta);
+            }
+        });
     }
 }

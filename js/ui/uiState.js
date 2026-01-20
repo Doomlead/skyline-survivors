@@ -7,6 +7,11 @@ let districtEl, threatEl, rewardEl;
 let assaultHudEl, assaultCoreFillEl, assaultCoreLabelEl, assaultShieldLabelEl;
 let mothershipHudEl, mothershipCoreFillEl, mothershipCoreLabelEl, mothershipPhaseLabelEl;
 let radarCanvas, radarCtx;
+let decayHudEl, decayPrimaryFillEl, decayPrimaryLabelEl, decayPrimaryTierEl;
+let decayCoverageFillEl, decayCoverageLabelEl;
+let decayMissileFillEl, decayMissileLabelEl;
+let decayOverdriveFillEl, decayOverdriveLabelEl;
+let decayStatusStripEl;
 
 const KEY_BINDING_ACTIONS = [
     { id: 'moveLeft', label: 'Move Left' },
@@ -20,7 +25,8 @@ const KEY_BINDING_ACTIONS = [
     { id: 'eject', label: 'Eject' },
     { id: 'enter', label: 'Enter Mech' },
     { id: 'hyperspace', label: 'Hyperspace' },
-    { id: 'pause', label: 'Pause' }
+    { id: 'pause', label: 'Pause' },
+    { id: 'switchPrimary', label: 'Switch Primary' }
 ];
 
 function formatKeyLabel(keyName) {

@@ -18,6 +18,16 @@ const CONFIG = {
 
 const CLASSIC_WAVE_LIMIT = 15;
 
+const POWERUP_DECAY_CONFIG = {
+    assaultMultiplier: 0.75,
+    paths: {
+        laser: { tiers: { 1: 35000, 2: 40000 } },
+        multiShot: { tiers: { 1: 45000, 2: 55000, 3: 65000 } },
+        coverage: { tiers: { 1: 60000, 2: 75000 } },
+        missile: { tiers: { 1: 35000, 2: 40000, 3: 45000 } }
+    }
+};
+
 const DEFAULT_KEY_BINDINGS = {
     moveLeft: 'LEFT',
     moveRight: 'RIGHT',
@@ -30,7 +40,8 @@ const DEFAULT_KEY_BINDINGS = {
     eject: 'E',
     enter: 'R',
     hyperspace: 'Q',
-    pause: 'P'
+    pause: 'P',
+    switchPrimary: 'TAB'
 };
 
 // Player-facing settings (audio + accessibility)
@@ -84,6 +95,15 @@ function persistUserSettings() {
 
 function isFlashReductionEnabled() {
     return !!userSettings.reduceFlashes;
+}
+
+function getDecayDurationMs(path, tier) {
+    if (!path || !tier || tier <= 0) return 0;
+    const pathConfig = POWERUP_DECAY_CONFIG.paths?.[path];
+    const baseDuration = pathConfig?.tiers?.[tier] || 0;
+    if (!baseDuration) return 0;
+    const multiplier = gameState.mode === 'assault' ? POWERUP_DECAY_CONFIG.assaultMultiplier : 1;
+    return Math.round(baseDuration * multiplier);
 }
 
 loadUserSettings();
@@ -179,6 +199,19 @@ const playerState = {
         invincibility: 0,
         timeSlow: 0
     },
+    primaryWeapon: 'laser',
+    powerUpDecay: {
+        laser: 0,
+        multiShot: 0,
+        coverage: 0,
+        missile: 0
+    },
+    decayFlash: {
+        laser: 0,
+        multiShot: 0,
+        coverage: 0,
+        missile: 0
+    },
     direction: 'right',
     baseSpeed: 300
 };
@@ -248,6 +281,19 @@ function resetGameState() {
         double: 0,
         invincibility: 0,
         timeSlow: 0
+    };
+    playerState.primaryWeapon = 'laser';
+    playerState.powerUpDecay = {
+        laser: 0,
+        multiShot: 0,
+        coverage: 0,
+        missile: 0
+    };
+    playerState.decayFlash = {
+        laser: 0,
+        multiShot: 0,
+        coverage: 0,
+        missile: 0
     };
     playerState.direction = 'right';
     veritechState.mode = 'fighter';
