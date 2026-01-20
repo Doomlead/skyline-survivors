@@ -17,8 +17,11 @@ function fireWeapon(scene, angleOverride = null) {
     const velocityY = Math.sin(baseAngle) * speed;
     const baseDamage = 1;
     const damage = p.double > 0 ? baseDamage * 2 : baseDamage;
-    const laserConfig = getLaserConfig(p);
-    const shotPattern = getPrimaryShotPattern(p);
+    const primaryWeapon = playerState.primaryWeapon || (p.laser > 0 ? 'laser' : 'multiShot');
+    const activeLaserTier = primaryWeapon === 'laser' ? p.laser : 0;
+    const activeMultiShotTier = primaryWeapon === 'multiShot' ? p.multiShot : 0;
+    const laserConfig = getLaserConfig(activeLaserTier, p.piercing);
+    const shotPattern = getPrimaryShotPattern(activeLaserTier, activeMultiShotTier);
     const coveragePattern = getCoverageShotPattern();
 
     fireShotPattern(scene, fireX, fireY, baseAngle, speed, damage, laserConfig, shotPattern);
@@ -72,9 +75,9 @@ function fireWeapon(scene, angleOverride = null) {
     });
 }
 
-function getLaserConfig(powerUps) {
-    const basePiercing = powerUps.piercing > 0 || powerUps.laser >= 1;
-    switch (powerUps.laser) {
+function getLaserConfig(laserTier, hasPiercing) {
+    const basePiercing = hasPiercing > 0 || laserTier >= 1;
+    switch (laserTier) {
         case 1:
             return { type: 'piercing', piercing: true };
         case 2:
@@ -89,11 +92,11 @@ function getCoverageConfig() {
     return { type: 'normal', piercing: false };
 }
 
-function getPrimaryShotPattern(powerUps) {
-    if (powerUps.laser > 0) {
+function getPrimaryShotPattern(laserTier, multiShotTier) {
+    if (laserTier > 0) {
         return getShotPattern(0);
     }
-    return getShotPattern(powerUps.multiShot || 0);
+    return getShotPattern(multiShotTier || 0);
 }
 
 function getCoverageShotPattern() {

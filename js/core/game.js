@@ -55,7 +55,8 @@ function applyKeyBindings(scene) {
         eject: scene.input.keyboard.addKey(resolveKeyCode('eject')),
         enter: scene.input.keyboard.addKey(resolveKeyCode('enter')),
         hyperspace: scene.input.keyboard.addKey(resolveKeyCode('hyperspace')),
-        pause: scene.input.keyboard.addKey(resolveKeyCode('pause'))
+        pause: scene.input.keyboard.addKey(resolveKeyCode('pause')),
+        switchPrimary: scene.input.keyboard.addKey(resolveKeyCode('switchPrimary'))
     };
 
     scene.boundKeys = boundKeys;
@@ -71,6 +72,7 @@ function applyKeyBindings(scene) {
     scene.enterKey = boundKeys.enter;
     scene.hyperspaceKey = boundKeys.hyperspace;
     scene.pauseKey = boundKeys.pause;
+    scene.switchPrimaryKey = boundKeys.switchPrimary;
 }
 
 function preload() {

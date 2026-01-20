@@ -486,6 +486,37 @@
                         <canvas id="radar-canvas" width="800" height="40" class="w-full h-full block"></canvas>
                     </div>
 
+                    <div id="decay-hud" class="flex flex-col gap-1 px-2">
+                        <div class="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-cyan-200">
+                            <span id="decay-primary-label">PRIMARY</span>
+                            <span id="decay-primary-tier">T0</span>
+                        </div>
+                        <div class="relative h-2 bg-slate-900 border border-cyan-400/40 rounded overflow-hidden">
+                            <div id="decay-primary-fill" class="absolute left-0 top-0 h-full bg-cyan-500"></div>
+                        </div>
+                        <div class="flex gap-2 text-[9px] uppercase tracking-[0.2em] text-slate-300">
+                            <div class="flex-1">
+                                <div class="relative h-1.5 bg-slate-900 border border-slate-600/60 rounded overflow-hidden">
+                                    <div id="decay-coverage-fill" class="absolute left-0 top-0 h-full bg-emerald-400"></div>
+                                </div>
+                                <div id="decay-coverage-label" class="mt-0.5 text-[9px] text-slate-400">Coverage</div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="relative h-1.5 bg-slate-900 border border-slate-600/60 rounded overflow-hidden">
+                                    <div id="decay-missile-fill" class="absolute left-0 top-0 h-full bg-fuchsia-400"></div>
+                                </div>
+                                <div id="decay-missile-label" class="mt-0.5 text-[9px] text-slate-400">Homing</div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="relative h-1.5 bg-slate-900 border border-slate-600/60 rounded overflow-hidden">
+                                    <div id="decay-overdrive-fill" class="absolute left-0 top-0 h-full bg-orange-400"></div>
+                                </div>
+                                <div id="decay-overdrive-label" class="mt-0.5 text-[9px] text-slate-400">Overdrive</div>
+                            </div>
+                        </div>
+                        <div id="decay-status-strip" class="flex flex-wrap gap-1 text-[9px] uppercase tracking-[0.2em] text-slate-400"></div>
+                    </div>
+
                     <div class="text-[10px] md:text-xs text-cyan-200 font-orbitron min-h-[1.5em] text-center tracking-wider" id="powerups-el"></div>
                 </div>
             </header>
@@ -505,6 +536,7 @@
                     <span class="text-cyan-300">E</span> = Eject,
                     <span class="text-cyan-300">R</span> = Enter Mech,
                     <span class="text-cyan-300">Q</span> = Hyperspace,
+                    <span class="text-cyan-300">Tab</span> = Switch Primary,
                     <span class="text-cyan-300">P</span> = Pause.
                 </p>
                 <div id="build-controls" class="flex flex-wrap justify-center gap-2 text-[10px] md:text-xs">
