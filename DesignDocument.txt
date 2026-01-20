@@ -287,6 +287,15 @@ Coverage Path currently implemented as single-level toggles (Rear Shot, Side Sho
 Homing Missiles currently single-level, needs tier progression
 Design suggests these should be tiered progression systems
 
+4.3.8. Power-Up Decay & Primary Weapon Switching
+Power-up drops remain infinite to preserve the "sensory jackpot" loop, but stacked tiers now decay when not refreshed. Each tier has a decay timer that resets on pickup; expiration downgrades the tier by one (Tier 0 never decays).
+Primary Weapon Switching:
+- Laser tiers and Multi-Shot tiers are treated as primary weapon modes.
+- Players can switch between Laser and Multi-Shot when both are available (no automatic override).
+- The non-active primary weapon can continue to decay while not in use, creating a strategic choice between burst focus and coverage.
+No Drone Decay:
+- Force Drones do not use decay timers; they persist until lost via damage or mission failure.
+
 5. Mission Types
 5.1. Defense Missions (Threatened Districts)
 Objective: Survive 15 waves of enemies
@@ -579,5 +588,4 @@ Dynamic States: Districts use Loss Aversion (Investment Levels) to increase stak
 Variable Rewards: Base rewards are randomized to create a Skinner Box loop
 Sensory Polish: Feedback is tuned to "Casino-style" intensity to maximize satisfaction
 Retention Mechanics: Near-miss timers and locked content ensure high replayability and "just-one-more-turn" gameplay
-
 
