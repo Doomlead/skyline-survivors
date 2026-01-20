@@ -114,6 +114,31 @@ function getClassicWaveEnemyPool(wave) {
     return [...CLASSIC_LIGHT_ENEMIES, ...CLASSIC_HEAVY_ENEMIES, ...CLASSIC_ELITE_ENEMIES];
 }
 
+function getWaveSpawnTiming(wave) {
+    const waveIndex = Math.max(1, wave);
+    const initialDelay = Phaser.Math.Clamp(8000 - (waveIndex - 1) * 350, 2500, 8000);
+    const groupDelay = Phaser.Math.Clamp(4000 - (waveIndex - 1) * 180, 1200, 4000);
+    const burstCount = waveIndex >= 7 ? Math.min(3, 1 + Math.floor((waveIndex - 7) / 3)) : 0;
+    const burstSize = waveIndex >= 7 ? Math.min(6, 3 + Math.floor((waveIndex - 7) / 2)) : 0;
+    const burstSpacing = Phaser.Math.Clamp(450 - (waveIndex - 7) * 20, 200, 450);
+
+    return {
+        initialDelay,
+        groupDelay,
+        burstCount,
+        burstSize,
+        burstSpacing
+    };
+}
+
+function scheduleSpawnBurst(scene, allowedTypes, startDelay, burstSize, burstSpacing) {
+    for (let i = 0; i < burstSize; i++) {
+        scene.time.delayedCall(startDelay + i * burstSpacing, () => {
+            spawnRandomEnemy(scene, allowedTypes);
+        });
+    }
+}
+
 // Picks an enemy type, honoring mission directive weights when provided
 // so districts can influence the composition of incoming threats.
 function getMissionWeightedEnemyType(allowedTypes = null) {
@@ -189,8 +214,9 @@ function spawnEnemyWave(scene) {
         gameState.killsThisWave = 0;
         const waveSize = gameState.enemiesToKillThisWave;
         const groupSize = 3;
-        const initialDelay = 8000;
-        const groupDelay = 4000;
+        const timing = getWaveSpawnTiming(gameState.wave);
+        const initialDelay = timing.initialDelay;
+        const groupDelay = timing.groupDelay;
         const allowedTypes = getClassicWaveEnemyPool(gameState.wave);
         for (let i = 0; i < waveSize; i++) {
             const groupIndex = Math.floor(i / groupSize);
@@ -199,10 +225,20 @@ function spawnEnemyWave(scene) {
                 spawnRandomEnemy(scene, allowedTypes);
             });
         }
+        if (timing.burstCount > 0 && timing.burstSize > 0) {
+            const groups = Math.ceil(waveSize / groupSize);
+            const totalDuration = initialDelay + groupDelay * Math.max(0, groups - 1);
+            const burstWindow = Math.max(groupDelay, totalDuration - initialDelay);
+            for (let burstIndex = 0; burstIndex < timing.burstCount; burstIndex++) {
+                const burstStart = initialDelay + (burstWindow / (timing.burstCount + 1)) * (burstIndex + 1);
+                scheduleSpawnBurst(scene, allowedTypes, burstStart, timing.burstSize, timing.burstSpacing);
+            }
+        }
     } else {
         const waveSize = 3 + gameState.wave;
+        const interval = Phaser.Math.Clamp(1000 - (gameState.wave - 1) * 40, 400, 1000);
         for (let i = 0; i < waveSize; i++) {
-            scene.time.delayedCall(i * 1000, () => {
+            scene.time.delayedCall(i * interval, () => {
                 spawnRandomEnemy(scene);
             });
         }
