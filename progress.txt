@@ -2,7 +2,7 @@
 
 ## 1. Core Concept
 
-**Implementation Status: 75% Complete** ⬆️ (was 70%)
+**Implementation Status: 76% Complete** ⬆️ (was 75%)
 
 ### Key Themes Progress:
 
@@ -18,8 +18,8 @@
 - Rescue armed ground operatives (rescue exists, operative squad system missing)
 - Dynamic front lines with strategic territory control (district state changes and battleship pressure exist, strategic layer missing)
 
-❌ **Not Implemented:**
-- Strategic territory control layer (prioritization, district value impacts)
+⚠️ **Partially Implemented:**
+- Strategic territory control layer (urgency + reward/spawn multipliers exist, but no explicit priority UI or district value impacts)
 
 ---
 
@@ -27,7 +27,7 @@
 
 ### 2.1. System View Orbital Map
 
-**Implementation Status: 80% Complete** ⬆️ (was 75%)
+**Implementation Status: 83% Complete** ⬆️ (was 80%)
 
 ✅ **Fully Implemented:**
 - 3D rotating globe with selectable districts
@@ -44,6 +44,7 @@
 - Occupied districts force assault launch mode with updated UI labeling
 - Threat indicators with pulsing urgency rings and under-attack highlights
 - District timers and state persistence
+- District directives include urgency + reward/spawn multipliers surfaced in the mission panel
 - Roaming battleship markers with travel/assault phases
 - Battleship assaults drain district timers and flag districts as under attack
 - Orbit node timers and status readouts in the build mission panel
@@ -124,11 +125,12 @@
 
 ### 2.3. Meta Progression
 
-**Implementation Status: 60% Complete** ⬆️ (was 55%)
+**Implementation Status: 70% Complete** ⬆️ (was 60%)
 
 ✅ **Fully Implemented:**
 - District clearing tracking
-- Meta progression scaffolding (credits, unlocks, loadouts)
+- Meta progression framework with credits, unlocks, and loadouts
+- Between-mission shop inventory + loadout selection UI
 - Persistent storage and run history
 - Failed defense consequences (district destruction states)
 - **Battleship Threat System:** Roaming battleships target friendly districts over time
@@ -146,7 +148,7 @@
 
 ### 3.1 Core Loop
 
-**Implementation Status: 70% Complete** ⬆️ (was 60%)
+**Implementation Status: 76% Complete** ⬆️ (was 70%)
 
 ✅ **Implemented:**
 1. **System Map:** District selection, status viewing, battleship tracking
@@ -163,7 +165,7 @@
 
 ❌ **Not Implemented:**
 1. **System Map:** Full assessment tools
-   - Strategic priority recommendations UI
+   - Strategic priority recommendations UI (beyond current urgency/reward/spawn multipliers)
 
 2. **Combat Mission:**
    - Fight on foot **with rescued operatives** (operative squad system missing)
@@ -199,7 +201,7 @@
 
 ### 4.2. Ground Combat & Operative System
 
-**Implementation Status: 35% Complete**
+**Implementation Status: 40% Complete**
 
 #### 4.2.1. Ship Destruction → Foot Combat
 **Implementation Status: 40% Complete**
@@ -481,6 +483,7 @@ Inventory Power-Ups
 - Orbit nodes with timers (shop/relay/distress/battleship/mothership)
 - Meta currency system
 - Permanent upgrade purchases
+- District mission panel shows urgency, reward multiplier, and spawn multiplier
 - Roaming battleships drain district timers during assaults
 - Urgency-based mission modifiers
 - District threat timers expiring into occupied state
@@ -639,7 +642,7 @@ Inventory Power-Ups
 
 ### 9.2. Scoring & Rewards
 
-**Implementation Status: 55% Complete** ⬆️ (was 50%)
+**Implementation Status: 60% Complete** ⬆️ (was 55%)
 
 ✅ **Implemented:**
 - Enemy kills
@@ -648,6 +651,7 @@ Inventory Power-Ups
 - Wave-completion bonuses
 - Mission completion credit rewards
 - Currency conversion (meta credits)
+- Urgency-based reward multipliers applied to meta credit earnings
 - Base core destruction score bonus
 
 ❌ **Not Implemented:**
@@ -668,7 +672,7 @@ Inventory Power-Ups
 
 ### 10.1. Core Mode: Planetary Liberation Campaign
 
-**Implementation Status: 50% Complete** ⬆️ (was 45%)
+**Implementation Status: 55% Complete** ⬆️ (was 50%)
 
 ✅ **Implemented:**
 - District-based mission structure
@@ -684,7 +688,7 @@ Inventory Power-Ups
 
 ❌ **Not Implemented:**
 - **Campaign Structure:**
-  - Goal: Secure all districts → Unlock Mothership → **Destroy Mothership** (final mission missing)
+  - Goal: Secure all districts → Unlock Mothership → **Destroy Mothership** (final mission exists but is single-phase)
 - **Dynamic Campaign:**
   - Player choices shape the battlefield beyond basic defense/assault outcomes
   - Strategic decisions affect difficulty curve
@@ -723,17 +727,23 @@ Inventory Power-Ups
   - **"Assault Only"** - All districts start occupied
   - **"Last Stand"** - All districts threatened simultaneously
 
+### 10.5. Additional Implemented Modes (Non-Design Scope)
+
+✅ **Implemented:**
+- Survival mode (time-based objective with boss spawns at minute intervals)
+
 ---
 
 ## 11. Difficulty & Replayability
 
-**Implementation Status: 35% Complete**
+**Implementation Status: 40% Complete**
 
 ✅ **Implemented:**
 - Basic difficulty scaling through waves
 - Meta progression unlocks
 - Persistent loadout system
 - District urgency scaling (timer-based)
+- Urgency-based spawn multipliers (threatened/occupied districts)
 
 ❌ **Not Implemented:**
 - **Scaling Systems:**
@@ -784,8 +794,8 @@ Inventory Power-Ups
 | 5 | ✅ Defense mission tier progression | **COMPLETE** | Light/heavy/elite wave mix |
 | 6 | ✅ District state transitions | **COMPLETE** | All state changes functional |
 | 7 | ✅ Campaign victory condition | **COMPLETE** | Dedicated campaign victory overlay with stats + menu options |
-| 8 | ❌ Strategic campaign layer | **NOT STARTED** | Priority UI, district values |
-| 9 | ❌ Ground combat depth | **NOT STARTED** | Operative squads, cover |
+| 8 | ⚠️ Strategic campaign layer | **IN PROGRESS** | Urgency + reward/spawn multipliers exist; priority UI + district values missing |
+| 9 | ⚠️ Ground combat depth | **IN PROGRESS** | Basic on-foot combat exists; operative squads + cover missing |
 | 10 | ❌ Additional game modes | **NOT STARTED** | Mission Mode, Boss Rush |
 
 ---
@@ -798,12 +808,12 @@ Inventory Power-Ups
   - Guardian Form
   - Defense Missions
   - District State System
-- **Substantially Complete:** 2/13 (15%)
+- **Substantially Complete:** 3/13 (23%)
   - Assault Missions (core loop + garrison defenders + HUD)
   - System Map (core mechanics working, strategic layer missing)
-- **Partially Complete:** 6/13 (46%)
+  - Meta Progression (credits, shop/loadouts, persistence)
+- **Partially Complete:** 5/13 (38%)
   - Ground Combat (pilot ejection + basic movement/shooting; no squad roles/cover)
-  - Meta Progression (credits/unlocks/persistence; no strategic control tracker)
   - Power-Up System (core drops + tiering; no jackpot/mystery tech)
   - Scoring & Rewards (base scoring + rescue bonus; lacks deeper incentives)
   - Campaign Mode (Mothership mission playable with HP-based phases; no exterior/interior multi-stage flow)
@@ -816,14 +826,14 @@ Inventory Power-Ups
 ## Design Document Alignment
 
 **Overall Implementation:**
-- ✅ **Implemented:** ~58% (adjusted after code audit)
-- ⚠️ **Partially Implemented:** ~30%
+- ✅ **Implemented:** ~60% (adjusted after code audit)
+- ⚠️ **Partially Implemented:** ~28%
 - ❌ **Not Implemented:** ~12%
 
 **By Category:**
 - **Core Gameplay Loop:** 80% complete (Mothership fight exists, but simplified)
-- **Mission Systems:** 75% complete (Defense 90%, Assault 75%, Mothership 35%)
-- **Meta Systems:** 55% complete
+- **Mission Systems:** 76% complete (Defense 90%, Assault 75%, Mothership 35%)
+- **Meta Systems:** 65% complete
 - **Player Mechanics:** 65% complete (Ship 100%, Ground 30%)
 - **Enemy Design:** 80% complete
 - **Environmental:** 35% complete ⬆️ (multi-layer parallax in place; no weather/day-night)
@@ -844,13 +854,15 @@ Inventory Power-Ups
 8. **Procedural parallax environment stack** - Multi-layer sky/city/terrain backgrounds with multiple style generators
 9. **Mothership assault playable** - Core arena fight with HP-based phases + reinforcements + campaign victory/defeat overlays (missing multi-stage flow)
 10. **Campaign victory flow** - Dedicated campaign victory overlay with stats + new campaign/menu options
+11. **Between-mission build & shop** - Loadout selection + shop unlocks integrated into district map panel
 
 ### 🎯 Recent Achievements:
 - ⬆️ Environmental stack: 40% → 55% (multi-layer sky/atmosphere/stars + multiple styles)
 - ⬆️ Assault missions: 60% → 75% (base shields, turrets, garrison defenders, HUD)
-- ⬆️ System map: 60% → 70% (complete state transition flow)
+- ⬆️ System map: 60% → 76% (state flow + mission urgency/reward multipliers)
 - ⬆️ Mothership assault: 10% → 35% (HP-based core phases + HUD support)
 - ⬆️ Campaign victory: 0% → 100% (campaign win/defeat overlays with stats)
+- ⬆️ Meta progression: 55% → 70% (between-mission loadouts + shop unlocks)
 
 ---
 
@@ -870,8 +882,8 @@ Inventory Power-Ups
 
 **Priority 3: Strategic Layer MVP Slice (2-3 days)**
 - Planetary control tracker UI (friendly vs occupied)
-- Simple district priority hints (low/medium/high urgency)
-- Update map panel with district value impact messaging
+- Explicit district priority hints (low/medium/high urgency)
+- Update map panel with district value impact messaging (resource + strategic importance)
 
 **Priority 4: Integration + Balance Pass (1-2 days)**
 - Full campaign playthrough testing
@@ -904,7 +916,7 @@ Inventory Power-Ups
 ## Estimated Remaining Work
 
 ### MVP Completion:
-- **Current Progress:** ~84% complete (adjusted after code audit)
+- **Current Progress:** ~85% complete (adjusted after code audit)
 - **Remaining Critical Work:**
   - Mothership Boss Mission (multi-phase upgrade): 4-6 days
   - Assault failure/retreat polish: 1-2 days
@@ -928,7 +940,7 @@ Inventory Power-Ups
 
 ## MVP Completion
 
-- **Status:** ~84% complete (core loop intact, Mothership fight present but simplified)
+- **Status:** ~85% complete (core loop intact, Mothership fight present but simplified)
 - **Primary Blockers:** Multi-phase Mothership mission, assault retreat/retry polish, planetary control tracker slice
 
 ---
@@ -943,3 +955,18 @@ Inventory Power-Ups
 3. **Strategic campaign layer** - Planetary control tracker, priority hints, district values, difficulty scaling
 4. **Multi-phase base reactor** - Added challenge to assault missions
 5. **Ground operative squad system** - Roles/cover/medic/engineer behaviors
+
+---
+
+## What We Should Work On Next
+
+1. **Mothership multi-phase upgrade (Exterior → Interior → Core)**  
+   This is the single largest compliance gap and the primary MVP blocker.
+2. **Assault mission retreat/redo loop polish**  
+   Clarifies assault failure flow and reduces dead-end game-over friction.
+3. **Strategic layer MVP slice (control tracker + priority hints + district values)**  
+   Reinforces the design doc’s strategic layer and drives decision-making on the map.
+4. **Multi-phase base reactor + assault reward drops**  
+   Makes occupied district assaults feel meaningfully distinct and rewards risk.
+5. **Ground operative squad system groundwork**  
+   Enables on-foot depth, roles, and rescue payoffs promised in the design doc.
