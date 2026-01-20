@@ -275,6 +275,8 @@
 
 ### 4.3. Power-Up & Weapon System
 
+**Implementation Status: 70% Complete** ⬆️ (was 60%)
+
 #### 4.3.1. Power Sources
 **Implementation Status: 90% Complete**
 
@@ -371,6 +373,29 @@ Inventory Power-Ups
 - Add Homing Missile tier progression (3 levels: Basic → Swarms → Barrage)
 - Document that Shot Pattern/Coverage are achieved through collecting multiple single-level pickups
 - This provides progression depth without major refactoring
+
+#### 4.3.8. Power-Up Decay & Primary Weapon Switching
+**Implementation Status: 85% Complete** ⬆️ (was 0%)
+
+✅ **Implemented:**
+- Tier decay timers for Laser, Multi-Shot, Coverage, and Homing tiers (downgrade when timers expire)
+- Primary weapon tracking (Laser vs Multi-Shot) with manual toggle and auto-normalization
+- Decay refresh on pickup and tier-based duration scaling
+
+❌ **Not Implemented:**
+- Explicit “Mystery Tech” jackpot drop cadence tied to base destruction
+
+#### 4.3.9. HUD Decay Visualization (Low-Clutter Plan)
+**Implementation Status: 75% Complete** ⬆️ (was 0%)
+
+✅ **Implemented:**
+- Primary decay bar with tier label for the active weapon (Laser or Multi-Shot)
+- Compact decay bars for Coverage, Homing, and Overdrive
+- Timed buff status strip for active temporary power-ups
+- Flash-reduction accessibility toggle honored by decay HUD pulses
+
+❌ **Not Implemented:**
+- Dedicated downgrade warning flashes beyond the current pulse/alpha swap
 
 
 ## 5. Mission Types
@@ -636,7 +661,7 @@ Inventory Power-Ups
 
 ### 9.1. Radar / HUD
 
-**Implementation Status: 87% Complete** ⬆️ (was 80%)
+**Implementation Status: 90% Complete** ⬆️ (was 87%)
 
 ✅ **Implemented:**
 - Mini-radar showing player, enemies, humans, pickups
@@ -644,6 +669,7 @@ Inventory Power-Ups
 - Battleship position markers on the globe view
 - Core HUD elements (score, wave count, timer, bombs, lives)
 - Power-up status readout
+- Power-up decay HUD (primary + coverage/missile/overdrive) with reduced-flash support
 - **Mission Objective Indicator (Defense):** Wave count (X/15)
 - **Mission Objective Indicator (Assault):** Base health bar + shield status
 
@@ -829,7 +855,7 @@ Inventory Power-Ups
   - Meta Progression (credits, shop/loadouts, persistence)
 - **Partially Complete:** 5/13 (38%)
   - Ground Combat (pilot ejection + basic movement/shooting; no squad roles/cover)
-  - Power-Up System (core drops + tiering; no jackpot/mystery tech)
+  - Power-Up System (core drops + tiering + decay/switching; no jackpot/mystery tech)
   - Scoring & Rewards (base scoring + rescue bonus; lacks deeper incentives)
   - Campaign Mode (Mothership mission playable with HP-based phases; no exterior/interior multi-stage flow)
   - Environment Design (multi-layer parallax styles; no weather/day-night or district-specific themes)
@@ -841,15 +867,15 @@ Inventory Power-Ups
 ## Design Document Alignment
 
 **Overall Implementation:**
-- ✅ **Implemented:** ~60% (adjusted after code audit)
-- ⚠️ **Partially Implemented:** ~28%
-- ❌ **Not Implemented:** ~12%
+- ✅ **Implemented:** ~62% (adjusted after code audit)
+- ⚠️ **Partially Implemented:** ~27%
+- ❌ **Not Implemented:** ~11%
 
 **By Category:**
 - **Core Gameplay Loop:** 80% complete (Mothership fight exists, but simplified)
 - **Mission Systems:** 76% complete (Defense 90%, Assault 75%, Mothership 35%)
 - **Meta Systems:** 65% complete
-- **Player Mechanics:** 65% complete (Ship 100%, Ground 30%)
+- **Player Mechanics:** 66% complete (Ship 100%, Ground 30%, power-up decay/switching)
 - **Enemy Design:** 80% complete
 - **Environmental:** 35% complete ⬆️ (multi-layer parallax in place; no weather/day-night)
 - **Additional Modes:** 0% complete
@@ -870,6 +896,7 @@ Inventory Power-Ups
 9. **Mothership assault playable** - Core arena fight with HP-based phases + reinforcements + campaign victory/defeat overlays (missing multi-stage flow)
 10. **Campaign victory flow** - Dedicated campaign victory overlay with stats + new campaign/menu options
 11. **Between-mission build & shop** - Loadout selection + shop unlocks integrated into district map panel
+12. **Power-up decay + primary switching** - Tier decay timers with active-weapon toggle and HUD support
 
 ### 🎯 Recent Achievements:
 - ⬆️ Environmental stack: 40% → 55% (multi-layer sky/atmosphere/stars + multiple styles)
@@ -905,6 +932,10 @@ Inventory Power-Ups
 - Balance pass on Mothership difficulty + assault reinforcements
 - Bug fixes and polish
 
+**Priority 5: Power-up Rewards Pass (1-2 days, stretch for MVP)**
+- Add base-destruction power-up reward bursts
+- Clarify power-up tier messaging in HUD (especially homing/coverage)
+
 ### 📋 Post-MVP Polish (Optional)
 
 **Phase 1: Assault Mission Depth (1 week)**
@@ -912,17 +943,22 @@ Inventory Power-Ups
 - Add high-value power-up drops in bases
 - Polish assault difficulty scaling
 
-**Phase 2: Ground Combat Depth (2 weeks)**
+**Phase 2: Power-Up Progression Depth (1 week)**
+- Add homing missile tier progression (basic → swarms → barrage)
+- Expand drone progression tiers
+- Add “Mystery Tech”/jackpot drops tied to elite/base kills
+
+**Phase 3: Ground Combat Depth (2 weeks)**
 - Operative squad system (roles: medic/engineer/turret)
 - Cover mechanics + terrain interactions
 - Ground weapons variety + pickup types
 
-**Phase 3: Strategic Layer Expansion (1 week)**
+**Phase 4: Strategic Layer Expansion (1 week)**
 - District value indicators
 - Global difficulty scaling tied to occupied districts
 - Battleship “kidnap” mechanic for shop items
 
-**Phase 4: Environment Variety (1 week)**
+**Phase 5: Environment Variety (1 week)**
 - District-specific background selection (tie styles to districts)
 - Day/night cycle or weather modifiers
 
@@ -931,7 +967,7 @@ Inventory Power-Ups
 ## Estimated Remaining Work
 
 ### MVP Completion:
-- **Current Progress:** ~85% complete (adjusted after code audit)
+- **Current Progress:** ~86% complete (adjusted after code audit)
 - **Remaining Critical Work:**
   - Mothership Boss Mission (multi-phase upgrade): 4-6 days
   - Assault failure/retreat polish: 1-2 days
@@ -955,7 +991,7 @@ Inventory Power-Ups
 
 ## MVP Completion
 
-- **Status:** ~85% complete (core loop intact, Mothership fight present but simplified)
+- **Status:** ~86% complete (core loop intact, Mothership fight present but simplified)
 - **Primary Blockers:** Multi-phase Mothership mission, assault retreat/retry polish, planetary control tracker slice
 
 ---
@@ -970,6 +1006,7 @@ Inventory Power-Ups
 3. **Strategic campaign layer** - Planetary control tracker, priority hints, district values, difficulty scaling
 4. **Multi-phase base reactor** - Added challenge to assault missions
 5. **Ground operative squad system** - Roles/cover/medic/engineer behaviors
+6. **Power-up progression depth + jackpot rewards** - Tiered homing/drone progression and base/elite reward bursts
 
 ---
 
@@ -983,5 +1020,7 @@ Inventory Power-Ups
    Reinforces the design doc’s strategic layer and drives decision-making on the map.
 4. **Multi-phase base reactor + assault reward drops**  
    Makes occupied district assaults feel meaningfully distinct and rewards risk.
-5. **Ground operative squad system groundwork**  
+5. **Power-up progression depth + jackpot rewards**  
+   Adds the tiered/variable-reward loop promised in the design doc.
+6. **Ground operative squad system groundwork**  
    Enables on-foot depth, roles, and rescue payoffs promised in the design doc.
