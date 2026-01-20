@@ -295,6 +295,20 @@ Primary Weapon Switching:
 - The non-active primary weapon can continue to decay while not in use, creating a strategic choice between burst focus and coverage.
 No Drone Decay:
 - Force Drones do not use decay timers; they persist until lost via damage or mission failure.
+Balancing Sheet:
+- Reference tuning values in powerup_decay_balancing.json (base defense durations, assault multiplier, and per-path tiers).
+
+4.3.9. HUD Decay Visualization (Low-Clutter Plan)
+Primary Bar Focus:
+- Show a single prominent decay bar for the active primary weapon (Laser or Multi-Shot) beneath the reticle or near the power-up HUD row.
+- When switching primaries, the bar smoothly swaps label/color to the new mode.
+Secondary Stacks (Compact):
+- Coverage, Homing, and Overdrive display as small tick bars/icons stacked vertically with minimal labels.
+- Timed buffs (Speed, Double Damage, Invincibility, Time Slow, Magnet) share a compact "status strip" with tiny timers rather than full bars.
+Urgency Feedback:
+- Bars pulse and desaturate when below 25% remaining; add a short warning flash on tier downgrade.
+Accessibility:
+- When Reduce Flashes is enabled, replace pulsing with a simple color shift and reduce alpha changes.
 
 5. Mission Types
 5.1. Defense Missions (Threatened Districts)
@@ -588,4 +602,3 @@ Dynamic States: Districts use Loss Aversion (Investment Levels) to increase stak
 Variable Rewards: Base rewards are randomized to create a Skinner Box loop
 Sensory Polish: Feedback is tuned to "Casino-style" intensity to maximize satisfaction
 Retention Mechanics: Near-miss timers and locked content ensure high replayability and "just-one-more-turn" gameplay
-

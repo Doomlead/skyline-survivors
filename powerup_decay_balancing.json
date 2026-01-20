@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "assault_duration_multiplier": 0.75,
+  "rules": {
+    "tier_0_decays": false,
+    "refresh_on_pickup": true,
+    "downgrade_on_expire": true
+  },
+  "primary_weapon_switching": {
+    "modes": ["laser", "multiShot"],
+    "switchable": true,
+    "decay_while_inactive": true
+  },
+  "paths": {
+    "laser": {
+      "role": "assault_precision",
+      "tiers": {
+        "1": { "label": "piercing", "duration_seconds_defense": 35 },
+        "2": { "label": "wave", "duration_seconds_defense": 40 }
+      }
+    },
+    "multiShot": {
+      "role": "defense_coverage",
+      "tiers": {
+        "1": { "label": "twin", "duration_seconds_defense": 45 },
+        "2": { "label": "spread", "duration_seconds_defense": 55 },
+        "3": { "label": "multi", "duration_seconds_defense": 65 }
+      }
+    },
+    "coverage": {
+      "role": "defense_survivability",
+      "tiers": {
+        "1": { "label": "rear", "duration_seconds_defense": 60 },
+        "2": { "label": "rear_side", "duration_seconds_defense": 75 }
+      }
+    },
+    "missile": {
+      "role": "assault_structure",
+      "tiers": {
+        "1": { "label": "homing_basic", "duration_seconds_defense": 35 },
+        "2": { "label": "homing", "duration_seconds_defense": 40 },
+        "3": { "label": "homing_cluster", "duration_seconds_defense": 45 }
+      }
+    },
+    "drone": {
+      "role": "defense_support",
+      "decay": "none"
+    },
+    "overdrive": {
+      "role": "burst_damage",
+      "duration_seconds_defense": 20
+    },
+    "double": {
+      "role": "burst_damage",
+      "duration_seconds_defense": 18
+    },
+    "invincibility": {
+      "role": "survivability_peak",
+      "duration_seconds_defense": 10
+    },
+    "timeSlow": {
+      "role": "tactical_control",
+      "duration_seconds_defense": 14
+    },
+    "speed": {
+      "role": "assault_mobility",
+      "duration_seconds_defense": 25
+    },
+    "magnet": {
+      "role": "pickup_chase",
+      "duration_seconds_defense": 30
+    }
+  }
+}
