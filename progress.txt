@@ -144,6 +144,21 @@
 
 ---
 
+### 2.4. Title Briefing & Main Menu
+
+**Implementation Status: 90% Complete** ⬆️ (was 0%)
+
+✅ **Implemented:**
+- Title briefing overlay with typed terminal-style mission recap
+- Skip/authorize flow that transitions into the main menu
+- Keyboard support (Space/Enter) for skipping and authorizing
+- Briefing text adapts to current district summary
+
+❌ **Not Implemented:**
+- Multiple briefing variants or branching narrative intros
+
+---
+
 ## 3. Gameplay Overview
 
 ### 3.1 Core Loop
