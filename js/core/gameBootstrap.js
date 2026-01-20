@@ -19,6 +19,9 @@ window.addEventListener('orientationchange', () => {
 // ------------------------
 // Responsive Resize Helper
 // ------------------------
+let lastResizeWidth = 0;
+let lastResizeHeight = 0;
+
 function applyResponsiveResize(options = {}) {
     const { force = false } = options;
     
@@ -34,9 +37,14 @@ function applyResponsiveResize(options = {}) {
         
         const container = document.getElementById('district-game-container');
         if (container && container.clientWidth > 0 && container.clientHeight > 0) {
+            if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
+                return;
+            }
             // Resize Phaser to match the container exactly
             game.scale.resize(container.clientWidth, container.clientHeight);
             game.scale.refresh();
+            lastResizeWidth = container.clientWidth;
+            lastResizeHeight = container.clientHeight;
         }
         return; 
     }
@@ -46,6 +54,9 @@ function applyResponsiveResize(options = {}) {
     
     // Only resize if the dimensions are valid
     if (width > 0 && height > 0) {
+        if (!force && width === lastResizeWidth && height === lastResizeHeight) {
+            return;
+        }
         console.log(`[ResponsiveResize] Updating game size to: ${width}x${height}`);
         
         // Force Phaser to use these dimensions
@@ -57,6 +68,8 @@ function applyResponsiveResize(options = {}) {
         
         // Refresh the scale manager internals
         game.scale.refresh();
+        lastResizeWidth = width;
+        lastResizeHeight = height;
     }
 }
 
