@@ -2,6 +2,66 @@
 // Boss AI Behaviors and Update Functions
 // ------------------------
 
+function fireBossBulletPattern(scene, boss, time, timeSlowMultiplier) {
+    const { enemyProjectiles } = scene;
+    if (!enemyProjectiles) return;
+    const shotConfig = getBossShotConfig(boss.bossType);
+    if (!shotConfig || !shotConfig.pattern) return;
+    if (!boss.lastPatternShot) boss.lastPatternShot = 0;
+    if (time - boss.lastPatternShot < shotConfig.interval) return;
+    boss.lastPatternShot = time;
+
+    const { sources, projectileType, speed, damage, pattern } = shotConfig;
+    const adjustedSpeed = speed * timeSlowMultiplier;
+
+    switch (pattern) {
+        case 'radial':
+            for (let i = 0; i < sources; i++) {
+                const angle = (Math.PI * 2 / sources) * i;
+                const bullet = enemyProjectiles.create(boss.x, boss.y, projectileType);
+                bullet.setDepth(FG_DEPTH_BASE + 4);
+                bullet.setScale(1.2);
+                bullet.setVelocity(Math.cos(angle) * adjustedSpeed, Math.sin(angle) * adjustedSpeed);
+                bullet.rotation = angle;
+                bullet.damage = damage;
+            }
+            break;
+        case 'spread': {
+            const player = getActivePlayer(scene);
+            if (!player) return;
+            const baseAngle = Phaser.Math.Angle.Between(boss.x, boss.y, player.x, player.y);
+            const spreadAngle = Math.PI / 6;
+            const count = Math.max(1, sources);
+            for (let i = 0; i < count; i++) {
+                const offset = count === 1 ? 0 : (spreadAngle * (i / (count - 1))) - (spreadAngle / 2);
+                const angle = baseAngle + offset;
+                const bullet = enemyProjectiles.create(boss.x, boss.y, projectileType);
+                bullet.setDepth(FG_DEPTH_BASE + 4);
+                bullet.setScale(1.2);
+                bullet.setVelocity(Math.cos(angle) * adjustedSpeed, Math.sin(angle) * adjustedSpeed);
+                bullet.rotation = angle;
+                bullet.damage = damage;
+            }
+            break;
+        }
+        case 'spiral':
+            if (!boss.spiralAngle) boss.spiralAngle = 0;
+            boss.spiralAngle += 0.2 * timeSlowMultiplier;
+            for (let i = 0; i < sources; i++) {
+                const angle = boss.spiralAngle + (Math.PI * 2 / sources) * i;
+                const bullet = enemyProjectiles.create(boss.x, boss.y, projectileType);
+                bullet.setDepth(FG_DEPTH_BASE + 4);
+                bullet.setScale(1.2);
+                bullet.setVelocity(Math.cos(angle) * adjustedSpeed, Math.sin(angle) * adjustedSpeed);
+                bullet.rotation = angle;
+                bullet.damage = damage;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
     // Circular orbit pattern around screen center
     if (!boss.orbitAngle) boss.orbitAngle = 0;
@@ -345,5 +405,7 @@ function updateBosses(scene, time, delta) {
                 updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier);
                 break;
         }
+
+        fireBossBulletPattern(scene, boss, time, timeSlowMultiplier);
     });
 }

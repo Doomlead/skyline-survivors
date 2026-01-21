@@ -249,6 +249,7 @@ function hitBoss(projectile, boss) {
     const scene = projectile.scene;
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
+    const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
     boss.hp -= applyBossDamage(boss, projectile.damage);
 
     // Visual hit feedback
@@ -259,6 +260,12 @@ function hitBoss(projectile, boss) {
         yoyo: true,
         ease: 'Linear'
     });
+    if (reduction > 0) {
+        boss.setTint(0xffaa00);
+        scene.time.delayedCall(50, () => {
+            if (boss && boss.active) boss.clearTint();
+        });
+    }
 
     if (audioManager) audioManager.playSound('hitEnemy');
     if (projectile.projectileType === 'homing' && particleManager) {

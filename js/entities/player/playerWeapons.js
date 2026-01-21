@@ -247,8 +247,12 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     proj.damage = damage;
     proj.isPiercing = piercing || playerState.powerUps.piercing > 0 || type === 'wave' || type === 'piercing';
     proj.birthTime = scene.time.now;
+    proj.spawnX = x;
+    proj.spawnY = y;
+    proj.maxRange = 1400;
     if (type === 'homing') {
         proj.homingTier = options.homingTier || 1;
+        proj.maxRange = 2000;
     }
     
     // Flip sprite if moving left
@@ -328,6 +332,22 @@ function updateProjectiles(scene) {
     projectiles.children.entries.forEach(proj => {
         wrapWorldBounds(proj);
         if (!proj.active || destroyIfGrounded(proj)) return;
+        if (proj.spawnX !== undefined && proj.spawnY !== undefined && proj.maxRange) {
+            const dx = proj.x - proj.spawnX;
+            const dy = proj.y - proj.spawnY;
+            const distTraveled = Math.hypot(dx, dy);
+            if (distTraveled > proj.maxRange) {
+                if (proj.projectileType !== 'homing') {
+                    proj.setAlpha(0.5);
+                    scene.time.delayedCall(50, () => {
+                        if (proj && proj.active) proj.destroy();
+                    });
+                } else {
+                    proj.destroy();
+                }
+                return;
+            }
+        }
         if (proj.projectileType === 'wave' && typeof proj.baseVx === 'number') {
             const elapsed = scene.time.now - (proj.waveStartTime || scene.time.now);
             const baseSpeed = Math.hypot(proj.baseVx, proj.baseVy) || 1;

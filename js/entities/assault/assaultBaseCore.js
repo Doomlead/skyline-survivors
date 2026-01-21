@@ -7,7 +7,7 @@ const ASSAULT_BASE_CONFIG = {
     shieldGeneratorHp: 18,
     turretHp: 16,
     shieldGeneratorCount: 2,
-    turretCount: 3,
+    turretCount: 5,
     defenderCount: 6,
     spawnInterval: 2200,
     turretFireInterval: 1300,
@@ -78,7 +78,7 @@ function setupAssaultObjective(scene) {
         createAssaultComponent(scene, shieldX, shieldY, 'assaultShieldGen', 'shield', ASSAULT_BASE_CONFIG.shieldGeneratorHp);
     }
 
-    const turretSpread = 170;
+    const turretSpread = 200;
     for (let i = 0; i < ASSAULT_BASE_CONFIG.turretCount; i++) {
         const offset = turretSpread * ((i / (ASSAULT_BASE_CONFIG.turretCount - 1)) - 0.5);
         const turretX = wrapValue(baseX + offset, CONFIG.worldWidth);
