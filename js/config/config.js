@@ -22,9 +22,9 @@ const POWERUP_DECAY_CONFIG = {
     assaultMultiplier: 0.75,
     paths: {
         laser: { tiers: { 1: 35000, 2: 40000 } },
-        multiShot: { tiers: { 1: 45000, 2: 55000, 3: 65000 } },
-        coverage: { tiers: { 1: 60000, 2: 75000 } },
-        missile: { tiers: { 1: 35000, 2: 40000, 3: 45000 } }
+        multiShot: { tiers: { 1: 60000, 2: 45000, 3: 30000 } },
+        coverage: { tiers: { 1: 60000, 2: 30000 } },
+        missile: { tiers: { 1: 45000, 2: 30000, 3: 15000 } }
     }
 };
 
