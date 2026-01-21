@@ -139,7 +139,7 @@ function collectPowerUp(playerSprite, powerUp) {
             refreshDecayTimer('missile', p.missile);
             break;
         case 'overdrive':
-            p.overdrive = 10000;
+            p.overdrive = 7000;
             playerState.fireRate = 50;
             break;
         case 'rear':
@@ -170,7 +170,7 @@ function collectPowerUp(playerSprite, powerUp) {
             }
             break;
         case 'speed':
-            p.speed = 10000;
+            p.speed = 25000;
             break;
         case 'magnet':
             p.magnet = 10000;
@@ -179,13 +179,13 @@ function collectPowerUp(playerSprite, powerUp) {
             gameState.smartBombs = Math.min(gameState.smartBombs + 1, 9);
             break;
         case 'double':
-            p.double = 10000;
+            p.double = 8000;
             break;
         case 'invincibility':
             p.invincibility = 5000;
             break;
         case 'timeSlow':
-            p.timeSlow = 8000;
+            p.timeSlow = 5000;
             break;
     }
 
