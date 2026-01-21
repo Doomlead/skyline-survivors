@@ -22,24 +22,24 @@
     "multiShot": {
       "role": "defense_coverage",
       "tiers": {
-        "1": { "label": "twin", "duration_seconds_defense": 45 },
-        "2": { "label": "spread", "duration_seconds_defense": 55 },
-        "3": { "label": "multi", "duration_seconds_defense": 65 }
+        "1": { "label": "twin", "duration_seconds_defense": 60 },
+        "2": { "label": "spread", "duration_seconds_defense": 45 },
+        "3": { "label": "multi", "duration_seconds_defense": 30 }
       }
     },
     "coverage": {
       "role": "defense_survivability",
       "tiers": {
         "1": { "label": "rear", "duration_seconds_defense": 60 },
-        "2": { "label": "rear_side", "duration_seconds_defense": 75 }
+        "2": { "label": "rear_side", "duration_seconds_defense": 30 }
       }
     },
     "missile": {
       "role": "assault_structure",
       "tiers": {
-        "1": { "label": "homing_basic", "duration_seconds_defense": 35 },
-        "2": { "label": "homing", "duration_seconds_defense": 40 },
-        "3": { "label": "homing_cluster", "duration_seconds_defense": 45 }
+        "1": { "label": "homing_basic", "duration_seconds_defense": 45 },
+        "2": { "label": "homing", "duration_seconds_defense": 30 },
+        "3": { "label": "homing_cluster", "duration_seconds_defense": 15 }
       }
     },
     "drone": {
@@ -48,19 +48,19 @@
     },
     "overdrive": {
       "role": "burst_damage",
-      "duration_seconds_defense": 20
+      "duration_seconds_defense": 7
     },
     "double": {
       "role": "burst_damage",
-      "duration_seconds_defense": 18
+      "duration_seconds_defense": 8
     },
     "invincibility": {
       "role": "survivability_peak",
-      "duration_seconds_defense": 10
+      "duration_seconds_defense": 5
     },
     "timeSlow": {
       "role": "tactical_control",
-      "duration_seconds_defense": 14
+      "duration_seconds_defense": 5
     },
     "speed": {
       "role": "assault_mobility",
@@ -68,7 +68,7 @@
     },
     "magnet": {
       "role": "pickup_chase",
-      "duration_seconds_defense": 30
+      "duration_seconds_defense": 10
     }
   }
 }
