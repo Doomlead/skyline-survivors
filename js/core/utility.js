@@ -182,6 +182,7 @@ function getResponsiveScale() {
     const touchControls = document.getElementById('touch-controls');
     const footer = document.getElementById('footer-note');
     const buildControls = document.getElementById('build-controls');
+    const gameContainer = document.getElementById('game-container');
 
     const getOuterHeight = (el) => {
         if (!el) return 0;
@@ -192,7 +193,8 @@ function getResponsiveScale() {
     };
 
     const reservedHeight = getOuterHeight(hud) + getOuterHeight(controls) + getOuterHeight(buildControls) + getOuterHeight(touchControls) + getOuterHeight(footer) + 16;
-    const maxWidth = Math.max(320, window.innerWidth - 24);
+    const containerWidth = gameContainer?.clientWidth || 0;
+    const maxWidth = Math.max(320, containerWidth || window.innerWidth - 24);
     let maxHeight = Math.max(180, window.innerHeight - reservedHeight);
 
     const baseWidth = CONFIG.width;
@@ -200,7 +202,8 @@ function getResponsiveScale() {
     const scaleX = maxWidth / baseWidth;
     const scaleY = maxHeight / baseHeight;
     const scale = Math.min(scaleX, scaleY);
-    const finalScale = isMobile && isLandscape ? scale : Math.min(scale, 1);
+    const maxScale = isMobile ? 1 : 1.35;
+    const finalScale = Math.min(scale, maxScale);
     return {
         width: Math.floor(baseWidth * finalScale),
         height: Math.floor(baseHeight * finalScale),
