@@ -253,7 +253,9 @@ function create() {
     this._restartHandler = () => {
         if (gameState.gameOver) {
             resetGameState();
-            this.scene.restart();
+            if (window.enterMainMenu) {
+                enterMainMenu();
+            }
         }
     };
     this.input.keyboard.on('keydown-R', this._restartHandler);
