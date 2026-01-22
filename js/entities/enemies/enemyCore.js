@@ -450,7 +450,7 @@ function destroyEnemy(scene, enemy) {
         onComplete: () => scorePopup.destroy()
     });
 
-    if (Math.random() < 0.2) spawnPowerUp(scene, enemy.x, enemy.y);
+    if (Math.random() < 0.12) spawnPowerUp(scene, enemy.x, enemy.y);
     enemy.destroy();
 
     if (enemy.isExtractionTarget && gameState.rebuildObjective?.active) {
