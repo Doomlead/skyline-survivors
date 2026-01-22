@@ -905,7 +905,7 @@ Inventory Power-Ups
 - ⬆️ Mothership assault: 10% → 35% (HP-based core phases + HUD support)
 - ⬆️ Campaign victory: 0% → 100% (campaign win/defeat overlays with stats)
 - ⬆️ Meta progression: 55% → 70% (between-mission loadouts + shop unlocks)
-
+- ✅ Balance pass: projectile range-based despawn, expanded assault base turrets, and boss damage reduction + bullet patterns
 ---
 
 ## Immediate Next Steps (Recommended Order)
