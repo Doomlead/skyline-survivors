@@ -63,6 +63,25 @@ Battleship Threat System: Roaming battleships don't just attack; they "kidnap" p
 Mothership Unlock: Only accessible when all districts are secured (none occupied). This acts as the ultimate "completionist" hook, using the Zeigarnik Effect (the brain's tendency to remember uncompleted tasks) to keep the player focused on the "Incomplete" map
 Dynamic Difficulty: More occupied districts = stronger battleship presence
 
+2.3.1. Shop & Loadouts (Current Implementation)
+Access Point: The Weapons Satellite / Orbit "shop" node feeds the between-mission shop UI, which is rendered in the build/district screens.
+Currency:
+- Meta Credits persist in local storage and carry across runs (default bank starts at 250).
+- Credits are earned after each mission from score, rescued humans, urgency state, success bonus, and reward multipliers.
+Shop Inventory Model:
+- The shop sells unlocks only; each purchase permanently unlocks a loadout option rather than direct stat boosts.
+- Owned items are tracked by unlock flags; affordability is based on current Meta Credits.
+Available Shop Items (unlock keys):
+- Escort Drone Contracts (drone_contract): unlocks an offense loadout that starts with a drone escort and side-shot coverage.
+- Overdrive Cache (overdrive_cache): unlocks an offense loadout that starts with overdrive charge + magnet.
+- Bomb Bay Expansion (bomb_bay): unlocks a defense loadout that adds +1 smart bomb and a small reward multiplier.
+- Shield Cache (shield_cache): unlocks a defense loadout that starts with ablative shields.
+- Hardened Hull Plating (hardened_hull): unlocks a defense loadout that grants +1 life and earlier extra-life thresholds.
+Loadout Behavior:
+- Two loadout slots (Offense, Defense). Only one option per slot can be equipped.
+- Locked loadouts show "Unlock via shop" and cannot be equipped until purchased.
+- Equipped loadouts apply their effects at mission start (e.g., drone escort, shields, bombs, overdrive buffer).
+
 3. Gameplay Overview
 3.1 Core Loop
 System Map: Assess planetary situation
