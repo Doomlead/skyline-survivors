@@ -668,34 +668,20 @@
                         </div>
                     </div>
                     
-                    <div class="district-panel-section">
-                        <h4>Equipped Loadout</h4>
-                        <div id="district-loadout-info">
-                            <div class="district-stat-row">
-                                <span class="district-stat-label">Offense</span>
-                                <span class="district-stat-value" id="district-offense-slot">Standard</span>
-                            </div>
-                            <div class="district-stat-row">
-                                <span class="district-stat-label">Defense</span>
-                                <span class="district-stat-value" id="district-defense-slot">Standard</span>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="district-panel-section" id="district-shop-panel">
-                        <h4>District Shop</h4>
-                        <p>Spend meta credits to unlock mission-start powerups and swap loadouts.</p>
+                        <h4>Supply Drop Terminal</h4>
+                        <p>Spend credits to purchase single-use supply drops for your next deployment.</p>
                         <div class="district-shop-group">
-                            <div class="district-shop-subhead">Offense Loadouts</div>
-                            <div id="district-shop-loadouts-offense"></div>
+                            <div class="district-shop-subhead">Available Supply Drops</div>
+                            <div id="district-shop-drops"></div>
                         </div>
                         <div class="district-shop-group">
-                            <div class="district-shop-subhead">Defense Loadouts</div>
-                            <div id="district-shop-loadouts-defense"></div>
+                            <div class="district-shop-subhead">Queued Drop</div>
+                            <div id="district-shop-pending"></div>
                         </div>
                         <div class="district-shop-group">
-                            <div class="district-shop-subhead">Unlockable Powerups</div>
-                            <div id="district-shop-items"></div>
+                            <div class="district-shop-subhead">Drop History</div>
+                            <div id="district-shop-history"></div>
                         </div>
                     </div>
                     
@@ -823,6 +809,7 @@
     <script src="js/ui/mainMenuScene.js"></script>
     <script src="js/ui/map/worldData.js"></script>
     <script src="js/ui/map/buildMapView.js"></script>
+    <script src="js/ui/supplyDropUnboxing.js"></script>
     <script src="js/ui/districtShop.js"></script>
     <script src="js/ui/districtLayoutManager.js"></script>
     <script src="js/ui/mission/buildMissionUi.js"></script>
