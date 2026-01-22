@@ -185,7 +185,7 @@ function destroyGarrisonDefender(scene, defender) {
         onComplete: () => scorePopup.destroy()
     });
 
-    if (Math.random() < 0.15) spawnPowerUp(scene, defender.x, defender.y);
+    if (Math.random() < 0.09) spawnPowerUp(scene, defender.x, defender.y);
     defender.destroy();
 }
 

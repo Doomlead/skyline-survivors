@@ -46,7 +46,7 @@ function rescueHuman(playerSprite, human) {
     });
     createExplosion(this, human.x, human.y, 0x00ff00);
     human.destroy();
-    if (Math.random() < 0.4) spawnPowerUp(this, human.x, human.y);
+    if (Math.random() < 0.24) spawnPowerUp(this, human.x, human.y);
 }
 
 function updateHumans(scene) {
