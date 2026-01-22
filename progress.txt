@@ -142,6 +142,55 @@
 - **Planetary Control Tracker:** Visual representation of friendly vs. occupied territories percentage
 - **Dynamic Difficulty:** More occupied districts = stronger battleship presence
 
+2.3.1: Shop System (Replaced "Shop & Loadouts")
+2.3.1. The "Supply Drop" Gacha Shop
+
+Access Point: The Weapons Satellite / Orbit node.
+Core Philosophy: Replaces the static purchase of permanent loadouts with a Variable Ratio Reinforcement model (Loot Boxes). Players spend persistent currency to gamble on "Supply Drops" that provide powerful advantages only for the immediate next deployment.
+
+Currency:
+
+    Meta Credits: Earned during gameplay. Used to purchase Supply Drops.
+    Bank Logic: Players must decide whether to hoard credits for a difficult Assault Mission or spend them now to survive a Threatened District.
+
+Inventory Model (Consumable "Hot Starts"):
+Items obtained from the shop are single-use and apply automatically to the very next mission the player launches. They do not persist if the ship is destroyed or the mission is completed.
+
+The Loot Boxes (Supply Pods):
+Players purchase "Encryption Keys" to unlock orbital drops.
+
+    Standard Drop (Cost: Low): High chance of Utility items, low chance of Weapon/Defense buffs.
+    Elite Drop (Cost: High): High chance of Weapon Tiers, guarantees at least one tier 2 power up.
+
+Loot Table (Run-Specific Power-ups):
+Instead of selecting a loadout, the box grants 1-3 random items from the following pool:
+
+    "Hot Start" Weaponry: Start the mission with Laser Tier 1, Spread Tier 1, or Homing Tier 1 (bypassing the early game build-up).
+    Ordnance Stockpile: Start with +2 Smart Bombs (above default).
+    Ablative Overlay: Start with a temporary shield layer.
+    Escort Lease: Start with a Drone companion (lasts until destroyed).
+    Mercenary Contract: A computer-controlled Ground Operative spawns at the start of the match (Assault Mission specific).
+
+New Section: 2.3.2. The Shop "Dopamine" Sequence
+
+Visual & Audio Design (The Hook):
+The purchase process is not instant; it is a dedicated "Unboxing Event" designed to spike player anticipation and gratification.
+
+    The Trigger: When the player buys a Supply Drop, the UI fades. A cinematic view shows an orbital satellite rotating into position.
+    The Build-Up (Anticipation):
+        Audio: A rising mechanical turbine whine (Shepard Tone) that increases in pitch and volume.
+        Visual: The satellite charges energy. The color of the energy (Blue, Purple, or Gold) teases the rarity of the item inside before it drops.
+    The Drop: The pod fires downward. The camera slams down to the hangar deck.
+    The Impact (The Rush):
+        The pod slams into the hangar floor with a screen shake and a heavy bass THUD.
+        Steam vents hiss loudly (white noise release).
+    The Reveal (Jackpot):
+        The pod panels explode outward.
+        Visual: High-intensity "God Rays" emit from the center. If the item is high-tier, the screen flashes white, then fades in with gold confetti particles and a slow-motion rotation of the Power-Up icon.
+        Audio: A high-frequency "Casino Win" chime or major chord strikes in sync with the visual flash.
+    Equip Feedback: The item flies from the pod into the player’s ship schematic, locking in with a satisfying metallic CLANK, confirming they are powered up for the next run.
+
+
 ---
 
 ### 2.4. Title Briefing & Main Menu

@@ -1,129 +1,70 @@
 // ------------------------
-// Meta progression and between-mission loadouts
+// Meta progression - Supply Drop Gacha System
 // ------------------------
 
-const META_STORAGE_KEY = 'skyline_meta_progression_v1';
+const META_STORAGE_KEY = 'skyline_meta_progression_v2';
 
-const SHOP_ITEMS = [
-    {
-        id: 'drone_contract',
-        name: 'Escort Drone Contracts',
-        cost: 140,
-        description: 'Unlocks an offensive loadout that deploys a drone escort and side-shot casings at mission start.',
-        grantsLoadout: 'drone-contract'
+// Loot tables for Supply Drops
+const LOOT_TABLES = {
+    standard: {
+        cost: 80,
+        name: 'Standard Drop',
+        description: 'Basic orbital supply drop. High chance of utility items.',
+        guaranteedItems: 1,
+        bonusChance: 0.3, // 30% chance for extra item
+        maxItems: 2,
+        weights: {
+            tier1: 60,  // Utility items
+            tier2: 35,  // Medium powerups
+            tier3: 5    // Rare powerups
+        }
     },
-    {
-        id: 'overdrive_cache',
-        name: 'Overdrive Cache',
-        cost: 150,
-        description: 'Unlocks an offensive loadout that begins with stored overdrive charge and magnetized pickups.',
-        grantsLoadout: 'overdrive-cache'
-    },
-    {
-        id: 'bomb_bay',
-        name: 'Bomb Bay Expansion',
-        cost: 120,
-        description: 'Unlocks a defensive loadout that adds an extra smart bomb for each deployment.',
-        grantsLoadout: 'bomb-bay'
-    },
-    {
-        id: 'shield_cache',
-        name: 'Shield Cache',
-        cost: 150,
-        description: 'Unlocks a defensive loadout that boots up with ablative shields online.',
-        grantsLoadout: 'shield-cache'
-    },
-    {
-        id: 'hardened_hull',
-        name: 'Hardened Hull Plating',
+    elite: {
         cost: 180,
-        description: 'Unlocks a defensive loadout that grants an extra life and earlier extra-life thresholds.',
-        grantsLoadout: 'hardened-hull'
+        name: 'Elite Drop',
+        description: 'Premium orbital supply drop. Guarantees powerful items.',
+        guaranteedItems: 2,
+        bonusChance: 0.5, // 50% chance for third item
+        maxItems: 3,
+        weights: {
+            tier1: 20,  // Utility items
+            tier2: 50,  // Medium powerups
+            tier3: 30   // Rare powerups
+        }
     }
-];
+};
 
-const LOADOUT_LIBRARY = {
-    offense: [
-        {
-            id: 'standard-offense',
-            name: 'Standard Arsenal',
-            description: 'Vanilla deployment. No meta modifiers applied.',
-            apply: () => ['Standard kit']
-        },
-        {
-            id: 'drone-contract',
-            name: 'Escort Fabricators',
-            unlockKey: 'drone_contract',
-            description: 'Start with a combat drone escort and lateral fire support.',
-            apply: (gameState, playerState) => {
-                playerState.powerUps.drone = Math.max(playerState.powerUps.drone, 1);
-                playerState.powerUps.coverage = Math.max(playerState.powerUps.coverage, 2);
-                return ['Drone escort online', 'Side-shot casings loaded'];
-            }
-        },
-        {
-            id: 'overdrive-cache',
-            name: 'Overdrive Cache',
-            unlockKey: 'overdrive_cache',
-            description: 'Begin with charged overdrive and magnetized pickups.',
-            apply: (gameState, playerState) => {
-                playerState.powerUps.overdrive = Math.max(playerState.powerUps.overdrive, 4000);
-                playerState.powerUps.magnet = Math.max(playerState.powerUps.magnet, 8000);
-                return ['Overdrive buffer primed', 'Magnetic pickup field active'];
-            }
-        }
+// Powerup tiers for loot drops
+const POWERUP_TIERS = {
+    tier1: [ // Utility / Common
+        { id: 'magnet', name: 'Power Magnet', duration: 10000 },
+        { id: 'speed', name: 'Speed Boost', duration: 25000 },
+        { id: 'bomb', name: 'Smart Bomb', quantity: 1 }
     ],
-    defense: [
-        {
-            id: 'standard-defense',
-            name: 'Standard Shielding',
-            description: 'Baseline lives and bomb stock.',
-            apply: () => ['Standard durability']
-        },
-        {
-            id: 'bomb-bay',
-            name: 'Bombardier Bay',
-            unlockKey: 'bomb_bay',
-            description: 'Launch with an extra smart bomb and a slight reward bump.',
-            apply: (gameState) => {
-                gameState.smartBombs += 1;
-                gameState.rewardMultiplier = (gameState.rewardMultiplier || 1) + 0.05;
-                return ['+1 smart bomb', 'Reward uplink boost'];
-            }
-        },
-        {
-            id: 'shield-cache',
-            name: 'Ablative Cache',
-            unlockKey: 'shield_cache',
-            description: 'Start with ablative shields active.',
-            apply: (gameState, playerState) => {
-                playerState.powerUps.shield = Math.max(playerState.powerUps.shield, 1);
-                return ['Ablative shields armed'];
-            }
-        },
-        {
-            id: 'hardened-hull',
-            name: 'Hardened Hull',
-            unlockKey: 'hardened_hull',
-            description: 'Gain an extra life and earlier extra-life thresholds.',
-            apply: (gameState) => {
-                gameState.lives += 1;
-                gameState.nextExtraLife = Math.max(5000, Math.floor(gameState.nextExtraLife * 0.9));
-                return ['+1 life', 'Extra-life threshold reduced'];
-            }
-        }
+    tier2: [ // Medium / Combat
+        { id: 'rapid', name: 'Rapid Fire', duration: 10000 },
+        { id: 'drone', name: 'Force Drone', tier: 1 },
+        { id: 'coverage', name: 'Side Shot', tier: 2 },
+        { id: 'shield', name: 'Ablative Shield', quantity: 1 },
+        { id: 'missile', name: 'Missile System', tier: 1 }
+    ],
+    tier3: [ // Rare / Powerful
+        { id: 'overdrive', name: 'Overdrive Cache', duration: 7000 },
+        { id: 'laser', name: 'Laser Upgrade', tier: 2 },
+        { id: 'multiShot', name: 'Multi-Shot', tier: 3 },
+        { id: 'double', name: 'Double Damage', duration: 8000 },
+        { id: 'invincibility', name: 'Invincibility', duration: 5000 },
+        { id: 'timeSlow', name: 'Time Slow', duration: 5000 }
     ]
 };
 
 const DEFAULT_META_STATE = {
     credits: 250,
-    unlocks: {},
-    equippedLoadout: {
-        offense: 'standard-offense',
-        defense: 'standard-defense'
-    },
+    pendingDrop: null, // Items to apply on next mission start
     runHistory: [],
-    lastRun: null
+    lastRun: null,
+    totalDropsPurchased: 0,
+    lootHistory: [] // Last 5 drops for "history" display
 };
 
 let metaState = null;
@@ -140,9 +81,9 @@ function loadMetaProgression() {
             metaState = {
                 ...metaState,
                 ...stored,
-                unlocks: stored.unlocks || {},
-                equippedLoadout: stored.equippedLoadout || DEFAULT_META_STATE.equippedLoadout,
-                runHistory: Array.isArray(stored.runHistory) ? stored.runHistory.slice(-8) : []
+                pendingDrop: stored.pendingDrop || null,
+                runHistory: Array.isArray(stored.runHistory) ? stored.runHistory.slice(-8) : [],
+                lootHistory: Array.isArray(stored.lootHistory) ? stored.lootHistory.slice(-5) : []
             };
         }
     } catch (err) {
@@ -164,9 +105,9 @@ function getMetaState() {
     const state = loadMetaProgression();
     return {
         ...state,
-        unlocks: { ...state.unlocks },
-        equippedLoadout: { ...state.equippedLoadout },
-        runHistory: [...state.runHistory]
+        pendingDrop: state.pendingDrop ? { ...state.pendingDrop } : null,
+        runHistory: [...state.runHistory],
+        lootHistory: [...state.lootHistory]
     };
 }
 
@@ -214,80 +155,194 @@ function recordRunOutcome(outcome) {
 
     state.lastRun = runEntry;
     state.runHistory = [...(state.runHistory || []), runEntry].slice(-8);
+    
+    // Clear pending drop after mission completion
+    state.pendingDrop = null;
+    
     persistMetaProgression();
     return runEntry;
 }
 
 function getShopInventory() {
     const state = loadMetaProgression();
-    return SHOP_ITEMS.map(item => ({
-        ...item,
-        owned: !!state.unlocks[item.id],
-        affordable: (state.credits || 0) >= item.cost
-    }));
+    return Object.keys(LOOT_TABLES).map(key => {
+        const drop = LOOT_TABLES[key];
+        return {
+            id: key,
+            ...drop,
+            affordable: (state.credits || 0) >= drop.cost
+        };
+    });
 }
 
-function purchaseShopItem(itemId) {
-    const state = loadMetaProgression();
-    const item = SHOP_ITEMS.find(i => i.id === itemId);
-    if (!item) return { success: false, reason: 'missing_item' };
-    if (state.unlocks[item.id]) return { success: false, reason: 'already_owned' };
-    if (!spendCredits(item.cost)) return { success: false, reason: 'insufficient_funds' };
-
-    state.unlocks[item.id] = true;
-    persistMetaProgression();
-    return { success: true, item };
+// Weighted random selection
+function selectRandomItem(tier) {
+    const items = POWERUP_TIERS[tier];
+    if (!items || items.length === 0) return null;
+    return items[Math.floor(Math.random() * items.length)];
 }
 
-function getLoadoutOptions() {
-    const state = loadMetaProgression();
-    const withMeta = (slot) => LOADOUT_LIBRARY[slot].map(option => ({
-        ...option,
-        unlocked: !option.unlockKey || !!state.unlocks[option.unlockKey],
-        equipped: state.equippedLoadout?.[slot] === option.id
-    }));
+// Roll loot from a supply drop
+function rollSupplyDrop(dropType) {
+    const config = LOOT_TABLES[dropType];
+    if (!config) return { success: false, reason: 'invalid_drop_type' };
+
+    const items = [];
+    let itemCount = config.guaranteedItems;
+    
+    // Check for bonus items
+    for (let i = 0; i < config.maxItems - config.guaranteedItems; i++) {
+        if (Math.random() < config.bonusChance) {
+            itemCount++;
+        }
+    }
+
+    // Roll each item based on tier weights
+    for (let i = 0; i < itemCount; i++) {
+        const roll = Math.random() * 100;
+        let tier = 'tier1';
+        
+        if (roll < config.weights.tier3) {
+            tier = 'tier3';
+        } else if (roll < config.weights.tier3 + config.weights.tier2) {
+            tier = 'tier2';
+        }
+        
+        const item = selectRandomItem(tier);
+        if (item) {
+            items.push({ ...item, tier });
+        }
+    }
 
     return {
-        offense: withMeta('offense'),
-        defense: withMeta('defense')
+        success: true,
+        items,
+        dropType,
+        timestamp: Date.now()
     };
 }
 
-function setEquippedLoadout(slot, optionId) {
+function purchaseSupplyDrop(dropType) {
     const state = loadMetaProgression();
-    const options = LOADOUT_LIBRARY[slot];
-    if (!options) return false;
-    const chosen = options.find(opt => opt.id === optionId);
-    if (!chosen) return false;
-    if (chosen.unlockKey && !state.unlocks[chosen.unlockKey]) return false;
-    state.equippedLoadout = {
-        ...(state.equippedLoadout || DEFAULT_META_STATE.equippedLoadout),
-        [slot]: optionId
-    };
-    persistMetaProgression();
-    return true;
+    const dropConfig = LOOT_TABLES[dropType];
+    
+    if (!dropConfig) return { success: false, reason: 'invalid_drop_type' };
+    if (!spendCredits(dropConfig.cost)) return { success: false, reason: 'insufficient_funds' };
+
+    const lootResult = rollSupplyDrop(dropType);
+    
+    if (lootResult.success) {
+        // Store items for next mission
+        state.pendingDrop = {
+            items: lootResult.items,
+            dropType: dropType,
+            purchaseTime: Date.now()
+        };
+        
+        // Add to loot history
+        state.lootHistory = [
+            ...state.lootHistory,
+            {
+                dropType,
+                items: lootResult.items.map(i => i.name),
+                timestamp: Date.now()
+            }
+        ].slice(-5);
+        
+        state.totalDropsPurchased = (state.totalDropsPurchased || 0) + 1;
+        persistMetaProgression();
+    }
+
+    return lootResult;
 }
 
-function applyLoadoutEffects(gameState, playerState) {
+function getPendingDrop() {
     const state = loadMetaProgression();
-    const summary = { offense: null, defense: null, bonuses: [] };
-    const applyForSlot = (slot) => {
-        const options = LOADOUT_LIBRARY[slot];
-        const equippedId = state.equippedLoadout?.[slot] || options[0].id;
-        let option = options.find(opt => opt.id === equippedId);
-        if (option?.unlockKey && !state.unlocks[option.unlockKey]) {
-            option = options.find(opt => !opt.unlockKey) || options[0];
+    return state.pendingDrop;
+}
+
+function applySupplyDropEffects(gameState, playerState) {
+    const state = loadMetaProgression();
+    const pending = state.pendingDrop;
+    
+    if (!pending || !pending.items || pending.items.length === 0) {
+        return { applied: false, bonuses: [] };
+    }
+
+    const bonuses = [];
+    
+    pending.items.forEach(item => {
+        switch (item.id) {
+            case 'laser':
+                playerState.powerUps.laser = Math.max(playerState.powerUps.laser || 0, item.tier || 1);
+                bonuses.push(`Laser Upgrade T${item.tier}`);
+                break;
+            case 'drone':
+                playerState.powerUps.drone = Math.max(playerState.powerUps.drone || 0, item.tier || 1);
+                bonuses.push(`Force Drone x${item.tier}`);
+                break;
+            case 'shield':
+                playerState.powerUps.shield = 1;
+                bonuses.push('Ablative Shield');
+                break;
+            case 'missile':
+                playerState.powerUps.missile = Math.max(playerState.powerUps.missile || 0, item.tier || 1);
+                bonuses.push(`Missile System T${item.tier}`);
+                break;
+            case 'overdrive':
+                playerState.powerUps.overdrive = item.duration || 7000;
+                bonuses.push('Overdrive Cache');
+                break;
+            case 'coverage':
+                playerState.powerUps.coverage = Math.max(playerState.powerUps.coverage || 0, item.tier || 1);
+                bonuses.push('Side/Rear Shot');
+                break;
+            case 'rapid':
+                playerState.powerUps.rapid = item.duration || 10000;
+                bonuses.push('Rapid Fire');
+                break;
+            case 'multiShot':
+                playerState.powerUps.multiShot = Math.max(playerState.powerUps.multiShot || 0, item.tier || 1);
+                bonuses.push(`Multi-Shot T${item.tier}`);
+                break;
+            case 'speed':
+                playerState.powerUps.speed = item.duration || 25000;
+                bonuses.push('Speed Boost');
+                break;
+            case 'magnet':
+                playerState.powerUps.magnet = item.duration || 10000;
+                bonuses.push('Power Magnet');
+                break;
+            case 'bomb':
+                gameState.smartBombs = Math.min(gameState.smartBombs + (item.quantity || 1), 9);
+                bonuses.push(`+${item.quantity || 1} Smart Bomb`);
+                break;
+            case 'double':
+                playerState.powerUps.double = item.duration || 8000;
+                bonuses.push('Double Damage');
+                break;
+            case 'invincibility':
+                playerState.powerUps.invincibility = item.duration || 5000;
+                bonuses.push('Invincibility');
+                break;
+            case 'timeSlow':
+                playerState.powerUps.timeSlow = item.duration || 5000;
+                bonuses.push('Time Slow');
+                break;
         }
-        if (!option) return;
-        const result = option.apply?.(gameState, playerState) || [];
-        summary[slot] = option.name;
-        summary.bonuses.push(...result);
-    };
+    });
 
-    applyForSlot('offense');
-    applyForSlot('defense');
+    return {
+        applied: true,
+        bonuses,
+        dropType: pending.dropType
+    };
+}
+
+function clearPendingDrop() {
+    const state = loadMetaProgression();
+    state.pendingDrop = null;
     persistMetaProgression();
-    return summary;
 }
 
 function getLastRunSummary() {
@@ -295,14 +350,22 @@ function getLastRunSummary() {
     return state.lastRun;
 }
 
+function getLootHistory() {
+    const state = loadMetaProgression();
+    return state.lootHistory || [];
+}
+
 window.metaProgression = {
     getMetaState,
     addCredits,
-    purchaseShopItem,
+    purchaseSupplyDrop,
     getShopInventory,
-    getLoadoutOptions,
-    setEquippedLoadout,
-    applyLoadoutEffects,
+    applySupplyDropEffects,
+    getPendingDrop,
+    clearPendingDrop,
     recordRunOutcome,
-    getLastRunSummary
+    getLastRunSummary,
+    getLootHistory,
+    LOOT_TABLES,
+    POWERUP_TIERS
 };

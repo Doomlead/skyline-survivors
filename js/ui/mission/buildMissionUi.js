@@ -16,12 +16,13 @@ class BuildMissionUi {
         this.onModeSelected = null;
         this.shopPanel = null;
         this.creditsText = null;
-        this.loadoutButtons = { offense: [], defense: [] };
-        this.shopItemRows = [];
+        this.dropButtons = [];
+        this.pendingItemsContainer = null;
+        this.historyContainer = null;
     }
 
     createOverlay(width) {
-        const header = this.scene.add.text(width / 2, 24, 'District + Build Map', {
+        const header = this.scene.add.text(width / 2, 24, 'District + Supply Drop', {
             fontFamily: 'Orbitron',
             fontSize: '18px',
             color: '#8bffff',
@@ -86,8 +87,8 @@ class BuildMissionUi {
         const hasTimedNodes = (typeof missionPlanner !== 'undefined' && missionPlanner.hasMapTimerData()) && mapNodes.some(
             node => (node.state?.timer || 0) > 0);
         const overlayDescription = hasTimedNodes
-            ? 'Click a glowing sector to select it. Drag to rotate the globe.\nNodes with active timers will destabilize—stabilize the most critical threats first.\nChoose a mode below to deploy to the selected district.'
-            : 'Click a glowing sector to select it. Drag to rotate the globe.\nThis map is static for now—select a sector and prep a deployment when ready.\nChoose a mode below to deploy to the selected district.';
+            ? 'Click a glowing sector to select it. Drag to rotate the globe.\nNodes with active timers will destabilize—stabilize the most critical threats first.\nPurchase Supply Drops below to power up your next deployment.'
+            : 'Click a glowing sector to select it. Drag to rotate the globe.\nThis map is static for now—select a sector and prep a deployment when ready.\nPurchase Supply Drops below to power up your next deployment.';
 
         this.detailBody = this.scene.add.text(width / 2 - 260, 94, overlayDescription, {
             fontFamily: 'Orbitron',
@@ -109,7 +110,7 @@ class BuildMissionUi {
         const inner = this.scene.add.rectangle(panelX, panelY, panelWidth - 16, panelHeight - 16, 0x07162b, 0.9);
         inner.setStrokeStyle(2, 0x0a85ff, 0.3);
 
-        this.missionHeader = this.scene.add.text(panelX, panelY - panelHeight / 2 + 18, 'Mission & Build Routing', {
+        this.missionHeader = this.scene.add.text(panelX, panelY - panelHeight / 2 + 18, 'Mission Routing', {
             fontFamily: 'Orbitron',
             fontSize: '14px',
             color: '#c7e3ff'
@@ -152,7 +153,7 @@ class BuildMissionUi {
 
     createBuildShopPanel(width, height) {
         const panelWidth = width * 0.46;
-        const panelHeight = 230;
+        const panelHeight = 280;
         const panelX = width * 0.78;
         const panelY = height - panelHeight / 2 - 12;
 
@@ -160,7 +161,7 @@ class BuildMissionUi {
         this.shopPanel.setStrokeStyle(2, 0x0ea5e9, 0.6);
         this.shopPanel.setDepth(4);
 
-        this.scene.add.text(panelX - panelWidth / 2 + 12, panelY - panelHeight / 2 + 8, 'Between-Mission Build & Shop', {
+        this.scene.add.text(panelX - panelWidth / 2 + 12, panelY - panelHeight / 2 + 8, 'Supply Drop Shop', {
             fontFamily: 'Orbitron',
             fontSize: '13px',
             color: '#8bffff'
@@ -172,79 +173,83 @@ class BuildMissionUi {
             color: '#fef08a'
         }).setOrigin(1, 0);
 
-        const loadoutY = panelY - 25;
-        this.createLoadoutColumn(panelX - panelWidth * 0.22, loadoutY, 'offense', 'Offense Loadout');
-        this.createLoadoutColumn(panelX + panelWidth * 0.08, loadoutY, 'defense', 'Defense Loadout');
-
-        const shopStartY = panelY + 40;
-        this.scene.add.text(panelX - panelWidth / 2 + 12, shopStartY - 22, 'Shop Unlocks (Orbit Node)', {
+        // Supply Drop Options
+        const dropY = panelY - 70;
+        this.scene.add.text(panelX - panelWidth / 2 + 12, dropY - 18, 'Purchase Encryption Keys', {
             fontFamily: 'Orbitron',
             fontSize: '11px',
             color: '#9fb8d1'
         }).setOrigin(0, 0.5);
 
         const inventory = window.metaProgression?.getShopInventory?.() || [];
-        const rowWidth = panelWidth - 30;
-        this.shopItemRows = inventory.map((item, idx) => {
-            const y = shopStartY + idx * 34;
-            const row = this.scene.add.rectangle(panelX, y, rowWidth, 30, 0x0f172a, 0.85)
-                .setStrokeStyle(1.5, 0x1dcaff, 0.35)
-                .setInteractive({ useHandCursor: true });
-            const nameText = this.scene.add.text(panelX - rowWidth / 2 + 10, y - 6, item.name, {
-                fontFamily: 'Orbitron',
-                fontSize: '11px',
-                color: '#dceefb'
-            }).setOrigin(0, 0.5);
-            const stateText = this.scene.add.text(panelX - rowWidth / 2 + 10, y + 8, '', {
-                fontFamily: 'Orbitron',
-                fontSize: '10px',
-                color: '#94a3b8'
-            }).setOrigin(0, 0.5);
-
-            row.on('pointerdown', () => this.purchaseItem(item.id));
-            return { id: item.id, row, nameText, stateText };
+        this.dropButtons = inventory.map((drop, idx) => {
+            const y = dropY + idx * 50;
+            return this.createSupplyDropButton(panelX, y, drop, panelWidth);
         });
-    }
 
-    createLoadoutColumn(x, y, slot, title) {
-        this.scene.add.text(x - 90, y - 18, title, {
+        // Pending Items Section
+        const pendingY = panelY + 40;
+        this.scene.add.text(panelX - panelWidth / 2 + 12, pendingY - 22, 'Queued for Next Mission', {
             fontFamily: 'Orbitron',
             fontSize: '11px',
             color: '#9fb8d1'
         }).setOrigin(0, 0.5);
 
-        const options = window.metaProgression?.getLoadoutOptions?.()?.[slot] || [];
-        const baseOptions = options.length ? options : [
-            { id: `${slot}-base`, name: 'Standard', description: 'Standard issue', unlocked: true, equipped: true }
-        ];
-        this.loadoutButtons[slot] = baseOptions.map((option, idx) => {
-            const btnY = y + idx * 30;
-            const rect = this.scene.add.rectangle(x, btnY, 200, 26, 0x0f172a, 0.85)
-                .setStrokeStyle(1.5, 0x22d3ee, 0.55)
-                .setInteractive({ useHandCursor: true });
-            const label = this.scene.add.text(x - 92, btnY, option.name, {
-                fontFamily: 'Orbitron',
-                fontSize: '11px',
-                color: '#dceefb'
-            }).setOrigin(0, 0.5);
-            const desc = this.scene.add.text(x + 10, btnY, option.description || '', {
-                fontFamily: 'Orbitron',
-                fontSize: '10px',
-                color: '#94a3b8'
-            }).setOrigin(0, 0.5);
+        this.pendingItemsContainer = this.scene.add.container(panelX, pendingY);
+        this.pendingItemsContainer.setDepth(5);
 
-            rect.on('pointerdown', () => {
-                if (window.metaProgression?.setEquippedLoadout && option.unlocked !== false) {
-                    const changed = metaProgression.setEquippedLoadout(slot, option.id);
-                    if (changed) {
-                        this.refreshBuildShopPanel();
-                        this.highlightShopPanel();
-                    }
-                }
-            });
+        // History hint
+        this.scene.add.text(panelX, panelY + panelHeight / 2 - 10, '💡 Items are single-use consumables', {
+            fontFamily: 'Orbitron',
+            fontSize: '9px',
+            color: '#64748b',
+            align: 'center'
+        }).setOrigin(0.5);
+    }
 
-            return { slot, optionId: option.id, rect, label, desc };
+    createSupplyDropButton(x, y, drop, panelWidth) {
+        const rowWidth = panelWidth - 24;
+        
+        const bg = this.scene.add.rectangle(x, y, rowWidth, 42, 0x0f172a, 0.9);
+        bg.setStrokeStyle(2, drop.id === 'elite' ? 0xa855f7 : 0x22d3ee, 0.6);
+        bg.setDepth(5);
+
+        const name = this.scene.add.text(x - rowWidth / 2 + 10, y - 8, drop.name, {
+            fontFamily: 'Orbitron',
+            fontSize: '11px',
+            color: '#dceefb'
         });
+        name.setOrigin(0, 0.5);
+        name.setDepth(6);
+
+        const desc = this.scene.add.text(x - rowWidth / 2 + 10, y + 8, drop.description, {
+            fontFamily: 'Orbitron',
+            fontSize: '9px',
+            color: '#94a3b8'
+        });
+        desc.setOrigin(0, 0.5);
+        desc.setDepth(6);
+
+        const button = this.scene.add.text(x + rowWidth / 2 - 10, y, `${drop.cost}`, {
+            fontFamily: 'Orbitron',
+            fontSize: '12px',
+            color: '#fef08a',
+            backgroundColor: '#1e293b',
+            padding: { x: 12, y: 6 }
+        });
+        button.setOrigin(1, 0.5);
+        button.setDepth(6);
+        button.setInteractive({ useHandCursor: true });
+
+        button.on('pointerover', () => {
+            this.scene.tweens.add({ targets: bg, alpha: 1, duration: 120 });
+        });
+        button.on('pointerout', () => {
+            this.scene.tweens.add({ targets: bg, alpha: 0.9, duration: 120 });
+        });
+        button.on('pointerdown', () => this.purchaseDrop(drop.id));
+
+        return { id: drop.id, bg, name, desc, button };
     }
 
     createMissionButton(x, y, label, strokeColor, handler) {
@@ -371,48 +376,78 @@ class BuildMissionUi {
     refreshBuildShopPanel() {
         if (!this.shopPanel) return;
         const meta = window.metaProgression?.getMetaState?.() || { credits: 0 };
-        const options = window.metaProgression?.getLoadoutOptions?.() || { offense: [], defense: [] };
         const inventory = window.metaProgression?.getShopInventory?.() || [];
+        const pending = window.metaProgression?.getPendingDrop?.();
 
+        // Update credits
         if (this.creditsText) {
             this.creditsText.setText(`Credits: ${meta.credits}`);
         }
 
-        ['offense', 'defense'].forEach(slot => {
-            const slotOptions = options[slot] || [];
-            this.loadoutButtons[slot]?.forEach(btn => {
-                const option = slotOptions.find(o => o.id === btn.optionId);
-                const unlocked = option ? option.unlocked !== false : true;
-                const equipped = option ? !!option.equipped : btn.optionId.includes('base');
-                btn.rect.setStrokeStyle(1.5, equipped ? 0x8b5cf6 : 0x22d3ee, unlocked ? 0.9 : 0.3);
-                btn.rect.setFillStyle(0x0f172a, unlocked ? 0.9 : 0.4);
-                btn.label.setColor(unlocked ? '#dceefb' : '#475569');
-                btn.desc.setColor(unlocked ? '#94a3b8' : '#475569');
-                if (unlocked && !btn.rect.input?.enabled) btn.rect.setInteractive({ useHandCursor: true });
-                if (!unlocked && btn.rect.input?.enabled) btn.rect.disableInteractive();
-                if (option && option.description) {
-                    btn.desc.setText(option.description);
-                }
-            });
+        // Update drop buttons
+        this.dropButtons.forEach(btn => {
+            const drop = inventory.find(d => d.id === btn.id);
+            if (!drop) return;
+            
+            const affordable = drop.affordable;
+            btn.button.setAlpha(affordable ? 1 : 0.5);
+            btn.bg.setAlpha(affordable ? 0.9 : 0.6);
+            
+            if (!affordable) {
+                btn.button.disableInteractive();
+            } else if (!btn.button.input?.enabled) {
+                btn.button.setInteractive({ useHandCursor: true });
+            }
         });
 
-        this.shopItemRows.forEach(row => {
-            const item = inventory.find(i => i.id === row.id);
-            if (!item) return;
-            const owned = !!item.owned;
-            const affordable = !!item.affordable;
-            const stateLabel = owned
-                ? 'Unlocked'
-                : affordable
-                    ? `Purchase: ${item.cost} credits`
-                    : `Need ${item.cost - (meta.credits || 0)} more credits`;
-            row.stateText.setText(stateLabel);
-            row.stateText.setColor(owned ? '#a7f3d0' : affordable ? '#fef3c7' : '#fca5a5');
-            row.row.setStrokeStyle(1.5, owned ? 0x22c55e : 0x1dcaff, owned ? 0.6 : 0.4);
-            row.row.setFillStyle(0x0f172a, owned ? 0.6 : 0.85);
-            if (owned && row.row.input?.enabled) row.row.disableInteractive();
-            if (!owned && !row.row.input?.enabled) row.row.setInteractive({ useHandCursor: true });
+        // Update pending items
+        this.renderPendingItems(pending);
+    }
+
+    renderPendingItems(pending) {
+        if (!this.pendingItemsContainer) return;
+        this.pendingItemsContainer.removeAll(true);
+
+        if (!pending || !pending.items || pending.items.length === 0) {
+            const emptyText = this.scene.add.text(0, 0, 'No items queued\nPurchase a drop above', {
+                fontFamily: 'Orbitron',
+                fontSize: '10px',
+                color: '#64748b',
+                align: 'center'
+            });
+            emptyText.setOrigin(0.5);
+            this.pendingItemsContainer.add(emptyText);
+            return;
+        }
+
+        pending.items.forEach((item, idx) => {
+            const y = idx * 20 - (pending.items.length - 1) * 10;
+            
+            const itemText = this.scene.add.text(-140, y, `• ${item.name}`, {
+                fontFamily: 'Orbitron',
+                fontSize: '10px',
+                color: '#dceefb'
+            });
+            itemText.setOrigin(0, 0.5);
+
+            const tierColor = this.getTierColor(item.tier);
+            const badge = this.scene.add.text(140, y, this.getTierLabel(item.tier), {
+                fontFamily: 'Orbitron',
+                fontSize: '8px',
+                color: tierColor
+            });
+            badge.setOrigin(1, 0.5);
+
+            this.pendingItemsContainer.add([itemText, badge]);
         });
+    }
+
+    getTierColor(tier) {
+        return tier === 'tier3' ? '#a855f7' : tier === 'tier2' ? '#22d3ee' : '#94a3b8';
+    }
+
+    getTierLabel(tier) {
+        return tier === 'tier3' ? 'RARE' : tier === 'tier2' ? 'COMBAT' : 'UTIL';
     }
 
     highlightShopPanel() {
@@ -420,28 +455,39 @@ class BuildMissionUi {
         this.scene.tweens.add({
             targets: this.shopPanel,
             scale: { from: 1, to: 1.02 },
-            alpha: { from: 0.9, to: 1 },
+            alpha: { from: 0.8, to: 1 },
             duration: 180,
             yoyo: true
         });
     }
 
-    purchaseItem(itemId) {
-        if (!window.metaProgression?.purchaseShopItem) return;
-        const result = metaProgression.purchaseShopItem(itemId);
+    purchaseDrop(dropId) {
+        if (!window.metaProgression?.purchaseSupplyDrop) return;
+        
+        const result = window.metaProgression.purchaseSupplyDrop(dropId);
+        
         if (result.success) {
-            this.updateDetail('Shop Acquisition', `${result.item.name} unlocked. Equip its loadout on the left.`);
-            this.highlightShopPanel();
+            // Trigger unboxing sequence
+            if (window.SupplyDropUnboxing && this.scene) {
+                window.SupplyDropUnboxing.setScene(this.scene);
+                window.SupplyDropUnboxing.playUnboxingSequence(result, () => {
+                    this.refreshBuildShopPanel();
+                    this.highlightShopPanel();
+                });
+            } else {
+                this.refreshBuildShopPanel();
+                this.highlightShopPanel();
+            }
         } else if (result.reason === 'insufficient_funds') {
+            // Flash credits
             if (this.creditsText) {
                 this.scene.tweens.add({
                     targets: this.creditsText,
-                    scale: { from: 1, to: 1.08 },
+                    scale: { from: 1, to: 1.15 },
                     duration: 140,
                     yoyo: true
                 });
             }
         }
-        this.refreshBuildShopPanel();
     }
 }
