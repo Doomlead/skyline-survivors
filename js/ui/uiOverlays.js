@@ -21,9 +21,17 @@ function gameOver(scene) {
     showMissionDefeat(scene, metaResult);
 }
 
+function getOverlayScale(scene) {
+    const cam = scene.cameras.main;
+    const scale = cam && cam.height ? cam.height / 700 : 1;
+    return Math.min(1, Math.max(0.7, scale));
+}
+
 function showMissionDefeat(scene, metaResult) {
-    const centerX = scene.cameras.main.width / 2;
-    const centerY = scene.cameras.main.height / 2;
+    const cam = scene.cameras.main;
+    const centerX = cam.width / 2;
+    const centerY = cam.height / 2;
+    const overlayScale = getOverlayScale(scene);
     const isAssault = gameState.mode === 'assault';
     const bannerText = isAssault ? 'ASSAULT UNSUCCESSFUL' : 'DISTRICT LOST';
     const bannerColor = isAssault ? '#f97316' : '#ef4444';
@@ -31,15 +39,15 @@ function showMissionDefeat(scene, metaResult) {
     const metaCredits = metaResult?.earnedCredits || 0;
     const metaBank = metaProgression?.getMetaState?.().credits || 0;
 
-    scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.7)
+    scene.add.rectangle(centerX, centerY, cam.width, cam.height, 0x000000, 0.7)
         .setScrollFactor(0).setDepth(990);
 
-    scene.add.text(centerX, centerY - 140, bannerText, {
-        fontSize: '60px',
+    scene.add.text(centerX, centerY - 140 * overlayScale, bannerText, {
+        fontSize: `${Math.round(60 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: bannerColor,
         stroke: '#000000',
-        strokeThickness: 8
+        strokeThickness: Math.round(8 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
     const statsLines = [];
@@ -50,22 +58,22 @@ function showMissionDefeat(scene, metaResult) {
     statsLines.push(`Score: ${gameState.score}`);
     statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
 
-    scene.add.text(centerX, centerY - 20, statsLines.join('\n'), {
-        fontSize: '26px',
+    scene.add.text(centerX, centerY - 20 * overlayScale, statsLines.join('\n'), {
+        fontSize: `${Math.round(26 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#e2e8f0',
         align: 'center',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
-    const buttonY = centerY + 150;
+    const buttonY = centerY + 150 * overlayScale;
     const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
-        fontSize: '22px',
+        fontSize: `${Math.round(22 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#facc15',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
     const handleReturn = () => {
@@ -98,19 +106,21 @@ function winGame(scene) {
 }
 
 function showCampaignDefeat(scene, metaResult) {
-    const centerX = scene.cameras.main.width / 2;
-    const centerY = scene.cameras.main.height / 2;
+    const cam = scene.cameras.main;
+    const centerX = cam.width / 2;
+    const centerY = cam.height / 2;
+    const overlayScale = getOverlayScale(scene);
     const stats = getCampaignVictoryStats();
 
-    scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.78)
+    scene.add.rectangle(centerX, centerY, cam.width, cam.height, 0x000000, 0.78)
         .setScrollFactor(0).setDepth(990);
 
-    scene.add.text(centerX, centerY - 160, 'PLANET REMAINS SUBJUGATED', {
-        fontSize: '54px',
+    scene.add.text(centerX, centerY - 160 * overlayScale, 'PLANET REMAINS SUBJUGATED', {
+        fontSize: `${Math.round(54 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#ef4444',
         stroke: '#000000',
-        strokeThickness: 8
+        strokeThickness: Math.round(8 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
     const statsText = [
@@ -119,23 +129,23 @@ function showCampaignDefeat(scene, metaResult) {
         `Score: ${stats.score}`
     ].join('\n');
 
-    scene.add.text(centerX, centerY - 10, statsText, {
-        fontSize: '26px',
+    scene.add.text(centerX, centerY - 10 * overlayScale, statsText, {
+        fontSize: `${Math.round(26 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#e2e8f0',
         align: 'center',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
-    const buttonY = centerY + 140;
+    const buttonY = centerY + 140 * overlayScale;
 
     const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
-        fontSize: '22px',
+        fontSize: `${Math.round(22 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#facc15',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
     const handleReturn = () => {
@@ -150,8 +160,10 @@ function showCampaignDefeat(scene, metaResult) {
 }
 
 function showMissionVictory(scene, metaResult) {
-    const centerX = scene.cameras.main.width / 2;
-    const centerY = scene.cameras.main.height / 2;
+    const cam = scene.cameras.main;
+    const centerX = cam.width / 2;
+    const centerY = cam.height / 2;
+    const overlayScale = getOverlayScale(scene);
     const isAssault = gameState.mode === 'assault';
     const bannerText = isAssault ? 'ASSAULT SUCCESSFUL' : 'DISTRICT DEFENDED';
     const bannerColor = isAssault ? '#38bdf8' : '#4ade80';
@@ -159,15 +171,15 @@ function showMissionVictory(scene, metaResult) {
     const metaCredits = metaResult?.earnedCredits || 0;
     const metaBank = metaProgression?.getMetaState?.().credits || 0;
 
-    scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.75)
+    scene.add.rectangle(centerX, centerY, cam.width, cam.height, 0x000000, 0.75)
         .setScrollFactor(0).setDepth(990);
 
-    scene.add.text(centerX, centerY - 140, bannerText, {
-        fontSize: '60px',
+    scene.add.text(centerX, centerY - 140 * overlayScale, bannerText, {
+        fontSize: `${Math.round(60 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: bannerColor,
         stroke: '#000000',
-        strokeThickness: 8
+        strokeThickness: Math.round(8 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
     const statsLines = [];
@@ -178,22 +190,22 @@ function showMissionVictory(scene, metaResult) {
     statsLines.push(`Score: ${gameState.score}`);
     statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
 
-    scene.add.text(centerX, centerY - 20, statsLines.join('\n'), {
-        fontSize: '26px',
+    scene.add.text(centerX, centerY - 20 * overlayScale, statsLines.join('\n'), {
+        fontSize: `${Math.round(26 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#e2e8f0',
         align: 'center',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
-    const buttonY = centerY + 150;
+    const buttonY = centerY + 150 * overlayScale;
     const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
-        fontSize: '22px',
+        fontSize: `${Math.round(22 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#facc15',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
     const handleReturn = () => {
@@ -208,8 +220,10 @@ function showMissionVictory(scene, metaResult) {
 }
 
 function showMissionVictory(scene, metaResult) {
-    const centerX = scene.cameras.main.width / 2;
-    const centerY = scene.cameras.main.height / 2;
+    const cam = scene.cameras.main;
+    const centerX = cam.width / 2;
+    const centerY = cam.height / 2;
+    const overlayScale = getOverlayScale(scene);
     const isAssault = gameState.mode === 'assault';
     const bannerText = isAssault ? 'ASSAULT SUCCESSFUL' : 'DISTRICT DEFENDED';
     const bannerColor = isAssault ? '#38bdf8' : '#4ade80';
@@ -217,15 +231,15 @@ function showMissionVictory(scene, metaResult) {
     const metaCredits = metaResult?.earnedCredits || 0;
     const metaBank = metaProgression?.getMetaState?.().credits || 0;
 
-    scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.75)
+    scene.add.rectangle(centerX, centerY, cam.width, cam.height, 0x000000, 0.75)
         .setScrollFactor(0).setDepth(990);
 
-    scene.add.text(centerX, centerY - 140, bannerText, {
-        fontSize: '60px',
+    scene.add.text(centerX, centerY - 140 * overlayScale, bannerText, {
+        fontSize: `${Math.round(60 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: bannerColor,
         stroke: '#000000',
-        strokeThickness: 8
+        strokeThickness: Math.round(8 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
     const statsLines = [];
@@ -236,22 +250,22 @@ function showMissionVictory(scene, metaResult) {
     statsLines.push(`Score: ${gameState.score}`);
     statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
 
-    scene.add.text(centerX, centerY - 20, statsLines.join('\n'), {
-        fontSize: '26px',
+    scene.add.text(centerX, centerY - 20 * overlayScale, statsLines.join('\n'), {
+        fontSize: `${Math.round(26 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#e2e8f0',
         align: 'center',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
-    const buttonY = centerY + 150;
+    const buttonY = centerY + 150 * overlayScale;
     const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
-        fontSize: '22px',
+        fontSize: `${Math.round(22 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#facc15',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
     const handleReturn = () => {
@@ -289,19 +303,21 @@ function formatCampaignTime(ms = 0) {
 }
 
 function showCampaignVictory(scene, metaResult) {
-    const centerX = scene.cameras.main.width / 2;
-    const centerY = scene.cameras.main.height / 2;
+    const cam = scene.cameras.main;
+    const centerX = cam.width / 2;
+    const centerY = cam.height / 2;
+    const overlayScale = getOverlayScale(scene);
     const stats = getCampaignVictoryStats();
 
-    scene.add.rectangle(centerX, centerY, CONFIG.width, CONFIG.height, 0x000000, 0.78)
+    scene.add.rectangle(centerX, centerY, cam.width, cam.height, 0x000000, 0.78)
         .setScrollFactor(0).setDepth(990);
 
-    scene.add.text(centerX, centerY - 160, 'PLANET LIBERATED', {
-        fontSize: '58px',
+    scene.add.text(centerX, centerY - 160 * overlayScale, 'PLANET LIBERATED', {
+        fontSize: `${Math.round(58 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#facc15',
         stroke: '#000000',
-        strokeThickness: 8
+        strokeThickness: Math.round(8 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
     const statsText = [
@@ -311,31 +327,31 @@ function showCampaignVictory(scene, metaResult) {
         `Meta Credits: +${metaResult?.earnedCredits || 0} (Bank: ${metaProgression?.getMetaState?.().credits || 0})`
     ].join('\n');
 
-    scene.add.text(centerX, centerY - 10, statsText, {
-        fontSize: '26px',
+    scene.add.text(centerX, centerY - 10 * overlayScale, statsText, {
+        fontSize: `${Math.round(26 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#e2e8f0',
         align: 'center',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
-    const buttonY = centerY + 140;
+    const buttonY = centerY + 140 * overlayScale;
 
     const newCampaignButton = scene.add.text(centerX - 170, buttonY, 'NEW CAMPAIGN', {
-        fontSize: '22px',
+        fontSize: `${Math.round(22 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#22c55e',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
     const menuButton = scene.add.text(centerX + 170, buttonY, 'RETURN TO MENU', {
-        fontSize: '22px',
+        fontSize: `${Math.round(22 * overlayScale)}px`,
         fontFamily: 'Orbitron',
         color: '#38bdf8',
         stroke: '#000000',
-        strokeThickness: 4
+        strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
     newCampaignButton.on('pointerdown', () => {
