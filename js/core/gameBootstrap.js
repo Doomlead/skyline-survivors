@@ -49,7 +49,25 @@ function applyResponsiveResize(options = {}) {
         return; 
     }
 
-    // 3. Normal Game Mode Logic:
+    // 3. Fullscreen Gameplay Logic:
+    if (document.body.classList.contains('fullscreen-active')) {
+        const fullscreenShell = document.getElementById('gameplay-shell');
+        if (fullscreenShell && fullscreenShell.clientWidth > 0 && fullscreenShell.clientHeight > 0) {
+            if (!force && fullscreenShell.clientWidth === lastResizeWidth && fullscreenShell.clientHeight === lastResizeHeight) {
+                return;
+            }
+            console.log(`[ResponsiveResize] Fullscreen game size to: ${fullscreenShell.clientWidth}x${fullscreenShell.clientHeight}`);
+            game.scale.resize(fullscreenShell.clientWidth, fullscreenShell.clientHeight);
+            game.canvas.style.width = `${fullscreenShell.clientWidth}px`;
+            game.canvas.style.height = `${fullscreenShell.clientHeight}px`;
+            game.scale.refresh();
+            lastResizeWidth = fullscreenShell.clientWidth;
+            lastResizeHeight = fullscreenShell.clientHeight;
+        }
+        return;
+    }
+
+    // 4. Normal Game Mode Logic:
     const { width, height } = getResponsiveScale();
     
     // Only resize if the dimensions are valid

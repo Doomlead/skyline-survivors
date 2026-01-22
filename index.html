@@ -13,10 +13,78 @@
         body { margin: 0; overflow: hidden; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
         #page-shell { height: 100%; max-height: 100dvh; }
+        #gameplay-radar-slot:empty { display: none; }
+
+        #fullscreen-overlay-toggle {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(34, 211, 238, 0.8);
+            background: rgba(15, 23, 42, 0.85);
+            color: #dbeafe;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        body.fullscreen-active #fullscreen-overlay-toggle {
+            display: inline-flex;
+        }
+
+        body.fullscreen-active #page-shell {
+            max-width: none;
+            padding: 0;
+        }
+
+        body.fullscreen-active #game-layout {
+            height: 100%;
+        }
+
+        body.fullscreen-active #game-layout header h1,
+        body.fullscreen-active #hud-container,
+        body.fullscreen-active #controls-text,
+        body.fullscreen-active #build-controls,
+        body.fullscreen-active #touch-controls {
+            display: none !important;
+        }
+
+        body.fullscreen-active #game-layout main {
+            flex: 1;
+            width: 100%;
+            margin: 0;
+        }
+
+        body.fullscreen-active #gameplay-shell {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        body.fullscreen-active #gameplay-radar-slot,
+        body.fullscreen-active #radar-container {
+            max-width: none;
+            width: 100%;
+        }
+
+        body.fullscreen-active #game-container {
+            flex: 1;
+            width: 100%;
+            max-width: none;
+            border: none;
+            border-radius: 0;
+        }
         
         /* Game Layout (default) */
         #game-layout { display: flex; flex-direction: column; }
-        #game-container { position: relative; }
+        #game-container { position: relative; display: flex; flex-direction: column; }
         
         /* District Map Layout (hidden by default) */
         #district-layout {
@@ -429,9 +497,12 @@
                         <div class="text-cyan-400 w-32 text-left">SCORE: <span id="score-el">000000</span></div>
                         <div class="text-amber-400 text-center flex-1" id="wave-el">WAVE 1  ENEMIES: 020</div>
                         <div class="text-white text-center flex-1 hidden" id="timer-el">TIME: 00:00</div>
-                        <div class="flex gap-4 justify-end w-auto md:w-48">
+                        <div class="flex gap-3 justify-end w-auto md:w-60 items-center">
                             <div class="text-green-400">BOMBS: <span id="bombs-el">3</span></div>
                             <div class="text-fuchsia-400">LIVES: <span id="lives-el">3</span></div>
+                            <button id="fullscreen-toggle" type="button" class="px-2 py-1 rounded border border-cyan-400/70 text-cyan-200 text-[10px] md:text-xs uppercase tracking-[0.2em] hover:border-cyan-200">
+                                Fullscreen
+                            </button>
                         </div>
                     </div>
 
@@ -482,7 +553,7 @@
                         <div id="reward-el" class="text-emerald-200 uppercase tracking-wider text-right w-44">REWARDS: x1.00 standard loot</div>
                     </div>
 
-                    <div class="w-full h-[40px] bg-black border border-cyan-900 relative overflow-hidden rounded">
+                    <div id="radar-container" class="w-full h-[40px] bg-black border border-cyan-900 relative overflow-hidden rounded">
                         <canvas id="radar-canvas" width="800" height="40" class="w-full h-full block"></canvas>
                     </div>
 
@@ -522,8 +593,12 @@
             </header>
 
             <main class="w-full flex-1 flex flex-col items-center gap-3 overflow-hidden">
-                <div id="game-container" class="relative bg-black border border-slate-700 shadow-2xl overflow-hidden rounded-b-lg w-full max-w-6xl">
-                    <!-- Phaser canvas renders here in game mode -->
+                <div id="gameplay-shell" class="relative w-full flex flex-col items-center gap-3">
+                    <div id="gameplay-radar-slot" class="w-full max-w-6xl"></div>
+                    <div id="game-container" class="relative bg-black border border-slate-700 shadow-2xl overflow-hidden rounded-b-lg w-full max-w-6xl">
+                        <!-- Phaser canvas renders here in game mode -->
+                    </div>
+                    <button id="fullscreen-overlay-toggle" type="button">Exit Fullscreen</button>
                 </div>
                 <p id="controls-text" class="text-[10px] md:text-xs text-slate-400 text-center leading-relaxed">
                     Desktop Controls:
@@ -801,6 +876,7 @@
     <script src="js/graphics/levelgenerator/backgroundManager.js"></script>
     <script src="js/ui/uiState.js"></script>
     <script src="js/ui/uiHud.js"></script>
+    <script src="js/ui/uiFullscreen.js"></script>
     <script src="js/ui/uiRadar.js"></script>
     <script src="js/ui/uiOverlays.js"></script>
     <script src="js/ui/uiPauseMenu.js"></script>
