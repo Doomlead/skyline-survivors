@@ -62,7 +62,7 @@ const FullscreenController = (function() {
         document.body.classList.toggle('fullscreen-active', isActive);
         updateToggleButtons(isActive);
         updateRadarPlacement(isActive);
-        refreshGameScale();
+        scheduleResize();
     }
 
     function updateToggleButtons(isActive) {
@@ -90,30 +90,13 @@ const FullscreenController = (function() {
         }
     }
 
-    function refreshGameScale() {
-        if (!window.game || !window.game.scale) return;
-        const responsive = typeof getResponsiveScale === 'function'
-            ? getResponsiveScale()
-            : { width: CONFIG.width, height: CONFIG.height };
-        let width = responsive.width || CONFIG.width;
-        let height = responsive.height || CONFIG.height;
-        const gameContainer = document.getElementById('game-container');
-        if (document.body.classList.contains('fullscreen-active') && gameContainer) {
-            const containerWidth = gameContainer.clientWidth;
-            const containerHeight = gameContainer.clientHeight;
-            if (containerWidth && containerHeight) {
-                const scale = Math.min(containerWidth / CONFIG.width, containerHeight / CONFIG.height);
-                width = Math.floor(CONFIG.width * scale);
-                height = Math.floor(CONFIG.height * scale);
-            }
-        }
-        window.game.scale.resize(width, height);
-        window.game.scale.refresh();
-        const canvas = document.querySelector('#game-container canvas');
-        if (canvas) {
-            canvas.style.width = `${width}px`;
-            canvas.style.height = `${height}px`;
-        }
+    function scheduleResize() {
+        if (typeof applyResponsiveResize !== 'function') return;
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                applyResponsiveResize({ force: true });
+            });
+        });
     }
 
     if (document.readyState === 'loading') {

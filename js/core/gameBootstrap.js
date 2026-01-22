@@ -49,7 +49,25 @@ function applyResponsiveResize(options = {}) {
         return; 
     }
 
-    // 3. Normal Game Mode Logic:
+    // 3. Fullscreen Gameplay Logic:
+    if (document.body.classList.contains('fullscreen-active')) {
+        const container = document.getElementById('game-container');
+        if (container && container.clientWidth > 0 && container.clientHeight > 0) {
+            if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
+                return;
+            }
+            console.log(`[ResponsiveResize] Updating game size to: ${container.clientWidth}x${container.clientHeight}`);
+            game.scale.resize(container.clientWidth, container.clientHeight);
+            game.canvas.style.width = `${container.clientWidth}px`;
+            game.canvas.style.height = `${container.clientHeight}px`;
+            game.scale.refresh();
+            lastResizeWidth = container.clientWidth;
+            lastResizeHeight = container.clientHeight;
+        }
+        return;
+    }
+
+    // 4. Normal Game Mode Logic:
     const { width, height } = getResponsiveScale();
     
     // Only resize if the dimensions are valid
