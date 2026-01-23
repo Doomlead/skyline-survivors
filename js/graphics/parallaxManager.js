@@ -29,7 +29,7 @@ class ParallaxManager {
             const frame = texture.getSourceImage();
             const texHeight = frame.height;
 
-            const tileSprite = this.scene.add.tileSprite(0, 0, camWidth, camHeight, layerConfig.key);
+            const tileSprite = this.scene.add.tileSprite(0, 0, camWidth, texHeight, layerConfig.key);
 
             tileSprite.setOrigin(0, 0);
             tileSprite.setScrollFactor(0);
@@ -41,6 +41,7 @@ class ParallaxManager {
             this.layers.push({
                 sprite: tileSprite,
                 speedX: layerConfig.speedX,
+                scaleY,
                 name: layerName,
             });
         }
@@ -70,22 +71,40 @@ class ParallaxManager {
 
         // --- Vertical Logic (NEW) ---
         // We assume no vertical wrapping in this game world, so simple delta works
-        let dy = (playerY !== undefined) ? (playerY - this._prevPlayerY) : 0;
-        this._accumScrollY += dy;
-        this._prevPlayerY = playerY;
+        const nextScrollY = playerY !== undefined ? playerY : this._prevPlayerY;
+        this._accumScrollY = Math.max(0, nextScrollY);
+        this._prevPlayerY = nextScrollY;
+
 
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
             // Set speedY to 1.0 so background locks perfectly to vertical camera movement
-            layer.sprite.tilePositionY = this._accumScrollY * 1.0;
+            layer.sprite.tilePositionY = this._accumScrollY / (layer.scaleY || 1);
         }
     }
 
     refresh() {
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
-            layer.sprite.tilePositionY = this._accumScrollY * 1.0;
+            layer.sprite.tilePositionY = this._accumScrollY / (layer.scaleY || 1);
         }
+    }
+
+    resize(width, height) {
+        this.config.width = width;
+        this.config.height = height;
+
+        for (const layer of this.layers) {
+            const texture = this.scene.textures.get(layer.sprite.texture.key);
+            const frame = texture.getSourceImage();
+            const texHeight = frame.height;
+            const scaleY = height / texHeight;
+
+            layer.sprite.setSize(width, texHeight);
+            layer.sprite.setScale(1, scaleY);
+            layer.scaleY = scaleY;
+        }
+        this.refresh();
     }
 
     destroy() {

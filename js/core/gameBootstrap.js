@@ -42,6 +42,9 @@ function applyResponsiveResize(options = {}) {
             }
             // Resize Phaser to match the container exactly
             game.scale.resize(container.clientWidth, container.clientHeight);
+            if (typeof resizeParallaxLayers === 'function') {
+                resizeParallaxLayers(container.clientWidth, container.clientHeight);
+            }
             game.scale.refresh();
             lastResizeWidth = container.clientWidth;
             lastResizeHeight = container.clientHeight;
@@ -51,7 +54,7 @@ function applyResponsiveResize(options = {}) {
 
     // 3. Fullscreen Gameplay Logic:
     if (document.body.classList.contains('fullscreen-active')) {
-        const container = document.getElementById('gameplay-shell');
+        const container = document.getElementById('game-container');
         if (container && container.clientWidth > 0 && container.clientHeight > 0) {
             if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
                 return;
@@ -60,6 +63,9 @@ function applyResponsiveResize(options = {}) {
             game.scale.resize(container.clientWidth, container.clientHeight);
             game.canvas.style.width = `${container.clientWidth}px`;
             game.canvas.style.height = `${container.clientHeight}px`;
+            if (typeof resizeParallaxLayers === 'function') {
+                resizeParallaxLayers(container.clientWidth, container.clientHeight);
+            }
             game.scale.refresh();
             lastResizeWidth = container.clientWidth;
             lastResizeHeight = container.clientHeight;
@@ -83,6 +89,9 @@ function applyResponsiveResize(options = {}) {
         // Ensure CSS matches so it renders sharply
         game.canvas.style.width = `${width}px`;
         game.canvas.style.height = `${height}px`;
+        if (typeof resizeParallaxLayers === 'function') {
+            resizeParallaxLayers(width, height);
+        }
         
         // Refresh the scale manager internals
         game.scale.refresh();
