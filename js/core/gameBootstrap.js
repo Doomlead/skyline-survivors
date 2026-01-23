@@ -54,7 +54,7 @@ function applyResponsiveResize(options = {}) {
 
     // 3. Fullscreen Gameplay Logic:
     if (document.body.classList.contains('fullscreen-active')) {
-        const container = document.getElementById('gameplay-shell');
+        const container = document.getElementById('game-container');
         if (container && container.clientWidth > 0 && container.clientHeight > 0) {
             if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
                 return;

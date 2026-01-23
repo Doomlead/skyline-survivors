@@ -50,8 +50,9 @@ class ParallaxManager {
     initTracking(playerX, playerY) {
         this._prevPlayerX = playerX;
         this._accumScrollX = 0;
-        this._prevPlayerY = playerY || 0; // NEW: Init Y
-        this._accumScrollY = 0;           // NEW: Init Y
+        const safeScrollY = Math.max(0, playerY || 0);
+        this._prevPlayerY = safeScrollY; // NEW: Init Y
+        this._accumScrollY = safeScrollY;           // NEW: Init Y
     }
 
     update(playerX, playerY) {
@@ -71,9 +72,9 @@ class ParallaxManager {
 
         // --- Vertical Logic (NEW) ---
         // We assume no vertical wrapping in this game world, so simple delta works
-        let dy = (playerY !== undefined) ? (playerY - this._prevPlayerY) : 0;
-        this._accumScrollY += dy;
-        this._prevPlayerY = playerY;
+        const nextScrollY = playerY !== undefined ? playerY : this._prevPlayerY;
+        this._accumScrollY = Math.max(0, nextScrollY);
+        this._prevPlayerY = nextScrollY;
 
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
