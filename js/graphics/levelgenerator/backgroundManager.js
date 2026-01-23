@@ -82,6 +82,12 @@ function updateParallax(playerX, playerY) {
     }
 }
 
+function resizeParallaxLayers(width, height) {
+    if (parallaxManagerInstance) {
+        parallaxManagerInstance.resize(width, height);
+    }
+}
+
 function destroyParallax() {
     if (parallaxManagerInstance) {
         parallaxManagerInstance.destroy();

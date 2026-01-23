@@ -36,7 +36,7 @@ class ParallaxManager {
             tileSprite.setDepth(layerConfig.depth);
 
             const scaleY = camHeight / texHeight;
-            tileSprite.setScale(1, scaleY);
+            tileSprite.setTileScale(1, scaleY);
 
             this.layers.push({
                 sprite: tileSprite,
@@ -86,6 +86,22 @@ class ParallaxManager {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
             layer.sprite.tilePositionY = this._accumScrollY * 1.0;
         }
+    }
+
+    resize(width, height) {
+        this.config.width = width;
+        this.config.height = height;
+
+        for (const layer of this.layers) {
+            const texture = this.scene.textures.get(layer.sprite.texture.key);
+            const frame = texture.getSourceImage();
+            const texHeight = frame.height;
+            const scaleY = height / texHeight;
+
+            layer.sprite.setSize(width, height);
+            layer.sprite.setTileScale(1, scaleY);
+        }
+        this.refresh();
     }
 
     destroy() {
