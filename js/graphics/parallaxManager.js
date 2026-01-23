@@ -42,6 +42,7 @@ class ParallaxManager {
                 sprite: tileSprite,
                 speedX: layerConfig.speedX,
                 name: layerName,
+                texHeight,
             });
         }
     }
@@ -86,6 +87,19 @@ class ParallaxManager {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
             layer.sprite.tilePositionY = this._accumScrollY * 1.0;
         }
+    }
+
+    resize(width, height) {
+        if (!width || !height) return;
+        this.config.width = width;
+        this.config.height = height;
+        for (const layer of this.layers) {
+            layer.sprite.setSize(width, height);
+            if (layer.texHeight) {
+                layer.sprite.setScale(1, height / layer.texHeight);
+            }
+        }
+        this.refresh();
     }
 
     destroy() {

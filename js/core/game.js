@@ -278,6 +278,10 @@ function create() {
         }
         destroyAllGhosts(this);
         destroyParallax();
+        if (this._resizeHandler) {
+            this.scale.off('resize', this._resizeHandler);
+            this._resizeHandler = null;
+        }
     });
 
     // Physics overlaps
@@ -315,6 +319,19 @@ function create() {
 
     const mainCam = this.cameras.main;
     initParallaxTracking(mainCam ? mainCam.scrollX : 0, mainCam ? mainCam.scrollY : 0);
+
+    if (this._resizeHandler) {
+        this.scale.off('resize', this._resizeHandler);
+    }
+    this._resizeHandler = (gameSize) => {
+        if (!gameSize || !gameSize.width || !gameSize.height) return;
+        const cam = this.cameras.main;
+        if (cam) {
+            cam.setSize(gameSize.width, gameSize.height);
+        }
+        resizeBackground(gameSize.width, gameSize.height);
+    };
+    this.scale.on('resize', this._resizeHandler);
 }
 
 function update(time, delta) {
