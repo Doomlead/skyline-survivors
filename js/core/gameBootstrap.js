@@ -42,8 +42,6 @@ function applyResponsiveResize(options = {}) {
             }
             // Resize Phaser to match the container exactly
             game.scale.resize(container.clientWidth, container.clientHeight);
-            CONFIG.width = container.clientWidth;
-            CONFIG.height = container.clientHeight;
             if (typeof resizeParallaxLayers === 'function') {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
@@ -65,8 +63,6 @@ function applyResponsiveResize(options = {}) {
             game.scale.resize(container.clientWidth, container.clientHeight);
             game.canvas.style.width = `${container.clientWidth}px`;
             game.canvas.style.height = `${container.clientHeight}px`;
-            CONFIG.width = container.clientWidth;
-            CONFIG.height = container.clientHeight;
             if (typeof resizeParallaxLayers === 'function') {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
@@ -93,8 +89,6 @@ function applyResponsiveResize(options = {}) {
         // Ensure CSS matches so it renders sharply
         game.canvas.style.width = `${width}px`;
         game.canvas.style.height = `${height}px`;
-        CONFIG.width = width;
-        CONFIG.height = height;
         if (typeof resizeParallaxLayers === 'function') {
             resizeParallaxLayers(width, height);
         }
