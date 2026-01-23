@@ -41,6 +41,7 @@ class ParallaxManager {
             this.layers.push({
                 sprite: tileSprite,
                 speedX: layerConfig.speedX,
+                scaleY,
                 name: layerName,
             });
         }
@@ -77,14 +78,14 @@ class ParallaxManager {
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
             // Set speedY to 1.0 so background locks perfectly to vertical camera movement
-            layer.sprite.tilePositionY = this._accumScrollY * 1.0;
+            layer.sprite.tilePositionY = this._accumScrollY / (layer.scaleY || 1);
         }
     }
 
     refresh() {
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
-            layer.sprite.tilePositionY = this._accumScrollY * 1.0;
+            layer.sprite.tilePositionY = this._accumScrollY / (layer.scaleY || 1);
         }
     }
 
@@ -100,6 +101,7 @@ class ParallaxManager {
 
             layer.sprite.setSize(width, texHeight);
             layer.sprite.setScale(1, scaleY);
+            layer.scaleY = scaleY;
         }
         this.refresh();
     }
