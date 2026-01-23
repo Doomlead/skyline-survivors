@@ -97,6 +97,9 @@ const FullscreenController = (function() {
                 applyResponsiveResize({ force: true });
             });
         });
+        setTimeout(() => {
+            applyResponsiveResize({ force: true });
+        }, 150);
     }
 
     if (document.readyState === 'loading') {
