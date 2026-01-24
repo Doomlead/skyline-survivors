@@ -326,9 +326,9 @@ function update(time, delta) {
 
     const mainCam = this.cameras.main;
     
-    // Ensure zoom is always 1
-    if (mainCam && mainCam.zoom !== 1) {
-        mainCam.setZoom(1);
+    const gameplayZoom = 0.75;
+    if (mainCam && mainCam.zoom !== gameplayZoom) {
+        mainCam.setZoom(gameplayZoom);
     }
     
     if (gameState.gameOver) {
