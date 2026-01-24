@@ -89,7 +89,18 @@
         
         /* Game Layout (default) */
         #game-layout { display: flex; flex-direction: column; }
-        #game-container { position: relative; }
+        #gameplay-shell { width: 100%; }
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            aspect-ratio: 2 / 1;
+        }
+        #game-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
         
         /* District Map Layout (hidden by default) */
         #district-layout {

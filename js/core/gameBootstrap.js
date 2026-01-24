@@ -74,7 +74,12 @@ function applyResponsiveResize(options = {}) {
     }
 
     // 4. Normal Game Mode Logic:
-    const { width, height } = getResponsiveScale();
+    const gameplayContainer = document.getElementById('game-container');
+    const containerWidth = gameplayContainer?.clientWidth || 0;
+    const containerHeight = gameplayContainer?.clientHeight || 0;
+    const { width, height } = containerWidth > 0 && containerHeight > 0
+        ? { width: containerWidth, height: containerHeight }
+        : getResponsiveScale();
     
     // Only resize if the dimensions are valid
     if (width > 0 && height > 0) {
