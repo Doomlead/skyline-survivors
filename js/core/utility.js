@@ -202,7 +202,7 @@ function getResponsiveScale() {
     const scaleX = maxWidth / baseWidth;
     const scaleY = maxHeight / baseHeight;
     const scale = Math.min(scaleX, scaleY);
-    const maxScale = isMobile ? 1 : 1.35;
+    const maxScale = isMobile ? 1 : 2;
     const finalScale = Math.min(scale, maxScale);
     return {
         width: Math.floor(baseWidth * finalScale),

@@ -7,12 +7,6 @@ let gameSceneInitialized = false;
 
 // Store canonical positions separately from render positions
 // This is the key to making wrap-around work properly
-function getGameplayCameraZoom(scene) {
-    if (!scene || !scene.cameras || !scene.cameras.main) return 1;
-    const mainCam = scene.cameras.main;
-    const zoomForHeight = CONFIG.worldHeight > 0 ? mainCam.height / CONFIG.worldHeight : 1;
-    return Math.min(1, zoomForHeight);
-}
 
 function initializeGame(scene) {
     for (let i = 0; i < gameState.humans; i++) {
@@ -226,21 +220,12 @@ function create() {
     // Maintain legacy scene.player reference for shared systems
     this.player = this.veritech;
 	
-    const mainCam = this.cameras.main;
-    const targetZoom = getGameplayCameraZoom(this);
-    if (mainCam && mainCam.zoom !== targetZoom) {
-        mainCam.setZoom(targetZoom);
-    }
-
 	// Position camera vertically to show the player from the start
-    const viewHeight = mainCam ? mainCam.height / mainCam.zoom : CONFIG.height;
 	const initialScrollY = Math.max(0, Math.min(
-		this.veritech.y - viewHeight / 2,
-		Math.max(0, CONFIG.worldHeight - viewHeight)
+		this.veritech.y - CONFIG.height / 2,
+		Math.max(0, CONFIG.worldHeight - CONFIG.height)
 		));
-	if (mainCam) {
-        mainCam.scrollY = initialScrollY;
-    }
+	this.cameras.main.scrollY = initialScrollY;
 
     // Game object groups
     this.enemies = this.physics.add.group();
@@ -328,6 +313,7 @@ function create() {
     initializeGame(this);
     this.gameScene = this;
 
+    const mainCam = this.cameras.main;
     initParallaxTracking(mainCam ? mainCam.scrollX : 0, mainCam ? mainCam.scrollY : 0);
 }
 
@@ -340,9 +326,9 @@ function update(time, delta) {
 
     const mainCam = this.cameras.main;
     
-    const targetZoom = getGameplayCameraZoom(this);
-    if (mainCam && mainCam.zoom !== targetZoom) {
-        mainCam.setZoom(targetZoom);
+    // Ensure zoom is always 1
+    if (mainCam && mainCam.zoom !== 1) {
+        mainCam.setZoom(1);
     }
     
     if (gameState.gameOver) {
@@ -389,11 +375,9 @@ function update(time, delta) {
     }
 
     // === CAMERA X POSITIONING (horizontal with wrap-around) ===
-    const viewWidth = mainCam.width / mainCam.zoom;
-    const viewHeight = mainCam.height / mainCam.zoom;
-    let desiredScrollX = activePlayer.x - viewWidth / 2;
+    let desiredScrollX = activePlayer.x - mainCam.width / 2;
     
-    const maxScrollX = CONFIG.worldWidth - viewWidth;
+    const maxScrollX = CONFIG.worldWidth - mainCam.width;
     
     // Handle wrap-around camera positioning
     if (desiredScrollX < 0) {
@@ -405,13 +389,13 @@ function update(time, delta) {
     mainCam.scrollX = desiredScrollX;
 
     // === CAMERA Y POSITIONING (vertical following) ===
-    let desiredScrollY = activePlayer.y - viewHeight / 2;
+    let desiredScrollY = activePlayer.y - mainCam.height / 2;
     
     // Clamp to world bounds (no wrap-around for Y)
-    const maxScrollY = Math.max(0, CONFIG.worldHeight - viewHeight);
+    const maxScrollY = Math.max(0, CONFIG.worldHeight - mainCam.height);
     if (maxScrollY <= 0) {
         // World height equals or is less than camera height - center vertically
-        desiredScrollY = (CONFIG.worldHeight - viewHeight) / 2;
+        desiredScrollY = (CONFIG.worldHeight - mainCam.height) / 2;
     } else {
         // Clamp scroll to valid range so we don't show outside world
         desiredScrollY = Math.max(0, Math.min(desiredScrollY, maxScrollY));
