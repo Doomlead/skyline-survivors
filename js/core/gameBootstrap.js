@@ -45,6 +45,7 @@ function applyResponsiveResize(options = {}) {
             if (typeof resizeParallaxLayers === 'function') {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
+            adjustGameplayCameraZoom(container.clientHeight);
             game.scale.refresh();
             lastResizeWidth = container.clientWidth;
             lastResizeHeight = container.clientHeight;
@@ -66,6 +67,7 @@ function applyResponsiveResize(options = {}) {
             if (typeof resizeParallaxLayers === 'function') {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
+            adjustGameplayCameraZoom(container.clientHeight);
             game.scale.refresh();
             lastResizeWidth = container.clientWidth;
             lastResizeHeight = container.clientHeight;
@@ -92,12 +94,22 @@ function applyResponsiveResize(options = {}) {
         if (typeof resizeParallaxLayers === 'function') {
             resizeParallaxLayers(width, height);
         }
+        adjustGameplayCameraZoom(height);
         
         // Refresh the scale manager internals
         game.scale.refresh();
         lastResizeWidth = width;
         lastResizeHeight = height;
     }
+}
+
+function adjustGameplayCameraZoom(viewportHeight) {
+    const scene = game?.scene?.getScene?.(SCENE_KEYS.game);
+    if (!scene?.cameras?.main) return;
+    const safeHeight = Math.max(1, viewportHeight);
+    const zoom = Math.min(1, safeHeight / CONFIG.worldHeight);
+    scene.cameras.main.setZoom(zoom);
+    scene.cameras.main.setScroll(scene.cameras.main.scrollX, 0);
 }
 
 // ------------------------

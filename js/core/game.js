@@ -325,10 +325,11 @@ function update(time, delta) {
     if (!player || !this.enemies) return;
 
     const mainCam = this.cameras.main;
-    
-    // Ensure zoom is always 1
-    if (mainCam && mainCam.zoom !== 1) {
-        mainCam.setZoom(1);
+    if (mainCam) {
+        const desiredZoom = Math.min(1, mainCam.height / CONFIG.worldHeight);
+        if (Math.abs(mainCam.zoom - desiredZoom) > 0.001) {
+            mainCam.setZoom(desiredZoom);
+        }
     }
     
     if (gameState.gameOver) {
@@ -375,9 +376,11 @@ function update(time, delta) {
     }
 
     // === CAMERA X POSITIONING (horizontal with wrap-around) ===
-    let desiredScrollX = activePlayer.x - mainCam.width / 2;
+    const viewWidth = mainCam.width / mainCam.zoom;
+    const viewHeight = mainCam.height / mainCam.zoom;
+    let desiredScrollX = activePlayer.x - viewWidth / 2;
     
-    const maxScrollX = CONFIG.worldWidth - mainCam.width;
+    const maxScrollX = CONFIG.worldWidth - viewWidth;
     
     // Handle wrap-around camera positioning
     if (desiredScrollX < 0) {
@@ -389,13 +392,13 @@ function update(time, delta) {
     mainCam.scrollX = desiredScrollX;
 
     // === CAMERA Y POSITIONING (vertical following) ===
-    let desiredScrollY = activePlayer.y - mainCam.height / 2;
+    let desiredScrollY = activePlayer.y - viewHeight / 2;
     
     // Clamp to world bounds (no wrap-around for Y)
-    const maxScrollY = Math.max(0, CONFIG.worldHeight - mainCam.height);
+    const maxScrollY = Math.max(0, CONFIG.worldHeight - viewHeight);
     if (maxScrollY <= 0) {
         // World height equals or is less than camera height - center vertically
-        desiredScrollY = (CONFIG.worldHeight - mainCam.height) / 2;
+        desiredScrollY = (CONFIG.worldHeight - viewHeight) / 2;
     } else {
         // Clamp scroll to valid range so we don't show outside world
         desiredScrollY = Math.max(0, Math.min(desiredScrollY, maxScrollY));
