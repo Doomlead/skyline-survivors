@@ -56,6 +56,7 @@ function applyResponsiveResize(options = {}) {
     if (document.body.classList.contains('fullscreen-active')) {
         const container = document.getElementById('game-container');
         if (container && container.clientWidth > 0 && container.clientHeight > 0) {
+            container.style.height = '100%';
             if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
                 return;
             }
@@ -74,29 +75,33 @@ function applyResponsiveResize(options = {}) {
     }
 
     // 4. Normal Game Mode Logic:
-    const { width, height } = getResponsiveScale();
-    
-    // Only resize if the dimensions are valid
-    if (width > 0 && height > 0) {
-        if (!force && width === lastResizeWidth && height === lastResizeHeight) {
+    const container = document.getElementById('game-container');
+    const containerWidth = container?.clientWidth || window.innerWidth;
+    let containerHeight = container?.clientHeight || 0;
+    const aspectRatio = CONFIG.height / CONFIG.width;
+
+    if (containerWidth > 0) {
+        if (!containerHeight || containerHeight < 50) {
+            containerHeight = Math.round(containerWidth * aspectRatio);
+            if (container) {
+                container.style.height = `${containerHeight}px`;
+            }
+        }
+
+        if (!force && containerWidth === lastResizeWidth && containerHeight === lastResizeHeight) {
             return;
         }
-        console.log(`[ResponsiveResize] Updating game size to: ${width}x${height}`);
-        
-        // Force Phaser to use these dimensions
-        game.scale.resize(width, height);
-        
-        // Ensure CSS matches so it renders sharply
-        game.canvas.style.width = `${width}px`;
-        game.canvas.style.height = `${height}px`;
+
+        console.log(`[ResponsiveResize] Updating game size to: ${containerWidth}x${containerHeight}`);
+        game.scale.resize(containerWidth, containerHeight);
+        game.canvas.style.width = `${containerWidth}px`;
+        game.canvas.style.height = `${containerHeight}px`;
         if (typeof resizeParallaxLayers === 'function') {
-            resizeParallaxLayers(width, height);
+            resizeParallaxLayers(containerWidth, containerHeight);
         }
-        
-        // Refresh the scale manager internals
         game.scale.refresh();
-        lastResizeWidth = width;
-        lastResizeHeight = height;
+        lastResizeWidth = containerWidth;
+        lastResizeHeight = containerHeight;
     }
 }
 
