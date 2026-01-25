@@ -11,12 +11,27 @@ class ParallaxManager {
         this._prevPlayerY = 0; // NEW: Track previous Y
         this._accumScrollX = 0;
         this._accumScrollY = 0; // NEW: Accumulate Y scroll
+        this._lastZoom = null;
+        this._lastCamWidth = null;
+        this._lastCamHeight = null;
+    }
+
+    _getEffectiveDimensions(width, height) {
+        const cam = this.scene.cameras && this.scene.cameras.main ? this.scene.cameras.main : null;
+        const zoom = cam && cam.zoom ? cam.zoom : 1;
+        return {
+            width: width / zoom,
+            height: height / zoom,
+            zoom,
+        };
     }
 
     createLayers() {
         const { worldWidth, worldHeight } = this.config;
-        const camWidth = this.config.width;
-        const camHeight = this.config.height;
+        const cam = this.scene.cameras && this.scene.cameras.main ? this.scene.cameras.main : null;
+        const camWidth = cam && cam.width ? cam.width : this.config.width;
+        const camHeight = cam && cam.height ? cam.height : this.config.height;
+        const effective = this._getEffectiveDimensions(camWidth, camHeight);
 
         for (const layerName of LAYER_ORDER) {
             const layerConfig = BACKGROUND_LAYERS[layerName];
@@ -29,13 +44,13 @@ class ParallaxManager {
             const frame = texture.getSourceImage();
             const texHeight = frame.height;
 
-            const tileSprite = this.scene.add.tileSprite(0, 0, camWidth, texHeight, layerConfig.key);
+            const tileSprite = this.scene.add.tileSprite(0, 0, effective.width, texHeight, layerConfig.key);
 
             tileSprite.setOrigin(0, 0);
             tileSprite.setScrollFactor(0);
             tileSprite.setDepth(layerConfig.depth);
 
-            const scaleY = camHeight / texHeight;
+            const scaleY = effective.height / texHeight;
             tileSprite.setScale(1, scaleY);
 
             this.layers.push({
@@ -45,6 +60,10 @@ class ParallaxManager {
                 name: layerName,
             });
         }
+
+        this._lastZoom = effective.zoom;
+        this._lastCamWidth = camWidth;
+        this._lastCamHeight = camHeight;
     }
 
     initTracking(playerX, playerY) {
@@ -56,6 +75,14 @@ class ParallaxManager {
 
     update(playerX, playerY) {
         const worldWidth = this.config.worldWidth;
+        const cam = this.scene.cameras && this.scene.cameras.main ? this.scene.cameras.main : null;
+        const camWidth = cam && cam.width ? cam.width : this.config.width;
+        const camHeight = cam && cam.height ? cam.height : this.config.height;
+        const zoom = cam && cam.zoom ? cam.zoom : 1;
+
+        if (this._lastZoom !== zoom || this._lastCamWidth !== camWidth || this._lastCamHeight !== camHeight) {
+            this.resize(camWidth, camHeight);
+        }
         
         // --- Horizontal Logic (Existing) ---
         let dx = playerX - this._prevPlayerX;
@@ -91,6 +118,7 @@ class ParallaxManager {
     }
 
     resize(width, height) {
+        const effective = this._getEffectiveDimensions(width, height);
         this.config.width = width;
         this.config.height = height;
 
@@ -98,12 +126,15 @@ class ParallaxManager {
             const texture = this.scene.textures.get(layer.sprite.texture.key);
             const frame = texture.getSourceImage();
             const texHeight = frame.height;
-            const scaleY = height / texHeight;
+            const scaleY = effective.height / texHeight;
 
-            layer.sprite.setSize(width, texHeight);
+            layer.sprite.setSize(effective.width, texHeight);
             layer.sprite.setScale(1, scaleY);
             layer.scaleY = scaleY;
         }
+        this._lastZoom = effective.zoom;
+        this._lastCamWidth = width;
+        this._lastCamHeight = height;
         this.refresh();
     }
 
