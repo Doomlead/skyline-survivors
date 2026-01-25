@@ -94,8 +94,65 @@ function resizeParallaxLayers(width, height) {
             if (scene.physics && scene.physics.world) {
                 scene.physics.world.setBounds(0, 0, CONFIG.worldWidth, height, false, false, true, true);
             }
+            alignGroundedActors(scene);
         }
         CONFIG.worldHeight = height;
+    }
+}
+
+function alignGroundedActors(scene) {
+    var groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    if (scene.humans && scene.humans.children && scene.humans.children.entries) {
+        scene.humans.children.entries.forEach(function(human) {
+            if (!human || !human.active || human.isAbducted) return;
+            var isFalling = Boolean(human.body && human.body.gravity && human.body.gravity.y > 0);
+            if (isFalling) return;
+            var terrainVariation = Math.sin(human.x / 200) * 30;
+            human.y = groundLevel - terrainVariation - 15;
+            if (human.body) {
+                human.setVelocity(0, 0);
+                human.setGravityY(0);
+            }
+        });
+    }
+
+    if (scene.assaultTargets && scene.assaultTargets.children && scene.assaultTargets.children.entries) {
+        var baseX = gameState?.assaultObjective?.baseX;
+        if (typeof baseX !== 'number' && scene.assaultBase) {
+            baseX = scene.assaultBase.x;
+        }
+        if (typeof baseX !== 'number') {
+            baseX = CONFIG.worldWidth * 0.5;
+        }
+        var terrainVariation = Math.sin(baseX / 200) * 30;
+        var baseY = Math.max(140, groundLevel - terrainVariation - 24);
+
+        if (scene.assaultBase && scene.assaultBase.active) {
+            scene.assaultBase.y = baseY;
+            if (scene.assaultBase.body) {
+                scene.assaultBase.setVelocity(0, 0);
+            }
+        }
+
+        scene.assaultTargets.children.entries.forEach(function(target) {
+            if (!target || !target.active) return;
+            switch (target.assaultRole) {
+                case 'core':
+                    target.y = baseY;
+                    break;
+                case 'shield':
+                    target.y = baseY - 10;
+                    break;
+                case 'turret':
+                    target.y = baseY + 34;
+                    break;
+                default:
+                    break;
+            }
+            if (target.body) {
+                target.setVelocity(0, 0);
+            }
+        });
     }
 }
 
