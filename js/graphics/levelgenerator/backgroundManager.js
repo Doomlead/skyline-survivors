@@ -85,6 +85,17 @@ function updateParallax(playerX, playerY) {
 function resizeParallaxLayers(width, height) {
     if (parallaxManagerInstance) {
         parallaxManagerInstance.resize(width, height);
+        var scene = parallaxManagerInstance.scene;
+        var baseWorldHeight = parallaxManagerInstance.config.worldHeight || height;
+        var baseGroundLevel = baseWorldHeight - 80;
+        var groundRatio = baseWorldHeight > 0 ? baseGroundLevel / baseWorldHeight : 1;
+        if (scene) {
+            scene.groundLevel = height * groundRatio;
+            if (scene.physics && scene.physics.world) {
+                scene.physics.world.setBounds(0, 0, CONFIG.worldWidth, height, false, false, true, true);
+            }
+        }
+        CONFIG.worldHeight = height;
     }
 }
 
