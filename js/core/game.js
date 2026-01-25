@@ -326,7 +326,12 @@ function update(time, delta) {
 
     const mainCam = this.cameras.main;
     
-    const gameplayZoom = 0.75;
+    const baseGameplayZoom = 0.75;
+    const desiredViewWidth = CONFIG.width / baseGameplayZoom;
+    const desiredViewHeight = CONFIG.height / baseGameplayZoom;
+    const zoomByWidth = mainCam.width / desiredViewWidth;
+    const zoomByHeight = mainCam.height / desiredViewHeight;
+    const gameplayZoom = Math.min(baseGameplayZoom, zoomByWidth, zoomByHeight);
     if (mainCam && mainCam.zoom !== gameplayZoom) {
         mainCam.setZoom(gameplayZoom);
     }
