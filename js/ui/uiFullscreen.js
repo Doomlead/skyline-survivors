@@ -39,7 +39,31 @@ const FullscreenController = (function() {
         handleFullscreenChange();
     }
 
+    function isGameLayoutActive() {
+        // Check if we're in district layout mode
+        if (typeof DistrictLayoutManager !== 'undefined') {
+            const currentLayout = DistrictLayoutManager.getCurrentLayout();
+            if (currentLayout === 'district') {
+                return false;
+            }
+        }
+        
+        // Additional check: ensure game-layout is visible
+        const gameLayout = document.getElementById('game-layout');
+        if (gameLayout && gameLayout.style.display === 'none') {
+            return false;
+        }
+        
+        return true;
+    }
+
     function handleToggle() {
+        // Prevent fullscreen operations when in district layout
+        if (!isGameLayoutActive()) {
+            console.warn('[Fullscreen] Cannot toggle fullscreen while in district layout');
+            return;
+        }
+        
         if (document.fullscreenElement) {
             exitFullscreen();
         } else {
@@ -48,6 +72,12 @@ const FullscreenController = (function() {
     }
 
     function enterFullscreen() {
+        // Double-check we're in game layout before entering fullscreen
+        if (!isGameLayoutActive()) {
+            console.warn('[Fullscreen] Cannot enter fullscreen while in district layout');
+            return;
+        }
+        
         if (!fullscreenTarget?.requestFullscreen) return;
         fullscreenTarget.requestFullscreen();
     }
@@ -59,6 +89,23 @@ const FullscreenController = (function() {
 
     function handleFullscreenChange() {
         const isActive = document.fullscreenElement === fullscreenTarget;
+        
+        // If we're exiting fullscreen OR if we're in district layout, ensure fullscreen class is removed
+        if (!isActive || !isGameLayoutActive()) {
+            document.body.classList.remove('fullscreen-active');
+            updateToggleButtons(false);
+            updateRadarPlacement(false);
+            scheduleResize();
+            
+            // If somehow we ended up in fullscreen while in district mode, exit it
+            if (isActive && !isGameLayoutActive() && document.fullscreenElement) {
+                console.warn('[Fullscreen] Exiting fullscreen due to district layout active');
+                exitFullscreen();
+            }
+            return;
+        }
+        
+        // Only apply fullscreen styles when in game layout
         document.body.classList.toggle('fullscreen-active', isActive);
         updateToggleButtons(isActive);
         updateRadarPlacement(isActive);
@@ -69,11 +116,23 @@ const FullscreenController = (function() {
         toggleButtons.forEach((button) => {
             button.textContent = isActive ? 'Exit Fullscreen' : 'Fullscreen';
             button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            
+            // Disable buttons when in district layout
+            if (!isGameLayoutActive()) {
+                button.disabled = true;
+                button.style.opacity = '0.5';
+            } else {
+                button.disabled = false;
+                button.style.opacity = '';
+            }
         });
     }
 
     function updateRadarPlacement(isActive) {
         if (!radarContainer || !radarSlot) return;
+        
+        // Don't move radar if we're not in game layout
+        if (!isGameLayoutActive()) return;
 
         if (isActive) {
             if (!radarOriginalParent) {
@@ -98,6 +157,18 @@ const FullscreenController = (function() {
             });
         });
     }
+    
+    // Public method to force exit fullscreen (called when switching to district layout)
+    function forceExitFullscreen() {
+        if (document.fullscreenElement) {
+            console.log('[Fullscreen] Force exiting fullscreen for layout switch');
+            exitFullscreen();
+        }
+        // Ensure fullscreen class is removed
+        document.body.classList.remove('fullscreen-active');
+        updateToggleButtons(false);
+        updateRadarPlacement(false);
+    }
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
@@ -105,5 +176,8 @@ const FullscreenController = (function() {
         init();
     }
 
-    return { init };
+    return { 
+        init,
+        forceExitFullscreen
+    };
 })();

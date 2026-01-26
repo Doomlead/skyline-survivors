@@ -12,25 +12,30 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center overflow-hidden">
     <div id="page-shell" class="w-full max-w-6xl px-4 flex flex-col items-center gap-2">
-        <div id="game-layout-slot"></div>
-        <div id="district-layout-slot"></div>
+        <!-- Partials will be loaded here directly -->
     </div>
+    
     <script>
-        const loadPartial = (slotId, url) => {
-            const slot = document.getElementById(slotId);
-            if (!slot) return;
+        // Load partials directly into page-shell
+        const loadPartial = (url) => {
+            const shell = document.getElementById('page-shell');
+            if (!shell) return;
             const request = new XMLHttpRequest();
             request.open('GET', url, false);
             request.send(null);
             if (request.status >= 200 && request.status < 400) {
-                slot.innerHTML = request.responseText;
+                const temp = document.createElement('div');
+                temp.innerHTML = request.responseText;
+                while (temp.firstChild) {
+                    shell.appendChild(temp.firstChild);
+                }
             } else {
                 console.error(`Failed to load partial: ${url} (${request.status})`);
             }
         };
 
-        loadPartial('game-layout-slot', 'partials/game-layout.html');
-        loadPartial('district-layout-slot', 'partials/district-layout.html');
+        loadPartial('partials/game-layout.html');
+        loadPartial('partials/district-layout.html');
     </script>
 
     <!-- Title Briefing Overlay -->
@@ -128,7 +133,7 @@
     <script src="js/graphics/levelgenerator/backgroundGeneratorWasteland2.js"></script>
     <script src="js/graphics/levelgenerator/backgroundGeneratorIndustrial.js"></script>
     <script src="js/graphics/levelgenerator/backgroundGeneratorDestroyedIndustrial.js"></script>
-	<script src="js/graphics/levelgenerator/backgroundGeneratorMothershipExterior.js"></script>
+    <script src="js/graphics/levelgenerator/backgroundGeneratorMothershipExterior.js"></script>
     <script src="js/graphics/levelgenerator/backgroundGeneratorMothershipInterior.js"></script>
     <script src="js/graphics/parallaxManager.js"></script>
     <script src="js/graphics/levelgenerator/backgroundManager.js"></script>
