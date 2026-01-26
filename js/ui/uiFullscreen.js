@@ -37,9 +37,14 @@ const FullscreenController = (function() {
 
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         handleFullscreenChange();
+        syncLayoutState();
     }
 
     function handleToggle() {
+        if (window.DistrictLayoutManager?.getCurrentLayout?.() === 'district') {
+            syncLayoutState();
+            return;
+        }
         if (document.fullscreenElement) {
             exitFullscreen();
         } else {
@@ -63,6 +68,26 @@ const FullscreenController = (function() {
         updateToggleButtons(isActive);
         updateRadarPlacement(isActive);
         scheduleResize();
+        syncLayoutState();
+    }
+
+    function syncLayoutState() {
+        const isDistrict = window.DistrictLayoutManager?.getCurrentLayout?.() === 'district';
+        if (isDistrict && document.fullscreenElement) {
+            exitFullscreen();
+        }
+
+        toggleButtons.forEach((button) => {
+            if (button.disabled) return;
+            button.disabled = isDistrict;
+            button.setAttribute('aria-disabled', isDistrict ? 'true' : 'false');
+            if (isDistrict) {
+                button.textContent = 'Fullscreen (Game Only)';
+            } else {
+                const isActive = document.fullscreenElement === fullscreenTarget;
+                button.textContent = isActive ? 'Exit Fullscreen' : 'Fullscreen';
+            }
+        });
     }
 
     function updateToggleButtons(isActive) {
@@ -105,5 +130,5 @@ const FullscreenController = (function() {
         init();
     }
 
-    return { init };
+    return { init, syncLayoutState };
 })();

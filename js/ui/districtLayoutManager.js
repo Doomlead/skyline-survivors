@@ -52,6 +52,10 @@ const DistrictLayoutManager = (function() {
         if (hud) hud.style.display = 'none';
         const buildToggle = document.getElementById('build-toggle');
         if (buildToggle) buildToggle.style.display = 'none';
+
+        if (window.FullscreenController?.syncLayoutState) {
+            window.FullscreenController.syncLayoutState();
+        }
     }
 	
     function switchToGameLayout() {
@@ -118,6 +122,10 @@ const DistrictLayoutManager = (function() {
                     requestAnimationFrame(resizeToGameLayout);
                 });
             }
+        }
+
+        if (window.FullscreenController?.syncLayoutState) {
+            window.FullscreenController.syncLayoutState();
         }
     }
     
