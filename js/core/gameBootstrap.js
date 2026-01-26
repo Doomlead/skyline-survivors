@@ -1,6 +1,5 @@
 // ------------------------
 // File: js/core/gameBootstrap.js
-// Responsive resize + touch controls wiring
 // ------------------------
 
 // Trigger initial resize
@@ -13,6 +12,18 @@ window.addEventListener('resize', () => {
 window.addEventListener('orientationchange', () => {
     setTimeout(() => {
         applyResponsiveResize();
+    }, 100);
+});
+
+// Listen for fullscreen changes to force reset
+document.addEventListener('fullscreenchange', () => {
+    // Reset the cached dimensions when fullscreen changes
+    lastResizeWidth = 0;
+    lastResizeHeight = 0;
+    
+    // Wait for DOM to settle, then force resize
+    setTimeout(() => {
+        applyResponsiveResize({ force: true });
     }, 100);
 });
 
@@ -59,7 +70,7 @@ function applyResponsiveResize(options = {}) {
             if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
                 return;
             }
-            console.log(`[ResponsiveResize] Updating game size to: ${container.clientWidth}x${container.clientHeight}`);
+            console.log(`[ResponsiveResize] Fullscreen - Updating game size to: ${container.clientWidth}x${container.clientHeight}`);
             game.scale.resize(container.clientWidth, container.clientHeight);
             game.canvas.style.width = `${container.clientWidth}px`;
             game.canvas.style.height = `${container.clientHeight}px`;
@@ -81,14 +92,19 @@ function applyResponsiveResize(options = {}) {
         if (!force && width === lastResizeWidth && height === lastResizeHeight) {
             return;
         }
-        console.log(`[ResponsiveResize] Updating game size to: ${width}x${height}`);
+        console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${width}x${height}`);
+        
+        // Clear any inline styles that might have been set during fullscreen
+        game.canvas.style.width = '';
+        game.canvas.style.height = '';
         
         // Force Phaser to use these dimensions
         game.scale.resize(width, height);
         
-        // Ensure CSS matches so it renders sharply
+        // Set CSS to match
         game.canvas.style.width = `${width}px`;
         game.canvas.style.height = `${height}px`;
+        
         if (typeof resizeParallaxLayers === 'function') {
             resizeParallaxLayers(width, height);
         }

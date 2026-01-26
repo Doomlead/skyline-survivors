@@ -92,10 +92,19 @@ const FullscreenController = (function() {
         
         // If we're exiting fullscreen OR if we're in district layout, ensure fullscreen class is removed
         if (!isActive || !isGameLayoutActive()) {
+            const wasFullscreen = document.body.classList.contains('fullscreen-active');
             document.body.classList.remove('fullscreen-active');
             updateToggleButtons(false);
             updateRadarPlacement(false);
-            scheduleResize();
+            
+            // When exiting fullscreen, wait for DOM to settle then force resize
+            if (wasFullscreen) {
+                setTimeout(() => {
+                    scheduleResize();
+                }, 100);
+            } else {
+                scheduleResize();
+            }
             
             // If somehow we ended up in fullscreen while in district mode, exit it
             if (isActive && !isGameLayoutActive() && document.fullscreenElement) {
@@ -109,7 +118,11 @@ const FullscreenController = (function() {
         document.body.classList.toggle('fullscreen-active', isActive);
         updateToggleButtons(isActive);
         updateRadarPlacement(isActive);
-        scheduleResize();
+        
+        // When entering fullscreen, also wait a moment for DOM to settle
+        setTimeout(() => {
+            scheduleResize();
+        }, 100);
     }
 
     function updateToggleButtons(isActive) {
