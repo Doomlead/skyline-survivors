@@ -3,8 +3,10 @@
 // ------------------------
 
 function wrapWorldBounds(sprite) {
-    if (sprite.x < 0) sprite.x = CONFIG.worldWidth;
-    else if (sprite.x > CONFIG.worldWidth) sprite.x = 0;
+    const worldWidth = CONFIG.worldWidth;
+    let wrappedX = sprite.x % worldWidth;
+    if (wrappedX < 0) wrappedX += worldWidth;
+    if (wrappedX !== sprite.x) sprite.x = wrappedX;
 }
 
 function createExplosion(scene, x, y, color = 0xffff00) {
