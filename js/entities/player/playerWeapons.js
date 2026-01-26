@@ -247,12 +247,11 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     proj.damage = damage;
     proj.isPiercing = piercing || playerState.powerUps.piercing > 0 || type === 'wave' || type === 'piercing';
     proj.birthTime = scene.time.now;
-    proj.spawnX = x;
-    proj.spawnY = y;
-    proj.maxRange = 1400;
+    proj.travelDistance = 0;
+    proj.lastX = x;
+    proj.lastY = y;
     if (type === 'homing') {
         proj.homingTier = options.homingTier || 1;
-        proj.maxRange = 2000;
     }
     
     // Flip sprite if moving left
@@ -288,6 +287,8 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     if (playerState.powerUps.timeSlow > 0) {
         proj.setVelocity(vx * 1.5, vy * 1.5);
     }
+    const initialSpeed = proj.body ? Math.hypot(proj.body.velocity.x, proj.body.velocity.y) : Math.hypot(vx, vy);
+    proj.maxRange = initialSpeed * 3;
     if (type === 'wave') {
         proj.baseVx = proj.body.velocity.x;
         proj.baseVy = proj.body.velocity.y;
@@ -332,18 +333,29 @@ function updateProjectiles(scene) {
     projectiles.children.entries.forEach(proj => {
         wrapWorldBounds(proj);
         if (!proj.active || destroyIfGrounded(proj)) return;
-        if (proj.spawnX !== undefined && proj.spawnY !== undefined && proj.maxRange) {
-            const dx = proj.x - proj.spawnX;
-            const dy = proj.y - proj.spawnY;
-            const distTraveled = Math.hypot(dx, dy);
-            if (distTraveled > proj.maxRange) {
-                if (proj.projectileType !== 'homing') {
-                    proj.setAlpha(0.5);
-                    scene.time.delayedCall(50, () => {
-                        if (proj && proj.active) proj.destroy();
+        if (proj.maxRange) {
+            if (typeof proj.lastX === 'number' && typeof proj.lastY === 'number') {
+                const worldWidth = CONFIG.worldWidth;
+                const deltaX = typeof wrappedDistance === 'function'
+                    ? wrappedDistance(proj.lastX, proj.x, worldWidth)
+                    : proj.x - proj.lastX;
+                const deltaY = proj.y - proj.lastY;
+                proj.travelDistance = (proj.travelDistance || 0) + Math.hypot(deltaX, deltaY);
+            }
+            proj.lastX = proj.x;
+            proj.lastY = proj.y;
+            if (proj.travelDistance > proj.maxRange) {
+                if (!proj.isFadingOut) {
+                    proj.isFadingOut = true;
+                    proj.setVelocity(0, 0);
+                    scene.tweens.add({
+                        targets: proj,
+                        alpha: 0,
+                        duration: 150,
+                        onComplete: () => {
+                            if (proj && proj.active) proj.destroy();
+                        }
                     });
-                } else {
-                    proj.destroy();
                 }
                 return;
             }
