@@ -1,0 +1,279 @@
+/* District Map Layout (hidden by default) */
+#district-layout {
+    display: none;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+}
+#district-layout.active {
+    display: flex;
+}
+
+/* Hide game layout when district is active */
+#game-layout.hidden-for-district {
+    display: none !important;
+}
+
+/* District layout panels */
+#district-top-panel {
+    height: 60px;
+    background: linear-gradient(180deg, #0b1628 0%, #061018 100%);
+    border-bottom: 2px solid #33c0ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+#district-main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#district-left-panel {
+    width: 280px;
+    background: linear-gradient(90deg, #0c1e34 0%, #0a1628 100%);
+    border-right: 2px solid #33c0ff;
+    padding: 16px;
+    overflow-y: auto;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#district-center-panel {
+    flex: 1;
+    background: #050912;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-width: 400px;
+    min-height: 600px; /* Minimum height for the globe */
+}
+
+#district-right-panel {
+    width: 260px;
+    background: linear-gradient(270deg, #0c1e34 0%, #0a1628 100%);
+    border-left: 2px solid #22d3ee;
+    padding: 16px;
+    overflow-y: auto;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Panel styling */
+.district-panel-header {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    color: #8bffff;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+    text-shadow: 0 0 8px #0ea5e9;
+}
+
+.district-panel-section {
+    background: rgba(11, 18, 32, 0.8);
+    border: 1px solid rgba(51, 192, 255, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.district-panel-section h4 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    color: #c7e3ff;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.district-panel-section p,
+.district-panel-section div {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: #9fb8d1;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.district-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(51, 192, 255, 0.15);
+}
+
+.district-stat-row:last-child {
+    border-bottom: none;
+}
+
+.district-stat-label {
+    color: #7dd3fc;
+}
+
+.district-stat-value {
+    color: #e0f2fe;
+    font-weight: bold;
+}
+
+.district-shop-group {
+    margin-top: 10px;
+}
+
+.district-shop-subhead {
+    font-size: 10px;
+    color: #7dd3fc;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+}
+
+.district-shop-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(29, 202, 255, 0.3);
+    margin-bottom: 6px;
+}
+
+.district-shop-row:last-child {
+    margin-bottom: 0;
+}
+
+.district-shop-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.district-shop-title {
+    font-size: 11px;
+    color: #e0f2fe;
+}
+
+.district-shop-desc {
+    font-size: 10px;
+    color: #94a3b8;
+}
+
+.district-shop-button {
+    border: 1px solid rgba(34, 211, 238, 0.7);
+    background: rgba(15, 23, 42, 0.9);
+    color: #dbeafe;
+    font-size: 10px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.district-shop-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: rgba(148, 163, 184, 0.4);
+}
+
+#district-game-container {
+    flex: 1;
+    background: #050912; /* Use the same dark color as the scene */
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid #1e293b;
+}
+
+/* Mode buttons in district layout */
+.district-mode-btn {
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: #0f172a;
+    border: 2px solid #33c0ff;
+    color: #d1f6ff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+}
+
+.district-mode-btn:hover {
+    background: #1e293b;
+    border-color: #7dd3fc;
+}
+
+.district-mode-btn.active {
+    background: #164e63;
+    border-color: #22d3ee;
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
+}
+
+.district-launch-btn {
+    padding: 14px 20px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #065f46 0%, #064e3b 100%);
+    border: 2px solid #34d399;
+    color: #ecfdf5;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    width: 100%;
+}
+
+.district-launch-btn:hover:not(:disabled) {
+    background: linear-gradient(180deg, #047857 0%, #065f46 100%);
+    box-shadow: 0 0 16px rgba(52, 211, 153, 0.4);
+}
+
+.district-launch-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    #district-left-panel { width: 240px; }
+    #district-right-panel { width: 220px; }
+}
+
+@media (max-width: 900px) {
+    #district-main {
+        flex-direction: column;
+    }
+    #district-left-panel,
+    #district-right-panel {
+        width: 100%;
+        max-height: 200px;
+        border: none;
+        border-bottom: 2px solid #33c0ff;
+    }
+    #district-right-panel {
+        border-bottom: none;
+        border-top: 2px solid #22d3ee;
+    }
+    #district-center-panel {
+        min-width: 0;
+        min-height: 1200px;
+    }
+    .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+    }
+}

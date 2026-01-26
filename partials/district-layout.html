@@ -1,0 +1,134 @@
+<!-- ============================================ -->
+<!-- DISTRICT MAP LAYOUT (for BuildScene) -->
+<!-- ============================================ -->
+<div id="district-layout">
+    <!-- Top Panel: Title -->
+    <div id="district-top-panel">
+        <h1 class="text-xl md:text-2xl font-bold tracking-[0.25em] text-cyan-300 uppercase font-orbitron">
+            Select a District
+        </h1>
+    </div>
+
+    <!-- Main 3-column layout -->
+    <div id="district-main">
+        <!-- Left Panel: Mission & Build Routing -->
+        <div id="district-left-panel">
+            <div class="district-panel-header">Mission & Build</div>
+
+            <div class="district-panel-section" id="district-mission-info">
+                <h4>Current Mission</h4>
+                <p id="district-mission-city">No district selected</p>
+                <p id="district-mission-details" class="mt-2" style="color: #7dd3fc;">Click a district on the globe to begin</p>
+            </div>
+
+            <div class="district-panel-section">
+                <h4>Deployment Mode</h4>
+                <div class="flex flex-col gap-2 mt-2">
+                    <button id="district-mode-wave" class="district-mode-btn active" onclick="selectDistrictMode('classic')">
+                        Defense Mode
+                    </button>
+                    <button id="district-mode-survival" class="district-mode-btn" onclick="selectDistrictMode('survival')">
+                        Survival Mode
+                    </button>
+                </div>
+                <p class="mt-3" style="font-size: 10px; color: #64748b;">
+                    Defense: 15-wave district defense<br>
+                    Survival: Timed endurance run
+                </p>
+            </div>
+
+            <div class="district-panel-section">
+                <h4>Directives</h4>
+                <div id="district-directives">
+                    <div class="district-stat-row">
+                        <span class="district-stat-label">Urgency</span>
+                        <span class="district-stat-value" id="district-urgency">--</span>
+                    </div>
+                    <div class="district-stat-row">
+                        <span class="district-stat-label">Reward Mult</span>
+                        <span class="district-stat-value" id="district-reward-mult">1.00x</span>
+                    </div>
+                    <div class="district-stat-row">
+                        <span class="district-stat-label">Spawn Rate</span>
+                        <span class="district-stat-value" id="district-spawn-rate">1.00x</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1"></div>
+
+            <button id="district-launch-btn" class="district-launch-btn" onclick="launchFromDistrictMap()" disabled>
+                Select District to Launch
+            </button>
+
+            <button onclick="returnToGameFromDistrict()" class="district-mode-btn" style="border-color: #f97316; margin-top: 8px;">
+                Return to Battle
+            </button>
+        </div>
+
+        <!-- Center Panel: Globe/World Map -->
+        <div id="district-center-panel">
+            <div id="district-game-container">
+                <!-- Phaser canvas will be moved here in district mode -->
+            </div>
+        </div>
+
+        <!-- Right Panel: Ship Status & Shop -->
+        <div id="district-right-panel">
+            <div class="district-panel-header">Ship Status</div>
+
+            <div class="district-panel-section">
+                <h4>Current Loadout</h4>
+                <div id="district-ship-stats">
+                    <div class="district-stat-row">
+                        <span class="district-stat-label">Lives</span>
+                        <span class="district-stat-value" id="district-lives">3</span>
+                    </div>
+                    <div class="district-stat-row">
+                        <span class="district-stat-label">Smart Bombs</span>
+                        <span class="district-stat-value" id="district-bombs">3</span>
+                    </div>
+                    <div class="district-stat-row">
+                        <span class="district-stat-label">Score</span>
+                        <span class="district-stat-value" id="district-score">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="district-panel-section">
+                <h4>Credits</h4>
+                <div class="text-center py-2">
+                    <span id="district-credits" style="font-size: 18px; color: #fef08a; font-weight: bold;">0</span>
+                </div>
+            </div>
+
+            <div class="district-panel-section" id="district-shop-panel">
+                <h4>Supply Drop Terminal</h4>
+                <p>Spend credits to purchase single-use supply drops for your next deployment.</p>
+                <div class="district-shop-group">
+                    <div class="district-shop-subhead">Available Supply Drops</div>
+                    <div id="district-shop-drops"></div>
+                </div>
+                <div class="district-shop-group">
+                    <div class="district-shop-subhead">Queued Drop</div>
+                    <div id="district-shop-pending"></div>
+                </div>
+                <div class="district-shop-group">
+                    <div class="district-shop-subhead">Drop History</div>
+                    <div id="district-shop-history"></div>
+                </div>
+            </div>
+
+            <div class="district-panel-section">
+                <h4>District Status</h4>
+                <div id="district-node-status" style="max-height: 120px; overflow-y: auto;">
+                    <p style="color: #64748b; font-size: 10px;">Select a district to view status</p>
+                </div>
+            </div>
+
+            <button onclick="openSettingsMenu()" class="district-mode-btn" style="border-color: #a78bfa; margin-top: auto;">
+                ⚙ Settings
+            </button>
+        </div>
+    </div>
+</div>
