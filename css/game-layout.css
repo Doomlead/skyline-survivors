@@ -38,7 +38,6 @@ body.fullscreen-active #game-layout {
 }
 
 body.fullscreen-active #game-layout header h1,
-body.fullscreen-active #hud-container,
 body.fullscreen-active #controls-text,
 body.fullscreen-active #build-controls,
 body.fullscreen-active #touch-controls {

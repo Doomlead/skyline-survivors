@@ -7,12 +7,16 @@ const FullscreenController = (function() {
     let radarOriginalParent;
     let radarOriginalNextSibling;
     let radarSlot;
+    let hudContainer;
+    let hudOriginalParent;
+    let hudOriginalNextSibling;
     let fullscreenTarget;
     let toggleButtons;
 
     function init() {
         radarContainer = document.getElementById('radar-container');
         radarSlot = document.getElementById('gameplay-radar-slot');
+        hudContainer = document.getElementById('hud-container');
         fullscreenTarget = document.getElementById('gameplay-shell');
         toggleButtons = [
             document.getElementById('fullscreen-toggle'),
@@ -96,6 +100,7 @@ const FullscreenController = (function() {
             document.body.classList.remove('fullscreen-active');
             updateToggleButtons(false);
             updateRadarPlacement(false);
+            updateHudPlacement(false);
             
             // When exiting fullscreen, wait for DOM to settle then force resize
             if (wasFullscreen) {
@@ -118,6 +123,7 @@ const FullscreenController = (function() {
         document.body.classList.toggle('fullscreen-active', isActive);
         updateToggleButtons(isActive);
         updateRadarPlacement(isActive);
+        updateHudPlacement(isActive);
         
         // When entering fullscreen, also wait a moment for DOM to settle
         setTimeout(() => {
@@ -162,6 +168,32 @@ const FullscreenController = (function() {
         }
     }
 
+    function updateHudPlacement(isActive) {
+        if (!hudContainer || !fullscreenTarget) return;
+
+        if (!isGameLayoutActive()) return;
+
+        if (isActive) {
+            if (!hudOriginalParent) {
+                hudOriginalParent = hudContainer.parentElement;
+                hudOriginalNextSibling = hudContainer.nextElementSibling;
+            }
+            if (radarSlot && radarSlot.parentElement) {
+                radarSlot.parentElement.insertBefore(hudContainer, radarSlot);
+            } else if (fullscreenTarget.firstChild) {
+                fullscreenTarget.insertBefore(hudContainer, fullscreenTarget.firstChild);
+            } else {
+                fullscreenTarget.appendChild(hudContainer);
+            }
+        } else if (hudOriginalParent) {
+            if (hudOriginalNextSibling && hudOriginalParent.contains(hudOriginalNextSibling)) {
+                hudOriginalParent.insertBefore(hudContainer, hudOriginalNextSibling);
+            } else {
+                hudOriginalParent.appendChild(hudContainer);
+            }
+        }
+    }
+
     function scheduleResize() {
         if (typeof applyResponsiveResize !== 'function') return;
         requestAnimationFrame(() => {
@@ -181,6 +213,7 @@ const FullscreenController = (function() {
         document.body.classList.remove('fullscreen-active');
         updateToggleButtons(false);
         updateRadarPlacement(false);
+        updateHudPlacement(false);
     }
 
     if (document.readyState === 'loading') {
