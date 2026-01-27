@@ -385,19 +385,32 @@ function updateSwarmLeaderBehavior(scene, enemy, time, timeSlowMultiplier) {
     const enemies = scene.enemies;
     const player = getActivePlayer(scene);
     if (!enemies || !player) return;
+    const buffInterval = 500;
+    const maxBuffSpeed = 260;
     enemies.children.entries.forEach(ally => {
         if (ally !== enemy && ally.active && Phaser.Math.Distance.Between(enemy.x, enemy.y, ally.x, ally.y) < enemy.buffRadius) {
-            if (ally.body) {
-                ally.body.setVelocity(ally.body.velocity.x * 1.2, ally.body.velocity.y * 1.2);
+            if (!ally.lastSwarmBuffAt || time - ally.lastSwarmBuffAt >= buffInterval) {
+                ally.lastSwarmBuffAt = time;
+                if (ally.body) {
+                    const boostedX = ally.body.velocity.x * 1.2;
+                    const boostedY = ally.body.velocity.y * 1.2;
+                    const boostedSpeed = Math.hypot(boostedX, boostedY);
+                    if (boostedSpeed > maxBuffSpeed) {
+                        const scale = maxBuffSpeed / boostedSpeed;
+                        ally.body.setVelocity(boostedX * scale, boostedY * scale);
+                    } else {
+                        ally.body.setVelocity(boostedX, boostedY);
+                    }
+                }
+                const buffGlow = scene.add.circle(ally.x, ally.y, 15, 0x00ff00, 0.3);
+                scene.tweens.add({
+                    targets: buffGlow,
+                    alpha: 0,
+                    scale: 1.5,
+                    duration: 500,
+                    onComplete: () => buffGlow.destroy()
+                });
             }
-            const buffGlow = scene.add.circle(ally.x, ally.y, 15, 0x00ff00, 0.3);
-            scene.tweens.add({
-                targets: buffGlow,
-                alpha: 0,
-                scale: 1.5,
-                duration: 500,
-                onComplete: () => buffGlow.destroy()
-            });
         }
     });
     
