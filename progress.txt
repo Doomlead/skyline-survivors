@@ -125,12 +125,13 @@
 
 ### 2.3. Meta Progression
 
-**Implementation Status: 70% Complete** ⬆️ (was 60%)
+**Implementation Status: 75% Complete** ⬆️ (was 60%)
 
 ✅ **Fully Implemented:**
 - District clearing tracking
 - Meta progression framework with credits, unlocks, and loadouts
 - Between-mission shop inventory + loadout selection UI
+- Supply Drop gacha shop with pending drop inventory and loot history
 - Persistent storage and run history
 - Failed defense consequences (district destruction states)
 - **Battleship Threat System:** Roaming battleships target friendly districts over time
@@ -142,53 +143,32 @@
 - **Planetary Control Tracker:** Visual representation of friendly vs. occupied territories percentage
 - **Dynamic Difficulty:** More occupied districts = stronger battleship presence
 
-2.3.1: Shop System (Replaced "Shop & Loadouts")
-2.3.1. The "Supply Drop" Gacha Shop
+### 2.3.1. Shop System (Supply Drop Gacha Shop)
 
-Access Point: The Weapons Satellite / Orbit node.
-Core Philosophy: Replaces the static purchase of permanent loadouts with a Variable Ratio Reinforcement model (Loot Boxes). Players spend persistent currency to gamble on "Supply Drops" that provide powerful advantages only for the immediate next deployment.
+**Implementation Status: 80% Complete** ⬆️ (was N/A)
 
-Currency:
+✅ **Implemented:**
+- Weapons Satellite shop panel with Standard/Elite Supply Drop options, cost/affordability states, and basic drop odds.
+- Meta Credits bank with spend/add logic; credits awarded on run completion.
+- Weighted loot tables with tiered items (utility/combat/rare) and 1–3 rolls per purchase.
+- Pending drop inventory that applies to the next mission and is consumed afterward.
+- Recent loot history list for prior purchases.
 
-    Meta Credits: Earned during gameplay. Used to purchase Supply Drops.
-    Bank Logic: Players must decide whether to hoard credits for a difficult Assault Mission or spend them now to survive a Threatened District.
+⚠️ **Partially Implemented:**
+- “Hot Start” loadout coverage: current drop pool covers laser/missile/drone/multi-shot/shield/bomb/timed buffs, but does not include every design doc item (e.g., ground operative contract).
 
-Inventory Model (Consumable "Hot Starts"):
-Items obtained from the shop are single-use and apply automatically to the very next mission the player launches. They do not persist if the ship is destroyed or the mission is completed.
+❌ **Not Implemented:**
+- Cinematic unboxing sequence (satellite fly-in, rarity tease, pod impact, god rays).
+- Dedicated jackpot audio/visual stingers for rare items.
 
-The Loot Boxes (Supply Pods):
-Players purchase "Encryption Keys" to unlock orbital drops.
+### 2.3.2. Shop "Dopamine" Sequence
 
-    Standard Drop (Cost: Low): High chance of Utility items, low chance of Weapon/Defense buffs.
-    Elite Drop (Cost: High): High chance of Weapon Tiers, guarantees at least one tier 2 power up.
+**Implementation Status: 0% Complete**
 
-Loot Table (Run-Specific Power-ups):
-Instead of selecting a loadout, the box grants 1-3 random items from the following pool:
-
-    "Hot Start" Weaponry: Start the mission with Laser Tier 1, Spread Tier 1, or Homing Tier 1 (bypassing the early game build-up).
-    Ordnance Stockpile: Start with +2 Smart Bombs (above default).
-    Ablative Overlay: Start with a temporary shield layer.
-    Escort Lease: Start with a Drone companion (lasts until destroyed).
-    Mercenary Contract: A computer-controlled Ground Operative spawns at the start of the match (Assault Mission specific).
-
-New Section: 2.3.2. The Shop "Dopamine" Sequence
-
-Visual & Audio Design (The Hook):
-The purchase process is not instant; it is a dedicated "Unboxing Event" designed to spike player anticipation and gratification.
-
-    The Trigger: When the player buys a Supply Drop, the UI fades. A cinematic view shows an orbital satellite rotating into position.
-    The Build-Up (Anticipation):
-        Audio: A rising mechanical turbine whine (Shepard Tone) that increases in pitch and volume.
-        Visual: The satellite charges energy. The color of the energy (Blue, Purple, or Gold) teases the rarity of the item inside before it drops.
-    The Drop: The pod fires downward. The camera slams down to the hangar deck.
-    The Impact (The Rush):
-        The pod slams into the hangar floor with a screen shake and a heavy bass THUD.
-        Steam vents hiss loudly (white noise release).
-    The Reveal (Jackpot):
-        The pod panels explode outward.
-        Visual: High-intensity "God Rays" emit from the center. If the item is high-tier, the screen flashes white, then fades in with gold confetti particles and a slow-motion rotation of the Power-Up icon.
-        Audio: A high-frequency "Casino Win" chime or major chord strikes in sync with the visual flash.
-    Equip Feedback: The item flies from the pod into the player’s ship schematic, locking in with a satisfying metallic CLANK, confirming they are powered up for the next run.
+❌ **Not Implemented:**
+- Satellite cinematic drop, rarity color tease, pod impact camera shake.
+- Jackpot reveal effects (god rays, confetti, screen flash).
+- Dedicated audio stingers and Shepard tone buildup.
 
 
 ---
@@ -901,7 +881,7 @@ Inventory Power-Ups
 - **Substantially Complete:** 3/13 (23%)
   - Assault Missions (core loop + garrison defenders + HUD)
   - System Map (core mechanics working, strategic layer missing)
-  - Meta Progression (credits, shop/loadouts, persistence)
+  - Meta Progression (credits, supply drop gacha shop, persistence)
 - **Partially Complete:** 5/13 (38%)
   - Ground Combat (pilot ejection + basic movement/shooting; no squad roles/cover)
   - Power-Up System (core drops + tiering + decay/switching; no jackpot/mystery tech)
@@ -916,14 +896,14 @@ Inventory Power-Ups
 ## Design Document Alignment
 
 **Overall Implementation:**
-- ✅ **Implemented:** ~62% (adjusted after code audit)
-- ⚠️ **Partially Implemented:** ~27%
-- ❌ **Not Implemented:** ~11%
+- ✅ **Implemented:** ~64% (adjusted after code audit)
+- ⚠️ **Partially Implemented:** ~26%
+- ❌ **Not Implemented:** ~10%
 
 **By Category:**
 - **Core Gameplay Loop:** 80% complete (Mothership fight exists, but simplified)
 - **Mission Systems:** 76% complete (Defense 90%, Assault 75%, Mothership 35%)
-- **Meta Systems:** 65% complete
+- **Meta Systems:** 70% complete (supply drop gacha + credits + persistence; no control tracker)
 - **Player Mechanics:** 66% complete (Ship 100%, Ground 30%, power-up decay/switching)
 - **Enemy Design:** 80% complete
 - **Environmental:** 35% complete ⬆️ (multi-layer parallax in place; no weather/day-night)
@@ -945,7 +925,8 @@ Inventory Power-Ups
 9. **Mothership assault playable** - Core arena fight with HP-based phases + reinforcements + campaign victory/defeat overlays (missing multi-stage flow)
 10. **Campaign victory flow** - Dedicated campaign victory overlay with stats + new campaign/menu options
 11. **Between-mission build & shop** - Loadout selection + shop unlocks integrated into district map panel
-12. **Power-up decay + primary switching** - Tier decay timers with active-weapon toggle and HUD support
+12. **Supply Drop gacha shop** - Standard/Elite drops with tiered loot, pending drop inventory, and loot history
+13. **Power-up decay + primary switching** - Tier decay timers with active-weapon toggle and HUD support
 
 ### 🎯 Recent Achievements:
 - ⬆️ Environmental stack: 40% → 55% (multi-layer sky/atmosphere/stars + multiple styles)
@@ -953,7 +934,7 @@ Inventory Power-Ups
 - ⬆️ System map: 60% → 76% (state flow + mission urgency/reward multipliers)
 - ⬆️ Mothership assault: 10% → 35% (HP-based core phases + HUD support)
 - ⬆️ Campaign victory: 0% → 100% (campaign win/defeat overlays with stats)
-- ⬆️ Meta progression: 55% → 70% (between-mission loadouts + shop unlocks)
+- ⬆️ Meta progression: 55% → 75% (supply drop gacha, pending drops, shop history)
 - ✅ Balance pass: projectile range-based despawn, expanded assault base turrets, and boss damage reduction + bullet patterns
 ---
 
@@ -987,6 +968,10 @@ Inventory Power-Ups
 
 ### 📋 Post-MVP Polish (Optional)
 
+**Phase 0: Shop Presentation (3-4 days)**
+- Implement the unboxing cinematic sequence for supply drops
+- Add rarity color teases and jackpot audio/visual stingers
+
 **Phase 1: Assault Mission Depth (1 week)**
 - Implement multi-phase core reactor
 - Add high-value power-up drops in bases
@@ -1016,7 +1001,7 @@ Inventory Power-Ups
 ## Estimated Remaining Work
 
 ### MVP Completion:
-- **Current Progress:** ~86% complete (adjusted after code audit)
+- **Current Progress:** ~87% complete (adjusted after code audit)
 - **Remaining Critical Work:**
   - Mothership Boss Mission (multi-phase upgrade): 4-6 days
   - Assault failure/retreat polish: 1-2 days
@@ -1025,11 +1010,11 @@ Inventory Power-Ups
 - **Total Time to Complete MVP:** 7-9 days
 
 ### Full Design Document:
-- **High Priority Features:** ~38% remaining
+- **High Priority Features:** ~36% remaining
   - Assault mission polish (multi-phase core, base rewards)
   - Strategic campaign layer + planetary control tracker
   - Enhanced rewards system + post-boss presentation polish
-- **Medium Priority Features:** ~62% remaining
+- **Medium Priority Features:** ~61% remaining
   - Ground combat depth (operatives, weapons, cover)
   - Power-up progression tiers (homing, drone, laser)
   - Environmental variety (weather, day/night, district themes)
@@ -1040,7 +1025,7 @@ Inventory Power-Ups
 
 ## MVP Completion
 
-- **Status:** ~86% complete (core loop intact, Mothership fight present but simplified)
+- **Status:** ~87% complete (core loop intact, Mothership fight present but simplified)
 - **Primary Blockers:** Multi-phase Mothership mission, assault retreat/retry polish, planetary control tracker slice
 
 ---
@@ -1056,6 +1041,7 @@ Inventory Power-Ups
 4. **Multi-phase base reactor** - Added challenge to assault missions
 5. **Ground operative squad system** - Roles/cover/medic/engineer behaviors
 6. **Power-up progression depth + jackpot rewards** - Tiered homing/drone progression and base/elite reward bursts
+7. **Supply Drop dopamine sequence** - Unboxing cinematic, rarity tease, and jackpot audio/visual reveal
 
 ---
 
@@ -1073,3 +1059,5 @@ Inventory Power-Ups
    Adds the tiered/variable-reward loop promised in the design doc.
 6. **Ground operative squad system groundwork**  
    Enables on-foot depth, roles, and rescue payoffs promised in the design doc.
+7. **Supply Drop unboxing sequence**  
+   Delivers the design doc’s dopamine-loop presentation for gacha purchases.
