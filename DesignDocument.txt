@@ -103,7 +103,7 @@ The purchase process is not instant; it is a dedicated "Unboxing Event" designed
         The pod panels explode outward.
         Visual: High-intensity "God Rays" emit from the center. If the item is high-tier, the screen flashes white, then fades in with gold confetti particles and a slow-motion rotation of the Power-Up icon.
         Audio: A high-frequency "Casino Win" chime or major chord strikes in sync with the visual flash.
-    Equip Feedback: The item flies from the pod into the player’s ship schematic, locking in with a satisfying metallic CLANK, confirming they are powered up for the next run.
+    Equip Feedback: The item flies from the pod into the player's ship schematic, locking in with a satisfying metallic CLANK, confirming they are powered up for the next run.
 
 
 3. Gameplay Overview
@@ -171,308 +171,107 @@ Engineer: Repair vehicles / Sabotage enemy base systems
 Rescue Dropship:
 Trigger mini-boss fight to secure extraction
 Return to system map with ship rebuilt
-Rebuild Station (Optional):
-Collect alien tech to rebuild stronger ship (risk/reward)
-4.2.3. Comrade Rescue & Mutation Risk
-Rescue Mechanics:
-Touch comrades to pick them up
-While carried, they fire at enemies (gun pod effect)
-Deposit at safe zones for:
-Score/currency
-Temporary buffs (e.g., shield recharge)
-Mutation Risk:
-Captured comrades become mutant troopers
-Kill mutants for bonus points OR risk rescuing them back
-In Occupied Districts: Fewer comrades available (most captured/converted)
+District status updates based on mission outcome
+Alternative: Find/repair a new ship during on-foot phase
+Recovery Items:
+Ship debris contains power-ups and weapons
+Destroyed enemies drop temporary ground weapons
 
-4.3. Power-Up & Weapon System
-4.3.1. Power Sources
-Airborne Power Capsules: Dropped by enemies
-Surface Items: Scattered on ground (fly low to collect)
-Variable Tech Bursts (Dark Pattern): Instead of flat rewards, base destruction and elite kills now drop "Mystery Tech" capsules.
-The Gamble: 90% contain standard Tier upgrades. 10% trigger a "Jackpot" animation, granting a temporary Apocalypse Swarm (Homing Tier 3 + Overdrive). This utilizes Variable Ratio Reinforcement to make every base destruction feel like a slot machine pull.
+4.3. Power-Up System
+4.3.1. Core Power-Ups
+Weapon Upgrades:
+Laser (3 tiers): Basic → Sustained beam → Multi-beam
+Spread Shot (3 tiers): Basic cone → Wide fan → Full coverage
+Homing Missiles (3 tiers): Single seeker → Twin launch → Swarm barrage
+Defensive:
+Shields: Absorb hits, regenerate slowly
+Speed Boost: Temporary velocity increase
+Invincibility: Brief invulnerability window
+Utility:
+Smart Bombs: Clear screen of enemies
+Extra Lives: Additional ship respawns
+Score Multipliers: Increase point gains
+4.3.2. Advanced Systems
+Weapon Decay:
+Power-ups have limited duration
+Visual/audio warnings before expiration
+Encourages aggressive play to maintain power
+Weapon Switching:
+Hold multiple weapon types simultaneously
+Toggle between primary weapons
+Strategic choices for different enemy types
+Mystery Drops:
+Rare power-ups with random effects
+High risk/reward gameplay moments
+Special "Jackpot" power-ups from boss kills
+4.3.3. Assault Mission Power-Ups
+Base Infiltration Rewards:
+Heavy weapons inside enemy bases
+Shield generators drop armor upgrades
+Destroying base sections reveals rare power-ups
+Risk/Reward Design:
+Dangerous infiltration = better rewards
+Encourages aggressive assault tactics
+Power-ups tied to base destruction milestones
 
-4.3.2. Upgrade Paths
-Tiered Weapon Systems
-These power-ups increase in level when collected multiple times, creating distinct upgrade paths:
-Laser System - Projectile Type Path
-Tier
-Effect
-0
-Single forward shot
-1
-Piercing shots (penetrate enemies)
-2
-Wave beam (sine wave pattern)
+5. Enemy Design
+5.1. Core Enemy Types
+Landers:
+Behavior: Descend to capture humans, ascend with captive
+Conversion: Captive becomes mutant if not rescued
+Priority Target: High value for defense missions
+Mutants:
+Created from captured humans
+Enhanced speed and aggression
+Can be reconverted by rescuing and returning to ground
+Bonus points for successful reconversion
+Bombers:
+Drop mines/bombs while patrolling
+Area denial tactics
+Predictable patterns for skilled interception
+Pods:
+Release swarms of smaller enemies
+Destroy before fully opening for bonus
+Multiple spawn variants (standard, reinforced, elite)
+Baiters:
+Hunt player aggressively
+Spawn when too few enemies remain
+Force player to complete waves actively
+Swarmers:
+Fast, numerous, weak enemies
+Overwhelming in groups
+Clear with bombs or spread weapons
 
-Shot Pattern - Spread Path
-Tier
-Effect
-0
-Single forward shot
-1
-Twin shots (2 parallel forward)
-2
-Spread shots (3-way fan)
-3
-Multi-shot (5-way wide spread)
-
-Coverage - Additional Angles Path
-Tier
-Effect
-0
-Forward only
-1
-Rear shot added
-2
-Side shots added (left/right)
-
-Homing Missiles
-Tier
-Effect
-0
-Homing Missiles
-Tier
-Effect
-0
-No missiles
-1 Straight shot missiles
-
-2 Basic homing missiles
-
-3 Clusters when missiles collide they do damage then break into smaller missiles that target closer enemies.( must be noted that all missiles should do the same damage as the regular Single forward shot).
-
-Single-Level Power-Ups
-These provide immediate effects, timed buffs, or toggle abilities:
-Defensive Systems:
-Shield: Ablative protection segments
-Invincibility: Timed invulnerability
-Offensive Modifiers:
-Double Damage: Timed damage boost
-Piercing Shots: Bullets pass through enemies (integrated into Laser tier 1)
-Utility & Support:
-Speed Boost: Timed movement speed increase
-Power Magnet: Timed auto-collection of power-ups
-Time Slow: Timed enemy slowdown effect
-Special Weapons:
-Smart Bomb: Screen-clearing attack (limited charges, increases stock)
-Overdrive: Timed massive firepower boost
-
-4.3.3. Sensory Feedback & "Juice" (Dark Pattern)
-The "Win" Celebration: High-value events (opening a "Mystery Tech" capsule, destroying a Core Reactor, or securing a district) trigger screen-shaking, gold-tinted particle explosions accompanied by high-frequency "ding" sounds. This mimics the sensory overload of casino machines to maximize the dopamine hit of a victory.
-
-4.3.4. Power-Up Interaction & Synergies
-Multi-Path Stacking
-Players can collect upgrades from multiple paths simultaneously:
-Laser Tier 2 (Wave) + Shot Pattern Tier 3 (Multi-Shot) = 5 wave beams
-Coverage Tier 2 (Rear + Side) + Spread Tier 2 = Multi-directional spread coverage
-Homing Tier 3 + Multi-Shot Tier 3 = Swarm of homing missiles from multiple angles
-Combo Examples
-"Bullet Hell Defense"
-Multi-Shot (Tier 3) + Side Shots + Rear Shot
-Effect: Complete 360° coverage with dense projectile patterns
-"Precision Sniper"
-Piercing (Laser Tier 1) + Twin Shots + Double Damage
-Effect: High-damage penetrating shots for line-clearing
-"Wave of Destruction"
-Wave Beam (Laser Tier 2) + Multi-Shot + Overdrive
-Effect: Screen-filling sine waves with massive damage
-"Assault Siege Loadout" (Critical for Base Destruction)
-Homing Barrage (Tier 3) + Multi-Shot + Overdrive
-Effect: Apocalypse swarm - overwhelming missile barrage for base assault
-Use Case: Destroying assault mission ground bases and shield generators
-"Guardian Fortress" (Guardian Mode Synergy)
-Force Drone (Tier 3) + Shield + Multi-Shot
-Effect: Stationary death platform with orbital protection
-Use Case: Holding position during base assault or wave defense
-"Ram Mode" (Aggressive Close-Range)
-Shield + Speed Boost + Invincibility (timed)
-Effect: Crash into base defenses safely at high speed
-Use Case: Breaking through defensive turret lines
-
-4.3.5. Strategic Power-Up Management
-Defense Missions:
-Prioritize coverage (Multi-Shot, Rear/Side Shots) for 360° threat handling
-Force Drones provide critical protection during rescue operations
-Smart Bombs save lives during overwhelming waves
-Assault Missions:
-Homing Missiles excel at destroying shield generators and turrets
-Piercing shots effective against lined-up defensive structures
-Overdrive + damage buffs essential for core reactor destruction
-Speed boosts help navigate through dense base defenses
-Resource Scarcity:
-Power-ups respawn between waves in defense missions
-Assault missions have limited power-ups (risk/reward for exploration)
-Destroyed bases yield major power-up rewards
-
-4.3.6. Power-Up Persistence & Loss
-Maintained Through:
-Wave completion
-Successful extraction
-Ship rebuilds (carries over to next deployment)
-Lost On:
-Ship destruction (partial loss - some core upgrades retained)
-Mission failure (full reset)
-Voluntary reset at shop (refund credits)
-Permanent Unlocks (Meta Progression):
-Starting weapon tier increases (unlock higher starting levels)
-Enhanced power-up drop rates
-Guaranteed power-up types in specific mission contexts
-
-4.3.7. Implementation Notes
-Current Implementation Status: ✓ Fully Implemented:
-Laser: Single → Piercing → Wave (3 tiers)
-Force Drone: 0 → 1 → 2 → 3 (4 tiers)
-All single-level power-ups (Shield, Homing, Overdrive, Rear/Side/Multi-Shot, Piercing, Speed, Magnet, Smart Bomb, Double Damage, Invincibility, Time Slow)
-⚠️ Design Clarification Needed:
-Shot Pattern Path currently implemented as part of single-level pickups (Spread, Multi-Shot)
-Coverage Path currently implemented as single-level toggles (Rear Shot, Side Shot)
-Homing Missiles currently single-level, needs tier progression
-Design suggests these should be tiered progression systems
-
-4.3.8. Power-Up Decay & Primary Weapon Switching
-Power-up drops remain infinite to preserve the "sensory jackpot" loop, but stacked tiers now decay when not refreshed. Each tier has a decay timer that resets on pickup; expiration downgrades the tier by one (Tier 0 never decays).
-Primary Weapon Switching:
-- Laser tiers and Multi-Shot tiers are treated as primary weapon modes.
-- Players can switch between Laser and Multi-Shot when both are available (no automatic override).
-- The non-active primary weapon can continue to decay while not in use, creating a strategic choice between burst focus and coverage.
-No Drone Decay:
-- Force Drones do not use decay timers; they persist until lost via damage or mission failure.
-Balancing Sheet:
-- Reference tuning values in powerup_decay_balancing.json (base defense durations, assault multiplier, and per-path tiers).
-
-4.3.9. HUD Decay Visualization (Low-Clutter Plan)
-Primary Bar Focus:
-- Show a single prominent decay bar for the active primary weapon (Laser or Multi-Shot) beneath the reticle or near the power-up HUD row.
-- When switching primaries, the bar smoothly swaps label/color to the new mode.
-Secondary Stacks (Compact):
-- Coverage, Homing, and Overdrive display as small tick bars/icons stacked vertically with minimal labels.
-- Timed buffs (Speed, Double Damage, Invincibility, Time Slow, Magnet) share a compact "status strip" with tiny timers rather than full bars.
-Urgency Feedback:
-- Bars pulse and desaturate when below 25% remaining; add a short warning flash on tier downgrade.
-Accessibility:
-- When Reduce Flashes is enabled, replace pulsing with a simple color shift and reduce alpha changes.
-
-5. Mission Types
-5.1. Defense Missions (Threatened Districts)
-Objective: Survive 15 waves of enemies
-Structure:
-Waves 1-5: Light forces (scouts, drones)
-Waves 6-10: Heavy forces (bombers, landers)
-Waves 11-14: Elite forces (cyber-mutants, assault pods)
-Wave 15: Battleship mini-boss
-Success: District remains friendly Failure: District becomes occupied (requires assault mission)
-Special Features:
-High comrade density to rescue
-Power-up drops increase per wave
-Bonus rewards for zero civilian casualties
-
-5.2. Assault Missions (Occupied Districts)
-Objective: Destroy the enemy ground base
-Structure:
-Heavy enemy presence throughout district
-Ground Base Components:
-Shield Generators (must destroy to expose core)
-Defensive Turrets (auto-targeting)
-Garrison Forces (elite units defending base)
-Core Reactor (primary target)
-Tactics:
-Air superiority: Destroy turrets and air defenses
-Ground assault: Deploy on foot to sabotage systems
-Engineers can disable shields faster
-Base destruction triggers explosion and evacuation sequence
-Success: District returns to friendly control + major reward Failure: Forced retreat, district remains occupied
-Risk/Reward Loops (Dark Pattern): Inside the base, players can find "Infiltration Nodes." These offer a choice: exit now with current rewards, or "Double or Nothing" by fighting an elite Garrison Force for a chance at a Permanent Meta-Upgrade.
-Core Reactor Destruction: The final explosion sequence is extended with a "jackpot-style" counter that tallies points rapidly with escalating sound pitches, celebrating the player's success regardless of the actual score.
-Special Features:
-Minimal comrade presence (most converted to mutants)
-High-value power-ups inside base
-Risky but rewarding infiltration opportunities
-
-6. Environment Design
-6.1. Parallax Cityscape
-Foreground: Destroyable buildings, hidden pickups
-Mid-Ground: Traffic, civilians, flying cars
-Background: Megastructures, dynamic weather
-Sky Layer: Day/night cycle affecting visibility
-6.2. District Themes
-District
-Defense Features
-Assault Features
-Downtown Core
-Narrow corridors; ideal for Guardian Mode
-Fortified skyscrapers; vertical base structures
-Industrial Zone
-Crushing machinery, toxic spills
-Factory bases with assembly line defenses
-Residential Sector
-High comrade density; hostage situations
-Underground bunker bases
-Dockyards
-Water enemies, cranes
-Naval base with water defenses
-Orbital Platform
-Low gravity, rotating platforms
-Space station base with shield layers
-
-
-7. System Map & Meta Layer
-7.1. System Map Mechanics
-Dynamic Threats:
-Battleships roam the map, targeting friendly districts
-Districts under battleship attack become threatened
-Timer countdown shows when district will fall if not defended
-Ignoring threats → District captured → New assault mission appears
-District States:
-🟢 Friendly: Secured, generates passive resources
-🟡 Threatened: Battleship attacking, defense mission available
-🔴 Occupied: Enemy base established, assault mission required
-Strategic Layer:
-Prioritize defenses vs. reclamation
-Some districts may be more valuable (resources, strategic position)
-Losing key districts increases battleship aggression
-7.2. Mothership Assault (Final Mission)
-Unlock Condition: All districts must be friendly (none occupied)
-Structure:
-Phase 1: Exterior defense ring (battleship gauntlet)
-Phase 2: Interior corridors with traps and elite forces
-Phase 3: Core boss fight (Mothership Queen/AI)
-End Conditions:
-Victory: Destroy Mothership core → Campaign complete
-Perfect Run: Complete campaign without losing any district → Special ending
-Defeat: Retreat and continue liberating districts
-
-8. Enemy Design
-8.1. Standard Forces
+5.2. Advanced Enemy Types (Design goals, specific behaviors may vary in implementation)
+5.2.1. Basic Enemies
 Lander
-Behavior: Hunts nearby humans, marks a target, abducts them, and climbs upward; if it reaches the top while carrying a human, the human is destroyed and a Mutant spawns at the human's position. If idle (no target), it drifts, occasionally reverses direction, and may fire at the player. On death, it releases any target it was abducting.
-Look: Classic red saucer with a domed canopy, running lights, landing legs, and a green tractor-beam glow beneath.
+Behavior: Descends slowly to grab a human. If successful, ascends with the human. If the human is held too long, it mutates into a Mutant.
+Look: Green flying saucer with a claw attachment, glowing underside, and a subtle "abduction beam" visual.
 Mutant
-Behavior: Aggressively homes in on the player with constant pursuit.
-Look: Humanoid alien with a tail, claws, orange body, and glowing aura; detailed limbs and head features.
-Drone
-Behavior: Lazy patrol in a circular arc while occasionally shooting at the player.
-Look: Small magenta/purple orb with concentric glows, sensor nodes, and a bright core.
+Behavior: Created when a Lander successfully captures a human. Pursues the player with moderate speed and fires periodically.
+Look: Red humanoid silhouette with glowing eyes, distorted limbs, and angry features.
 Bomber
-Behavior: Patrols horizontally, periodically drops spinning mines, and intermittently fires at the player.
-Look: Red aircraft-like hull with winglets, cockpit, bomb bay detail, engine flames, and warning stripes.
-Swarmer
-Behavior: Zig-zags toward the player with a wobble in its heading; pure rush behavior.
-Look: Small green orb with sensor "eyes," antennae, and a glowing core plus speed-trail glow.
+Behavior: Flies in a sine-wave pattern across the screen, dropping bombs at intervals. Does not chase the player directly.
+Look: Blue rounded bomber craft with a bomb bay door, smooth body, and a visible payload.
 Pod
-Behavior: Drifts on a slow sinusoidal path. On death, it always releases 3 swarmers.
-Look: Purple organic sphere with a translucent membrane, visible green "embryos," veins, and glowing node points.
+Behavior: Drifts slowly, then opens to spawn a burst of Swarmers. Once opened, it becomes harmless.
+Look: Yellow-orange egg-like pod with segmented panels, glowing seams, and spawn ports.
 Baiter
-Behavior: Aggressive chaser that speeds up erratically in bursts; no direct shooting behavior in its update loop.
-Look: Sleek magenta wedge-shaped ship with exhaust flames, sensor/glow cockpit, fins, and speed streaks.
+Behavior: Spawns when the player takes too long to clear a wave. Aggressively pursues the player with high speed and fires continuously.
+Look: Bright red dart-like ship with sharp angles, an angry "eye," and speed trail effects.
+Swarmer
+Behavior: Fast, weak enemies that move erratically in packs. Typically spawned by Pods.
+Look: Small white orbs with simple eyes and minimal details, sometimes with trailing motion blur.
+
+5.2.2. Advanced Enemies
 Kamikaze
-Behavior: Homes aggressively toward the player, occasionally jukes, and may fire rarely; on death it explodes and damages nearby enemies within a radius.
-Look: Red missile with warning stripes, flame tail, and an "angry eye" motif.
+Behavior: Charges directly at the player, spinning rapidly, and explodes on contact or when destroyed.
+Look: Angry red sphere with spikes, a jagged edge, and explosive particle trail.
 Turret
-Behavior: Wanders briefly, then plants itself in place and alternates between cardinal and diagonal multi-shot volleys.
-Look: Small gray turret with a base platform and four gun barrels (up/down/left/right) around a red sensor eye.
+Behavior: Stationary defense unit that rotates to track and fire at the player in bursts.
+Look: Gray cylindrical turret with a rotating barrel, red targeting light, and a mounted base.
 Shield
-Behavior: Slow arcing patrol; occasionally fires. Has a shield HP property and special shield-break explosion effects.
+Behavior: Deploys a protective energy field that absorbs shots. Must be destroyed or bypassed before vulnerable targets can be hit.
 Look: Cyan shield bubble with hex-like generator nodes, concentric pulse rings, and a central eye.
 Seeker
 Behavior: Predicts the player's future position based on velocity and pursues that predicted point, firing periodically.
@@ -496,7 +295,7 @@ Regenerator
 Behavior: Periodically heals itself and emits a green healing burst, drifts in gentle arcs, and fires occasionally.
 Look: Green organic cell with healing aura, tissue patches, and a bright nucleus core.
 
-8.2. Bosses
+5.3. Bosses
 Mega Lander
 Behavior: Orbits around screen center in a loop and fires from four tentacles in a radial pattern.
 Look: Giant red UFO with a large glowing eye, upper dome, and four bright tentacles with glowing tips.
@@ -525,7 +324,7 @@ Overlord Shield
 Behavior: Slow orbital movement around center; six energy nodes fire in a radial pattern.
 Look: Large circular energy barrier with concentric rings, six node emitters, and a glowing central core.
 
-8.3. Elite Forces
+5.4. Elite Forces
 Enemy Type
 Behavior
 Primary Context
@@ -543,14 +342,14 @@ Elite units protecting ground bases
 Assault missions only
 
 
-8.4. Base Defenses (Assault Only)
+5.5. Base Defenses (Assault Only)
 Turrets: Auto-targeting defense systems
 Shield Generators: Protect core reactor
 Garrison Forces: Elite troops defending base perimeter
 Core Reactor: Primary target, heavily armored
 
-9. Game Systems
-9.1. Radar / HUD
+6. Game Systems
+6.1. Radar / HUD
 Combat View:
 Mini-Radar: Shows player, comrades, mutants, pickups
 Mission Objective Indicator:
@@ -565,7 +364,7 @@ Red districts (occupied)
 Battleship positions and movement paths
 District timers
 
-9.2. Scoring & Rewards
+6.2. Scoring & Rewards
 Points For:
 Enemy kills
 Comrade rescues/survival
@@ -578,8 +377,8 @@ Score → Shop resources
 District Liberation Bonus: Major currency reward for assault victories
 Unlocks cosmetics/challenges
 
-10. Progression & Modes
-10.1. Core Mode: Planetary Liberation Campaign
+7. Progression & Modes
+7.1. Core Mode: Planetary Liberation Campaign
 Campaign Structure:
 Start with 30-50% districts friendly, rest occupied
 Battleships begin attacking friendly districts
@@ -589,20 +388,20 @@ Player choices shape the battlefield
 Lost defenses create new assault challenges
 Strategic decisions affect difficulty curve
 
-10.2. Mission Mode
+7.2. Mission Mode
 Handcrafted scenarios:
 Hold Sector X for 5 minutes
 Assault Fortress Base in under 10 minutes
 Escort VIP transports
 Sabotage enemy supply lines
 
-10.3. Boss Rush
+7.3. Boss Rush
 Sequential boss fights:
 All battleship encounters
 Special assault base commanders
 Final Mothership battle
 
-10.4. Daily/Weekly Challenges
+7.4. Daily/Weekly Challenges
 Mutators:
 Double enemy speed
 Only Guardian Mode allowed
@@ -610,7 +409,7 @@ Limited weapons
 New: "Assault Only" - All districts start occupied
 New: "Last Stand" - All districts threatened simultaneously
 
-11. Difficulty & Replayability
+8. Difficulty & Replayability
 Scaling Systems:
 More occupied districts → Stronger battleship forces
 Failed defenses → Harder assault missions
@@ -625,7 +424,65 @@ Persistent upgrades carry between campaigns
 Unlock starting advantages (more friendly districts)
 Cosmetic rewards for perfect defense records
 
-12. Key Design Changes Summary
+9. Environment Design
+9.1. Cityscape Layers
+Foreground: Street level with building details
+Mid-ground: City blocks and structures
+Background: Skyline silhouettes
+Far Background: Sky, clouds, stars
+9.2. Dynamic Elements
+Weather Effects:
+Clear, rain, fog, sandstorm
+Affects visibility and gameplay
+Time of Day:
+Dawn, day, dusk, night
+Changes lighting and atmosphere
+District Themes:
+Industrial: Factories, warehouses
+Residential: Apartments, parks
+Commercial: Skyscrapers, shopping
+Military: Bases, bunkers, fortifications
+9.3. Destructible Environment
+Building Damage:
+Enemy fire creates collateral damage
+Adds to chaos and intensity
+Ground Impact:
+Crashed ships leave craters
+Environmental storytelling
+Mission Impact:
+Successful defense: Minimal damage
+Failed defense/assault: Heavy destruction visible
+
+10. Audio Design
+10.1. Music System
+Adaptive Layers:
+Base layer: Atmospheric tension
+Combat layer: High-energy beats
+Boss layer: Intense orchestration
+District Themes:
+Each district type has musical identity
+Transitions smoothly between themes
+10.2. Sound Effects
+Combat Feedback:
+Distinct sounds for each weapon
+Impact feedback for hits
+Enemy Audio:
+Unique sounds per enemy type
+Audio cues for threats
+Environmental:
+City ambience
+Destruction sounds
+Civilian voices (rescue/capture)
+10.3. Psychological Audio Design
+Near-Miss Feedback:
+Close dodge = satisfying "whoosh"
+Reinforces skilled play
+Power-Up Acquisition:
+Rising pitch sequence
+"Jackpot" sound for rare drops
+Satisfying collection feedback
+
+11. Key Design Changes Summary
 Previous System:
 Districts only defended from attacks
 Single "enemy base" endgame
