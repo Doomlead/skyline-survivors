@@ -1,504 +1,211 @@
-Skyline Survivors: Urban Defender 
-1. Core Concept
-A modern reimagining of Defender/Stargate fused with Strike Force, Vampire Survivors, and Blaster Master-style vehicle/foot combat.
-Key Themes:
-Defend and Reclaim: Districts exist in three states - friendly, threatened, or enemy-occupied
-Seamlessly transition between piloting a strike ship and fighting on foot when destroyed
-Rescue armed ground operatives to aid in combat
-Dynamic front lines with strategic territory control
-The Hook: High-intensity "sensory jackpot" combat combined with a strategic layer that leverages Loss Aversion and Variable Reinforcement
+Here is the complete and updated design document for **Skyline Survivors: Urban Defender**, integrating the new **Rescue Loop**, **Operative AI**, and **On-Foot Command** systems into the existing framework.
 
-2. High-Level Structure
-2.1. System View Orbital Map
-Purpose: Strategic command center showing planetary control status, using Loss Aversion to drive player priority
-Elements:
-City districts displayed as nodes with three states:
+***
 
+# Skyline Survivors: Urban Defender – Design Document v2.0
 
-🟢 Friendly (Secured) - No immediate action needed
-🟡 Threatened (Under Attack) - Requires defense
-🔴 Occupied (Enemy Controlled) - Requires assault
-District Investment Levels (Dark Pattern): Friendly districts accumulate a "Prosperity Multiplier" over time, increasing resource generation. If a district becomes Occupied, this multiplier resets to zero. This triggers Loss Aversion, making players feel a "need" to defend threatened areas to protect their investment.
+## 1. Core Concept
+A modern reimagining of *Defender/Stargate* fused with *Strike Force*, *Vampire Survivors*, and *Blaster Master*-style vehicle/foot combat.
 
+**Key Themes:**
+*   **Defend and Reclaim:** Districts exist in three states (Friendly, Threatened, Occupied).
+*   **Active Deployment:** Humans are not just scoring items; they are the ammunition for your ground game.
+*   **Seamless Transition:** Shift between piloting a heavy strike ship and fighting on foot as a Squad Leader.
+*   **The "Comrade" System:** Rescued civilians become armed operatives that provide fire-and-forget support.
 
-The "Near-Miss" Timer (Dark Pattern): When a Threatened district timer hits zero, it enters a 30-second flashing "CRITICAL" state. Successfully starting a mission during this window grants a "Clutch Defense" bonus. Failing to do so reinforces the feeling that the player almost saved it, encouraging "just one more" attempt to prevent future losses.
+**The Hook:** High-intensity "sensory jackpot" combat combined with a strategic layer that leverages Loss Aversion and specific "Rescue-to-Deploy" gameplay loops.
 
+---
 
-Battleships roam between nodes, attacking friendly districts
+## 2. High-Level Structure
 
+### 2.1. System View Orbital Map
+**Purpose:** Strategic command center showing planetary control status.
+**Elements:**
+*   **City Districts (Nodes):**
+    *   🟢 **Friendly (Secured):** Accumulates "Prosperity Multiplier" (resources).
+    *   🟡 **Threatened (Under Attack):** Requires Defense Mission. Timer based.
+    *   🔴 **Occupied (Enemy Controlled):** Requires Assault Mission. Prosperity reset to zero (Loss Aversion).
+*   **The "Near-Miss" Timer:** When a Threatened timer hits zero, it flashes "CRITICAL" for 30s. Starting a mission here grants a "Clutch Defense" bonus.
+*   **Roaming Battleships:** Mobile boss nodes that block progress/shop items.
 
-Special nodes:
+**Mechanics:**
+*   **Consequence System:** Ignoring Threatened → District falls to Occupied → Requires Assault.
+*   **Victory Condition:** Secure all districts → Unlock Mothership assault.
 
+### 2.2. Side-Scrolling Combat View
+**Perspective:** Horizontal wraparound map above a cityscape.
+*   **Defense Missions:** Defend 1 fixed **Extraction Hub (Fortified Hangar)**. 15 Waves.
+*   **Assault Missions:** Push into enemy territory to destroy a Ground Base.
+*   **Key Features:** Radar HUD, Parallax Cityscape, Day/Night Cycle.
 
-Weapons Satellite (Shop)
-Mothership (Final Endgame Target - unlocked when all districts secured)
-Optional Challenge Missions
-Mechanics:
-Defensive Missions: Select threatened districts to defend from 15 waves
-Assault Missions: Attack occupied districts to destroy enemy ground bases
-Consequence System: Ignoring threatened districts → District falls to enemy control → Becomes assault mission
-Victory Condition: Secure all districts → Unlock Mothership assault
+### 2.3. Meta Progression & Shop
+**2.3.1. The "Supply Drop" Gacha Shop**
+*   **Concept:** Variable Ratio Reinforcement. Spend credits on "Supply Drops" for single-mission advantages.
+*   **Inventory:** Items are "Hot Starts" (e.g., start with Tier 2 Laser) that apply only to the next run.
 
-2.2. Side-Scrolling Combat View
-Perspective: Horizontal wraparound map above a cityscape
-Defense Missions (Threatened Districts)
-Defend district from 15 waves of enemies
-Rescue armed ground operatives (comrades)
-Collect power-ups and defeat mini-bosses
-Extract after wave 15 to secure district
-Assault Missions (Occupied Districts)
-Destroy all enemy forces in the district
-Primary Objective: Destroy the enemy ground base
-Ground base has defensive turrets, shields, and garrison forces
-Success: District returns to friendly control
-Failure: Retreat and retry (district remains occupied)
-Key Features:
-Radar HUD (Defender-style)
-Parallax cityscape with dynamic weather/day-night cycle
-Mission type affects enemy composition and objectives
+**2.3.2. The Shop "Dopamine" Sequence**
+*   **Visuals:** Satellite charges energy (color indicates rarity) -> Pod slams into hangar (Screen Shake) -> God Rays reveal item.
+*   **Audio:** Shepard Tone build-up -> Bass Thud -> Casino Win Chime.
 
-2.3. Meta Progression
-Planetary Control Tracker: Visual representation of friendly vs. occupied territories
-Battleship Threat System: Roaming battleships don't just attack; they "kidnap" progress by locking away shop items or upgrades until the battleship is defeated
-Mothership Unlock: Only accessible when all districts are secured (none occupied). This acts as the ultimate "completionist" hook, using the Zeigarnik Effect (the brain's tendency to remember uncompleted tasks) to keep the player focused on the "Incomplete" map
-Dynamic Difficulty: More occupied districts = stronger battleship presence
+---
 
-2.3.1: Shop System (Replaced "Shop & Loadouts")
-2.3.1. The "Supply Drop" Gacha Shop
+## 3. Gameplay Overview & The Rescue Loop
 
-Access Point: The Weapons Satellite / Orbit node.
-Core Philosophy: Replaces the static purchase of permanent loadouts with a Variable Ratio Reinforcement model (Loot Boxes). Players spend persistent currency to gamble on "Supply Drops" that provide powerful advantages only for the immediate next deployment.
+### 3.1. The Rescue & Drop-Off Loop
+Instead of humans being passive scoring items, they are the primary resource for ground-game momentum.
 
-Currency:
+1.  **Extraction Hubs:** Each district features 1 fixed aerial **Fortified Hangar** (Drop-off Point). These are the only locations where civilians can be converted into "Comrades."
+2.  **The "Strike Force" Carry:** When the ship hovers over a human, they are tractor-beamed into cargo.
+    *   *Mechanic:* Carrying humans increases ship weight/inertia.
+    *   *Risk/Reward:* Holding multiple humans yields a higher deployment bonus but makes the ship harder to maneuver during high-intensity waves.
+3.  **Tactical Deployment:** Dropping off humans at the Hangar triggers a **Deployment Animation**.
+    *   *Result:* A squad of 3–5 armed operatives exits the Hangar to join the fray on the ground below.
 
-    Meta Credits: Earned during gameplay. Used to purchase Supply Drops.
-    Bank Logic: Players must decide whether to hoard credits for a difficult Assault Mission or spend them now to survive a Threatened District.
+### 3.2. Core Loop
+1.  **System Map:** Choose Defense (Threatened) or Assault (Occupied).
+2.  **Combat:** Pilot ship -> Rescue Humans -> Deploy Comrades -> Survive Waves.
+3.  **Crisis:** If ship destroyed -> Enter On-Foot Command -> Rebuild at Hangar.
+4.  **Extraction:** Complete Wave 15 or Destroy Base.
 
-Inventory Model (Consumable "Hot Starts"):
-Items obtained from the shop are single-use and apply automatically to the very next mission the player launches. They do not persist if the ship is destroyed or the mission is completed.
+---
 
-The Loot Boxes (Supply Pods):
-Players purchase "Encryption Keys" to unlock orbital drops.
+## 4. Player Mechanics & Operative Systems
 
-    Standard Drop (Cost: Low): High chance of Utility items, low chance of Weapon/Defense buffs.
-    Elite Drop (Cost: High): High chance of Weapon Tiers, guarantees at least one tier 2 item.
+### 4.1. Ship Forms & Movement
+**4.1.1. Normal Fighter Form**
+*   **Movement:** 8-directional. Inertia scales based on number of humans in cargo.
+*   **Primary Weapon:** Forward blaster.
+*   **Secondary:** Smart Bomb / Hyperspace.
 
-Loot Table (Run-Specific Power-ups):
-Instead of selecting a loadout, the box grants 1-3 random items from the entire powerup pool.
+**4.1.2. Guardian Form**
+*   **Activation:** Toggle button.
+*   **Movement:** Drastically slowed.
+*   **Synergy - Defensive Perimeter:** If the player is in Guardian Form, ground operatives actively gather below the ship and form a defensive ring, providing 360° cover fire while the ship focuses on heavy targets.
 
-2.3.2. The Shop "Dopamine" Sequence
+### 4.2. Operative AI & Combat Behavior ("The Comrades")
+These soldiers provide "fire-and-forget" support, making the battlefield feel alive.
 
-Visual & Audio Design (The Hook):
-The purchase process is not instant; it is a dedicated "Unboxing Event" designed to spike player anticipation and gratification.
+**4.2.1. Formation Tactics**
+*   Comrades move in small fire teams.
+*   They automatically engage the nearest threat but will prioritize protecting the player if the player is low health or on foot.
 
-    The Trigger: When the player buys a Supply Drop, the UI fades. A cinematic view shows an orbital satellite rotating into position.
-    The Build-Up (Anticipation):
-        Audio: A rising mechanical turbine whine (Shepard Tone) that increases in pitch and volume.
-        Visual: The satellite charges energy. The color of the energy (Blue, Purple, or Gold) teases the rarity of the item inside before it drops.
-    The Drop: The pod fires downward. The camera slams down to the hangar deck.
-    The Impact (The Rush):
-        The pod slams into the hangar floor with a screen shake and a heavy bass THUD.
-        Steam vents hiss loudly (white noise release).
-    The Reveal (Jackpot):
-        The pod panels explode outward.
-        Visual: High-intensity "God Rays" emit from the center. If the item is high-tier, the screen flashes white, then fades in with gold confetti particles and a slow-motion rotation of the Power-Up icon.
-        Audio: A high-frequency "Casino Win" chime or major chord strikes in sync with the visual flash.
-    Equip Feedback: The item flies from the pod into the player's ship schematic, locking in with a satisfying metallic CLANK, confirming they are powered up for the next run.
+**4.2.2. Weapon Scaling**
+*   Operatives start with basic rifles.
+*   **Tier Overflow:** If the player picks up a Weapon Power-Up while their ship is already at **Tier 3 (Max)**, the "excess" power is distributed to ground troops, upgrading their fire rate or damage output permanently for that mission.
 
+**4.2.3. Operative Classes**
+| Operative Type | Rarity | Combat Behavior & Abilities |
+| :--- | :--- | :--- |
+| **Standard Infantry** | Common (65%) | Equipped with a rapid-fire rifle; auto-fires at nearest enemy. Moves in small squads to provide basic screen coverage. |
+| **Heavy Gunner** | Uncommon (20%) | High DPS unit with a Gatling-style weapon. Slows down to a "braced" position to shred through Bombers or Pods. |
+| **Combat Medic** | Rare (10%) | Does not attack. Periodically drops small health pickups for the pilot. Critical for survival during On-Foot Combat. |
+| **Saboteur** | Elite (5%) | Specifically targets **Enemy Ground Bases** in Assault Missions. Uses EMP grenades to disable Turrets and Shield Generators. |
 
-3. Gameplay Overview
-3.1 Core Loop
-System Map: Assess planetary situation
+### 4.3. On-Foot Command (Ship Destruction)
+If the ship is destroyed, the game does not end. The pilot ejects, and the genre shifts to a run-and-gun survival mode.
 
+**4.3.1. Squad Leader Aura**
+*   When on foot, nearby Comrades stop patrolling and follow the player's movement exactly.
+*   **Visual:** This creates a "Bullet Hell" wall of return fire (similar to "Options" in *Gradius*), concentrating firepower wherever the pilot moves.
 
-Identify threatened districts (defense needed)
-Identify occupied districts (assault needed)
-Track roaming battleships
-Mission Selection:
+**4.3.2. Extraction Defense (Rebuild Mechanic)**
+*   To rebuild the ship, the pilot must reach the **Fortified Hangar** (Drop-off point) and stand their ground.
+*   **Sacrifice:** While the "Ship Rebuild" timer ticks down, Comrades will physically body-block incoming enemy fire, sacrificing themselves to ensure the pilot gets back in the air.
 
+### 4.4. Power-Up System
+**4.4.1. Core Upgrades**
+*   **Weapons:** Laser, Spread Shot, Homing Missiles (3 Tiers each).
+*   **Defense:** Shields, Speed Boost.
+*   **Utility:** Smart Bombs, Score Multipliers.
 
-Defense Mission: Protect threatened district from 15 waves
-Assault Mission: Destroy enemy base in occupied district
-Combat Mission:
+**4.4.2. Advanced Systems**
+*   **Weapon Decay:** Power-ups have duration; encourages aggression.
+*   **Mystery Drops:** Random effects/Jackpots.
+*   **Assault Rewards:** Destroying base sections reveals rare power-ups.
 
+---
 
-Pilot ship → Fight enemies → Complete objective
-If ship destroyed: Fight on foot with rescued operatives
-Assault missions require destroying fortified ground base
-Extract/Upgrade:
+## 5. Enemy Design
 
+### 5.1. Core Enemy Types
+*   **Lander:** Descends to capture humans. If successful, ascends.
+*   **Mutant:** Created from captured humans. Aggressive seeker.
+*   **Bomber:** Drops mines; area denial.
+*   **Pod:** Releases swarms of smaller enemies.
+*   **Baiter:** Spawns if the player takes too long (anti-camping).
+*   **Swarmer:** Fast, weak, overwhelms in groups.
 
-Return to system map
-Visit Weapons Satellite shop
-Check district status changes
-Campaign Progression:
+### 5.2. Advanced Behaviors
+*   **Kamikaze:** Charges and explodes on contact.
+*   **Shield:** Absorbs shots; requires flanking or piercing.
+*   **Sniper:** Stationary; fires high-speed shots after a delay.
+*   **Healer (Regenerator):** Heals nearby biological enemies (Mutants).
 
+### 5.3. Bosses
+*   **Mega Lander:** Giant UFO with tentacles.
+*   **Titan Mutant:** Massive humanoid with multiple arms.
+*   **Leviathan Baiter:** Serpentine sea-monster silhouette.
+*   **Fortress Turret:** Multi-barrel stationary platform.
 
-Secure all districts → Unlock Mothership
-Assault Mothership → Victory
+### 5.4. Base Defenses (Assault Only)
+*   **Turrets:** Auto-targeting. Saboteurs can disable these.
+*   **Shield Generators:** Protect the core. Must be destroyed first.
+*   **Garrison Forces:** Elite troops that only spawn within base perimeters.
 
-4. Player Mechanics
-4.1. Ship Forms & Movement
-4.1.1. Normal Fighter Form
-Movement: 8-directional, slight inertia
-Primary Weapon: Forward blaster (direction matches facing)
-Secondary Actions:
-Smart Bomb: Screen-clearing attack (limited charges)
-Hyperspace: Emergency teleport (risky spawn)
-4.1.2. Guardian Form
-Activation: Toggle button
-Movement: Drastically slowed
-Aim/Fire: 360° aim (mouse/right stick)
-Firepower: Higher DPS, special shot types
-Critical for Assault Missions: Base destruction benefits from sustained fire
+---
 
-4.2. Ground Combat & Operative System
-4.2.1. Ship Destruction → Foot Combat
-Ejection Sequence:
-Ship destroyed → Pilot ejects and lands near crash site
-Rescue nearby comrades to form a squad
-On-Foot Mechanics:
-Weapons: Pistol, rifle, grenades, improvised weapons
-Cover System: Use debris, buildings, destroyed vehicles
-Assault Mission Advantage: Ground combat effective against base defenses
-Operative AI:
-Basic Combat: Auto-fire at enemies
-Special Roles:
-Turret Operative: Man mounted guns
-Medic: Heal player
-Engineer: Repair vehicles / Sabotage enemy base systems
-4.2.2. Rebuilding/Extraction
-Rescue Dropship:
-Trigger mini-boss fight to secure extraction
-Return to system map with ship rebuilt
-District status updates based on mission outcome
-Alternative: Find/repair a new ship during on-foot phase
-Recovery Items:
-Ship debris contains power-ups and weapons
-Destroyed enemies drop temporary ground weapons
+## 6. Game Systems & UI
 
-4.3. Power-Up System
-4.3.1. Core Power-Ups
-Weapon Upgrades:
-Laser (3 tiers): Basic → Sustained beam → Multi-beam
-Spread Shot (3 tiers): Basic cone → Wide fan → Full coverage
-Homing Missiles (3 tiers): Single seeker → Twin launch → Swarm barrage
-Defensive:
-Shields: Absorb hits, regenerate slowly
-Speed Boost: Temporary velocity increase
-Invincibility: Brief invulnerability window
-Utility:
-Smart Bombs: Clear screen of enemies
-Extra Lives: Additional ship respawns
-Score Multipliers: Increase point gains
-4.3.2. Advanced Systems
-Weapon Decay:
-Power-ups have limited duration
-Visual/audio warnings before expiration
-Encourages aggressive play to maintain power
-Weapon Switching:
-Hold multiple weapon types simultaneously
-Toggle between primary weapons
-Strategic choices for different enemy types
-Mystery Drops:
-Rare power-ups with random effects
-High risk/reward gameplay moments
-Special "Jackpot" power-ups from boss kills
-4.3.3. Assault Mission Power-Ups
-Base Infiltration Rewards:
-Heavy weapons inside enemy bases
-Shield generators drop armor upgrades
-Destroying base sections reveals rare power-ups
-Risk/Reward Design:
-Dangerous infiltration = better rewards
-Encourages aggressive assault tactics
-Power-ups tied to base destruction milestones
+### 6.1. Radar / HUD
+*   **Mini-Radar:** Shows Player, Comrades (Blue dots), Mutants/Enemies (Red dots), Pickups.
+*   **Engagement Tracking:** A "Combo Meter" that does not reset as long as the player moves toward an objective (Flow state).
+*   **Visual Urgency:** Radar pulses faster as "Near-Miss" timers approach zero.
 
-5. Enemy Design
-5.1. Core Enemy Types
-Landers:
-Behavior: Descend to capture humans, ascend with captive
-Conversion: Captive becomes mutant if not rescued
-Priority Target: High value for defense missions
-Mutants:
-Created from captured humans
-Enhanced speed and aggression
-Can be reconverted by rescuing and returning to ground
-Bonus points for successful reconversion
-Bombers:
-Drop mines/bombs while patrolling
-Area denial tactics
-Predictable patterns for skilled interception
-Pods:
-Release swarms of smaller enemies
-Destroy before fully opening for bonus
-Multiple spawn variants (standard, reinforced, elite)
-Baiters:
-Hunt player aggressively
-Spawn when too few enemies remain
-Force player to complete waves actively
-Swarmers:
-Fast, numerous, weak enemies
-Overwhelming in groups
-Clear with bombs or spread weapons
+### 6.2. Scoring & Rewards
+*   **Points:** Kills, Rescues, Base Destruction.
+*   **Comrade Bonus:** Significant points for every Operative alive at mission end.
+*   **Reconversion:** Rescuing a human from a Lander/Mutant grants bonus points.
 
-5.2. Advanced Enemy Types (Design goals, specific behaviors may vary in implementation)
-5.2.1. Basic Enemies
-Lander
-Behavior: Descends slowly to grab a human. If successful, ascends with the human. If the human is held too long, it mutates into a Mutant.
-Look: Green flying saucer with a claw attachment, glowing underside, and a subtle "abduction beam" visual.
-Mutant
-Behavior: Created when a Lander successfully captures a human. Pursues the player with moderate speed and fires periodically.
-Look: Red humanoid silhouette with glowing eyes, distorted limbs, and angry features.
-Bomber
-Behavior: Flies in a sine-wave pattern across the screen, dropping bombs at intervals. Does not chase the player directly.
-Look: Blue rounded bomber craft with a bomb bay door, smooth body, and a visible payload.
-Pod
-Behavior: Drifts slowly, then opens to spawn a burst of Swarmers. Once opened, it becomes harmless.
-Look: Yellow-orange egg-like pod with segmented panels, glowing seams, and spawn ports.
-Baiter
-Behavior: Spawns when the player takes too long to clear a wave. Aggressively pursues the player with high speed and fires continuously.
-Look: Bright red dart-like ship with sharp angles, an angry "eye," and speed trail effects.
-Swarmer
-Behavior: Fast, weak enemies that move erratically in packs. Typically spawned by Pods.
-Look: Small white orbs with simple eyes and minimal details, sometimes with trailing motion blur.
+---
 
-5.2.2. Advanced Enemies
-Kamikaze
-Behavior: Charges directly at the player, spinning rapidly, and explodes on contact or when destroyed.
-Look: Angry red sphere with spikes, a jagged edge, and explosive particle trail.
-Turret
-Behavior: Stationary defense unit that rotates to track and fire at the player in bursts.
-Look: Gray cylindrical turret with a rotating barrel, red targeting light, and a mounted base.
-Shield
-Behavior: Deploys a protective energy field that absorbs shots. Must be destroyed or bypassed before vulnerable targets can be hit.
-Look: Cyan shield bubble with hex-like generator nodes, concentric pulse rings, and a central eye.
-Seeker
-Behavior: Predicts the player's future position based on velocity and pursues that predicted point, firing periodically.
-Look: Purple body with a scanning dish, multiple red "tracking eyes," and targeting lines.
-Spawner
-Behavior: Periodically spawns two Swarmer minions (up to a cap), patrols in a slow arc, and fires intermittently. On death, it has a chance to spawn extra swarmers.
-Look: Yellow-gold organic pod with visible embryos, multiple spawn ports, and a central control node.
-Shielder
-Behavior: Creates protective tethers to nearby allies, heals allies who have been damaged recently, and tries to stay near them while occasionally shooting.
-Look: Green diamond-shaped core with energy nodes at corners and a protective field ring.
-Bouncer
-Behavior: Ricochets erratically by picking a new direction every ~0.5s; fires occasionally.
-Look: Orange bouncy orb with motion blur, angry eyes/eyebrows, and speed lines.
-Sniper
-Behavior: Positions itself for a brief setup phase; once "positioned," it stabilizes and fires high-speed shots at longer intervals.
-Look: Long gray barrel with a red laser tip and scope; clearly a gun-platform silhouette.
-Swarm Leader
-Behavior: Buffs nearby allies (speeding them up with visual glow), moves toward the player with evasive weaving, and fires periodically. On death, nearby enemies are debuffed (slowed).
-Look: Purple command orb with a crown motif, golden spikes, and glowing command nodes.
-Regenerator
-Behavior: Periodically heals itself and emits a green healing burst, drifts in gentle arcs, and fires occasionally.
-Look: Green organic cell with healing aura, tissue patches, and a bright nucleus core.
+## 7. Progression & Modes
 
-5.3. Bosses
-Mega Lander
-Behavior: Orbits around screen center in a loop and fires from four tentacles in a radial pattern.
-Look: Giant red UFO with a large glowing eye, upper dome, and four bright tentacles with glowing tips.
-Titan Mutant
-Behavior: Aggressive pursuit with wobble; fires a three-arm spread toward the player.
-Look: Massive humanoid alien with elongated head, glowing eyes, multiple arms, and a tail spike.
-Hive Drone
-Behavior: Hovers and patrols laterally with a slow vertical bob; fires from six hex-arranged ports.
-Look: Large magenta hexagonal platform with six gun ports and a glowing central core.
-Behemoth Bomber
-Behavior: Slow horizontal patrol; drops mines from three bays and fires lateral shots from side guns.
-Look: Huge red aerial fortress with bomb bays, cockpit, twin engines, and wing guns.
-Colossal Pod
-Behavior: Sinuous vertical oscillation while drifting horizontally; fires from four ports in radial patterns.
-Look: Giant purple organic pod with multiple glowing spawn ports and internal nuclei.
-Leviathan Baiter
-Behavior: Serpentine pursuit with weaving; fires sequentially from five thrusters.
-Look: Long cyan sea-monster silhouette with dorsal spines, glowing eye, and thruster vents.
-Apex Kamikaze
-Behavior: Fast suicide-style charge with spinning; fires from four appendages in bursts.
-Look: Angry red missile with an eye, spiky explosive appendages, and flame exhaust.
-Fortress Turret
-Behavior: Stationary once planted; alternates between 8-direction firing patterns, rotating its barrel mode.
-Look: Heavy gray turret platform with eight barrels arranged in a ring and a central red targeting core.
-Overlord Shield
-Behavior: Slow orbital movement around center; six energy nodes fire in a radial pattern.
-Look: Large circular energy barrier with concentric rings, six node emitters, and a glowing central core.
+### 7.1. Planetary Liberation Campaign
+*   **Structure:** Start with ~40% friendly districts.
+*   **Dynamic:** Failed defenses lead to Occupied districts (Assault missions).
+*   **Endgame:** Secure 100% of districts to unlock the Mothership.
 
-5.4. Elite Forces
-Enemy Type
-Behavior
-Primary Context
-Battleships
-Wave 15 mini-boss; roams system map
-Defense missions
-Cyber-Mutants
-Blink/teleport, hybrid tech
-Assault missions
-Kaiju Units
-Multi-limb bosses; destroy limbs for advantage
-Special events
-Base Defenders
-Elite units protecting ground bases
-Assault missions only
+### 7.2. Mission Types
+*   **Defense:** 15 Waves. Focus on keeping the Fortified Hangar safe and deploying troops.
+*   **Assault:** Destroy Enemy Base. Saboteurs and Guardian Form are highly effective here.
+*   **Mothership:** The final "Boss Rush" style level.
 
+### 7.3. Challenges
+*   **"Last Stand":** Infinite waves, global leaderboard.
+*   **"Assault Only":** All districts start Occupied.
 
-5.5. Base Defenses (Assault Only)
-Turrets: Auto-targeting defense systems
-Shield Generators: Protect core reactor
-Garrison Forces: Elite troops defending base perimeter
-Core Reactor: Primary target, heavily armored
+---
 
-6. Game Systems
-6.1. Radar / HUD
-Combat View:
-Mini-Radar: Shows player, comrades, mutants, pickups
-Mission Objective Indicator:
-Defense: Wave count (X/15)
-Assault: Base health bar
-Off-screen arrows for priority targets
-Engagement Tracking (Dark Pattern): The HUD now features a "Combo Meter" that never fully resets as long as the player is moving toward an objective, maintaining a constant state of "Flow" and reducing perceived stopping points.
-Visual Urgency (Dark Pattern): Threatened districts on the radar pulse with increasing intensity as the "Near-Miss" timer approaches, creating a psychological "Call to Action" that is difficult for players to ignore.
-System Map:
-Flashing districts (threatened)
-Red districts (occupied)
-Battleship positions and movement paths
-District timers
+## 8. Environment & Audio
 
-6.2. Scoring & Rewards
-Points For:
-Enemy kills
-Comrade rescues/survival
-Mutant reconversions
-Base destruction (major bonus)
-No-death runs
-Perfect district defense (no civilian casualties)
-Currency Conversion:
-Score → Shop resources
-District Liberation Bonus: Major currency reward for assault victories
-Unlocks cosmetics/challenges
+### 8.1. Environment
+*   **Layers:** Parallax cityscape (Industrial, Residential, Military).
+*   **Destruction:** Buildings take damage from enemy fire and crashed ships.
+*   **Weather:** Rain/Fog affects visibility.
 
-7. Progression & Modes
-7.1. Core Mode: Planetary Liberation Campaign
-Campaign Structure:
-Start with 30-50% districts friendly, rest occupied
-Battleships begin attacking friendly districts
-Goal: Secure all districts → Unlock Mothership → Destroy Mothership
-Dynamic Campaign:
-Player choices shape the battlefield
-Lost defenses create new assault challenges
-Strategic decisions affect difficulty curve
+### 8.2. Audio Design
+*   **Music:** Adaptive layers (Atmospheric -> High Energy -> Boss).
+*   **SFX:** Distinct weapon sounds. "Casino-style" sounds for Shop and Deployment.
+*   **Feedback:**
+    *   **Rescue:** Satisfying "Lock-and-Load" sound when beaming up humans.
+    *   **Deployment:** Sound of boots hitting the ground and radio chatter ("Squad deployed!") when dropping off at the Hangar.
 
-7.2. Mission Mode
-Handcrafted scenarios:
-Hold Sector X for 5 minutes
-Assault Fortress Base in under 10 minutes
-Escort VIP transports
-Sabotage enemy supply lines
+---
 
-7.3. Boss Rush
-Sequential boss fights:
-All battleship encounters
-Special assault base commanders
-Final Mothership battle
-
-7.4. Daily/Weekly Challenges
-Mutators:
-Double enemy speed
-Only Guardian Mode allowed
-Limited weapons
-New: "Assault Only" - All districts start occupied
-New: "Last Stand" - All districts threatened simultaneously
-
-8. Difficulty & Replayability
-Scaling Systems:
-More occupied districts → Stronger battleship forces
-Failed defenses → Harder assault missions
-District liberation → Unlocks harder battleship variants
-Unlocks:
-New ship skins
-Permanent buffs for Perfect Runs
-Harder Mothership variants
-New: Base assault equipment (bunker busters, EMP bombs)
-Meta Progression:
-Persistent upgrades carry between campaigns
-Unlock starting advantages (more friendly districts)
-Cosmetic rewards for perfect defense records
-
-9. Environment Design
-9.1. Cityscape Layers
-Foreground: Street level with building details
-Mid-ground: City blocks and structures
-Background: Skyline silhouettes
-Far Background: Sky, clouds, stars
-9.2. Dynamic Elements
-Weather Effects:
-Clear, rain, fog, sandstorm
-Affects visibility and gameplay
-Time of Day:
-Dawn, day, dusk, night
-Changes lighting and atmosphere
-District Themes:
-Industrial: Factories, warehouses
-Residential: Apartments, parks
-Commercial: Skyscrapers, shopping
-Military: Bases, bunkers, fortifications
-9.3. Destructible Environment
-Building Damage:
-Enemy fire creates collateral damage
-Adds to chaos and intensity
-Ground Impact:
-Crashed ships leave craters
-Environmental storytelling
-Mission Impact:
-Successful defense: Minimal damage
-Failed defense/assault: Heavy destruction visible
-
-10. Audio Design
-10.1. Music System
-Adaptive Layers:
-Base layer: Atmospheric tension
-Combat layer: High-energy beats
-Boss layer: Intense orchestration
-District Themes:
-Each district type has musical identity
-Transitions smoothly between themes
-10.2. Sound Effects
-Combat Feedback:
-Distinct sounds for each weapon
-Impact feedback for hits
-Enemy Audio:
-Unique sounds per enemy type
-Audio cues for threats
-Environmental:
-City ambience
-Destruction sounds
-Civilian voices (rescue/capture)
-10.3. Psychological Audio Design
-Near-Miss Feedback:
-Close dodge = satisfying "whoosh"
-Reinforces skilled play
-Power-Up Acquisition:
-Rising pitch sequence
-"Jackpot" sound for rare drops
-Satisfying collection feedback
-
-11. Key Design Changes Summary
-Previous System:
-Districts only defended from attacks
-Single "enemy base" endgame
-Motherships were mini-bosses
-New System:
-Districts have three states: Friendly, Threatened, Occupied
-Two mission types:
-Defense: 15 waves (current gameplay)
-Assault: Destroy enemy ground base
-Battleships are mini-bosses that attack districts (renamed from motherships)
-Mothership is the final boss (unlocked when all districts secured)
-Strategic layer: Balance defending territory vs. reclaiming lost ground
-Dynamic campaign: Player failure creates new challenges (occupied districts)
-Clear victory path: Secure planet → Assault Mothership → Win
-Psychological Engagement Systems (v2.0):
-Dynamic States: Districts use Loss Aversion (Investment Levels) to increase stakes
-Variable Rewards: Base rewards are randomized to create a Skinner Box loop
-Sensory Polish: Feedback is tuned to "Casino-style" intensity to maximize satisfaction
-Retention Mechanics: Near-miss timers and locked content ensure high replayability and "just-one-more-turn" gameplay
+## 9. Key Design Changes Summary (v2.0)
+*   **Resource vs. Score:** Humans are now ammunition for the ground war via the "Strike Force" Carry and Deployment system.
+*   **Inertia Mechanic:** Carrying humans adds weight, creating a risk/reward balance.
+*   **Operative Depth:** Added 4 distinct classes (Infantry, Gunner, Medic, Saboteur) and AI behaviors (Defensive Perimeter).
+*   **Weapon Synergy:** Tier 3 ship overflow upgrades ground troops.
+*   **Second Chance Mechanic:** On-Foot Command turns the pilot into a Squad Leader, using "Bullet Hell" squad tactics and "Sacrifice" mechanics to rebuild the ship.
