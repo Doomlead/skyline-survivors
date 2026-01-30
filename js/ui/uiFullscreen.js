@@ -17,7 +17,7 @@ const FullscreenController = (function() {
         radarContainer = document.getElementById('radar-container');
         radarSlot = document.getElementById('gameplay-radar-slot');
         hudContainer = document.getElementById('hud-container');
-        fullscreenTarget = document.getElementById('gameplay-shell');
+        fullscreenTarget = document.getElementById('game-layout') || document.getElementById('gameplay-shell');
         toggleButtons = [
             document.getElementById('fullscreen-toggle'),
             document.getElementById('fullscreen-overlay-toggle')
