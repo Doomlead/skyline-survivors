@@ -17,7 +17,7 @@ const FullscreenController = (function() {
         radarContainer = document.getElementById('radar-container');
         radarSlot = document.getElementById('gameplay-radar-slot');
         hudContainer = document.getElementById('hud-container');
-        fullscreenTarget = document.getElementById('gameplay-shell');
+        fullscreenTarget = document.getElementById('game-layout') || document.getElementById('gameplay-shell');
         toggleButtons = [
             document.getElementById('fullscreen-toggle'),
             document.getElementById('fullscreen-overlay-toggle')
@@ -158,7 +158,13 @@ const FullscreenController = (function() {
                 radarOriginalParent = radarContainer.parentElement;
                 radarOriginalNextSibling = radarContainer.nextElementSibling;
             }
-            radarSlot.appendChild(radarContainer);
+            if (radarOriginalParent && radarOriginalParent !== radarContainer.parentElement) {
+                if (radarOriginalNextSibling && radarOriginalParent.contains(radarOriginalNextSibling)) {
+                    radarOriginalParent.insertBefore(radarContainer, radarOriginalNextSibling);
+                } else {
+                    radarOriginalParent.appendChild(radarContainer);
+                }
+            }
         } else if (radarOriginalParent) {
             if (radarOriginalNextSibling && radarOriginalParent.contains(radarOriginalNextSibling)) {
                 radarOriginalParent.insertBefore(radarContainer, radarOriginalNextSibling);
@@ -179,7 +185,7 @@ const FullscreenController = (function() {
                 hudOriginalNextSibling = hudContainer.nextElementSibling;
             }
             if (radarSlot && radarSlot.parentElement) {
-                radarSlot.parentElement.insertBefore(hudContainer, radarSlot);
+                radarSlot.parentElement.insertBefore(hudContainer, radarSlot.nextSibling);
             } else if (fullscreenTarget.firstChild) {
                 fullscreenTarget.insertBefore(hudContainer, fullscreenTarget.firstChild);
             } else {
