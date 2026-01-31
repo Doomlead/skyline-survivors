@@ -23,6 +23,11 @@ const DistrictLayoutManager = (function() {
     
     function switchToDistrictLayout() {
         if (currentLayout === 'district') return;
+
+        if (typeof FullscreenController !== 'undefined' && FullscreenController.forceExitFullscreen) {
+            FullscreenController.forceExitFullscreen();
+        }
+
         currentLayout = 'district';
         
         const gameLayout = document.getElementById('game-layout');
@@ -45,6 +50,14 @@ const DistrictLayoutManager = (function() {
                     window.game.scale.refresh();
                 }
             }, 50);
+        }
+
+        if (typeof applyResponsiveResize === 'function') {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    applyResponsiveResize({ force: true });
+                });
+            });
         }
 
         // Hide other HUD elements
