@@ -158,7 +158,13 @@ const FullscreenController = (function() {
                 radarOriginalParent = radarContainer.parentElement;
                 radarOriginalNextSibling = radarContainer.nextElementSibling;
             }
-            radarSlot.appendChild(radarContainer);
+            if (radarOriginalParent && radarOriginalParent !== radarContainer.parentElement) {
+                if (radarOriginalNextSibling && radarOriginalParent.contains(radarOriginalNextSibling)) {
+                    radarOriginalParent.insertBefore(radarContainer, radarOriginalNextSibling);
+                } else {
+                    radarOriginalParent.appendChild(radarContainer);
+                }
+            }
         } else if (radarOriginalParent) {
             if (radarOriginalNextSibling && radarOriginalParent.contains(radarOriginalNextSibling)) {
                 radarOriginalParent.insertBefore(radarContainer, radarOriginalNextSibling);
