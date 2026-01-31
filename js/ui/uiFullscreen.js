@@ -179,7 +179,7 @@ const FullscreenController = (function() {
                 hudOriginalNextSibling = hudContainer.nextElementSibling;
             }
             if (radarSlot && radarSlot.parentElement) {
-                radarSlot.parentElement.insertBefore(hudContainer, radarSlot);
+                radarSlot.parentElement.insertBefore(hudContainer, radarSlot.nextSibling);
             } else if (fullscreenTarget.firstChild) {
                 fullscreenTarget.insertBefore(hudContainer, fullscreenTarget.firstChild);
             } else {
