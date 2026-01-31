@@ -85,34 +85,32 @@ function applyResponsiveResize(options = {}) {
     }
 
     // 4. Normal Game Mode Logic:
-    const { width, height } = getResponsiveScale();
-    
-    // Only resize if the dimensions are valid
-    if (width > 0 && height > 0) {
-        if (!force && width === lastResizeWidth && height === lastResizeHeight) {
+    const container = document.getElementById('game-container');
+    if (container && container.clientWidth > 0 && container.clientHeight > 0) {
+        if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
             return;
         }
-        console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${width}x${height}`);
-        
+        console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${container.clientWidth}x${container.clientHeight}`);
+
         // Clear any inline styles that might have been set during fullscreen
         game.canvas.style.width = '';
         game.canvas.style.height = '';
-        
+
         // Force Phaser to use these dimensions
-        game.scale.resize(width, height);
-        
+        game.scale.resize(container.clientWidth, container.clientHeight);
+
         // Set CSS to match
-        game.canvas.style.width = `${width}px`;
-        game.canvas.style.height = `${height}px`;
-        
+        game.canvas.style.width = `${container.clientWidth}px`;
+        game.canvas.style.height = `${container.clientHeight}px`;
+
         if (typeof resizeParallaxLayers === 'function') {
-            resizeParallaxLayers(width, height);
+            resizeParallaxLayers(container.clientWidth, container.clientHeight);
         }
-        
+
         // Refresh the scale manager internals
         game.scale.refresh();
-        lastResizeWidth = width;
-        lastResizeHeight = height;
+        lastResizeWidth = container.clientWidth;
+        lastResizeHeight = container.clientHeight;
     }
 }
 
