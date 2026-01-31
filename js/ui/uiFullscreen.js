@@ -233,3 +233,5 @@ const FullscreenController = (function() {
         forceExitFullscreen
     };
 })();
+
+window.FullscreenController = FullscreenController;

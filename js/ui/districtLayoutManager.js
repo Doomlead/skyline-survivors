@@ -24,6 +24,13 @@ const DistrictLayoutManager = (function() {
     function switchToDistrictLayout() {
         if (currentLayout === 'district') return;
         currentLayout = 'district';
+
+        if (window.FullscreenController?.forceExitFullscreen) {
+            window.FullscreenController.forceExitFullscreen();
+        } else if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen();
+            document.body.classList.remove('fullscreen-active');
+        }
         
         const gameLayout = document.getElementById('game-layout');
         const districtLayout = document.getElementById('district-layout');
@@ -43,6 +50,9 @@ const DistrictLayoutManager = (function() {
             setTimeout(() => {
                 if (window.game) {
                     window.game.scale.refresh();
+                }
+                if (typeof applyResponsiveResize === 'function') {
+                    applyResponsiveResize({ force: true });
                 }
             }, 50);
         }
