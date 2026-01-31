@@ -56,12 +56,22 @@ body.fullscreen-active #gameplay-shell {
     height: 100%;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 body.fullscreen-active #gameplay-radar-slot,
 body.fullscreen-active #radar-container {
     max-width: none;
     width: 100%;
+}
+
+body.fullscreen-active #gameplay-radar-slot {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    pointer-events: none;
 }
 
 body.fullscreen-active #game-container {
@@ -74,6 +84,14 @@ body.fullscreen-active #game-container {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+body.fullscreen-active #hud-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
 }
 
 /* Game Layout (default) */
