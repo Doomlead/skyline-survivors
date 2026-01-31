@@ -74,6 +74,7 @@ body.fullscreen-active #game-container {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 0;
 }
 
 /* Game Layout (default) */
