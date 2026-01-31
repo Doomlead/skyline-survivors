@@ -24,6 +24,10 @@ const DistrictLayoutManager = (function() {
     function switchToDistrictLayout() {
         if (currentLayout === 'district') return;
         currentLayout = 'district';
+
+        if (window.FullscreenController?.forceExitFullscreen) {
+            window.FullscreenController.forceExitFullscreen();
+        }
         
         const gameLayout = document.getElementById('game-layout');
         const districtLayout = document.getElementById('district-layout');
