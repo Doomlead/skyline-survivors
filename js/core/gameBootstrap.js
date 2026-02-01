@@ -85,34 +85,38 @@ function applyResponsiveResize(options = {}) {
     }
 
     // 4. Normal Game Mode Logic:
-    const { width, height } = getResponsiveScale();
-    
-    // Only resize if the dimensions are valid
-    if (width > 0 && height > 0) {
-        if (!force && width === lastResizeWidth && height === lastResizeHeight) {
+    const container = document.getElementById('game-container');
+    if (container && container.clientWidth > 0 && container.clientHeight > 0) {
+        const responsive = typeof getResponsiveScale === 'function'
+            ? getResponsiveScale()
+            : { width: container.clientWidth, height: container.clientHeight };
+        const targetWidth = responsive.width || container.clientWidth;
+        const targetHeight = responsive.height || container.clientHeight;
+
+        if (!force && targetWidth === lastResizeWidth && targetHeight === lastResizeHeight) {
             return;
         }
-        console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${width}x${height}`);
-        
+        console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${targetWidth}x${targetHeight}`);
+
         // Clear any inline styles that might have been set during fullscreen
         game.canvas.style.width = '';
         game.canvas.style.height = '';
-        
+
         // Force Phaser to use these dimensions
-        game.scale.resize(width, height);
-        
+        game.scale.resize(targetWidth, targetHeight);
+
         // Set CSS to match
-        game.canvas.style.width = `${width}px`;
-        game.canvas.style.height = `${height}px`;
-        
+        game.canvas.style.width = `${targetWidth}px`;
+        game.canvas.style.height = `${targetHeight}px`;
+
         if (typeof resizeParallaxLayers === 'function') {
-            resizeParallaxLayers(width, height);
+            resizeParallaxLayers(targetWidth, targetHeight);
         }
-        
+
         // Refresh the scale manager internals
         game.scale.refresh();
-        lastResizeWidth = width;
-        lastResizeHeight = height;
+        lastResizeWidth = targetWidth;
+        lastResizeHeight = targetHeight;
     }
 }
 
