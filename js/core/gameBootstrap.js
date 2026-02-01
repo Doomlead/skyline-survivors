@@ -87,30 +87,36 @@ function applyResponsiveResize(options = {}) {
     // 4. Normal Game Mode Logic:
     const container = document.getElementById('game-container');
     if (container && container.clientWidth > 0 && container.clientHeight > 0) {
-        if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
+        const responsive = typeof getResponsiveScale === 'function'
+            ? getResponsiveScale()
+            : { width: container.clientWidth, height: container.clientHeight };
+        const targetWidth = responsive.width || container.clientWidth;
+        const targetHeight = responsive.height || container.clientHeight;
+
+        if (!force && targetWidth === lastResizeWidth && targetHeight === lastResizeHeight) {
             return;
         }
-        console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${container.clientWidth}x${container.clientHeight}`);
+        console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${targetWidth}x${targetHeight}`);
 
         // Clear any inline styles that might have been set during fullscreen
         game.canvas.style.width = '';
         game.canvas.style.height = '';
 
         // Force Phaser to use these dimensions
-        game.scale.resize(container.clientWidth, container.clientHeight);
+        game.scale.resize(targetWidth, targetHeight);
 
         // Set CSS to match
-        game.canvas.style.width = `${container.clientWidth}px`;
-        game.canvas.style.height = `${container.clientHeight}px`;
+        game.canvas.style.width = `${targetWidth}px`;
+        game.canvas.style.height = `${targetHeight}px`;
 
         if (typeof resizeParallaxLayers === 'function') {
-            resizeParallaxLayers(container.clientWidth, container.clientHeight);
+            resizeParallaxLayers(targetWidth, targetHeight);
         }
 
         // Refresh the scale manager internals
         game.scale.refresh();
-        lastResizeWidth = container.clientWidth;
-        lastResizeHeight = container.clientHeight;
+        lastResizeWidth = targetWidth;
+        lastResizeHeight = targetHeight;
     }
 }
 
