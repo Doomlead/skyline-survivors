@@ -241,6 +241,7 @@ function create() {
     this.assaultTargets = this.physics.add.group();
     this.garrisonDefenders = this.physics.add.group();
     this.friendlies = this.physics.add.group();
+    this.operatives = this.physics.add.group();
 
     this.particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
 
@@ -295,6 +296,7 @@ function create() {
     this.physics.add.overlap(this.veritech, this.enemyProjectiles, playerHitProjectile, null, this);
     this.physics.add.overlap(this.veritech, this.powerUps, collectPowerUp, null, this);
     this.physics.add.overlap(this.veritech, this.humans, rescueHuman, null, this);
+    this.physics.add.overlap(this.enemyProjectiles, this.operatives, hitOperative, null, this);
 
     this.physics.add.overlap(this.drones, this.enemies, droneHitEnemy, null, this);
     this.physics.add.overlap(this.drones, this.enemyProjectiles, droneHitProjectile, null, this);
@@ -418,6 +420,7 @@ function update(time, delta) {
     updateDrones(this, time);
     updateHumans(this);
     updateHangars(this, delta);
+    updateOperatives(this, time, delta);
     updateGarrisonDefenders(this, time, delta);
     updateBosses(this, time, delta);
     updateMothershipBosses(this, time, delta);

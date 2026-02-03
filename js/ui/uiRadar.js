@@ -4,7 +4,7 @@
 
 function updateRadar(scene) {
     if (!radarCtx || !scene) return;
-    const { enemies, garrisonDefenders, humans, bosses } = scene;
+    const { enemies, garrisonDefenders, operatives, humans, bosses } = scene;
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -93,6 +93,25 @@ function updateRadar(scene) {
             radarCtx.fillStyle = color;
             radarCtx.beginPath();
             radarCtx.arc(dx, dy, 2.5, 0, Math.PI * 2);
+            radarCtx.fill();
+        });
+    }
+
+    if (operatives) {
+        operatives.children.entries.forEach(operative => {
+            if (!operative.active) return;
+            const ox = operative.x * scaleX;
+            const oy = (operative.y / CONFIG.worldHeight) * height;
+            let color = '#60a5fa';
+            switch (operative.operativeType) {
+                case 'infantry': color = '#38bdf8'; break;
+                case 'heavy': color = '#f97316'; break;
+                case 'medic': color = '#7dd3fc'; break;
+                case 'saboteur': color = '#22d3ee'; break;
+            }
+            radarCtx.fillStyle = color;
+            radarCtx.beginPath();
+            radarCtx.arc(ox, oy, 2.5, 0, Math.PI * 2);
             radarCtx.fill();
         });
     }
