@@ -174,7 +174,8 @@ const gameState = {
         branch: 'dropship',
         requiredAlienTech: 0,
         collectedAlienTech: 0,
-        shipReturned: false
+        shipReturned: false,
+        hangarRebuildTimer: 0
     }
 };
 
@@ -357,7 +358,8 @@ function resetGameState() {
         branch: 'dropship',
         requiredAlienTech: 0,
         collectedAlienTech: 0,
-        shipReturned: false
+        shipReturned: false,
+        hangarRebuildTimer: 0
     };
 
     if (window.ShipController?.resetCargo) {

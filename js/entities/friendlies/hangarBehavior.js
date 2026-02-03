@@ -7,6 +7,9 @@ const HANGAR_DROP_OFF_CONFIG = {
     yRange: 70,
     botSpawnOffset: 70
 };
+const HANGAR_REBUILD_CONFIG = {
+    durationMs: 30000
+};
 
 function isPlayerOverHangar(scene, hangar) {
     const player = getActivePlayer(scene);
@@ -62,7 +65,31 @@ function dropOffCargo(scene, hangar) {
     }
 }
 
-function updateHangars(scene, time) {
+function handleHangarRebuild(scene, hangar, delta) {
+    const objective = gameState.rebuildObjective;
+    if (!objective || !objective.active || !veritechState.destroyed || !pilotState.active) return;
+    if (!scene || !hangar || !hangar.active) return;
+
+    if (!isPlayerOverHangar(scene, hangar)) {
+        objective.hangarRebuildTimer = 0;
+        return;
+    }
+
+    objective.hangarRebuildTimer += delta;
+    if (objective.hangarRebuildTimer < HANGAR_REBUILD_CONFIG.durationMs) return;
+
+    objective.extractionX = hangar.x;
+    objective.extractionY = hangar.y;
+    rebuildVeritechAtExtraction(scene, objective);
+    objective.active = false;
+    objective.stage = null;
+    objective.timer = 0;
+    objective.encounterSpawned = false;
+    objective.hangarRebuildTimer = 0;
+    objective.shipReturned = true;
+}
+
+function updateHangars(scene, time, delta) {
     const { friendlies } = scene;
     if (!friendlies || !friendlies.children) return;
 
@@ -78,5 +105,6 @@ function updateHangars(scene, time) {
         friendly.setTint(Phaser.Display.Color.GetColor(tintColor.r, tintColor.g, tintColor.b));
         friendly.y = friendly.baseY + Math.sin(time * 0.002 + friendly.blinkOffset) * 1.5;
         dropOffCargo(scene, friendly);
+        handleHangarRebuild(scene, friendly, delta);
     });
 }
