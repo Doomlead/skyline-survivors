@@ -212,33 +212,32 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - ❌ **Not Implemented:** ~15%
 
 ### 🚨 Critical v2.0 Mechanics (The "New Fun")
-The game is currently playable as a standard shooter, but lacks the specific "Urban Defender v2.0" hook (The Rescue Loop).
+The core Rescue Loop components (cargo carry, hangar drop-off, operative deployment) are now present. The remaining gaps are mostly in *feel*, *feedback*, and *synergy*.
 
-1.  **The Extraction Hub (Hangar):** Needs to be placed in the level.
-2.  **The Carry Mechanic:** Ship needs `currentCargo` variable.
-3.  **The Deployment Logic:** Dropping cargo at Hangar = Spawn `Operative`.
-4.  **Inertia Scaling:** Ship physics update: `drag = baseDrag + (cargo * weightModifier)`.
+1.  **Inertia Scaling:** Ship physics update: `drag = baseDrag + (cargo * weightModifier)`.
+2.  **Cargo/Squad UI:** HUD indicator for carried civilians and active operatives.
+3.  **Guardian Defensive Perimeter:** Operatives forming a ring and prioritizing protection while in Guardian form.
+4.  **Squad Leader Aura:** On-foot comrades follow the pilot and focus fire in formation.
+5.  **Hangar-Based Rebuild Loop:** Tie ship rebuild to the hangar/defense point rather than the dropship encounter.
 
 ### Revised Immediate Next Steps:
 
-**Priority 1: The "Rescue Loop" MVP (3-4 Days)**
-- Modify `ShipController` to store rescued humans as `Cargo` instead of instant score.
-- Add `Hangar` entity to Defense Maps.
-- Implement `DropOff` logic: If over Hangar -> Empty Cargo -> Spawn `BasicShooterBot`.
-- Implement simple Inertia scaling based on Cargo count.
+**Priority 1: Cargo Weight + HUD Feedback (2-3 Days)**
+- Add inertia scaling to `playerControls` so cargo count influences accel/drag.
+- Add HUD counters for cargo + deployed operatives.
+- Add audio/visual feedback when cargo is dropped off.
 
-**Priority 2: Operative Basics (2-3 Days)**
-- Create `OperativeController`.
-- Behavior State Machine:
-    - *State 1 (Ship Airborne):* Patrol/Engage nearest enemy.
-    - *State 2 (Guardian Form):* Move to position relative to player (Defensive Ring).
-    - *State 3 (On Foot):* Follow player transform (Squad Leader).
+**Priority 2: Guardian/On-Foot Squad Behaviors (3-4 Days)**
+- Implement Guardian defensive ring positioning and fire priorities.
+- Add Squad Leader aura: operatives follow pilot and align their firing angles.
+- Ensure transition logic between patrol/guardian/on-foot states.
 
-**Priority 3: Mothership & Campaign Polish (Existing Goal - 4 Days)**
+**Priority 3: Hangar Rebuild Flow (2-3 Days)**
+- Replace dropship extraction rebuild with a hangar timer/hold-the-line mechanic.
+- Add sacrifice behavior for operatives to body-block shots during rebuild.
+
+**Priority 4: Mothership & Campaign Polish (Existing Goal - 4 Days)**
 - Continue with the Multi-phase Mothership boss as planned (this is still the endgame).
-
-**Priority 4: On-Foot Rebuild (Post-MVP / Stretch)**
-- Implement the logic to respawn the ship if the player survives at the Hangar for X seconds.
 
 ---
 
