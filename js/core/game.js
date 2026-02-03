@@ -28,6 +28,7 @@ function initializeGame(scene) {
     }
     if (gameState.mode === 'classic') {
         spawnEnemyWave(scene);
+        setupHangar(scene);
     }
     updateUI(scene);
 }
@@ -239,6 +240,7 @@ function create() {
     this.battleships = this.physics.add.group();
     this.assaultTargets = this.physics.add.group();
     this.garrisonDefenders = this.physics.add.group();
+    this.friendlies = this.physics.add.group();
 
     this.particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
 
@@ -415,6 +417,7 @@ function update(time, delta) {
     updatePowerUpMagnet(this);
     updateDrones(this, time);
     updateHumans(this);
+    updateHangars(this, delta);
     updateGarrisonDefenders(this, time, delta);
     updateBosses(this, time, delta);
     updateMothershipBosses(this, time, delta);

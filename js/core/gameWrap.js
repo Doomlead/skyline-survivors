@@ -97,6 +97,7 @@ function updateEntityWrapping(scene) {
         humans,
         drones,
         garrisonDefenders,
+        friendlies,
         bosses,
         battleships,
         explosions,
@@ -173,6 +174,7 @@ function updateEntityWrapping(scene) {
     processGroup(powerUps);
     processGroup(humans);
     processGroup(drones);
+    processGroup(friendlies);
     processGroup(bosses);
     processGroup(battleships);
     processGroup(assaultTargets);
