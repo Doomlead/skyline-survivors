@@ -21,11 +21,37 @@ function isPlayerOverHangar(scene, hangar) {
 }
 
 function dropOffCargo(scene, hangar) {
+    const { audioManager } = scene;
     const cargoCount = window.ShipController?.cargo ?? 0;
     if (cargoCount <= 0) return;
     if (!isPlayerOverHangar(scene, hangar)) return;
 
     window.ShipController?.resetCargo();
+    const dropOffScore = getMissionScaledReward(HUMAN_RESCUE_SCORE * HUMAN_DROP_OFF_SCORE_MULTIPLIER * cargoCount);
+    gameState.score += dropOffScore;
+
+    if (audioManager) audioManager.playSound('cargoDrop');
+    const dropText = scene.add.text(
+        hangar.x,
+        hangar.y - 62,
+        `SQUAD DEPLOYED +${dropOffScore}`,
+        {
+            fontSize: '16px',
+            fontFamily: 'Orbitron',
+            color: '#38bdf8',
+            stroke: '#0f172a',
+            strokeThickness: 4
+        }
+    ).setOrigin(0.5);
+    scene.tweens.add({
+        targets: dropText,
+        y: hangar.y - 92,
+        alpha: 0,
+        duration: 1200,
+        ease: 'Power2',
+        onComplete: () => dropText.destroy()
+    });
+    createExplosion(scene, hangar.x, hangar.y - 18, 0x38bdf8);
 
     for (let i = 0; i < cargoCount; i++) {
         const offsetX = Phaser.Math.Between(-HANGAR_DROP_OFF_CONFIG.botSpawnOffset, HANGAR_DROP_OFF_CONFIG.botSpawnOffset);

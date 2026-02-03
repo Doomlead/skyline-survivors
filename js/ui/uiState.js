@@ -2,7 +2,7 @@
 // file js/ui/uiState.js UI shared state and helpers
 // ------------------------
 
-let scoreEl, waveEl, timerEl, bombsEl, livesEl, powerupsEl;
+let scoreEl, waveEl, timerEl, bombsEl, livesEl, powerupsEl, cargoEl, operativesEl;
 let districtEl, threatEl, rewardEl;
 let assaultHudEl, assaultCoreFillEl, assaultCoreLabelEl, assaultShieldLabelEl;
 let mothershipHudEl, mothershipCoreFillEl, mothershipCoreLabelEl, mothershipPhaseLabelEl;

@@ -7,8 +7,12 @@
 
         <!-- External HUD Container -->
         <div id="hud-container" class="w-full bg-slate-900/90 border border-slate-700 p-2 rounded-lg flex flex-col gap-1 shadow-lg relative z-10">
-            <div class="flex flex-wrap justify-between items-center text-xs md:text-sm font-orbitron font-bold px-2">
+            <div class="flex flex-wrap justify-between items-center text-xs md:text-sm font-orbitron font-bold px-2 gap-3">
                 <div class="text-cyan-400 w-32 text-left">SCORE: <span id="score-el">000000</span></div>
+                <div class="flex flex-col text-[10px] md:text-xs text-emerald-300 uppercase tracking-[0.15em] min-w-[110px]">
+                    <div>Cargo: <span id="cargo-el">00</span></div>
+                    <div>Ops: <span id="operatives-el">00</span></div>
+                </div>
                 <div class="text-amber-400 text-center flex-1" id="wave-el">WAVE 1  ENEMIES: 020</div>
                 <div class="text-white text-center flex-1 hidden" id="timer-el">TIME: 00:00</div>
                 <div class="flex gap-3 justify-end w-auto md:w-60 items-center">

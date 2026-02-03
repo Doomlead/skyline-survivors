@@ -23,11 +23,13 @@ function rescueHuman(playerSprite, human) {
     if (!human.isAbducted && !isFalling) return;
     gameState.humansRescued++;
     const cargoCount = window.ShipController?.addCargo(1) ?? 0;
+    const rescueScore = getMissionScaledReward(HUMAN_RESCUE_SCORE);
+    gameState.score += rescueScore;
     if (audioManager) audioManager.playSound('humanRescued');
     const rescueText = this.add.text(
         human.x,
         human.y - 20,
-        `CARGO +1 (${cargoCount})`,
+        `CARGO +1 (${cargoCount})  +${rescueScore}`,
         {
             fontSize: '16px',
             fontFamily: 'Orbitron',
