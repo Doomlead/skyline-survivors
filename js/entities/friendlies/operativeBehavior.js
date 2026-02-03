@@ -5,18 +5,20 @@
 const OPERATIVE_CLASS_CONFIG = {
     infantry: {
         texture: 'operativeInfantry',
-        scale: 1.65,
+        scale: 1.25,
         fireCooldown: 650,
         range: 420,
         projectileSpeed: 440,
         projectileType: 'normal',
         damage: 1,
         patrolRange: 60,
-        moveSpeed: 80
+        moveSpeed: 80,
+        roamSpeed: 70,
+        roamLeash: 140
     },
     gunner: {
         texture: 'operativeGunner',
-        scale: 1.8,
+        scale: 1.25,
         fireCooldown: 900,
         range: 500,
         projectileSpeed: 500,
@@ -24,11 +26,13 @@ const OPERATIVE_CLASS_CONFIG = {
         damage: 2,
         patrolRange: 50,
         moveSpeed: 65,
-        braceDuration: 700
+        braceDuration: 700,
+        roamSpeed: 60,
+        roamLeash: 160
     },
     medic: {
         texture: 'operativeMedic',
-        scale: 1.6,
+        scale: 1.2,
         fireCooldown: 0,
         range: 0,
         projectileSpeed: 0,
@@ -37,11 +41,13 @@ const OPERATIVE_CLASS_CONFIG = {
         patrolRange: 70,
         moveSpeed: 70,
         supportCooldown: 5200,
-        supportRange: 260
+        supportRange: 260,
+        roamSpeed: 80,
+        roamLeash: 120
     },
     saboteur: {
         texture: 'operativeSaboteur',
-        scale: 1.6,
+        scale: 1.2,
         fireCooldown: 1200,
         range: 360,
         projectileSpeed: 360,
@@ -49,7 +55,9 @@ const OPERATIVE_CLASS_CONFIG = {
         damage: 2,
         patrolRange: 50,
         moveSpeed: 90,
-        empDisableDuration: 3600
+        empDisableDuration: 3600,
+        roamSpeed: 85,
+        roamLeash: 140
     }
 };
 
@@ -81,7 +89,9 @@ function spawnOperative(scene, type, x, y) {
     operative.setScale(config.scale);
     operative.setImmovable(false);
     if (operative.body) {
-        operative.body.setAllowGravity(false);
+        operative.body.setAllowGravity(true);
+        operative.body.setGravityY(60);
+        operative.body.setMaxVelocity(200, 160);
         operative.body.setVelocity(0, 0);
     }
     operative.isOperative = true;
@@ -312,6 +322,24 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier) {
     }
 }
 
+function updateOperativeHomeAnchor(scene, operative, timeSlowMultiplier, delta) {
+    const config = OPERATIVE_CLASS_CONFIG[operative.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
+    const player = getActivePlayer(scene);
+    if (!player || !config.roamSpeed) return;
+
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(operative.homeX, player.x, CONFIG.worldWidth)
+        : (player.x - operative.homeX);
+    if (Math.abs(dx) <= (config.roamLeash || 0)) return;
+
+    const step = Math.sign(dx) * config.roamSpeed * timeSlowMultiplier * (delta / 1000);
+    if (typeof wrapValue === 'function') {
+        operative.homeX = wrapValue(operative.homeX + step, CONFIG.worldWidth);
+    } else {
+        operative.homeX += step;
+    }
+}
+
 function updateOperatives(scene, time, delta) {
     const { friendlies } = scene;
     if (!friendlies) return;
@@ -324,6 +352,7 @@ function updateOperatives(scene, time, delta) {
         if (!friendly || !friendly.body || !friendly.active || !friendly.isOperative) return;
 
         wrapWorldBounds(friendly);
+        updateOperativeHomeAnchor(scene, friendly, timeSlowMultiplier, delta);
 
         const terrainVariation = Math.sin(friendly.x / 200) * 30;
         const minClearance = 28;
