@@ -52,7 +52,8 @@ function createPowerUpGraphics(scene) {
         bomb:       0xFFD700,
         double:     0xA8FF00,
         invincibility: 0xD4D4D4,
-        timeSlow:   0x007F6E
+        timeSlow:   0x007F6E,
+        medkit:     0x22d3ee
     };
 
     // Size 24x24 for detail
@@ -291,6 +292,7 @@ function createGraphics(scene) {
     createEnemyProjectileGraphics(scene);
     createOriginalEnemyGraphics(scene);
     createNewEnemyGraphics(scene);
+    createOperativeGraphics(scene);
     createGarrisonDefenderGraphics(scene);
     createBattleshipGraphics(scene);
     createAssaultBaseGraphics(scene);

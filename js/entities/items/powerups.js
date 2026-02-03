@@ -92,7 +92,8 @@ function collectPowerUp(playerSprite, powerUp) {
         bomb: 'SMART BOMB',
         double: 'DOUBLE DAMAGE',
         invincibility: 'INVINCIBILITY',
-        timeSlow: 'TIME SLOW'
+        timeSlow: 'TIME SLOW',
+        medkit: 'MEDKIT'
     };
 
     const nameText = this.add.text(
@@ -186,6 +187,10 @@ function collectPowerUp(playerSprite, powerUp) {
             break;
         case 'timeSlow':
             p.timeSlow = 5000;
+            break;
+        case 'medkit':
+            p.shield = 1;
+            p.invincibility = Math.max(p.invincibility || 0, 1200);
             break;
     }
 
