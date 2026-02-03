@@ -4,6 +4,8 @@
 
 function createUI(scene) {
     scoreEl = document.getElementById('score-el');
+    cargoEl = document.getElementById('cargo-el');
+    operativesEl = document.getElementById('operatives-el');
     waveEl = document.getElementById('wave-el');
     timerEl = document.getElementById('timer-el');
     bombsEl = document.getElementById('bombs-el');
@@ -76,6 +78,15 @@ function updateUI(scene) {
     };
 
     scoreEl.innerText = gameState.score.toString().padStart(6, '0');
+    if (cargoEl) {
+        const cargoCount = window.ShipController?.cargo ?? 0;
+        cargoEl.innerText = String(cargoCount).padStart(2, '0');
+    }
+    if (operativesEl) {
+        const friendlies = scene?.friendlies?.children?.entries || [];
+        const deployed = friendlies.filter(entry => entry.active && entry.isOperative).length;
+        operativesEl.innerText = String(deployed).padStart(2, '0');
+    }
 
     if (gameState.mode === 'survival') {
         if (assaultHudEl) assaultHudEl.classList.add('hidden');
