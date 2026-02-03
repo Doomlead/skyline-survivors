@@ -418,6 +418,7 @@ function update(time, delta) {
     updateDrones(this, time);
     updateHumans(this);
     updateHangars(this, time);
+    updateOperatives(this, time, delta);
     updateGarrisonDefenders(this, time, delta);
     updateBosses(this, time, delta);
     updateMothershipBosses(this, time, delta);
