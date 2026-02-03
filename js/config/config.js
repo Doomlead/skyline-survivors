@@ -357,4 +357,8 @@ function resetGameState() {
         collectedAlienTech: 0,
         shipReturned: false
     };
+
+    if (window.ShipController?.resetCargo) {
+        window.ShipController.resetCargo();
+    }
 }
