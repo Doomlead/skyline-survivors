@@ -44,6 +44,21 @@ function createAssaultComponent(scene, x, y, texture, role, hp) {
     return component;
 }
 
+function isAssaultShieldBlocking(scene) {
+    const objective = gameState.assaultObjective;
+    if (!objective || objective.shieldsRemaining <= 0) return false;
+    const { assaultTargets } = scene;
+    if (!assaultTargets) return true;
+    const now = scene.time?.now || 0;
+    let blocking = false;
+    assaultTargets.children.entries.forEach((target) => {
+        if (!target || !target.active || target.assaultRole !== 'shield') return;
+        if (target.empDisabledUntil && target.empDisabledUntil > now) return;
+        blocking = true;
+    });
+    return blocking;
+}
+
 function setupAssaultObjective(scene) {
     if (!scene || !scene.assaultTargets) return;
     const objective = gameState.assaultObjective;
@@ -97,7 +112,12 @@ function hitAssaultTarget(projectile, target) {
         return;
     }
 
-    if (target.assaultRole === 'core' && objective.shieldsRemaining > 0) {
+    if (projectile && projectile.empDisableDuration && (target.assaultRole === 'turret' || target.assaultRole === 'shield')) {
+        target.empDisabledUntil = this.time.now + projectile.empDisableDuration;
+        createExplosion(this, target.x, target.y, 0x38bdf8);
+    }
+
+    if (target.assaultRole === 'core' && isAssaultShieldBlocking(this)) {
         if (objective.shieldHitCooldown <= 0) {
             createExplosion(this, target.x, target.y - 6, 0x38bdf8);
             objective.shieldHitCooldown = 350;
