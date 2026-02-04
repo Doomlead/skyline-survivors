@@ -26,6 +26,9 @@ function createUI(scene) {
     mothershipCoreFillEl = document.getElementById('mothership-core-fill');
     mothershipCoreLabelEl = document.getElementById('mothership-core-label');
     mothershipPhaseLabelEl = document.getElementById('mothership-phase-label');
+    rebuildHudEl = document.getElementById('rebuild-hud');
+    rebuildTextEl = document.getElementById('rebuild-text');
+    rebuildTimerEl = document.getElementById('rebuild-timer');
     decayHudEl = document.getElementById('decay-hud');
     decayPrimaryFillEl = document.getElementById('decay-primary-fill');
     decayPrimaryLabelEl = document.getElementById('decay-primary-label');
@@ -153,6 +156,30 @@ function updateUI(scene) {
         const enemiesLeft = Math.max(0, (gameState.enemiesToKillThisWave || 0) - (gameState.killsThisWave || 0));
         const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
         waveEl.innerText = `WAVE ${gameState.wave}/${waveLimit}  ENEMIES: ${String(enemiesLeft).padStart(3, '0')}`;
+    }
+
+    if (rebuildHudEl) {
+        const objective = gameState.rebuildObjective;
+        const rebuildActive = objective?.branch === 'hangar'
+            && objective?.active
+            && veritechState.destroyed
+            && pilotState.active;
+        if (!rebuildActive) {
+            rebuildHudEl.classList.add('hidden');
+        } else {
+            rebuildHudEl.classList.remove('hidden');
+            const remainingMs = Math.max(0, 30000 - (objective?.hangarRebuildTimer || 0));
+            const remainingSec = Math.ceil(remainingMs / 1000);
+            if (rebuildTextEl) {
+                const label = objective?.stage === 'hold_hangar'
+                    ? 'Hold under the hangar to rebuild.'
+                    : 'Return to the hangar and stand underneath.';
+                rebuildTextEl.innerText = label;
+            }
+            if (rebuildTimerEl) {
+                rebuildTimerEl.innerText = `00:${String(Math.min(99, remainingSec)).padStart(2, '0')}`;
+            }
+        }
     }
 
     bombsEl.innerText = gameState.smartBombs;

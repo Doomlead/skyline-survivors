@@ -8,7 +8,10 @@ const HANGAR_DROP_OFF_CONFIG = {
     botSpawnOffset: 70
 };
 const HANGAR_REBUILD_CONFIG = {
-    durationMs: 30000
+    durationMs: 30000,
+    xRange: 70,
+    yRange: 24,
+    yOffset: 18
 };
 
 function isPlayerOverHangar(scene, hangar) {
@@ -21,6 +24,20 @@ function isPlayerOverHangar(scene, hangar) {
     const dy = player.y - dropOffY;
     return Math.abs(dx) <= HANGAR_DROP_OFF_CONFIG.xRange
         && Math.abs(dy) <= HANGAR_DROP_OFF_CONFIG.yRange;
+}
+
+function isPilotInRebuildZone(scene, hangar) {
+    if (!scene || !hangar || !pilotState.active || !scene.pilot) return false;
+    if (!pilotState.grounded) return false;
+    const pilot = scene.pilot;
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(hangar.x, pilot.x, CONFIG.worldWidth)
+        : (pilot.x - hangar.x);
+    const groundY = hangar.baseY ?? hangar.y;
+    const targetY = groundY - HANGAR_REBUILD_CONFIG.yOffset;
+    const dy = pilot.y - targetY;
+    return Math.abs(dx) <= HANGAR_REBUILD_CONFIG.xRange
+        && Math.abs(dy) <= HANGAR_REBUILD_CONFIG.yRange;
 }
 
 function dropOffCargo(scene, hangar) {
@@ -65,16 +82,57 @@ function dropOffCargo(scene, hangar) {
     }
 }
 
+function updateHangarRebuildIndicator(scene, hangar, time) {
+    if (!scene || !hangar) return;
+    if (!hangar.rebuildIndicator) {
+        hangar.rebuildIndicator = scene.add.graphics();
+        hangar.rebuildIndicator.setDepth(FG_DEPTH_BASE + 2);
+    }
+    const indicator = hangar.rebuildIndicator;
+    const pulse = 0.4 + Math.sin(time * 0.004) * 0.35;
+    const groundY = (hangar.baseY ?? hangar.y) - 6;
+    indicator.clear();
+    indicator.lineStyle(2, 0x22d3ee, 0.4 + pulse);
+    indicator.fillStyle(0x0ea5e9, 0.15 + pulse * 0.2);
+    indicator.strokeEllipse(hangar.x, groundY, 110, 24);
+    indicator.fillEllipse(hangar.x, groundY, 110, 24);
+
+    if (!hangar.rebuildLabel) {
+        hangar.rebuildLabel = scene.add.text(hangar.x, hangar.y - 80, 'REBUILD ZONE', {
+            fontSize: '12px',
+            fontFamily: 'Orbitron',
+            color: '#67e8f9',
+            stroke: '#0f172a',
+            strokeThickness: 3
+        }).setOrigin(0.5).setDepth(FG_DEPTH_BASE + 3);
+    }
+    hangar.rebuildLabel.setPosition(hangar.x, hangar.y - 80);
+    hangar.rebuildLabel.setAlpha(0.6 + pulse * 0.4);
+}
+
+function clearHangarRebuildIndicator(hangar) {
+    if (hangar.rebuildIndicator) {
+        hangar.rebuildIndicator.destroy();
+        hangar.rebuildIndicator = null;
+    }
+    if (hangar.rebuildLabel) {
+        hangar.rebuildLabel.destroy();
+        hangar.rebuildLabel = null;
+    }
+}
+
 function handleHangarRebuild(scene, hangar, delta) {
     const objective = gameState.rebuildObjective;
     if (!objective || !objective.active || !veritechState.destroyed || !pilotState.active) return;
     if (!scene || !hangar || !hangar.active) return;
 
-    if (!isPlayerOverHangar(scene, hangar)) {
+    if (!isPilotInRebuildZone(scene, hangar)) {
         objective.hangarRebuildTimer = 0;
+        objective.stage = 'reach_hangar';
         return;
     }
 
+    objective.stage = 'hold_hangar';
     objective.hangarRebuildTimer += delta;
     if (objective.hangarRebuildTimer < HANGAR_REBUILD_CONFIG.durationMs) return;
 
@@ -106,5 +164,10 @@ function updateHangars(scene, time, delta) {
         friendly.y = friendly.baseY + Math.sin(time * 0.002 + friendly.blinkOffset) * 1.5;
         dropOffCargo(scene, friendly);
         handleHangarRebuild(scene, friendly, delta);
+        if (gameState.rebuildObjective?.active && veritechState.destroyed && pilotState.active) {
+            updateHangarRebuildIndicator(scene, friendly, time);
+        } else {
+            clearHangarRebuildIndicator(friendly);
+        }
     });
 }
