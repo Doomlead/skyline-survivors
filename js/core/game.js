@@ -26,6 +26,7 @@ function initializeGame(scene) {
         const spawnScale = gameState.spawnMultiplier || 1;
         gameState.enemiesToKillThisWave = Math.max(5, Math.round((20 + (gameState.wave - 1) * 5) * spawnScale));
     }
+    setupDefenseHangar(scene);
     if (gameState.mode === 'classic') {
         spawnEnemyWave(scene);
     }
@@ -239,6 +240,7 @@ function create() {
     this.battleships = this.physics.add.group();
     this.assaultTargets = this.physics.add.group();
     this.garrisonDefenders = this.physics.add.group();
+    this.friendlies = this.physics.add.group();
 
     this.particleManager = new ParticleManager(this, CONFIG.worldWidth, CONFIG.worldHeight);
 
@@ -415,6 +417,8 @@ function update(time, delta) {
     updatePowerUpMagnet(this);
     updateDrones(this, time);
     updateHumans(this);
+    updateHangars(this, time, delta);
+    updateOperatives(this, time, delta);
     updateGarrisonDefenders(this, time, delta);
     updateBosses(this, time, delta);
     updateMothershipBosses(this, time, delta);

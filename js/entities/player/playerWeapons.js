@@ -311,6 +311,8 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     scene.time.delayedCall(3000, () => {
         if (proj && proj.active) proj.destroy();
     });
+
+    return proj;
 }
 
 function updateProjectiles(scene) {

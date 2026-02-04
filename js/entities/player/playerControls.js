@@ -68,8 +68,13 @@ function updatePlayer(scene, time, delta) {
     if (veritechState.active) {
         const speed = veritechState.mode === 'fighter' ? 320 : 220;
         const horizontalSpeed = speed * 0.4;
-        const accel = veritechState.mode === 'fighter' ? 0.18 : 0.2;
-        const drag = veritechState.mode === 'fighter' ? 0.92 : 0.9;
+        const baseAccel = veritechState.mode === 'fighter' ? 0.18 : 0.2;
+        const baseDrag = veritechState.mode === 'fighter' ? 0.92 : 0.9;
+        const cargoCount = window.ShipController?.cargo ?? 0;
+        const accelPenalty = Math.min(0.45, cargoCount * 0.06);
+        const accel = baseAccel * (1 - accelPenalty);
+        const dragBoost = Math.min(0.06, cargoCount * 0.01);
+        const drag = Math.min(0.98, baseDrag + dragBoost);
         const gravity = veritechState.mode === 'guardian' ? 520 : 0;
 
         if (left) {

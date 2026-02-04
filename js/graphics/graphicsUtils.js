@@ -292,8 +292,10 @@ function createGraphics(scene) {
     createOriginalEnemyGraphics(scene);
     createNewEnemyGraphics(scene);
     createGarrisonDefenderGraphics(scene);
+    createOperativeGraphics(scene);
     createBattleshipGraphics(scene);
     createAssaultBaseGraphics(scene);
+    createHangarGraphics(scene);
     createMapIconGraphics(scene);
 
     // Boss sprites for boss waves

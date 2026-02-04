@@ -100,7 +100,8 @@ function updateEntityWrapping(scene) {
         bosses,
         battleships,
         explosions,
-        assaultTargets
+        assaultTargets,
+        friendlies
     } = scene;
     const mainCam = scene.cameras.main;
     const scrollX = mainCam.scrollX;
@@ -176,6 +177,7 @@ function updateEntityWrapping(scene) {
     processGroup(bosses);
     processGroup(battleships);
     processGroup(assaultTargets);
+    processGroup(friendlies);
     
     if (explosions && explosions.children) {
         explosions.children.entries.forEach(processEntity);

@@ -49,6 +49,7 @@ function updateAssaultObjective(scene, delta) {
         if (scene.assaultTargets) {
             scene.assaultTargets.children.entries.forEach((target) => {
                 if (!target.active || target.assaultRole !== 'turret') return;
+                if (target.empDisabledUntil && target.empDisabledUntil > scene.time.now) return;
                 const dummy = { x: target.x, y: target.y, enemyType: 'turret' };
                 shootAtPlayer(scene, dummy);
             });

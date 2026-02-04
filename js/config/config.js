@@ -17,6 +17,8 @@ const CONFIG = {
 };
 
 const CLASSIC_WAVE_LIMIT = 15;
+const HUMAN_RESCUE_SCORE = 150;
+const HUMAN_DROP_OFF_SCORE_MULTIPLIER = 2;
 
 const POWERUP_DECAY_CONFIG = {
     assaultMultiplier: 0.75,
@@ -172,7 +174,8 @@ const gameState = {
         branch: 'dropship',
         requiredAlienTech: 0,
         collectedAlienTech: 0,
-        shipReturned: false
+        shipReturned: false,
+        hangarRebuildTimer: 0
     }
 };
 
@@ -355,6 +358,11 @@ function resetGameState() {
         branch: 'dropship',
         requiredAlienTech: 0,
         collectedAlienTech: 0,
-        shipReturned: false
+        shipReturned: false,
+        hangarRebuildTimer: 0
     };
+
+    if (window.ShipController?.resetCargo) {
+        window.ShipController.resetCargo();
+    }
 }
