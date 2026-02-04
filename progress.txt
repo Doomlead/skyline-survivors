@@ -21,7 +21,7 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - **Defend and Reclaim**: Districts exist in three states (Friendly/Threatened/Occupied)
 
 ⚠️ **Partially Implemented:**
-- **Seamless transition (Ship/Foot):** Ejection exists, but the "Squad Leader" mechanics and "Rebuild at Hangar" loop are missing.
+- **Seamless transition (Ship/Foot):** Ejection exists and the hangar rebuild loop is in place, but the "Squad Leader" mechanics are missing.
 - **Resource vs. Score (The Rescue Loop):** Humans can be rescued for points, but they are not yet stored as "Cargo/Ammo" nor do they deploy troops upon drop-off.
 - **Strategic Territory Control:** District states exist, but the "Loss Aversion" investment mechanics are missing.
 
@@ -96,7 +96,7 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - Ship Destruction -> Ejection.
 
 ⚠️ **Partially Implemented:**
-- **Crisis Management:** The loop of "Fight on foot -> Reach Hangar -> Rebuild Ship" is incomplete (currently just game over or basic survival).
+- **Crisis Management:** The loop of "Fight on foot -> Reach Hangar -> Rebuild Ship" works in defense missions (30s hold timer), but squad behavior is still minimal.
 
 ---
 
@@ -132,14 +132,14 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 
 ### 4.3. On-Foot Command (Ship Destruction)
 
-**Implementation Status: 20% Complete**
+**Implementation Status: 45% Complete**
 
 ✅ **Fully Implemented:**
 - Ejection Sequence (Pilot sprite, basic pistol).
+- **Extraction Defense:** Holding position under the Hangar for 30 seconds rebuilds the Veritech, with on-world guidance.
 
 ❌ **Not Implemented:**
 - **Squad Leader Aura:** Comrades following pilot movement (Bullet Hell wall).
-- **Extraction Defense:** The "Hold the Line" timer at the Hangar to rebuild the ship.
 - **Sacrifice Mechanic:** AI behavior to body-block shots during rebuild.
 
 ### 4.4. Power-Up System
@@ -218,7 +218,7 @@ The core Rescue Loop components (cargo carry, hangar drop-off, operative deploym
 2.  **Cargo/Squad UI:** HUD indicator for carried civilians and active operatives.
 3.  **Guardian Defensive Perimeter:** Operatives forming a ring and prioritizing protection while in Guardian form.
 4.  **Squad Leader Aura:** On-foot comrades follow the pilot and focus fire in formation.
-5.  **Hangar-Based Rebuild Loop:** Tie ship rebuild to the hangar/defense point rather than the dropship encounter.
+5.  **Hangar-Based Rebuild Loop:** Implemented with a 30s hold timer and hangar indicator for rebuild guidance.
 
 ### Revised Immediate Next Steps:
 
@@ -233,8 +233,8 @@ The core Rescue Loop components (cargo carry, hangar drop-off, operative deploym
 - Ensure transition logic between patrol/guardian/on-foot states.
 
 **Priority 3: Hangar Rebuild Flow (2-3 Days)**
-- Replace dropship extraction rebuild with a hangar timer/hold-the-line mechanic.
-- Add sacrifice behavior for operatives to body-block shots during rebuild.
+- ✅ Replace dropship extraction rebuild with a hangar timer/hold-the-line mechanic.
+- ❌ Add sacrifice behavior for operatives to body-block shots during rebuild.
 
 **Priority 4: Mothership & Campaign Polish (Existing Goal - 4 Days)**
 - Continue with the Multi-phase Mothership boss as planned (this is still the endgame).

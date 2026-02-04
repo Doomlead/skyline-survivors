@@ -86,17 +86,21 @@ function playerDie(scene) {
         }
         ejectPilot(scene);
         if (gameState.rebuildObjective) {
+            const hasHangar = !!(scene.hangar && scene.hangar.active);
             gameState.rebuildObjective.active = true;
-            gameState.rebuildObjective.stage = 'secure_extraction';
+            gameState.rebuildObjective.branch = hasHangar ? 'hangar' : (gameState.rebuildObjective.branch || 'dropship');
+            gameState.rebuildObjective.stage = hasHangar ? 'secure_hangar' : 'secure_extraction';
             gameState.rebuildObjective.timer = 0;
             gameState.rebuildObjective.encounterSpawned = false;
             gameState.rebuildObjective.extractionX = scene.pilot ? scene.pilot.x : player.x;
             gameState.rebuildObjective.extractionY = scene.pilot ? scene.pilot.y : player.y;
-            gameState.rebuildObjective.branch = gameState.rebuildObjective.branch || 'dropship';
             gameState.rebuildObjective.requiredAlienTech = gameState.rebuildObjective.branch === 'station' ? 3 : 0;
             gameState.rebuildObjective.collectedAlienTech = 0;
             gameState.rebuildObjective.shipReturned = false;
             gameState.rebuildObjective.hangarRebuildTimer = 0;
+            if (hasHangar && typeof showRebuildObjectiveBanner === 'function') {
+                showRebuildObjectiveBanner(scene, 'Reach the hangar and hold position (30s)');
+            }
         }
         playerState.powerUps.invincibility = 1500;
         return;

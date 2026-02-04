@@ -156,10 +156,14 @@ function updateRebuildObjective(scene, delta) {
     const objective = gameState.rebuildObjective;
     if (!objective || !objective.active) return;
 
+    if (objective.branch === 'hangar') {
+        return;
+    }
+
     objective.timer += delta;
 
     if (objective.stage === 'secure_extraction') {
-        if (!objective.encounterSpawned && objective.branch !== 'station') {
+        if (!objective.encounterSpawned && objective.branch === 'dropship') {
             spawnExtractionDropship(scene, objective);
             objective.encounterSpawned = true;
         }
