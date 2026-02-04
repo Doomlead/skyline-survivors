@@ -27,14 +27,11 @@ function spawnDefenseHangar(scene) {
     if (!scene || !scene.friendlies || !isDefenseMission()) return null;
 
     const spawnX = scene.veritech ? scene.veritech.x : CONFIG.worldWidth * 0.5;
-    const spawnY = scene.veritech ? scene.veritech.y : null;
     const hangarX = typeof wrapValue === 'function'
         ? wrapValue(spawnX, CONFIG.worldWidth)
         : spawnX;
     const groundY = getHangarGroundY(scene, hangarX);
-    const hangarY = spawnY !== null
-        ? spawnY
-        : groundY + HANGAR_CONFIG.groundOffset;
+    const hangarY = groundY + HANGAR_CONFIG.groundOffset;
 
     const hangar = scene.friendlies.create(hangarX, hangarY, HANGAR_CONFIG.texture);
     hangar.setOrigin(0.5, 1);
@@ -47,6 +44,7 @@ function spawnDefenseHangar(scene) {
     }
     hangar.isHangar = true;
     hangar.baseY = hangarY;
+    hangar.groundOffset = HANGAR_CONFIG.groundOffset;
     hangar.blinkOffset = Math.random() * Math.PI * 2;
 
     const beaconBeamHeight = Math.max(40, hangarY - groundY - 12);

@@ -126,6 +126,9 @@ function updateHangars(scene, time, delta) {
 
     friendlies.children.entries.forEach((friendly) => {
         if (!friendly || !friendly.active || !friendly.isHangar) return;
+        const groundY = typeof getHangarGroundY === 'function' ? getHangarGroundY(scene, friendly.x) : friendly.baseY;
+        const groundOffset = Number.isFinite(friendly.groundOffset) ? friendly.groundOffset : 0;
+        friendly.baseY = groundY + groundOffset;
         const pulse = 0.65 + Math.sin(time * 0.004 + friendly.blinkOffset) * 0.25;
         const tintColor = Phaser.Display.Color.Interpolate.ColorWithColor(
             { r: 34, g: 197, b: 94 },
