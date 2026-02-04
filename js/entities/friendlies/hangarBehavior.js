@@ -11,7 +11,9 @@ const HANGAR_DROP_OFF_CONFIG = {
 const HANGAR_REBUILD_CONFIG = {
     durationMs: 30000,
     indicatorPulseSpeed: 0.004,
-    indicatorAlpha: 0.75
+    indicatorAlpha: 0.75,
+    xRange: 70,
+    yRange: 24
 };
 
 function isPlayerOverHangar(scene, hangar) {
@@ -24,6 +26,19 @@ function isPlayerOverHangar(scene, hangar) {
     const dy = player.y - dropOffY;
     return Math.abs(dx) <= HANGAR_DROP_OFF_CONFIG.xRange
         && Math.abs(dy) <= HANGAR_DROP_OFF_CONFIG.yRange;
+}
+
+function isPilotUnderHangar(scene, hangar) {
+    if (!scene || !hangar || !scene.pilot || !pilotState.active) return false;
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(hangar.x, scene.pilot.x, CONFIG.worldWidth)
+        : (scene.pilot.x - hangar.x);
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(hangar.x / 200) * 30;
+    const groundY = groundLevel - terrainVariation - 12;
+    const dy = scene.pilot.y - groundY;
+    return Math.abs(dx) <= HANGAR_REBUILD_CONFIG.xRange
+        && Math.abs(dy) <= HANGAR_REBUILD_CONFIG.yRange;
 }
 
 function shouldShowHangarRebuildIndicator(scene, hangar, objective) {
@@ -78,13 +93,13 @@ function updateHangarRebuildIndicator(scene, hangar, objective, time) {
     ring.strokeEllipse(
         hangar.x,
         hangar.y - HANGAR_DROP_OFF_CONFIG.indicatorYOffset,
-        HANGAR_DROP_OFF_CONFIG.xRange * 1.7,
-        HANGAR_DROP_OFF_CONFIG.yRange * 1.2
+        HANGAR_REBUILD_CONFIG.xRange * 1.9,
+        HANGAR_REBUILD_CONFIG.yRange * 3
     );
 
     text.setPosition(hangar.x, hangar.y - 110);
 
-    const isStanding = isPlayerOverHangar(scene, hangar);
+    const isStanding = isPilotUnderHangar(scene, hangar);
     if (isStanding) {
         const remainingMs = Math.max(0, HANGAR_REBUILD_CONFIG.durationMs - (objective?.hangarRebuildTimer || 0));
         const seconds = Math.ceil(remainingMs / 1000);
@@ -143,7 +158,7 @@ function handleHangarRebuild(scene, hangar, delta) {
     if (!objective || !objective.active || !veritechState.destroyed || !pilotState.active) return;
     if (!scene || !hangar || !hangar.active) return;
 
-    if (!isPlayerOverHangar(scene, hangar)) {
+    if (!isPilotUnderHangar(scene, hangar)) {
         objective.hangarRebuildTimer = 0;
         return;
     }
