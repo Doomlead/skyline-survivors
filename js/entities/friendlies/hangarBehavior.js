@@ -89,7 +89,6 @@ function handleHangarRebuild(scene, hangar, delta) {
     if (!landingZone || !landingZone.active) return;
 
     if (!isPlayerOnLandingZone(scene, landingZone)) {
-        objective.hangarRebuildTimer = 0;
         return;
     }
 

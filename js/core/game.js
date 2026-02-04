@@ -151,7 +151,7 @@ function updateHangarRebuildUi(scene) {
         : false;
     const statusLine = isOnZone
         ? `Hold position: ${remainingSec}s remaining`
-        : 'Reach the landing zone to start the rebuild timer';
+        : 'Return to the landing zone to resume the rebuild timer';
     const message = `REBUILD PROTOCOL\nStand on the landing zone under the hangar for 30s to respawn a VERITECH.\n${statusLine}`;
 
     ui.text.setText(message);
