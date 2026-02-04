@@ -53,6 +53,7 @@ function updateGhostSprite(scene, entity, ghostX) {
     if (!ghost) {
         // Create ghost sprite matching the original
         ghost = scene.add.sprite(ghostX, entity.y, entity.texture.key);
+        ghost.setOrigin(entity.originX, entity.originY);
         ghost.setScale(entity.scaleX, entity.scaleY);
         ghost.setDepth(entity.depth);
         ghost.setAlpha(entity.alpha);
@@ -63,6 +64,7 @@ function updateGhostSprite(scene, entity, ghostX) {
     
     // Update ghost position and properties
     ghost.setPosition(ghostX, entity.y);
+    ghost.setOrigin(entity.originX, entity.originY);
     ghost.setScale(entity.scaleX, entity.scaleY);
     ghost.setFlipX(entity.flipX);
     ghost.setFlipY(entity.flipY);
