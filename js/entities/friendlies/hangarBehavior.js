@@ -7,9 +7,12 @@ const HANGAR_DROP_OFF_CONFIG = {
     yRange: 70,
     botSpawnOffset: 70
 };
-const HANGAR_REBUILD_CONFIG = {
-    durationMs: 30000
-};
+
+function getHangarGroundY(scene, hangarX) {
+    const groundLevel = scene?.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(hangarX / 200) * 30;
+    return groundLevel - terrainVariation - 12;
+}
 
 function isPlayerOverHangar(scene, hangar) {
     const player = getActivePlayer(scene);
@@ -21,6 +24,20 @@ function isPlayerOverHangar(scene, hangar) {
     const dy = player.y - dropOffY;
     return Math.abs(dx) <= HANGAR_DROP_OFF_CONFIG.xRange
         && Math.abs(dy) <= HANGAR_DROP_OFF_CONFIG.yRange;
+}
+
+function isPilotInRebuildZone(scene, hangar) {
+    if (!pilotState.active || !pilotState.grounded) return false;
+    const player = scene?.pilot;
+    if (!player || !hangar) return false;
+    const zoneX = hangar.rebuildZone?.x ?? hangar.x;
+    const zoneY = hangar.rebuildZone?.y ?? getHangarGroundY(scene, hangar.x);
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(zoneX, player.x, CONFIG.worldWidth)
+        : (player.x - zoneX);
+    const dy = player.y - zoneY;
+    return Math.abs(dx) <= HANGAR_REBUILD_CONFIG.zoneWidth * 0.5
+        && Math.abs(dy) <= HANGAR_REBUILD_CONFIG.zoneHeight * 0.5;
 }
 
 function dropOffCargo(scene, hangar) {
@@ -69,8 +86,9 @@ function handleHangarRebuild(scene, hangar, delta) {
     const objective = gameState.rebuildObjective;
     if (!objective || !objective.active || !veritechState.destroyed || !pilotState.active) return;
     if (!scene || !hangar || !hangar.active) return;
+    if (objective.branch !== 'hangar') return;
 
-    if (!isPlayerOverHangar(scene, hangar)) {
+    if (!isPilotInRebuildZone(scene, hangar)) {
         objective.hangarRebuildTimer = 0;
         return;
     }
@@ -95,6 +113,19 @@ function updateHangars(scene, time, delta) {
 
     friendlies.children.entries.forEach((friendly) => {
         if (!friendly || !friendly.active || !friendly.isHangar) return;
+        const groundY = getHangarGroundY(scene, friendly.x);
+        if (friendly.rebuildZone) {
+            const isRebuildActive = gameState.rebuildObjective?.active
+                && gameState.rebuildObjective?.branch === 'hangar'
+                && veritechState.destroyed
+                && pilotState.active;
+            const pulse = 0.75 + Math.sin(time * 0.006 + friendly.blinkOffset) * 0.2;
+            friendly.rebuildZone.setPosition(friendly.x, groundY);
+            friendly.rebuildZone.setVisible(true);
+            friendly.rebuildZone.setAlpha(isRebuildActive ? pulse : 0.35);
+            friendly.rebuildZone.setScale(isRebuildActive ? 1.05 : 1);
+            friendly.rebuildZone.setTint(isRebuildActive ? 0x22d3ee : 0x94a3b8);
+        }
         const pulse = 0.65 + Math.sin(time * 0.004 + friendly.blinkOffset) * 0.25;
         const tintColor = Phaser.Display.Color.Interpolate.ColorWithColor(
             { r: 34, g: 197, b: 94 },

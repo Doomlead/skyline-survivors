@@ -38,6 +38,14 @@ function spawnDefenseHangar(scene) {
     hangar.isHangar = true;
     hangar.baseY = hangarY;
     hangar.blinkOffset = Math.random() * Math.PI * 2;
+    hangar.rebuildZone = scene.add.sprite(
+        hangarX,
+        groundLevel - terrainVariation - 12,
+        'hangar_rebuild_zone'
+    );
+    hangar.rebuildZone.setOrigin(0.5, 0.5);
+    hangar.rebuildZone.setDepth(FG_DEPTH_BASE);
+    hangar.rebuildZone.setAlpha(0.35);
 
     scene.hangar = hangar;
     return hangar;

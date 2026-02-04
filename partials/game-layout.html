@@ -38,6 +38,19 @@
                 </div>
             </div>
 
+            <div id="rebuild-hud" class="hidden px-2 pb-1">
+                <div class="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-emerald-200">
+                    <span>Veritech Rebuild</span>
+                    <span id="rebuild-timer-label">Hold 30s</span>
+                </div>
+                <div class="relative h-2 bg-slate-900 border border-emerald-400/40 rounded overflow-hidden">
+                    <div id="rebuild-timer-fill" class="absolute left-0 top-0 h-full bg-emerald-500"></div>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-slate-300 mt-1">
+                    <span id="rebuild-instructions" class="text-emerald-300">Go to the Hangar and stand in the rebuild zone.</span>
+                </div>
+            </div>
+
             <div id="boss-hud" class="hidden px-2 pb-1">
                 <div class="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-red-200">
                     <span id="boss-name-label">Boss Target</span>

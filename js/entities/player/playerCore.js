@@ -86,17 +86,22 @@ function playerDie(scene) {
         }
         ejectPilot(scene);
         if (gameState.rebuildObjective) {
+            const hangar = scene?.hangar?.active ? scene.hangar : null;
+            const useHangar = !!hangar;
             gameState.rebuildObjective.active = true;
-            gameState.rebuildObjective.stage = 'secure_extraction';
+            gameState.rebuildObjective.stage = useHangar ? 'reach_hangar' : 'secure_extraction';
             gameState.rebuildObjective.timer = 0;
             gameState.rebuildObjective.encounterSpawned = false;
-            gameState.rebuildObjective.extractionX = scene.pilot ? scene.pilot.x : player.x;
-            gameState.rebuildObjective.extractionY = scene.pilot ? scene.pilot.y : player.y;
-            gameState.rebuildObjective.branch = gameState.rebuildObjective.branch || 'dropship';
+            gameState.rebuildObjective.extractionX = useHangar ? hangar.x : (scene.pilot ? scene.pilot.x : player.x);
+            gameState.rebuildObjective.extractionY = useHangar ? hangar.y : (scene.pilot ? scene.pilot.y : player.y);
+            gameState.rebuildObjective.branch = useHangar ? 'hangar' : (gameState.rebuildObjective.branch || 'dropship');
             gameState.rebuildObjective.requiredAlienTech = gameState.rebuildObjective.branch === 'station' ? 3 : 0;
             gameState.rebuildObjective.collectedAlienTech = 0;
             gameState.rebuildObjective.shipReturned = false;
             gameState.rebuildObjective.hangarRebuildTimer = 0;
+            if (useHangar) {
+                showRebuildObjectiveBanner(scene, 'Return to the hangar and hold the rebuild zone', '#38bdf8');
+            }
         }
         playerState.powerUps.invincibility = 1500;
         return;

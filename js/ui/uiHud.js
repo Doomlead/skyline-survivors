@@ -18,6 +18,10 @@ function createUI(scene) {
     assaultCoreFillEl = document.getElementById('assault-core-fill');
     assaultCoreLabelEl = document.getElementById('assault-core-label');
     assaultShieldLabelEl = document.getElementById('assault-shield-label');
+    rebuildHudEl = document.getElementById('rebuild-hud');
+    rebuildTimerFillEl = document.getElementById('rebuild-timer-fill');
+    rebuildTimerLabelEl = document.getElementById('rebuild-timer-label');
+    rebuildInstructionsEl = document.getElementById('rebuild-instructions');
     bossHudEl = document.getElementById('boss-hud');
     bossHpFillEl = document.getElementById('boss-hp-fill');
     bossHpLabelEl = document.getElementById('boss-hp-label');
@@ -86,6 +90,32 @@ function updateUI(scene) {
         const friendlies = scene?.friendlies?.children?.entries || [];
         const deployed = friendlies.filter(entry => entry.active && entry.isOperative).length;
         operativesEl.innerText = String(deployed).padStart(2, '0');
+    }
+    if (rebuildHudEl) {
+        const objective = gameState.rebuildObjective;
+        const isRebuildActive = objective?.active
+            && objective.branch === 'hangar'
+            && veritechState.destroyed
+            && pilotState.active;
+        rebuildHudEl.classList.toggle('hidden', !isRebuildActive);
+        if (isRebuildActive) {
+            const durationMs = HANGAR_REBUILD_CONFIG?.durationMs ?? 30000;
+            const elapsed = objective?.hangarRebuildTimer ?? 0;
+            const remainingMs = Math.max(0, durationMs - elapsed);
+            const remainingSec = Math.ceil(remainingMs / 1000);
+            const pct = durationMs > 0 ? Math.max(0, Math.min(1, elapsed / durationMs)) : 0;
+            if (rebuildTimerFillEl) {
+                rebuildTimerFillEl.style.width = `${Math.round(pct * 100)}%`;
+            }
+            if (rebuildTimerLabelEl) {
+                rebuildTimerLabelEl.innerText = `Hold ${remainingSec}s`;
+            }
+            if (rebuildInstructionsEl) {
+                rebuildInstructionsEl.innerText = pilotState.grounded
+                    ? 'Hold position inside the rebuild zone.'
+                    : 'Get under the hangar and stay grounded.';
+            }
+        }
     }
 
     if (gameState.mode === 'survival') {

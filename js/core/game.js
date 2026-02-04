@@ -155,6 +155,7 @@ function addAlienTechToRebuildObjective(amount = 1) {
 function updateRebuildObjective(scene, delta) {
     const objective = gameState.rebuildObjective;
     if (!objective || !objective.active) return;
+    if (objective.branch === 'hangar') return;
 
     objective.timer += delta;
 

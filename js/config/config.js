@@ -19,6 +19,11 @@ const CONFIG = {
 const CLASSIC_WAVE_LIMIT = 15;
 const HUMAN_RESCUE_SCORE = 150;
 const HUMAN_DROP_OFF_SCORE_MULTIPLIER = 2;
+const HANGAR_REBUILD_CONFIG = {
+    durationMs: 30000,
+    zoneWidth: 140,
+    zoneHeight: 40
+};
 
 const POWERUP_DECAY_CONFIG = {
     assaultMultiplier: 0.75,

@@ -52,4 +52,23 @@ function createHangarGraphics(scene) {
 
     hangar.generateTexture('hangar', width, height);
     hangar.destroy();
+
+    const zone = scene.add.graphics();
+    const zoneWidth = 140;
+    const zoneHeight = 40;
+    const zoneCenterX = zoneWidth / 2;
+    const zoneCenterY = zoneHeight / 2;
+
+    zone.lineStyle(3, 0x22d3ee, 0.9);
+    zone.strokeEllipse(zoneCenterX, zoneCenterY, zoneWidth - 8, zoneHeight - 12);
+    zone.lineStyle(2, 0x38bdf8, 0.7);
+    zone.strokeEllipse(zoneCenterX, zoneCenterY, zoneWidth - 28, zoneHeight - 22);
+    zone.fillStyle(0x0f172a, 0.35);
+    zone.fillEllipse(zoneCenterX, zoneCenterY, zoneWidth - 36, zoneHeight - 26);
+
+    zone.fillStyle(0x22d3ee, 0.9);
+    zone.fillTriangle(zoneCenterX - 6, zoneCenterY - 10, zoneCenterX + 6, zoneCenterY - 10, zoneCenterX, zoneCenterY - 2);
+
+    zone.generateTexture('hangar_rebuild_zone', zoneWidth, zoneHeight);
+    zone.destroy();
 }
