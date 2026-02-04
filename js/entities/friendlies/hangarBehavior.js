@@ -8,7 +8,9 @@ const HANGAR_DROP_OFF_CONFIG = {
     botSpawnOffset: 70
 };
 const HANGAR_REBUILD_CONFIG = {
-    durationMs: 30000
+    durationMs: 30000,
+    pulseBaseAlpha: 0.75,
+    pulseRange: 0.2
 };
 
 function isPlayerOverHangar(scene, hangar) {
@@ -65,12 +67,28 @@ function dropOffCargo(scene, hangar) {
     }
 }
 
+function isPlayerOnLandingZone(scene, landingZone) {
+    const player = getActivePlayer(scene);
+    if (!player || !landingZone) return false;
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(landingZone.x, player.x, CONFIG.worldWidth)
+        : (player.x - landingZone.x);
+    const zoneCenterY = landingZone.y - landingZone.displayHeight * 0.5;
+    const dy = player.y - zoneCenterY;
+    const xRange = landingZone.displayWidth * 0.35;
+    const yRange = landingZone.displayHeight * 0.35;
+    return Math.abs(dx) <= xRange && Math.abs(dy) <= yRange;
+}
+
 function handleHangarRebuild(scene, hangar, delta) {
     const objective = gameState.rebuildObjective;
     if (!objective || !objective.active || !veritechState.destroyed || !pilotState.active) return;
+    if (objective.stage !== 'hangar_rebuild') return;
     if (!scene || !hangar || !hangar.active) return;
+    const landingZone = hangar.landingZone;
+    if (!landingZone || !landingZone.active) return;
 
-    if (!isPlayerOverHangar(scene, hangar)) {
+    if (!isPlayerOnLandingZone(scene, landingZone)) {
         objective.hangarRebuildTimer = 0;
         return;
     }
@@ -104,6 +122,14 @@ function updateHangars(scene, time, delta) {
         );
         friendly.setTint(Phaser.Display.Color.GetColor(tintColor.r, tintColor.g, tintColor.b));
         friendly.y = friendly.baseY + Math.sin(time * 0.002 + friendly.blinkOffset) * 1.5;
+        if (friendly.landingZone && friendly.landingZone.active) {
+            const landingZone = friendly.landingZone;
+            landingZone.x = friendly.x;
+            const rebuildPulse = Math.sin(time * 0.005 + landingZone.blinkOffset);
+            const targetAlpha = HANGAR_REBUILD_CONFIG.pulseBaseAlpha + rebuildPulse * HANGAR_REBUILD_CONFIG.pulseRange;
+            const shouldPulse = gameState.rebuildObjective?.active && veritechState.destroyed && pilotState.active;
+            landingZone.setAlpha(shouldPulse ? targetAlpha : 0.85);
+        }
         dropOffCargo(scene, friendly);
         handleHangarRebuild(scene, friendly, delta);
     });
