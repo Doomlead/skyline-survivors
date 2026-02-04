@@ -125,7 +125,6 @@ function updateHangars(scene, time, delta) {
         if (friendly.landingZone && friendly.landingZone.active) {
             const landingZone = friendly.landingZone;
             landingZone.x = friendly.x;
-            landingZone.y = landingZone.baseY;
             const rebuildPulse = Math.sin(time * 0.005 + landingZone.blinkOffset);
             const targetAlpha = HANGAR_REBUILD_CONFIG.pulseBaseAlpha + rebuildPulse * HANGAR_REBUILD_CONFIG.pulseRange;
             const shouldPulse = gameState.rebuildObjective?.active && veritechState.destroyed && pilotState.active;

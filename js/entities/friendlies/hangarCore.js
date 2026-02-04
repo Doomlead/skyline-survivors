@@ -45,7 +45,8 @@ function spawnDefenseHangar(scene) {
     hangar.baseY = hangarY;
     hangar.blinkOffset = Math.random() * Math.PI * 2;
 
-    const landingZone = scene.friendlies.create(hangarX, hangarY + LANDING_ZONE_CONFIG.groundOffset, LANDING_ZONE_CONFIG.texture);
+    const landingZoneY = groundLevel - terrainVariation + LANDING_ZONE_CONFIG.groundOffset;
+    const landingZone = scene.friendlies.create(hangarX, landingZoneY, LANDING_ZONE_CONFIG.texture);
     landingZone.setOrigin(0.5, 1);
     landingZone.setDepth(FG_DEPTH_BASE);
     landingZone.setScale(LANDING_ZONE_CONFIG.scale);
@@ -56,7 +57,7 @@ function spawnDefenseHangar(scene) {
         landingZone.body.setVelocity(0, 0);
     }
     landingZone.isLandingZone = true;
-    landingZone.baseY = hangarY + LANDING_ZONE_CONFIG.groundOffset;
+    landingZone.baseY = landingZoneY;
     landingZone.blinkOffset = Math.random() * Math.PI * 2;
     hangar.landingZone = landingZone;
 
