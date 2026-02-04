@@ -21,7 +21,7 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - **Defend and Reclaim**: Districts exist in three states (Friendly/Threatened/Occupied)
 
 ⚠️ **Partially Implemented:**
-- **Seamless transition (Ship/Foot):** Ejection exists, but the "Squad Leader" mechanics and "Rebuild at Hangar" loop are missing.
+- **Seamless transition (Ship/Foot):** Ejection exists, but the "Squad Leader" mechanics are still missing.
 - **Resource vs. Score (The Rescue Loop):** Humans can be rescued for points, but they are not yet stored as "Cargo/Ammo" nor do they deploy troops upon drop-off.
 - **Strategic Territory Control:** District states exist, but the "Loss Aversion" investment mechanics are missing.
 
@@ -96,7 +96,7 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - Ship Destruction -> Ejection.
 
 ⚠️ **Partially Implemented:**
-- **Crisis Management:** The loop of "Fight on foot -> Reach Hangar -> Rebuild Ship" is incomplete (currently just game over or basic survival).
+- **Crisis Management:** The loop of "Fight on foot -> Reach Hangar -> Rebuild Ship" now exists with a 30-second hold timer, but Squad Leader and sacrifice mechanics are still missing.
 
 ---
 
@@ -132,14 +132,14 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 
 ### 4.3. On-Foot Command (Ship Destruction)
 
-**Implementation Status: 20% Complete**
+**Implementation Status: 45% Complete**
 
 ✅ **Fully Implemented:**
 - Ejection Sequence (Pilot sprite, basic pistol).
+- **Extraction Defense:** Hold position under the Hangar for 30 seconds to rebuild the ship (with on-screen prompt + beacon indicator).
 
 ❌ **Not Implemented:**
 - **Squad Leader Aura:** Comrades following pilot movement (Bullet Hell wall).
-- **Extraction Defense:** The "Hold the Line" timer at the Hangar to rebuild the ship.
 - **Sacrifice Mechanic:** AI behavior to body-block shots during rebuild.
 
 ### 4.4. Power-Up System
@@ -238,7 +238,7 @@ The game is currently playable as a standard shooter, but lacks the specific "Ur
 - Continue with the Multi-phase Mothership boss as planned (this is still the endgame).
 
 **Priority 4: On-Foot Rebuild (Post-MVP / Stretch)**
-- Implement the logic to respawn the ship if the player survives at the Hangar for X seconds.
+- ✅ Implemented a Hangar rebuild loop: reach the Hangar and hold position for 30 seconds to respawn the Veritech (with beacon + prompt).
 
 ---
 

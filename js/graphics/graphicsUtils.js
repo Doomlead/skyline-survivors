@@ -124,6 +124,33 @@ function createUtilityGraphics(scene) {
     forceDroneGraphics.destroy();
 
     // ========================
+    // HANGAR MARKER (Rebuild Point)
+    // ========================
+    const hangarPadGraphics = scene.add.graphics();
+    hangarPadGraphics.fillStyle(0x1f2937, 1);
+    hangarPadGraphics.fillRoundedRect(0, 0, 80, 18, 4);
+    hangarPadGraphics.lineStyle(2, 0x38bdf8, 1);
+    hangarPadGraphics.strokeRoundedRect(0.5, 0.5, 79, 17, 4);
+    hangarPadGraphics.fillStyle(0x38bdf8, 0.8);
+    hangarPadGraphics.fillRect(34, 4, 12, 10);
+    hangarPadGraphics.generateTexture('hangar_pad', 80, 18);
+    hangarPadGraphics.destroy();
+
+    const hangarBeaconGraphics = scene.add.graphics();
+    hangarBeaconGraphics.fillStyle(0xfacc15, 0.95);
+    hangarBeaconGraphics.fillTriangle(12, 0, 24, 22, 0, 22);
+    hangarBeaconGraphics.lineStyle(2, 0xffffff, 0.8);
+    hangarBeaconGraphics.strokeTriangle(12, 1, 23, 21, 1, 21);
+    hangarBeaconGraphics.generateTexture('hangar_beacon', 24, 24);
+    hangarBeaconGraphics.destroy();
+
+    const hangarZoneGraphics = scene.add.graphics();
+    hangarZoneGraphics.lineStyle(3, 0x38bdf8, 0.6);
+    hangarZoneGraphics.strokeCircle(80, 80, 78);
+    hangarZoneGraphics.generateTexture('hangar_zone', 160, 160);
+    hangarZoneGraphics.destroy();
+
+    // ========================
     // EXPLOSION (Particle Texture)
     // ========================
     const explosionGraphics = scene.add.graphics();

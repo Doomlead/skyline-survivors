@@ -104,6 +104,57 @@ function showRebuildObjectiveBanner(scene, message, color = '#66ccff') {
     });
 }
 
+function setupHangarMarkers(scene) {
+    if (!scene) return;
+    if (scene.hangarMarkers) {
+        scene.hangarMarkers.clear(true, true);
+    }
+
+    const hangarState = gameState.hangar || (gameState.hangar = { x: 0, y: 0, radius: 85 });
+    const hangarX = hangarState.x > 0 ? hangarState.x : CONFIG.worldWidth * 0.5;
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(hangarX / 200) * 30;
+    const hangarY = Math.max(120, groundLevel - terrainVariation - 26);
+
+    hangarState.x = hangarX;
+    hangarState.y = hangarY;
+
+    const pad = scene.add.sprite(hangarX, hangarY, 'hangar_pad').setDepth(FG_DEPTH_BASE + 2);
+    const zone = scene.add.sprite(hangarX, hangarY, 'hangar_zone').setDepth(FG_DEPTH_BASE + 1).setAlpha(0.45);
+    const beacon = scene.add.sprite(hangarX, hangarY - 46, 'hangar_beacon').setDepth(FG_DEPTH_BASE + 3);
+    const label = scene.add.text(hangarX, hangarY - 70, 'HANGAR', {
+        fontSize: '14px',
+        fontFamily: 'Orbitron',
+        color: '#7dd3fc',
+        stroke: '#0f172a',
+        strokeThickness: 3
+    }).setOrigin(0.5).setDepth(FG_DEPTH_BASE + 3);
+
+    scene.tweens.add({
+        targets: beacon,
+        y: hangarY - 52,
+        duration: 900,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+    });
+
+    scene.tweens.add({
+        targets: zone,
+        alpha: 0.75,
+        duration: 1400,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+    });
+
+    scene.hangarMarkers = scene.add.group([pad, zone, beacon]);
+    scene.hangarPad = pad;
+    scene.hangarZone = zone;
+    scene.hangarBeacon = beacon;
+    scene.hangarLabel = label;
+}
+
 function spawnExtractionDropship(scene, objective) {
     const spawnOffset = Math.random() < 0.5 ? -260 : 260;
     const spawnX = wrapValue(objective.extractionX + spawnOffset, CONFIG.worldWidth);
@@ -118,6 +169,33 @@ function spawnExtractionDropship(scene, objective) {
 
     showRebuildObjectiveBanner(scene, 'Extraction dropship inbound');
     return dropShip;
+}
+
+function rebuildVeritechAtHangar(scene) {
+    if (!scene.veritech || !scene.pilot) return;
+    const hangar = gameState.hangar || {};
+    const hangarX = hangar.x || CONFIG.worldWidth * 0.5;
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(hangarX / 200) * 30;
+    const spawnY = Math.max(40, groundLevel - terrainVariation - 30);
+
+    setVeritechMode(scene, 'fighter');
+    veritechState.destroyed = false;
+    veritechState.active = true;
+    veritechState.vx = 0;
+    veritechState.vy = 0;
+
+    scene.veritech.setPosition(hangarX, spawnY);
+    scene.veritech.setActive(true).setVisible(true);
+    scene.veritech.body.enable = true;
+
+    pilotState.active = false;
+    scene.pilot.setActive(false).setVisible(false);
+    scene.pilot.body.enable = false;
+    syncActivePlayer(scene);
+
+    playerState.powerUps.invincibility = 2000;
+    showRebuildObjectiveBanner(scene, 'Veritech rebuilt - return to battle', '#66ff88');
 }
 
 function rebuildVeritechAtExtraction(scene, objective) {
@@ -153,7 +231,65 @@ function addAlienTechToRebuildObjective(amount = 1) {
 
 function updateRebuildObjective(scene, delta) {
     const objective = gameState.rebuildObjective;
-    if (!objective || !objective.active) return;
+    const prompt = scene.rebuildPromptText;
+    if (!objective || !objective.active) {
+        if (prompt) prompt.setVisible(false);
+        return;
+    }
+
+    if (prompt) {
+        prompt.setVisible(true);
+    }
+
+    if (objective.branch === 'hangar') {
+        const hangar = gameState.hangar || {};
+        const radius = hangar.radius || 85;
+        const pilot = scene.pilot;
+        const dx = pilot ? wrappedDistance(pilot.x, hangar.x, CONFIG.worldWidth) : Infinity;
+        const dy = pilot ? pilot.y - hangar.y : Infinity;
+        const distance = Math.hypot(dx, dy);
+        const inZone = pilot && pilot.active && distance <= radius;
+
+        if (!objective.bannerShown) {
+            showRebuildObjectiveBanner(scene, 'Reach the Hangar and hold for 30 seconds');
+            objective.bannerShown = true;
+        }
+
+        if (inZone) {
+            objective.holdTimer += delta;
+            objective.stage = 'hold_position';
+        } else {
+            if (objective.stage === 'hold_position') {
+                objective.holdTimer = 0;
+            }
+            objective.stage = 'reach_hangar';
+        }
+
+        if (scene.hangarZone) {
+            scene.hangarZone.setTint(inZone ? 0x86efac : 0x38bdf8);
+        }
+
+        const remainingMs = Math.max(0, objective.holdDuration - objective.holdTimer);
+        const remainingSeconds = Math.ceil(remainingMs / 1000);
+        if (prompt) {
+            if (objective.stage === 'hold_position') {
+                prompt.setText(`HOLD POSITION UNDER THE HANGAR\nVERITECH REBUILD IN ${remainingSeconds}s`);
+            } else {
+                prompt.setText('RETURN TO THE HANGAR\nSTAND UNDER THE BEACON TO REBUILD');
+            }
+        }
+
+        if (objective.holdTimer >= objective.holdDuration) {
+            objective.active = false;
+            objective.stage = null;
+            objective.holdTimer = 0;
+            objective.timer = 0;
+            objective.bannerShown = false;
+            if (prompt) prompt.setVisible(false);
+            rebuildVeritechAtHangar(scene);
+        }
+        return;
+    }
 
     objective.timer += delta;
 
@@ -203,6 +339,8 @@ function create() {
     // Generate backgrounds FIRST
     createBackground(this);
 
+    setupHangarMarkers(this);
+
     // Veritech + Pilot
     this.veritech = this.physics.add.sprite(100, 300, 'veritech_fighter');
     this.veritech.setCollideWorldBounds(false);
@@ -216,6 +354,20 @@ function create() {
     this.pilot.body.setSize(12, 18);
     this.pilot.setDepth(FG_DEPTH_BASE + 9);
     this.pilot.setActive(false).setVisible(false);
+
+    this.rebuildPromptText = this.add.text(
+        CONFIG.width / 2,
+        80,
+        '',
+        {
+            fontSize: '18px',
+            fontFamily: 'Orbitron',
+            color: '#e2e8f0',
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 4
+        }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(210).setVisible(false);
 
     // Maintain legacy scene.player reference for shared systems
     this.player = this.veritech;

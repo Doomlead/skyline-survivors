@@ -453,7 +453,8 @@ function destroyEnemy(scene, enemy) {
     if (Math.random() < 0.12) spawnPowerUp(scene, enemy.x, enemy.y);
     enemy.destroy();
 
-    if (enemy.isExtractionTarget && gameState.rebuildObjective?.active) {
+    if (enemy.isExtractionTarget && gameState.rebuildObjective?.active
+        && gameState.rebuildObjective?.branch === 'dropship') {
         gameState.rebuildObjective.stage = 'return_ship';
         gameState.rebuildObjective.timer = 0;
         gameState.rebuildObjective.encounterSpawned = false;
