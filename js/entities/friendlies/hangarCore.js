@@ -5,7 +5,10 @@
 const HANGAR_CONFIG = {
     texture: 'hangar',
     scale: 1.5,
-    groundOffset: 6
+    groundOffset: 6,
+    markerTexture: 'hangar_marker',
+    markerScale: 1,
+    markerYOffset: -10
 };
 
 function isDefenseMission() {
@@ -38,6 +41,15 @@ function spawnDefenseHangar(scene) {
     hangar.isHangar = true;
     hangar.baseY = hangarY;
     hangar.blinkOffset = Math.random() * Math.PI * 2;
+
+    if (scene.add && scene.textures?.exists(HANGAR_CONFIG.markerTexture)) {
+        const marker = scene.add.sprite(hangarX, hangarY + HANGAR_CONFIG.markerYOffset, HANGAR_CONFIG.markerTexture);
+        marker.setDepth(FG_DEPTH_BASE);
+        marker.setOrigin(0.5, 0.5);
+        marker.setScale(HANGAR_CONFIG.markerScale);
+        marker.setAlpha(0.85);
+        hangar.marker = marker;
+    }
 
     scene.hangar = hangar;
     return hangar;

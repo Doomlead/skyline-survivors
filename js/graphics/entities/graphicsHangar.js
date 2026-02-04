@@ -52,4 +52,18 @@ function createHangarGraphics(scene) {
 
     hangar.generateTexture('hangar', width, height);
     hangar.destroy();
+
+    const marker = scene.add.graphics();
+    const markerSize = 72;
+    const markerCenter = markerSize / 2;
+    marker.fillStyle(0x0f172a, 0.55);
+    marker.fillEllipse(markerCenter, markerSize - 10, 60, 14);
+    marker.lineStyle(2, 0x22d3ee, 0.9);
+    marker.strokeEllipse(markerCenter, markerCenter, 50, 18);
+    marker.lineStyle(2, 0x38bdf8, 0.8);
+    marker.strokeEllipse(markerCenter, markerCenter, 36, 10);
+    marker.fillStyle(0x22d3ee, 0.9);
+    marker.fillTriangle(markerCenter - 6, markerCenter - 2, markerCenter + 6, markerCenter - 2, markerCenter, markerCenter + 8);
+    marker.generateTexture('hangar_marker', markerSize, markerSize);
+    marker.destroy();
 }

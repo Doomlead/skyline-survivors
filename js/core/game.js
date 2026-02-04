@@ -158,6 +158,14 @@ function updateRebuildObjective(scene, delta) {
 
     objective.timer += delta;
 
+    if (objective.branch === 'hangar') {
+        if (!objective.encounterSpawned) {
+            showRebuildObjectiveBanner(scene, 'Reach the hangar and hold for 30 seconds');
+            objective.encounterSpawned = true;
+        }
+        return;
+    }
+
     if (objective.stage === 'secure_extraction') {
         if (!objective.encounterSpawned && objective.branch !== 'station') {
             spawnExtractionDropship(scene, objective);

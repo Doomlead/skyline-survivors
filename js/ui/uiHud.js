@@ -27,6 +27,7 @@ function createUI(scene) {
     mothershipCoreLabelEl = document.getElementById('mothership-core-label');
     mothershipPhaseLabelEl = document.getElementById('mothership-phase-label');
     decayHudEl = document.getElementById('decay-hud');
+    rebuildInstructionsEl = document.getElementById('rebuild-instructions');
     decayPrimaryFillEl = document.getElementById('decay-primary-fill');
     decayPrimaryLabelEl = document.getElementById('decay-primary-label');
     decayPrimaryTierEl = document.getElementById('decay-primary-tier');
@@ -157,6 +158,23 @@ function updateUI(scene) {
 
     bombsEl.innerText = gameState.smartBombs;
     livesEl.innerText = gameState.lives;
+
+    if (rebuildInstructionsEl) {
+        const objective = gameState.rebuildObjective;
+        const showRebuild = objective?.active && veritechState.destroyed && objective?.branch === 'hangar';
+        if (showRebuild) {
+            const durationMs = objective?.hangarRebuildDuration || HANGAR_REBUILD_DURATION_MS;
+            const remainingMs = Math.max(0, durationMs - (objective?.hangarRebuildTimer || 0));
+            const remaining = Math.ceil(remainingMs / 1000);
+            const statusLabel = remainingMs > 0
+                ? `Hold position ${remaining}s to rebuild`
+                : 'Veritech rebuilding...';
+            rebuildInstructionsEl.innerText = `REBUILD: Stand under the hangar · ${statusLabel}`;
+            rebuildInstructionsEl.classList.remove('hidden');
+        } else {
+            rebuildInstructionsEl.classList.add('hidden');
+        }
+    }
 
     let powerUpText = '';
     const p = playerState.powerUps;

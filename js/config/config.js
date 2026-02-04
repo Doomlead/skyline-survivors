@@ -19,6 +19,7 @@ const CONFIG = {
 const CLASSIC_WAVE_LIMIT = 15;
 const HUMAN_RESCUE_SCORE = 150;
 const HUMAN_DROP_OFF_SCORE_MULTIPLIER = 2;
+const HANGAR_REBUILD_DURATION_MS = 30000;
 
 const POWERUP_DECAY_CONFIG = {
     assaultMultiplier: 0.75,
@@ -175,7 +176,8 @@ const gameState = {
         requiredAlienTech: 0,
         collectedAlienTech: 0,
         shipReturned: false,
-        hangarRebuildTimer: 0
+        hangarRebuildTimer: 0,
+        hangarRebuildDuration: HANGAR_REBUILD_DURATION_MS
     }
 };
 
@@ -359,7 +361,8 @@ function resetGameState() {
         requiredAlienTech: 0,
         collectedAlienTech: 0,
         shipReturned: false,
-        hangarRebuildTimer: 0
+        hangarRebuildTimer: 0,
+        hangarRebuildDuration: HANGAR_REBUILD_DURATION_MS
     };
 
     if (window.ShipController?.resetCargo) {
