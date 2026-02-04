@@ -115,16 +115,16 @@ function updateHangars(scene, time, delta) {
         if (!friendly || !friendly.active || !friendly.isHangar) return;
         const groundY = getHangarGroundY(scene, friendly.x);
         if (friendly.rebuildZone) {
-            const isRebuildActive = gameState.rebuildObjective?.active
-                && gameState.rebuildObjective?.branch === 'hangar'
-                && veritechState.destroyed
-                && pilotState.active;
-            const pulse = 0.75 + Math.sin(time * 0.006 + friendly.blinkOffset) * 0.2;
+            const isPilotActive = pilotState.active && veritechState.destroyed;
+            const isRebuildActive = isPilotActive
+                && gameState.rebuildObjective?.active
+                && gameState.rebuildObjective?.branch === 'hangar';
+            const pulse = 0.8 + Math.sin(time * 0.006 + friendly.blinkOffset) * 0.2;
             friendly.rebuildZone.setPosition(friendly.x, groundY);
-            friendly.rebuildZone.setVisible(true);
-            friendly.rebuildZone.setAlpha(isRebuildActive ? pulse : 0.35);
+            friendly.rebuildZone.setVisible(isPilotActive);
+            friendly.rebuildZone.setAlpha(isRebuildActive ? pulse : 0.6);
             friendly.rebuildZone.setScale(isRebuildActive ? 1.05 : 1);
-            friendly.rebuildZone.setTint(isRebuildActive ? 0x22d3ee : 0x94a3b8);
+            friendly.rebuildZone.setTint(isRebuildActive ? 0x22d3ee : 0x38bdf8);
         }
         const pulse = 0.65 + Math.sin(time * 0.004 + friendly.blinkOffset) * 0.25;
         const tintColor = Phaser.Display.Color.Interpolate.ColorWithColor(

@@ -45,7 +45,8 @@ function spawnDefenseHangar(scene) {
     );
     hangar.rebuildZone.setOrigin(0.5, 0.5);
     hangar.rebuildZone.setDepth(FG_DEPTH_BASE);
-    hangar.rebuildZone.setAlpha(0.35);
+    hangar.rebuildZone.setAlpha(0.6);
+    hangar.rebuildZone.setVisible(false);
 
     scene.hangar = hangar;
     return hangar;
