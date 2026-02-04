@@ -105,6 +105,61 @@ function showRebuildObjectiveBanner(scene, message, color = '#66ccff') {
     });
 }
 
+function initHangarRebuildUi(scene) {
+    if (!scene || scene.hangarRebuildUi) return;
+    const rebuildText = scene.add.text(0, 0, '', {
+        fontSize: '20px',
+        fontFamily: 'Orbitron',
+        color: '#e2e8f0',
+        align: 'center',
+        stroke: '#0f172a',
+        strokeThickness: 4,
+        lineSpacing: 6
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(240);
+    rebuildText.setVisible(false);
+    scene.hangarRebuildUi = {
+        text: rebuildText
+    };
+}
+
+function updateHangarRebuildUi(scene) {
+    if (!scene || !scene.hangarRebuildUi) return;
+    const ui = scene.hangarRebuildUi;
+    const objective = gameState.rebuildObjective;
+    const hangar = scene.hangar;
+    const landingZone = hangar?.landingZone;
+    const shouldShow = objective?.active
+        && objective.stage === 'hangar_rebuild'
+        && veritechState.destroyed
+        && pilotState.active
+        && landingZone?.active;
+
+    if (!shouldShow) {
+        ui.text.setVisible(false);
+        return;
+    }
+
+    const cam = scene.cameras.main;
+    const scale = typeof getOverlayScale === 'function' ? getOverlayScale(scene) : 1;
+    const durationMs = typeof HANGAR_REBUILD_CONFIG !== 'undefined'
+        ? HANGAR_REBUILD_CONFIG.durationMs
+        : 30000;
+    const remainingMs = Math.max(0, durationMs - (objective.hangarRebuildTimer || 0));
+    const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+    const isOnZone = typeof isPlayerOnLandingZone === 'function'
+        ? isPlayerOnLandingZone(scene, landingZone)
+        : false;
+    const statusLine = isOnZone
+        ? `Hold position: ${remainingSec}s remaining`
+        : 'Reach the landing zone to start the rebuild timer';
+    const message = `REBUILD PROTOCOL\nStand on the landing zone under the hangar for 30s to respawn a VERITECH.\n${statusLine}`;
+
+    ui.text.setText(message);
+    ui.text.setFontSize(`${Math.round(20 * scale)}px`);
+    ui.text.setPosition(cam.width / 2, 90 * scale);
+    ui.text.setVisible(true);
+}
+
 function spawnExtractionDropship(scene, objective) {
     const spawnOffset = Math.random() < 0.5 ? -260 : 260;
     const spawnX = wrapValue(objective.extractionX + spawnOffset, CONFIG.worldWidth);
@@ -308,6 +363,7 @@ function create() {
     this.physics.add.overlap(this.pilot, this.humans, rescueHuman, null, this);
 
     createUI(this);
+    initHangarRebuildUi(this);
 
     this.audioManager = new AudioManager(this);
     this.audioManager.playAmbientMusic();
@@ -361,6 +417,7 @@ function update(time, delta) {
 
     updatePlayer(this, time, delta);
     updateRebuildObjective(this, delta);
+    updateHangarRebuildUi(this);
 
     if (particleManager) {
         particleManager.update(delta);

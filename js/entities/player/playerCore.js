@@ -86,13 +86,15 @@ function playerDie(scene) {
         }
         ejectPilot(scene);
         if (gameState.rebuildObjective) {
+            const useHangarRebuild = typeof isDefenseMission === 'function' ? isDefenseMission() : false;
+            const defaultBranch = gameState.rebuildObjective.branch || 'dropship';
             gameState.rebuildObjective.active = true;
-            gameState.rebuildObjective.stage = 'secure_extraction';
+            gameState.rebuildObjective.stage = useHangarRebuild ? 'hangar_rebuild' : 'secure_extraction';
             gameState.rebuildObjective.timer = 0;
             gameState.rebuildObjective.encounterSpawned = false;
             gameState.rebuildObjective.extractionX = scene.pilot ? scene.pilot.x : player.x;
             gameState.rebuildObjective.extractionY = scene.pilot ? scene.pilot.y : player.y;
-            gameState.rebuildObjective.branch = gameState.rebuildObjective.branch || 'dropship';
+            gameState.rebuildObjective.branch = useHangarRebuild ? 'hangar' : defaultBranch;
             gameState.rebuildObjective.requiredAlienTech = gameState.rebuildObjective.branch === 'station' ? 3 : 0;
             gameState.rebuildObjective.collectedAlienTech = 0;
             gameState.rebuildObjective.shipReturned = false;

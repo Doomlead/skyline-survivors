@@ -296,6 +296,7 @@ function createGraphics(scene) {
     createBattleshipGraphics(scene);
     createAssaultBaseGraphics(scene);
     createHangarGraphics(scene);
+    createLandingZoneGraphics(scene);
     createMapIconGraphics(scene);
 
     // Boss sprites for boss waves
