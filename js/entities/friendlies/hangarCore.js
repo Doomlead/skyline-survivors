@@ -10,7 +10,10 @@ const HANGAR_CONFIG = {
 
 function getHangarGroundY(scene, x) {
     const groundLevel = scene?.groundLevel || CONFIG.worldHeight - 80;
-    const terrainVariation = Math.sin(x / 200) * 30;
+    const canonicalX = typeof wrapValue === 'function'
+        ? wrapValue(x, CONFIG.worldWidth)
+        : x;
+    const terrainVariation = Math.sin(canonicalX / 200) * 30;
     return groundLevel - terrainVariation;
 }
 
@@ -25,9 +28,10 @@ function spawnDefenseHangar(scene) {
 
     const spawnX = scene.veritech ? scene.veritech.x : CONFIG.worldWidth * 0.5;
     const spawnY = scene.veritech ? scene.veritech.y : null;
-    const terrainVariation = Math.sin(spawnX / 200) * 30;
-    const groundY = getHangarGroundY(scene, spawnX);
-    const hangarX = spawnX;
+    const hangarX = typeof wrapValue === 'function'
+        ? wrapValue(spawnX, CONFIG.worldWidth)
+        : spawnX;
+    const groundY = getHangarGroundY(scene, hangarX);
     const hangarY = spawnY !== null
         ? spawnY
         : groundY + HANGAR_CONFIG.groundOffset;
