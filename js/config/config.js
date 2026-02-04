@@ -171,7 +171,7 @@ const gameState = {
         encounterSpawned: false,
         extractionX: 0,
         extractionY: 0,
-        branch: 'dropship',
+        branch: 'hangar',
         requiredAlienTech: 0,
         collectedAlienTech: 0,
         shipReturned: false,

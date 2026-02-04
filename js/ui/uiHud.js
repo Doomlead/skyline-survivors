@@ -26,6 +26,10 @@ function createUI(scene) {
     mothershipCoreFillEl = document.getElementById('mothership-core-fill');
     mothershipCoreLabelEl = document.getElementById('mothership-core-label');
     mothershipPhaseLabelEl = document.getElementById('mothership-phase-label');
+    rebuildHudEl = document.getElementById('rebuild-hud');
+    rebuildTimerFillEl = document.getElementById('rebuild-timer-fill');
+    rebuildTimerLabelEl = document.getElementById('rebuild-timer-label');
+    rebuildInstructionEl = document.getElementById('rebuild-instruction');
     decayHudEl = document.getElementById('decay-hud');
     decayPrimaryFillEl = document.getElementById('decay-primary-fill');
     decayPrimaryLabelEl = document.getElementById('decay-primary-label');
@@ -91,6 +95,7 @@ function updateUI(scene) {
     if (gameState.mode === 'survival') {
         if (assaultHudEl) assaultHudEl.classList.add('hidden');
         if (mothershipHudEl) mothershipHudEl.classList.add('hidden');
+        if (rebuildHudEl) rebuildHudEl.classList.add('hidden');
         updateBossHud(activeBoss);
         const activeHumans = humansGroup ? humansGroup.countActive(true) : gameState.humans;
         waveEl.style.display = 'block';
@@ -106,6 +111,7 @@ function updateUI(scene) {
         waveEl.style.display = 'block';
         if (mothershipHudEl) mothershipHudEl.classList.add('hidden');
         if (bossHudEl) bossHudEl.classList.add('hidden');
+        if (rebuildHudEl) rebuildHudEl.classList.add('hidden');
         const objective = gameState.assaultObjective;
         const baseHp = objective?.baseHp ?? 0;
         const baseMax = objective?.baseHpMax ?? 0;
@@ -127,6 +133,7 @@ function updateUI(scene) {
         waveEl.style.display = 'block';
         if (assaultHudEl) assaultHudEl.classList.add('hidden');
         if (bossHudEl) bossHudEl.classList.add('hidden');
+        if (rebuildHudEl) rebuildHudEl.classList.add('hidden');
         waveEl.innerText = 'FINAL ASSAULT: MOTHERSHIP CORE';
         const objective = gameState.mothershipObjective;
         const bossHp = objective?.bossHp ?? 0;
@@ -153,6 +160,27 @@ function updateUI(scene) {
         const enemiesLeft = Math.max(0, (gameState.enemiesToKillThisWave || 0) - (gameState.killsThisWave || 0));
         const waveLimit = typeof CLASSIC_WAVE_LIMIT === 'number' ? CLASSIC_WAVE_LIMIT : 15;
         waveEl.innerText = `WAVE ${gameState.wave}/${waveLimit}  ENEMIES: ${String(enemiesLeft).padStart(3, '0')}`;
+    }
+
+    const rebuildObjective = gameState.rebuildObjective;
+    const rebuildActive = rebuildObjective?.active && veritechState.destroyed && pilotState.active;
+    if (rebuildHudEl) {
+        rebuildHudEl.classList.toggle('hidden', !rebuildActive);
+    }
+    if (rebuildActive) {
+        const rebuildDuration = HANGAR_REBUILD_CONFIG?.durationMs ?? 30000;
+        const elapsed = rebuildObjective?.hangarRebuildTimer ?? 0;
+        const remaining = Math.max(0, rebuildDuration - elapsed);
+        const pct = rebuildDuration > 0 ? Math.max(0, Math.min(1, elapsed / rebuildDuration)) : 0;
+        if (rebuildTimerFillEl) {
+            rebuildTimerFillEl.style.width = `${Math.round(pct * 100)}%`;
+        }
+        if (rebuildTimerLabelEl) {
+            rebuildTimerLabelEl.innerText = `${(remaining / 1000).toFixed(1)}s`;
+        }
+        if (rebuildInstructionEl) {
+            rebuildInstructionEl.innerText = 'Stand under the hangar to rebuild the Veritech.';
+        }
     }
 
     bombsEl.innerText = gameState.smartBombs;

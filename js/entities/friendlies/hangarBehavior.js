@@ -8,7 +8,9 @@ const HANGAR_DROP_OFF_CONFIG = {
     botSpawnOffset: 70
 };
 const HANGAR_REBUILD_CONFIG = {
-    durationMs: 30000
+    durationMs: 30000,
+    xRange: 90,
+    yRange: 50
 };
 
 function isPlayerOverHangar(scene, hangar) {
@@ -21,6 +23,17 @@ function isPlayerOverHangar(scene, hangar) {
     const dy = player.y - dropOffY;
     return Math.abs(dx) <= HANGAR_DROP_OFF_CONFIG.xRange
         && Math.abs(dy) <= HANGAR_DROP_OFF_CONFIG.yRange;
+}
+
+function isPilotUnderHangar(scene, hangar) {
+    if (!pilotState.active || !scene?.pilot || !hangar) return false;
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(hangar.x, scene.pilot.x, CONFIG.worldWidth)
+        : (scene.pilot.x - hangar.x);
+    const groundY = typeof getHangarGroundY === 'function' ? getHangarGroundY(scene, hangar.x) : hangar.y;
+    const dy = scene.pilot.y - groundY;
+    return Math.abs(dx) <= HANGAR_REBUILD_CONFIG.xRange
+        && Math.abs(dy) <= HANGAR_REBUILD_CONFIG.yRange;
 }
 
 function dropOffCargo(scene, hangar) {
@@ -70,7 +83,7 @@ function handleHangarRebuild(scene, hangar, delta) {
     if (!objective || !objective.active || !veritechState.destroyed || !pilotState.active) return;
     if (!scene || !hangar || !hangar.active) return;
 
-    if (!isPlayerOverHangar(scene, hangar)) {
+    if (!isPilotUnderHangar(scene, hangar)) {
         objective.hangarRebuildTimer = 0;
         return;
     }
@@ -89,6 +102,24 @@ function handleHangarRebuild(scene, hangar, delta) {
     objective.shipReturned = true;
 }
 
+function updateHangarBeacon(scene, hangar, time) {
+    if (!hangar?.beaconPad || !hangar?.beaconBeam || !hangar?.beaconLabel) return;
+    const groundY = typeof getHangarGroundY === 'function' ? getHangarGroundY(scene, hangar.x) : hangar.y;
+    const beamHeight = Math.max(40, hangar.y - groundY - 12);
+    const rebuildActive = gameState.rebuildObjective?.active && veritechState.destroyed && pilotState.active;
+    const pulse = 0.55 + Math.sin(time * 0.004 + hangar.blinkOffset) * 0.25;
+    const alpha = rebuildActive ? 0.7 + pulse * 0.3 : 0.25 + pulse * 0.1;
+
+    hangar.beaconPad.setPosition(hangar.x, groundY);
+    hangar.beaconPad.setAlpha(alpha);
+    hangar.beaconBeam.setPosition(hangar.x, hangar.y - beamHeight / 2);
+    hangar.beaconBeam.setSize(14, beamHeight);
+    hangar.beaconBeam.setAlpha(alpha * 0.6);
+    hangar.beaconLabel.setPosition(hangar.x, groundY - 16);
+    hangar.beaconLabel.setText(rebuildActive ? 'REBUILD ZONE' : 'HANGAR DROP ZONE');
+    hangar.beaconLabel.setAlpha(Math.min(1, alpha + 0.2));
+}
+
 function updateHangars(scene, time, delta) {
     const { friendlies } = scene;
     if (!friendlies || !friendlies.children) return;
@@ -104,6 +135,7 @@ function updateHangars(scene, time, delta) {
         );
         friendly.setTint(Phaser.Display.Color.GetColor(tintColor.r, tintColor.g, tintColor.b));
         friendly.y = friendly.baseY + Math.sin(time * 0.002 + friendly.blinkOffset) * 1.5;
+        updateHangarBeacon(scene, friendly, time);
         dropOffCargo(scene, friendly);
         handleHangarRebuild(scene, friendly, delta);
     });
