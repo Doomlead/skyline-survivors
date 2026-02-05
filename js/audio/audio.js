@@ -71,6 +71,8 @@ class AudioManager {
         this.sounds.humanRescued = { type: 'synth', frequencies: [1200, 1400, 1600], duration: 0.4, waveform: 'sine', pitch: 'up' };
         this.sounds.humanAbducted = { type: 'synth', freq: 600, duration: 0.3, waveform: 'sine', pitch: 'down' };
         this.sounds.cargoDrop = { type: 'synth', frequencies: [500, 800, 1100], duration: 0.5, waveform: 'sine' };
+        this.sounds.squadDeployed = { type: 'synth', frequencies: [900, 1200, 1500], duration: 0.45, waveform: 'sine', pitch: 'up' };
+        this.sounds.squadSacrifice = { type: 'synth', frequencies: [700, 500, 300], duration: 0.5, waveform: 'sine', pitch: 'down' };
 
         // Game state
         this.sounds.waveComplete = { type: 'synth', frequencies: [800, 1000, 1200, 1400], duration: 0.6, waveform: 'sine' };

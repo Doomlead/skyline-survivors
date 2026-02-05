@@ -68,6 +68,16 @@ const OPERATIVE_RARITY_WEIGHTS = [
     { type: 'saboteur', weight: 5 }
 ];
 
+const OPERATIVE_FOLLOW_CONFIG = {
+    radius: 62,
+    verticalRatio: 0.4,
+    spacingJitter: 0.15,
+    moveSpeed: 110,
+    sacrificeSpeed: 140,
+    interceptLeadTime: 0.2,
+    interceptHorizon: 1.4
+};
+
 function pickOperativeType() {
     const total = OPERATIVE_RARITY_WEIGHTS.reduce((sum, entry) => sum + entry.weight, 0);
     const roll = Math.random() * total;
@@ -102,6 +112,14 @@ function spawnOperative(scene, type, x, y) {
     operative.homeX = x;
     operative.homeY = y;
     operative.bracedUntil = 0;
+    if (scene) {
+        scene.operativeSpawnIndex = (scene.operativeSpawnIndex || 0) + 1;
+        operative.formationIndex = scene.operativeSpawnIndex;
+    } else {
+        operative.formationIndex = 0;
+    }
+    operative.currentState = 'PATROL';
+    operative.isBodyBlocking = false;
 
     createSpawnEffect(scene, x, y, 'drone');
     if (audioManager) audioManager.playSound('enemySpawn');
@@ -160,6 +178,114 @@ function findNearestEnemy(scene, origin) {
     return { target: nearest, distance: nearestDist };
 }
 
+function getOperativeSquadSize(scene) {
+    if (!scene?.friendlies?.children?.entries) return 0;
+    return scene.friendlies.children.entries.filter(entry => entry?.active && entry.isOperative).length;
+}
+
+function getFormationOffset(index, squadSize, time) {
+    if (!squadSize || squadSize <= 0) return { x: 0, y: 0 };
+    const slot = ((index || 0) % squadSize);
+    const angleStep = (Math.PI * 2) / squadSize;
+    const wobble = Math.sin(time * 0.002 + slot) * OPERATIVE_FOLLOW_CONFIG.spacingJitter;
+    const angle = angleStep * slot + wobble;
+    return {
+        x: Math.cos(angle) * OPERATIVE_FOLLOW_CONFIG.radius,
+        y: Math.sin(angle) * OPERATIVE_FOLLOW_CONFIG.radius * OPERATIVE_FOLLOW_CONFIG.verticalRatio
+    };
+}
+
+function moveOperativeToTarget(operative, targetX, speed, timeSlowMultiplier) {
+    const deltaX = typeof wrappedDistance === 'function'
+        ? wrappedDistance(operative.x, targetX, CONFIG.worldWidth)
+        : (targetX - operative.x);
+    const absDx = Math.abs(deltaX);
+    if (absDx < 4) {
+        operative.setVelocityX(0);
+        return;
+    }
+    operative.setVelocityX(Math.sign(deltaX) * speed * timeSlowMultiplier);
+}
+
+function getActiveRebuildZone(scene) {
+    const { friendlies } = scene;
+    if (!friendlies?.children?.entries) return null;
+    for (const friendly of friendlies.children.entries) {
+        if (friendly?.active && friendly.isHangar && friendly.landingZone?.active) {
+            return friendly.landingZone;
+        }
+    }
+    return null;
+}
+
+function isPlayerOnLandingZone(player, landingZone) {
+    if (!player || !landingZone) return false;
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(landingZone.x, player.x, CONFIG.worldWidth)
+        : (player.x - landingZone.x);
+    const zoneCenterY = landingZone.y - landingZone.displayHeight * 0.5;
+    const dy = player.y - zoneCenterY;
+    const xRange = landingZone.displayWidth * 0.35;
+    const yRange = landingZone.displayHeight * 0.35;
+    return Math.abs(dx) <= xRange && Math.abs(dy) <= yRange;
+}
+
+function findThreateningProjectile(scene, player, landingZone) {
+    const enemyProjectiles = scene?.enemyProjectiles;
+    if (!enemyProjectiles?.children?.entries) return null;
+    const targetX = landingZone ? landingZone.x : player.x;
+    const targetY = landingZone ? landingZone.y - landingZone.displayHeight * 0.5 : player.y;
+    const targetRadius = landingZone ? Math.max(landingZone.displayWidth, landingZone.displayHeight) * 0.35 : 38;
+    let best = null;
+    let bestDistance = Infinity;
+
+    enemyProjectiles.children.entries.forEach((proj) => {
+        if (!proj || !proj.active || !proj.body) return;
+        const vx = proj.body.velocity.x || 0;
+        const vy = proj.body.velocity.y || 0;
+        const speedSq = vx * vx + vy * vy;
+        if (speedSq < 1) return;
+        const relX = proj.x - targetX;
+        const relY = proj.y - targetY;
+        const tClosest = -(relX * vx + relY * vy) / speedSq;
+        if (tClosest < 0 || tClosest > OPERATIVE_FOLLOW_CONFIG.interceptHorizon) return;
+        const closestX = relX + vx * tClosest;
+        const closestY = relY + vy * tClosest;
+        const closestDist = Math.hypot(closestX, closestY);
+        if (closestDist > targetRadius) return;
+        const distToPlayer = Phaser.Math.Distance.Between(proj.x, proj.y, targetX, targetY);
+        if (distToPlayer < bestDistance) {
+            bestDistance = distToPlayer;
+            best = proj;
+        }
+    });
+
+    return best;
+}
+
+function applyOperativeDefensiveVisual(scene, operative, time) {
+    if (!operative) return;
+    if (operative.isBodyBlocking) {
+        if (!operative.defenseSprite) {
+            operative.defenseSprite = scene.add.sprite(operative.x, operative.y, 'shieldEffect');
+            operative.defenseSprite.setDepth(FG_DEPTH_BASE + 4);
+            operative.defenseSprite.setScale(0.25);
+            operative.defenseSprite.setAlpha(0.55);
+        }
+    }
+    if (operative.defenseSprite) {
+        if (!operative.isBodyBlocking || !operative.active) {
+            operative.defenseSprite.destroy();
+            operative.defenseSprite = null;
+        } else {
+            operative.defenseSprite.x = operative.x;
+            operative.defenseSprite.y = operative.y - 6;
+            const pulse = 0.4 + Math.sin(time * 0.008 + operative.blinkOffset) * 0.2;
+            operative.defenseSprite.setAlpha(pulse);
+        }
+    }
+}
+
 function findNearestAssaultTarget(scene, origin) {
     const { assaultTargets } = scene;
     if (!assaultTargets) return { target: null, distance: Infinity };
@@ -183,13 +309,17 @@ function findNearestAssaultTarget(scene, origin) {
     return { target: nearest, distance: nearestDist };
 }
 
-function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier) {
+function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, movementOverride) {
     const config = OPERATIVE_CLASS_CONFIG.infantry;
-    const patrolAngle = (operative.patrolAngle || 0) + 0.02 * timeSlowMultiplier;
-    operative.patrolAngle = patrolAngle;
-    const sway = Math.sin(patrolAngle + operative.blinkOffset) * config.patrolRange;
-    const targetX = operative.homeX + sway;
-    operative.setVelocityX((targetX - operative.x) * 0.6 * timeSlowMultiplier);
+    if (movementOverride) {
+        moveOperativeToTarget(operative, movementOverride.targetX, movementOverride.speed, timeSlowMultiplier);
+    } else {
+        const patrolAngle = (operative.patrolAngle || 0) + 0.02 * timeSlowMultiplier;
+        operative.patrolAngle = patrolAngle;
+        const sway = Math.sin(patrolAngle + operative.blinkOffset) * config.patrolRange;
+        const targetX = operative.homeX + sway;
+        operative.setVelocityX((targetX - operative.x) * 0.6 * timeSlowMultiplier);
+    }
 
     if (time > operative.lastShot + config.fireCooldown) {
         const { target, distance } = findNearestEnemy(scene, operative);
@@ -209,23 +339,27 @@ function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier) {
     }
 }
 
-function updateOperativeGunner(scene, operative, time, timeSlowMultiplier) {
+function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, movementOverride) {
     const config = OPERATIVE_CLASS_CONFIG.gunner;
     const { target, distance } = findNearestEnemy(scene, operative);
     const inRange = target && distance <= config.range;
 
-    if (inRange) {
+    if (inRange && !movementOverride) {
         operative.bracedUntil = Math.max(operative.bracedUntil || 0, time + config.braceDuration);
     }
 
-    if (operative.bracedUntil && time < operative.bracedUntil) {
-        operative.setVelocityX(0);
+    if (movementOverride) {
+        moveOperativeToTarget(operative, movementOverride.targetX, movementOverride.speed, timeSlowMultiplier);
     } else {
-        const patrolAngle = (operative.patrolAngle || 0) + 0.016 * timeSlowMultiplier;
-        operative.patrolAngle = patrolAngle;
-        const sway = Math.sin(patrolAngle + operative.blinkOffset) * config.patrolRange;
-        const targetX = operative.homeX + sway;
-        operative.setVelocityX((targetX - operative.x) * 0.5 * timeSlowMultiplier);
+        if (operative.bracedUntil && time < operative.bracedUntil) {
+            operative.setVelocityX(0);
+        } else {
+            const patrolAngle = (operative.patrolAngle || 0) + 0.016 * timeSlowMultiplier;
+            operative.patrolAngle = patrolAngle;
+            const sway = Math.sin(patrolAngle + operative.blinkOffset) * config.patrolRange;
+            const targetX = operative.homeX + sway;
+            operative.setVelocityX((targetX - operative.x) * 0.5 * timeSlowMultiplier);
+        }
     }
 
     if (inRange && time > operative.lastShot + config.fireCooldown) {
@@ -246,19 +380,23 @@ function updateOperativeGunner(scene, operative, time, timeSlowMultiplier) {
     }
 }
 
-function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) {
+function updateOperativeMedic(scene, operative, time, timeSlowMultiplier, movementOverride) {
     const config = OPERATIVE_CLASS_CONFIG.medic;
     const player = getActivePlayer(scene);
 
     if (player) {
-        const dx = typeof wrappedDistance === 'function'
-            ? wrappedDistance(operative.x, player.x, CONFIG.worldWidth)
-            : (player.x - operative.x);
-        const absDx = Math.abs(dx);
-        if (absDx > 80) {
-            operative.setVelocityX(Math.sign(dx) * config.moveSpeed * timeSlowMultiplier);
+        if (movementOverride) {
+            moveOperativeToTarget(operative, movementOverride.targetX, movementOverride.speed, timeSlowMultiplier);
         } else {
-            operative.setVelocityX(0);
+            const dx = typeof wrappedDistance === 'function'
+                ? wrappedDistance(operative.x, player.x, CONFIG.worldWidth)
+                : (player.x - operative.x);
+            const absDx = Math.abs(dx);
+            if (absDx > 80) {
+                operative.setVelocityX(Math.sign(dx) * config.moveSpeed * timeSlowMultiplier);
+            } else {
+                operative.setVelocityX(0);
+            }
         }
 
         const distance = Phaser.Math.Distance.Between(operative.x, operative.y, player.x, player.y);
@@ -267,7 +405,7 @@ function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) {
             createExplosion(scene, operative.x, operative.y - 6, 0x5eead4);
             operative.lastSupport = time;
         }
-    } else {
+    } else if (!movementOverride) {
         const patrolAngle = (operative.patrolAngle || 0) + 0.02 * timeSlowMultiplier;
         operative.patrolAngle = patrolAngle;
         const sway = Math.sin(patrolAngle + operative.blinkOffset) * config.patrolRange;
@@ -276,7 +414,7 @@ function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) {
     }
 }
 
-function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier) {
+function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, movementOverride) {
     const config = OPERATIVE_CLASS_CONFIG.saboteur;
     const useAssaultTargets = gameState.mode === 'assault' && scene.assaultTargets;
 
@@ -286,7 +424,9 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier) {
 
     const { target, distance } = targetData;
 
-    if (target) {
+    if (movementOverride) {
+        moveOperativeToTarget(operative, movementOverride.targetX, movementOverride.speed, timeSlowMultiplier);
+    } else if (target) {
         const dx = typeof wrappedDistance === 'function'
             ? wrappedDistance(operative.x, target.x, CONFIG.worldWidth)
             : (target.x - operative.x);
@@ -313,7 +453,7 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier) {
             }
             operative.lastShot = time;
         }
-    } else {
+    } else if (!movementOverride) {
         const patrolAngle = (operative.patrolAngle || 0) + 0.02 * timeSlowMultiplier;
         operative.patrolAngle = patrolAngle;
         const sway = Math.sin(patrolAngle + operative.blinkOffset) * config.patrolRange;
@@ -348,6 +488,14 @@ function updateOperatives(scene, time, delta) {
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const topLimit = 20;
 
+    const player = getActivePlayer(scene);
+    const isPilotActive = pilotState.active && aegisState.destroyed && player === scene.pilot;
+    const rebuildObjective = gameState.rebuildObjective;
+    const isRebuildActive = isPilotActive && rebuildObjective?.active && rebuildObjective.stage === 'hangar_rebuild';
+    const landingZone = isRebuildActive ? getActiveRebuildZone(scene) : null;
+    const isPilotOnPad = isRebuildActive && player && landingZone && isPlayerOnLandingZone(player, landingZone);
+    const squadSize = getOperativeSquadSize(scene);
+
     friendlies.children.entries.forEach((friendly) => {
         if (!friendly || !friendly.body || !friendly.active || !friendly.isOperative) return;
 
@@ -367,19 +515,75 @@ function updateOperatives(scene, time, delta) {
             if (friendly.body.velocity.y < 0) friendly.setVelocityY(0);
         }
 
+        let movementOverride = null;
+        friendly.isBodyBlocking = false;
+
+        if (isPilotActive && player) {
+            if (isPilotOnPad) {
+                const threat = findThreateningProjectile(scene, player, landingZone);
+                if (threat) {
+                    const dirX = player.x - threat.x;
+                    const dirY = player.y - threat.y;
+                    const distance = Math.max(1, Math.hypot(dirX, dirY));
+                    const interceptRatio = Math.min(0.5, Math.max(0.25, distance / 500));
+                    const targetX = threat.x + dirX * interceptRatio + threat.body.velocity.x * OPERATIVE_FOLLOW_CONFIG.interceptLeadTime;
+                    movementOverride = {
+                        targetX,
+                        speed: OPERATIVE_FOLLOW_CONFIG.sacrificeSpeed
+                    };
+                    friendly.currentState = 'SACRIFICE';
+                    friendly.isBodyBlocking = true;
+                } else {
+                    const offset = getFormationOffset(friendly.formationIndex || 0, squadSize, time);
+                    movementOverride = {
+                        targetX: wrapValue(player.x + offset.x, CONFIG.worldWidth),
+                        speed: OPERATIVE_FOLLOW_CONFIG.moveSpeed
+                    };
+                    friendly.currentState = 'DEFEND_REBUILD';
+                }
+            } else {
+                const offset = getFormationOffset(friendly.formationIndex || 0, squadSize, time);
+                movementOverride = {
+                    targetX: wrapValue(player.x + offset.x, CONFIG.worldWidth),
+                    speed: OPERATIVE_FOLLOW_CONFIG.moveSpeed
+                };
+                friendly.currentState = 'FOLLOW_LEADER';
+            }
+        } else {
+            friendly.currentState = 'PATROL';
+        }
+
+        if (scene?.audioManager && friendly === friendlies.children.entries[0]) {
+            if (scene.operativeRadioState !== friendly.currentState) {
+                const now = time || 0;
+                if (!scene.operativeRadioCooldown || now > scene.operativeRadioCooldown) {
+                    if (friendly.currentState === 'FOLLOW_LEADER') {
+                        scene.audioManager.playSound('squadDeployed');
+                        scene.operativeRadioCooldown = now + 2000;
+                    } else if (friendly.currentState === 'SACRIFICE') {
+                        scene.audioManager.playSound('squadSacrifice');
+                        scene.operativeRadioCooldown = now + 2000;
+                    }
+                }
+                scene.operativeRadioState = friendly.currentState;
+            }
+        }
+
         switch (friendly.operativeType) {
             case 'infantry':
-                updateOperativeInfantry(scene, friendly, time, timeSlowMultiplier);
+                updateOperativeInfantry(scene, friendly, time, timeSlowMultiplier, movementOverride);
                 break;
             case 'gunner':
-                updateOperativeGunner(scene, friendly, time, timeSlowMultiplier);
+                updateOperativeGunner(scene, friendly, time, timeSlowMultiplier, movementOverride);
                 break;
             case 'medic':
-                updateOperativeMedic(scene, friendly, time, timeSlowMultiplier);
+                updateOperativeMedic(scene, friendly, time, timeSlowMultiplier, movementOverride);
                 break;
             case 'saboteur':
-                updateOperativeSaboteur(scene, friendly, time, timeSlowMultiplier);
+                updateOperativeSaboteur(scene, friendly, time, timeSlowMultiplier, movementOverride);
                 break;
         }
+
+        applyOperativeDefensiveVisual(scene, friendly, time);
     });
 }
