@@ -1,7 +1,3 @@
-Here is the complete and updated design document for **Skyline Survivors: Urban Defender**, integrating the new **Rescue Loop**, **Operative AI**, and **On-Foot Command** systems into the existing framework.
-
-***
-
 # Skyline Survivors: Urban Defender – Design Document v2.0
 
 ## 1. Core Concept
@@ -56,61 +52,59 @@ A modern reimagining of *Defender/Stargate* fused with *Strike Force*, *Vampire 
 Instead of humans being passive scoring items, they are the primary resource for ground-game momentum.
 
 1.  **Extraction Hubs:** Each district features 1 fixed aerial **Fortified Hangar** (Drop-off Point). These are the only locations where civilians can be converted into "Comrades."
-2.  **The "Strike Force" Carry:** When the ship hovers over a human, they are tractor-beamed into cargo.
+2.  **The "Strike Force" Carry:** When the Aegis hovers over a human, they are tractor-beamed into cargo.
     *   *Mechanic:* Carrying humans increases ship weight/inertia.
-    *   *Risk/Reward:* Holding multiple humans yields a higher deployment bonus but makes the ship harder to maneuver during high-intensity waves.
+    *   *Risk/Reward:* Holding multiple humans yields a higher deployment bonus but makes the Aegis harder to maneuver during high-intensity waves.
 3.  **Tactical Deployment:** Dropping off humans at the Hangar triggers a **Deployment Animation**.
     *   *Result:* A squad of 3–5 armed operatives exits the Hangar to join the fray on the ground below.
 
 ### 3.2. Core Loop
 1.  **System Map:** Choose Defense (Threatened) or Assault (Occupied).
-2.  **Combat:** Pilot ship -> Rescue Humans -> Deploy Comrades -> Survive Waves.
-3.  **Crisis:** If ship destroyed -> Enter On-Foot Command -> Rebuild at Hangar.
+2.  **Combat:** Pilot the Aegis -> Rescue Humans -> Deploy Comrades -> Survive Waves.
+3.  **Crisis:** If the Aegis is destroyed -> Enter On-Foot Command -> Rebuild at Hangar.
 4.  **Extraction:** Complete Wave 15 or Destroy Base.
 
 ---
 
 ## 4. Player Mechanics & Operative Systems
 
-### 4.1. Ship Forms & Movement
-**4.1.1. Normal Fighter Form**
+### 4.1. The Aegis: Forms & Movement
+**4.1.1. Interceptor Mode (Fighter Form)**
 *   **Movement:** 8-directional. Inertia scales based on number of humans in cargo.
 *   **Primary Weapon:** Forward blaster.
 *   **Secondary:** Smart Bomb / Hyperspace.
 
-**4.1.2. Guardian Form**
+**4.1.2. Bulwark Mode (Guardian Replacement)**
 *   **Activation:** Toggle button.
 *   **Movement:** Drastically slowed.
-*   **Synergy - Defensive Perimeter:** If the player is in Guardian Form, ground operatives actively gather below the ship and form a defensive ring, providing 360° cover fire while the ship focuses on heavy targets.
 
 ### 4.2. Operative AI & Combat Behavior ("The Comrades")
 These soldiers provide "fire-and-forget" support, making the battlefield feel alive.
 
 **4.2.1. Formation Tactics**
 *   Comrades move in small fire teams.
-*   They automatically engage the nearest threat but will prioritize protecting the player if the player is low health or on foot.
+*   They automatically engage the nearest threat but will prioritize protecting the player if the player is on foot.
 
 **4.2.2. Weapon Scaling**
 *   Operatives start with basic rifles.
-*   **Tier Overflow:** If the player picks up a Weapon Power-Up while their ship is already at **Tier 3 (Max)**, the "excess" power is distributed to ground troops, upgrading their fire rate or damage output permanently for that mission.
+*   **Tier Overflow:** If the player picks up a Weapon Power-Up while the Aegis is already at **Tier 3 (Max)**, the "excess" power is distributed to ground troops, upgrading their fire rate or damage output permanently for that mission.
 
 **4.2.3. Operative Classes**
 | Operative Type | Rarity | Combat Behavior & Abilities |
 | :--- | :--- | :--- |
 | **Standard Infantry** | Common (65%) | Equipped with a rapid-fire rifle; auto-fires at nearest enemy. Moves in small squads to provide basic screen coverage. |
 | **Heavy Gunner** | Uncommon (20%) | High DPS unit with a Gatling-style weapon. Slows down to a "braced" position to shred through Bombers or Pods. |
-| **Combat Medic** | Rare (10%) | Does not attack. Periodically drops small health pickups for the pilot. Critical for survival during On-Foot Combat. |
 | **Saboteur** | Elite (5%) | Specifically targets **Enemy Ground Bases** in Assault Missions. Uses EMP grenades to disable Turrets and Shield Generators. |
 
 ### 4.3. On-Foot Command (Ship Destruction)
-If the ship is destroyed, the game does not end. The pilot ejects, and the genre shifts to a run-and-gun survival mode.
+If the Aegis is destroyed, the game does not end. The pilot ejects, and the genre shifts to a run-and-gun survival mode.
 
 **4.3.1. Squad Leader Aura**
 *   When on foot, nearby Comrades stop patrolling and follow the player's movement exactly.
 *   **Visual:** This creates a "Bullet Hell" wall of return fire (similar to "Options" in *Gradius*), concentrating firepower wherever the pilot moves.
 
 **4.3.2. Extraction Defense (Rebuild Mechanic)**
-*   To rebuild the ship, the pilot must reach the **Fortified Hangar** (Drop-off point) and stand their ground.
+*   To rebuild the Aegis, the pilot must reach the **Fortified Hangar** (Drop-off point) and stand their ground.
 *   **Sacrifice:** While the "Ship Rebuild" timer ticks down, Comrades will physically body-block incoming enemy fire, sacrificing themselves to ensure the pilot gets back in the air.
 
 ### 4.4. Power-Up System
@@ -178,7 +172,7 @@ If the ship is destroyed, the game does not end. The pilot ejects, and the genre
 
 ### 7.2. Mission Types
 *   **Defense:** 15 Waves. Focus on keeping the Fortified Hangar safe and deploying troops.
-*   **Assault:** Destroy Enemy Base. Saboteurs and Guardian Form are highly effective here.
+*   **Assault:** Destroy Enemy Base. Saboteurs and Bulwark Mode are highly effective here.
 *   **Mothership:** The final "Boss Rush" style level.
 
 ### 7.3. Challenges
@@ -203,9 +197,9 @@ If the ship is destroyed, the game does not end. The pilot ejects, and the genre
 
 ---
 
-## 9. Key Design Changes Summary (v2.0)
+## 9. Key Design Changes Summary 
 *   **Resource vs. Score:** Humans are now ammunition for the ground war via the "Strike Force" Carry and Deployment system.
 *   **Inertia Mechanic:** Carrying humans adds weight, creating a risk/reward balance.
-*   **Operative Depth:** Added 4 distinct classes (Infantry, Gunner, Medic, Saboteur) and AI behaviors (Defensive Perimeter).
+*   **Operative Depth:** Added 3 distinct classes (Infantry, Gunner, Saboteur) and AI behaviors (Defensive Perimeter).
 *   **Weapon Synergy:** Tier 3 ship overflow upgrades ground troops.
-*   **Second Chance Mechanic:** On-Foot Command turns the pilot into a Squad Leader, using "Bullet Hell" squad tactics and "Sacrifice" mechanics to rebuild the ship.
+*   **Second Chance Mechanic:** On-Foot Command turns the pilot into a Squad Leader, using "Bullet Hell" squad tactics and "Sacrifice" mechanics to rebuild the Aegis.

@@ -1,15 +1,8 @@
-Here is the updated `progress.txt`.
-
-**Note on Progress Calculation:**
-Because Design Document v2.0 introduces significant new mechanical systems (Squad AI, Variable Inertia, Class Systems, and the specific "Rescue-to-Deploy" loop), the overall completion percentage has **decreased** relative to the new scope. While the *codebase* hasn't changed, the *distance to the finish line* has increased.
-
-***
-
-# Skyline Survivors: Urban Defender - Implementation Progress (v2.0 Scope)
+# Skyline Survivors: Urban Defender
 
 ## 1. Core Concept
 
-**Implementation Status: 70% Complete** ⬆️ (Adjusted for v2.0 Scope)
+**Implementation Status: 70% Complete**  
 
 ### Key Themes Progress:
 
@@ -32,7 +25,7 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 
 ### 2.1. System View Orbital Map
 
-**Implementation Status: 83% Complete** (Unchanged by v2.0)
+**Implementation Status: 83% Complete**
 
 ✅ **Fully Implemented:**
 - 3D rotating globe with selectable districts
@@ -102,8 +95,6 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - **Normal Fighter Form:** 8-directional movement, Primary Weapon, Smart Bomb, Hyperspace.
 - **Guardian Form:** Toggle, Slowed movement, 360° aim.
 
-❌ **Not Implemented:**
-- **Guardian Defensive Perimeter:** Signaling ground AI to form a ring around the ship.
 
 ### 4.2. Operative AI & Combat Behavior ("The Comrades")
 
@@ -114,7 +105,6 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - **Operative Classes:**
   - *Standard Infantry:* (Common)
   - *Heavy Gunner:* (Uncommon - Braced fire)
-  - *Combat Medic:* (Rare - Health drops)
   - *Saboteur:* (Elite - Anti-base logic + EMP vs base defenses)
 
 ❌ **Not Implemented:**
@@ -194,27 +184,24 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 
 ---
 
-## Gap Analysis & Next Steps (Updated for v2.0)
+## Gap Analysis & Next Steps
 
 **Overall Implementation:**
 - ✅ **Implemented:** ~70% (Adjusted upward as rescue/deploy loop shipped)
 - ⚠️ **Partially Implemented:** ~20%
 - ❌ **Not Implemented:** ~10%
 
-### 🚨 Critical v2.0 Mechanics (The "New Fun")
+### 🚨 Critical Mechanics (The "New Fun")
 The core Rescue Loop components (cargo carry, inertia scaling, hangar drop-off, operative deployment, HUD counters) are now present. The remaining gaps are mostly in *feel*, *feedback*, and *synergy*.
 
-1.  **Guardian Defensive Perimeter:** Operatives forming a ring and prioritizing protection while in Guardian form.
-2.  **Squad Leader Aura:** On-foot comrades follow the pilot and focus fire in formation.
-3.  **Weapon Tier Overflow:** Redirect max-tier pickups to ground troop upgrades.
-4.  **Sacrifice Behavior:** AI body-blocks during hangar rebuild.
-5.  **Hangar-Based Rebuild Loop:** ✅ Implemented (landing zone hold timer under the hangar).
+1.  **Squad Leader Aura:** On-foot comrades follow the pilot and focus fire in formation.
+2.  **Weapon Tier Overflow:** Redirect max-tier pickups to ground troop upgrades.
+3.  **Sacrifice Behavior:** AI body-blocks during hangar rebuild.
+4.  **Hangar-Based Rebuild Loop:** ✅ Implemented (landing zone hold timer under the hangar).
 
 ### Revised Immediate Next Steps:
 
 **Priority 1: Guardian/On-Foot Squad Behaviors (3-4 Days)**
-- Implement Guardian defensive ring positioning and fire priorities.
-- Add Squad Leader aura: operatives follow pilot and align their firing angles.
 - Add sacrifice behavior for operatives to body-block shots during rebuild.
 - Ensure transition logic between patrol/guardian/on-foot states.
 
@@ -231,7 +218,7 @@ The core Rescue Loop components (cargo carry, inertia scaling, hangar drop-off, 
 
 ---
 
-## Estimated Remaining Work (v2.0 Scope)
+## Estimated Remaining Work
 
 - **Rescue/Deploy Loop:** 2 days
 - **Operative AI & Classes:** 4 days
