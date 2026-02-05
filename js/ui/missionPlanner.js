@@ -142,8 +142,8 @@
             reward: 'supply caches'
         },
         {
-            id: 'savanna-guardian',
-            name: 'Savanna Guardian',
+            id: 'savanna-bulwark',
+            name: 'Savanna Bulwark',
             center: { lat: -10, lon: 35 },
             timer: 135,
             color: 0x22c55e,

@@ -4,7 +4,7 @@
 
 function updatePlayer(scene, time, delta) {
     const {
-        veritech,
+        aegis,
         pilot,
         leftKey,
         rightKey,
@@ -22,7 +22,7 @@ function updatePlayer(scene, time, delta) {
         particleManager,
         audioManager
     } = scene;
-    if (!veritech || !leftKey || !rightKey || !upKey || !downKey) return;
+    if (!aegis || !leftKey || !rightKey || !upKey || !downKey) return;
 
     const vInput = window.virtualInput || { left: false, right: false, up: false, down: false, fire: false };
     const left = leftKey.isDown || vInput.left;
@@ -30,22 +30,22 @@ function updatePlayer(scene, time, delta) {
     const up = upKey.isDown || vInput.up;
     const down = downKey.isDown || vInput.down;
 
-    if (veritechState.transformCooldown > 0) {
-        veritechState.transformCooldown -= delta;
+    if (aegisState.transformCooldown > 0) {
+        aegisState.transformCooldown -= delta;
     }
 
-    if (Phaser.Input.Keyboard.JustDown(transformKey) && veritechState.active && veritechState.transformCooldown <= 0) {
-        const nextMode = veritechState.mode === 'fighter' ? 'guardian' : 'fighter';
-        setVeritechMode(scene, nextMode);
-        veritechState.transformCooldown = 350;
+    if (Phaser.Input.Keyboard.JustDown(transformKey) && aegisState.active && aegisState.transformCooldown <= 0) {
+        const nextMode = aegisState.mode === 'interceptor' ? 'bulwark' : 'interceptor';
+        setAegisMode(scene, nextMode);
+        aegisState.transformCooldown = 350;
     }
 
-    if (ejectKey && Phaser.Input.Keyboard.JustDown(ejectKey) && veritechState.active) {
+    if (ejectKey && Phaser.Input.Keyboard.JustDown(ejectKey) && aegisState.active) {
         ejectPilot(scene);
     }
 
     if (enterKey && Phaser.Input.Keyboard.JustDown(enterKey) && pilotState.active) {
-        enterVeritech(scene);
+        enterAegis(scene);
     }
 
     if (bombKey && Phaser.Input.Keyboard.JustDown(bombKey)) useSmartBomb(scene);
@@ -65,61 +65,61 @@ function updatePlayer(scene, time, delta) {
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const minY = 20;
 
-    if (veritechState.active) {
-        const speed = veritechState.mode === 'fighter' ? 320 : 220;
+    if (aegisState.active) {
+        const speed = aegisState.mode === 'interceptor' ? 320 : 220;
         const horizontalSpeed = speed * 0.4;
-        const baseAccel = veritechState.mode === 'fighter' ? 0.18 : 0.2;
-        const baseDrag = veritechState.mode === 'fighter' ? 0.92 : 0.9;
+        const baseAccel = aegisState.mode === 'interceptor' ? 0.18 : 0.2;
+        const baseDrag = aegisState.mode === 'interceptor' ? 0.92 : 0.9;
         const cargoCount = window.ShipController?.cargo ?? 0;
         const accelPenalty = Math.min(0.45, cargoCount * 0.06);
         const accel = baseAccel * (1 - accelPenalty);
         const dragBoost = Math.min(0.06, cargoCount * 0.01);
         const drag = Math.min(0.98, baseDrag + dragBoost);
-        const gravity = veritechState.mode === 'guardian' ? 520 : 0;
+        const gravity = aegisState.mode === 'bulwark' ? 520 : 0;
 
         if (left) {
-            veritechState.vx -= horizontalSpeed * accel;
-            veritechState.facing = -1;
+            aegisState.vx -= horizontalSpeed * accel;
+            aegisState.facing = -1;
         } else if (right) {
-            veritechState.vx += horizontalSpeed * accel;
-            veritechState.facing = 1;
+            aegisState.vx += horizontalSpeed * accel;
+            aegisState.facing = 1;
         }
 
-        if (veritechState.mode === 'fighter') {
-            if (up) veritechState.vy -= speed * accel;
-            if (down) veritechState.vy += speed * accel;
+        if (aegisState.mode === 'interceptor') {
+            if (up) aegisState.vy -= speed * accel;
+            if (down) aegisState.vy += speed * accel;
         } else {
-            if (up) veritechState.vy -= speed * accel * 1.2;
-            if (down) veritechState.vy += speed * accel * 0.7;
-            veritechState.vy += gravity * (delta / 1000);
+            if (up) aegisState.vy -= speed * accel * 1.2;
+            if (down) aegisState.vy += speed * accel * 0.7;
+            aegisState.vy += gravity * (delta / 1000);
         }
 
-        veritechState.vx *= drag;
-        veritechState.vy *= drag;
+        aegisState.vx *= drag;
+        aegisState.vy *= drag;
 
         const maxSpeed = speed * 1.1;
         const maxHorizontalSpeed = horizontalSpeed * 1.1;
-        veritechState.vx = Phaser.Math.Clamp(veritechState.vx, -maxHorizontalSpeed, maxHorizontalSpeed);
-        veritechState.vy = Phaser.Math.Clamp(veritechState.vy, -maxSpeed, maxSpeed);
+        aegisState.vx = Phaser.Math.Clamp(aegisState.vx, -maxHorizontalSpeed, maxHorizontalSpeed);
+        aegisState.vy = Phaser.Math.Clamp(aegisState.vy, -maxSpeed, maxSpeed);
 
-        veritech.x += veritechState.vx * (delta / 1000);
-        veritech.y += veritechState.vy * (delta / 1000);
-        veritech.body.setVelocity(veritechState.vx, veritechState.vy);
+        aegis.x += aegisState.vx * (delta / 1000);
+        aegis.y += aegisState.vy * (delta / 1000);
+        aegis.body.setVelocity(aegisState.vx, aegisState.vy);
 
-        const terrainVariation = Math.sin(veritech.x / 200) * 30;
+        const terrainVariation = Math.sin(aegis.x / 200) * 30;
         const maxY = groundLevel - terrainVariation - 20;
-        if (veritech.y < minY) veritech.y = minY;
-        if (veritech.y > maxY) {
-            veritech.y = maxY;
-            veritechState.vy = 0;
+        if (aegis.y < minY) aegis.y = minY;
+        if (aegis.y > maxY) {
+            aegis.y = maxY;
+            aegisState.vy = 0;
         }
 
-        if (veritechState.mode === 'guardian') {
-            veritechState.aimAngle = getGuardianAimAngle(left, right, up, down);
+        if (aegisState.mode === 'bulwark') {
+            aegisState.aimAngle = getBulwarkAimAngle(left, right, up, down);
         }
 
-        veritech.flipX = veritechState.facing < 0;
-        playerState.direction = veritechState.facing < 0 ? 'left' : 'right';
+        aegis.flipX = aegisState.facing < 0;
+        playerState.direction = aegisState.facing < 0 ? 'left' : 'right';
         syncActivePlayer(scene);
     } else if (pilotState.active) {
         const speed = 200;
@@ -172,8 +172,8 @@ function updatePlayer(scene, time, delta) {
         let angle = null;
         if (pilotState.active) {
             angle = getPilotAimAngle(left, right, up, down, pilotState.grounded);
-        } else if (veritechState.active && veritechState.mode === 'guardian') {
-            angle = veritechState.aimAngle;
+        } else if (aegisState.active && aegisState.mode === 'bulwark') {
+            angle = aegisState.aimAngle;
         }
         fireWeapon(scene, angle);
         if (audioManager) {
@@ -223,7 +223,7 @@ function updatePlayer(scene, time, delta) {
     const velocityX = activePlayer.body.velocity.x;
     const velocityY = activePlayer.body.velocity.y;
     const movementSpeed = Math.hypot(velocityX, velocityY);
-    if (particleManager && movementSpeed > 20 && veritechState.active) {
+    if (particleManager && movementSpeed > 20 && aegisState.active) {
         const rotation = movementSpeed > 0
             ? Math.atan2(velocityY, velocityX)
             : (playerState.direction === 'right' ? 0 : Math.PI);
@@ -255,11 +255,11 @@ function getPilotAimAngle(left, right, up, down, grounded) {
     return Math.atan2(aimY, aimX);
 }
 
-function getGuardianAimAngle(left, right, up, down) {
+function getBulwarkAimAngle(left, right, up, down) {
     const aimX = (left ? -1 : 0) + (right ? 1 : 0);
     const aimY = (up ? -1 : 0) + (down ? 1 : 0);
     if (aimX === 0 && aimY === 0) {
-        return veritechState.facing < 0 ? Math.PI : 0;
+        return aegisState.facing < 0 ? Math.PI : 0;
     }
     return Math.atan2(aimY, aimX);
 }

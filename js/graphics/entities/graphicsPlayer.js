@@ -1,5 +1,5 @@
 // ------------------------
-// Player Graphics - Veritech
+// Player Graphics - Aegis
 // ------------------------
 
 function createPlayerGraphics(scene) {
@@ -24,7 +24,7 @@ function createPlayerGraphics(scene) {
     };
 
     // ==========================================
-    // 1. JET FIGHTER MODE (Fighter)
+    // 1. JET INTERCEPTOR MODE (Interceptor)
     // ==========================================
     const g = scene.add.graphics();
     const w = 80, h = 40; // Slightly larger canvas for detail
@@ -91,12 +91,12 @@ function createPlayerGraphics(scene) {
     drawPixel(g, 45, 14, 1, 10, PALETTE.black, 0.3); // Neck seam
     drawPixel(g, 60, 15, 1, 8, PALETTE.black, 0.3);  // Radome seam
 
-    g.generateTexture('veritech_fighter', w, h);
+    g.generateTexture('aegis_interceptor', w, h);
     g.destroy();
 
 
     // ==========================================
-    // 2. GUARDIAN MODE (Gerwalk)
+    // 2. BULWARK MODE (Gerwalk)
     // ==========================================
     // Half-Jet, Half-Robot. Distinctive "Chicken Walker" legs.
     const gg = scene.add.graphics();
@@ -156,10 +156,10 @@ function createPlayerGraphics(scene) {
     // Foot Thruster Flame (Hovering)
     drawPixel(gg, 14, 56, 10, 4, PALETTE.thruster, 0.6);
 
-    // -- Wings (Swept back fully in Guardian mode) --
+    // -- Wings (Swept back fully in Bulwark mode) --
     drawPixel(gg, 20, 12, 15, 4, PALETTE.hullDark); // Wing root visible
 
-    gg.generateTexture('veritech_guardian', gw, gh);
+    gg.generateTexture('aegis_bulwark', gw, gh);
     gg.destroy();
 
 

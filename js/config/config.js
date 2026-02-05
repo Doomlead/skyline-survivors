@@ -219,9 +219,9 @@ const playerState = {
     baseSpeed: 300
 };
 
-// Veritech + pilot states
-const veritechState = {
-    mode: 'fighter',
+// Aegis + pilot states
+const aegisState = {
+    mode: 'interceptor',
     active: true,
     facing: 1,
     aimAngle: 0,
@@ -299,14 +299,14 @@ function resetGameState() {
         missile: 0
     };
     playerState.direction = 'right';
-    veritechState.mode = 'fighter';
-    veritechState.active = true;
-    veritechState.facing = 1;
-    veritechState.aimAngle = 0;
-    veritechState.transformCooldown = 0;
-    veritechState.vx = 0;
-    veritechState.vy = 0;
-    veritechState.destroyed = false;
+    aegisState.mode = 'interceptor';
+    aegisState.active = true;
+    aegisState.facing = 1;
+    aegisState.aimAngle = 0;
+    aegisState.transformCooldown = 0;
+    aegisState.vx = 0;
+    aegisState.vy = 0;
+    aegisState.destroyed = false;
     pilotState.active = false;
     pilotState.facing = 1;
     pilotState.grounded = false;

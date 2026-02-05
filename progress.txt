@@ -17,7 +17,7 @@
 - **Seamless transition (Ship/Foot):** Ejection + hangar rebuild exist, but the "Squad Leader" aura/follow behavior is missing.
 - **Resource vs. Score (The Rescue Loop):** Cargo collection + deployment are in place, but tier overflow and squad synergy feedback are missing.
 - **Strategic Territory Control:** District states exist, but the "Loss Aversion" investment mechanics are missing.
-- **Operative Depth:** The 4 distinct classes exist with core behaviors (Infantry, Gunner, Medic, Saboteur), but squad formations and Guardian defensive perimeter logic are missing.
+- **Operative Depth:** The 4 distinct classes exist with core behaviors (Infantry, Gunner, Medic, Saboteur), but squad formations and Bulwark defensive perimeter logic are missing.
 
 ---
 
@@ -59,7 +59,7 @@
 - **Saboteur Synergy:** EMP-style disables against turrets/shields.
 
 ❌ **Not Implemented:**
-- **Guardian Form Synergy:** Increased effectiveness against structures.
+- **Bulwark Form Synergy:** Increased effectiveness against structures.
 
 ---
 
@@ -92,8 +92,8 @@
 **Implementation Status: 90% Complete**
 
 ✅ **Fully Implemented:**
-- **Normal Fighter Form:** 8-directional movement, Primary Weapon, Smart Bomb, Hyperspace.
-- **Guardian Form:** Toggle, Slowed movement, 360° aim.
+- **Normal Interceptor Form:** 8-directional movement, Primary Weapon, Smart Bomb, Hyperspace.
+- **Bulwark Form:** Toggle, Slowed movement, 360° aim.
 
 
 ### 4.2. Operative AI & Combat Behavior ("The Comrades")
@@ -117,7 +117,7 @@
 
 ✅ **Fully Implemented:**
 - Ejection Sequence (Pilot sprite, basic pistol).
-- **Extraction Defense:** Hold the landing zone under the hangar for 30s to rebuild the Veritech (with UI prompt).
+- **Extraction Defense:** Hold the landing zone under the hangar for 30s to rebuild the Aegis (with UI prompt).
 
 ❌ **Not Implemented:**
 - **Squad Leader Aura:** Comrades following pilot movement (Bullet Hell wall).
@@ -201,9 +201,9 @@ The core Rescue Loop components (cargo carry, inertia scaling, hangar drop-off, 
 
 ### Revised Immediate Next Steps:
 
-**Priority 1: Guardian/On-Foot Squad Behaviors (3-4 Days)**
+**Priority 1: Bulwark/On-Foot Squad Behaviors (3-4 Days)**
 - Add sacrifice behavior for operatives to body-block shots during rebuild.
-- Ensure transition logic between patrol/guardian/on-foot states.
+- Ensure transition logic between patrol/bulwark/on-foot states.
 
 **Priority 2: Weapon Tier Overflow + Comrade Scaling (2-3 Days)**
 - Detect max-tier ship pickups and redirect upgrades to ground troops (damage, fire rate, or survivability).

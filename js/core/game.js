@@ -130,7 +130,7 @@ function updateHangarRebuildUi(scene) {
     const landingZone = hangar?.landingZone;
     const shouldShow = objective?.active
         && objective.stage === 'hangar_rebuild'
-        && veritechState.destroyed
+        && aegisState.destroyed
         && pilotState.active
         && landingZone?.active;
 
@@ -152,7 +152,7 @@ function updateHangarRebuildUi(scene) {
     const statusLine = isOnZone
         ? `Hold position: ${remainingSec}s remaining`
         : 'Return to the landing zone to resume the rebuild timer';
-    const message = `REBUILD PROTOCOL\nStand on the landing zone under the hangar for 30s to respawn a VERITECH.\n${statusLine}`;
+    const message = `REBUILD PROTOCOL\nStand on the landing zone under the hangar for 30s to respawn an AEGIS.\n${statusLine}`;
 
     ui.text.setText(message);
     ui.text.setFontSize(`${Math.round(20 * scale)}px`);
@@ -176,21 +176,21 @@ function spawnExtractionDropship(scene, objective) {
     return dropShip;
 }
 
-function rebuildVeritechAtExtraction(scene, objective) {
-    if (!scene.veritech || !scene.pilot) return;
+function rebuildAegisAtExtraction(scene, objective) {
+    if (!scene.aegis || !scene.pilot) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const terrainVariation = Math.sin(objective.extractionX / 200) * 30;
     const spawnY = Math.max(40, groundLevel - terrainVariation - 30);
 
-    setVeritechMode(scene, 'fighter');
-    veritechState.destroyed = false;
-    veritechState.active = true;
-    veritechState.vx = 0;
-    veritechState.vy = 0;
+    setAegisMode(scene, 'interceptor');
+    aegisState.destroyed = false;
+    aegisState.active = true;
+    aegisState.vx = 0;
+    aegisState.vy = 0;
 
-    scene.veritech.setPosition(objective.extractionX, spawnY);
-    scene.veritech.setActive(true).setVisible(true);
-    scene.veritech.body.enable = true;
+    scene.aegis.setPosition(objective.extractionX, spawnY);
+    scene.aegis.setActive(true).setVisible(true);
+    scene.aegis.body.enable = true;
 
     pilotState.active = false;
     scene.pilot.setActive(false).setVisible(false);
@@ -198,7 +198,7 @@ function rebuildVeritechAtExtraction(scene, objective) {
     syncActivePlayer(scene);
 
     playerState.powerUps.invincibility = 2000;
-    showRebuildObjectiveBanner(scene, 'Veritech rebuilt - return to battle', '#66ff88');
+    showRebuildObjectiveBanner(scene, 'Aegis rebuilt - return to battle', '#66ff88');
 }
 
 function addAlienTechToRebuildObjective(amount = 1) {
@@ -225,7 +225,7 @@ function updateRebuildObjective(scene, delta) {
         }
     } else if (objective.stage === 'return_ship') {
         if (!objective.shipReturned) {
-            rebuildVeritechAtExtraction(scene, objective);
+            rebuildAegisAtExtraction(scene, objective);
             objective.shipReturned = true;
         }
         if (objective.timer > 800) {
@@ -259,12 +259,12 @@ function create() {
     // Generate backgrounds FIRST
     createBackground(this);
 
-    // Veritech + Pilot
-    this.veritech = this.physics.add.sprite(100, 300, 'veritech_fighter');
-    this.veritech.setCollideWorldBounds(false);
-    this.veritech.setScale(1.25);
-    this.veritech.body.setSize(28, 12);
-    this.veritech.setDepth(FG_DEPTH_BASE + 10);
+    // Aegis + Pilot
+    this.aegis = this.physics.add.sprite(100, 300, 'aegis_interceptor');
+    this.aegis.setCollideWorldBounds(false);
+    this.aegis.setScale(1.25);
+    this.aegis.body.setSize(28, 12);
+    this.aegis.setDepth(FG_DEPTH_BASE + 10);
 
     this.pilot = this.physics.add.sprite(100, 300, 'pilot');
     this.pilot.setCollideWorldBounds(false);
@@ -274,11 +274,11 @@ function create() {
     this.pilot.setActive(false).setVisible(false);
 
     // Maintain legacy scene.player reference for shared systems
-    this.player = this.veritech;
+    this.player = this.aegis;
 	
 	// Position camera vertically to show the player from the start
 	const initialScrollY = Math.max(0, Math.min(
-		this.veritech.y - CONFIG.height / 2,
+		this.aegis.y - CONFIG.height / 2,
 		Math.max(0, CONFIG.worldHeight - CONFIG.height)
 		));
 	this.cameras.main.scrollY = initialScrollY;
@@ -343,13 +343,13 @@ function create() {
     this.physics.add.overlap(this.projectiles, this.bosses, hitBoss, null, this);
     this.physics.add.overlap(this.projectiles, this.battleships, hitBattleship, null, this);
     this.physics.add.overlap(this.projectiles, this.assaultTargets, hitAssaultTarget, null, this);
-    this.physics.add.overlap(this.veritech, this.enemies, playerHitEnemy, null, this);
-    this.physics.add.overlap(this.veritech, this.garrisonDefenders, playerHitGarrisonDefender, null, this);
-    this.physics.add.overlap(this.veritech, this.bosses, playerHitBoss, null, this);
-    this.physics.add.overlap(this.veritech, this.battleships, playerHitBattleship, null, this);
-    this.physics.add.overlap(this.veritech, this.enemyProjectiles, playerHitProjectile, null, this);
-    this.physics.add.overlap(this.veritech, this.powerUps, collectPowerUp, null, this);
-    this.physics.add.overlap(this.veritech, this.humans, rescueHuman, null, this);
+    this.physics.add.overlap(this.aegis, this.enemies, playerHitEnemy, null, this);
+    this.physics.add.overlap(this.aegis, this.garrisonDefenders, playerHitGarrisonDefender, null, this);
+    this.physics.add.overlap(this.aegis, this.bosses, playerHitBoss, null, this);
+    this.physics.add.overlap(this.aegis, this.battleships, playerHitBattleship, null, this);
+    this.physics.add.overlap(this.aegis, this.enemyProjectiles, playerHitProjectile, null, this);
+    this.physics.add.overlap(this.aegis, this.powerUps, collectPowerUp, null, this);
+    this.physics.add.overlap(this.aegis, this.humans, rescueHuman, null, this);
 
     this.physics.add.overlap(this.drones, this.enemies, droneHitEnemy, null, this);
     this.physics.add.overlap(this.drones, this.enemyProjectiles, droneHitProjectile, null, this);
@@ -425,9 +425,9 @@ function update(time, delta) {
 
     const activePlayer = getActivePlayer(this);
 
-    // Wrap veritech + pilot to canonical positions
-    if (this.veritech && this.veritech.active) {
-        this.veritech.x = wrapValue(this.veritech.x, CONFIG.worldWidth);
+    // Wrap aegis + pilot to canonical positions
+    if (this.aegis && this.aegis.active) {
+        this.aegis.x = wrapValue(this.aegis.x, CONFIG.worldWidth);
     }
     if (this.pilot && this.pilot.active) {
         this.pilot.x = wrapValue(this.pilot.x, CONFIG.worldWidth);

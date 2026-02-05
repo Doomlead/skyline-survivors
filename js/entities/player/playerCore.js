@@ -3,7 +3,7 @@
 // ------------------------
 
 function getActivePlayer(scene) {
-    return veritechState.active ? scene.veritech : scene.pilot;
+    return aegisState.active ? scene.aegis : scene.pilot;
 }
 
 function syncActivePlayer(scene) {
@@ -11,51 +11,51 @@ function syncActivePlayer(scene) {
     return scene.player;
 }
 
-function setVeritechMode(scene, mode) {
-    veritechState.mode = mode;
-    const texture = mode === 'guardian' ? 'veritech_guardian' : 'veritech_fighter';
-    if (scene.veritech) {
-        scene.veritech.setTexture(texture);
-        if (mode === 'guardian') {
-            scene.veritech.body.setSize(22, 28);
+function setAegisMode(scene, mode) {
+    aegisState.mode = mode;
+    const texture = mode === 'bulwark' ? 'aegis_bulwark' : 'aegis_interceptor';
+    if (scene.aegis) {
+        scene.aegis.setTexture(texture);
+        if (mode === 'bulwark') {
+            scene.aegis.body.setSize(22, 28);
         } else {
-            scene.veritech.body.setSize(28, 12);
+            scene.aegis.body.setSize(28, 12);
         }
     }
 }
 
 function ejectPilot(scene) {
-    if (!scene.veritech || !scene.pilot || !veritechState.active) return;
-    veritechState.active = false;
+    if (!scene.aegis || !scene.pilot || !aegisState.active) return;
+    aegisState.active = false;
     pilotState.active = true;
     pilotState.grounded = false;
-    pilotState.vx = veritechState.vx * 0.5;
+    pilotState.vx = aegisState.vx * 0.5;
     pilotState.vy = -120;
-    pilotState.facing = veritechState.facing;
-    scene.pilot.setPosition(scene.veritech.x, scene.veritech.y);
+    pilotState.facing = aegisState.facing;
+    scene.pilot.setPosition(scene.aegis.x, scene.aegis.y);
     scene.pilot.setActive(true).setVisible(true);
     scene.pilot.body.enable = true;
-    scene.veritech.body.enable = false;
-    scene.veritech.setAlpha(1);
-    if (scene.veritech.shieldSprite) {
-        scene.veritech.shieldSprite.destroy();
-        scene.veritech.shieldSprite = null;
+    scene.aegis.body.enable = false;
+    scene.aegis.setAlpha(1);
+    if (scene.aegis.shieldSprite) {
+        scene.aegis.shieldSprite.destroy();
+        scene.aegis.shieldSprite = null;
     }
     syncActivePlayer(scene);
 }
 
-function enterVeritech(scene) {
-    if (!scene.veritech || !scene.pilot || !pilotState.active) return;
-    if (veritechState.destroyed) return;
-    const dist = Phaser.Math.Distance.Between(scene.pilot.x, scene.pilot.y, scene.veritech.x, scene.veritech.y);
+function enterAegis(scene) {
+    if (!scene.aegis || !scene.pilot || !pilotState.active) return;
+    if (aegisState.destroyed) return;
+    const dist = Phaser.Math.Distance.Between(scene.pilot.x, scene.pilot.y, scene.aegis.x, scene.aegis.y);
     if (dist > 60) return;
     pilotState.active = false;
-    veritechState.active = true;
+    aegisState.active = true;
     pilotState.vx = 0;
     pilotState.vy = 0;
     scene.pilot.setActive(false).setVisible(false);
     scene.pilot.body.enable = false;
-    scene.veritech.body.enable = true;
+    scene.aegis.body.enable = true;
     scene.pilot.setAlpha(1);
     if (scene.pilot.shieldSprite) {
         scene.pilot.shieldSprite.destroy();
@@ -69,7 +69,7 @@ function playerDie(scene) {
     const player = getActivePlayer(scene);
     if (!player) return;
     if (scene._isRespawning || gameState.gameOver) return;
-    const isVeritechActive = veritechState.active || player === scene.veritech;
+    const isAegisActive = aegisState.active || player === scene.aegis;
     if (particleManager) {
         if (audioManager) audioManager.playSound('explosion');
         particleManager.playerExplosion(player.x, player.y);
@@ -78,11 +78,11 @@ function playerDie(scene) {
     }
     screenShake(scene, 20, 500);
 
-    if (isVeritechActive) {
-        veritechState.destroyed = true;
-        if (scene.veritech) {
-            scene.veritech.setActive(false).setVisible(false);
-            scene.veritech.body.enable = false;
+    if (isAegisActive) {
+        aegisState.destroyed = true;
+        if (scene.aegis) {
+            scene.aegis.setActive(false).setVisible(false);
+            scene.aegis.body.enable = false;
         }
         ejectPilot(scene);
         if (gameState.rebuildObjective) {
@@ -112,7 +112,7 @@ function playerDie(scene) {
         player.setActive(false).setVisible(false);
         player.body.enable = false;
         pilotState.active = false;
-        veritechState.active = true;
+        aegisState.active = true;
 
         const p = playerState.powerUps;
         const weaponKeys = ['laser','drone','shield','missile','overdrive','coverage','rapid','multiShot','piercing','speed','magnet','double','timeSlow'];
@@ -146,12 +146,12 @@ function playerDie(scene) {
         }
 
         scene.time.delayedCall(1000, () => {
-            setVeritechMode(scene, 'fighter');
-            veritechState.destroyed = false;
-            scene.veritech.x = 100;
-            scene.veritech.y = 300;
-            scene.veritech.setActive(true).setVisible(true);
-            scene.veritech.body.enable = true;
+            setAegisMode(scene, 'interceptor');
+            aegisState.destroyed = false;
+            scene.aegis.x = 100;
+            scene.aegis.y = 300;
+            scene.aegis.setActive(true).setVisible(true);
+            scene.aegis.body.enable = true;
             scene.pilot.setActive(false).setVisible(false);
             scene.pilot.body.enable = false;
             playerState.powerUps.invincibility = 2000;
