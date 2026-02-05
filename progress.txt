@@ -186,42 +186,71 @@
 
 ## Gap Analysis & Next Steps
 
-**Overall Implementation:**
-- ✅ **Implemented:** ~70% (Adjusted upward as rescue/deploy loop shipped)
-- ⚠️ **Partially Implemented:** ~20%
-- ❌ **Not Implemented:** ~10%
+### Overall Completion Statistics
+- **MVP Completion:** ~70% (Core rescue/deploy loop and district flow are playable.)
+- **Design Document Alignment:** ~65% (Key systems exist, but several design-only mechanics are missing.)
+- **Major Milestones Achieved:** Rescue/Deploy loop, district states, assault/defense modes, hangar rebuild, operative spawning.
 
-### 🚨 Critical Mechanics (The "New Fun")
-The core Rescue Loop components (cargo carry, inertia scaling, hangar drop-off, operative deployment, HUD counters) are now present. The remaining gaps are mostly in *feel*, *feedback*, and *synergy*.
+### Design Document Alignment
+**Aligned/Implemented**
+- District state system (Friendly/Threatened/Occupied).
+- Rescue-to-Deploy loop (cargo carry, inertia, hangar drop-off, operative deployment).
+- Assault/Defense mission flows with hangar rebuild loop.
 
-1.  **Squad Leader Aura:** On-foot comrades follow the pilot and focus fire in formation.
-2.  **Weapon Tier Overflow:** Redirect max-tier pickups to ground troop upgrades.
-3.  **Sacrifice Behavior:** AI body-blocks during hangar rebuild.
-4.  **Hangar-Based Rebuild Loop:** ✅ Implemented (landing zone hold timer under the hangar).
+**Partially Aligned**
+- Operative depth (classes exist; missing squad leader aura/formation logic).
+- Power-up progression (tiering and decay exist; missing tier overflow to operatives).
+- Strategic layer urgency (Threatened/Occupied exists; missing near-miss timer, prosperity loss aversion).
 
-### Revised Immediate Next Steps:
+**Not Aligned**
+- Supply Drop hot-start inventory application to next run.
+- Combo/urgency feedback loops (near-miss pulses, combo meter).
 
-**Priority 1: Bulwark/On-Foot Squad Behaviors (3-4 Days)**
+### Major Milestones Achieved
+- Ship/foot transition with pilot ejection and hangar rebuild.
+- Cargo-based inertia and operative deployment.
+- Assault base objective with garrisons/turrets/shield nodes.
+
+### Critical Missing Features for Design Document Compliance
+1. **Squad Leader Aura + Sacrifice Behavior:** Operatives follow pilot and body-block during rebuild.
+2. **Weapon Tier Overflow:** Redirect max-tier ship pickups to comrade scaling.
+3. **Strategic Pressure Systems:** Near-miss timer flash, combo meter, prosperity/loss aversion.
+4. **Supply Drop Hot-Starts:** Apply shop rewards to the next run with UI feedback.
+
+### Immediate Next Steps (Recommended Order)
+**Priority 1: On-Foot Squad Leader + Sacrifice Loop (3-4 Days)**
+- Implement squad leader aura so operatives follow the pilot and concentrate fire while on foot.
 - Add sacrifice behavior for operatives to body-block shots during rebuild.
-- Ensure transition logic between patrol/bulwark/on-foot states.
+- Ensure clean transition logic between patrol/bulwark/on-foot states.
 
 **Priority 2: Weapon Tier Overflow + Comrade Scaling (2-3 Days)**
-- Detect max-tier ship pickups and redirect upgrades to ground troops (damage, fire rate, or survivability).
-- Add feedback for comrade buffs (HUD pulse or combat text).
+- Detect max-tier ship pickups and redirect upgrades to ground troops (damage, fire rate, survivability).
+- Add visible feedback for comrade buffs (HUD pulse or combat text).
 
-**Priority 3: Dark Patterns & Urgency Feedback (2 Days)**
-- Add "Near-Miss" timer flash and combo meter to reinforce urgency.
-- Add Prosperity/Loss Aversion feedback on the system map.
+**Priority 3: Strategic Pressure & Urgency (2 Days)**
+- Add near-miss timer flash and combo meter to reinforce urgency.
+- Add prosperity/loss aversion feedback on the system map (district investment levels).
 
-**Priority 4: Mothership & Campaign Polish (Existing Goal - 4 Days)**
-- Continue with the Multi-phase Mothership boss as planned (this is still the endgame).
+**Priority 4: Supply Drop Hot-Starts (1-2 Days)**
+- Apply supply drop rewards to the next run (inventory hot-starts).
+- Add clear UI feedback for queued hot-start items.
 
----
+**Priority 5: Mothership & Campaign Polish (4 Days)**
+- Continue with the multi-phase Mothership boss as planned (endgame).
 
-## Estimated Remaining Work
-
-- **Rescue/Deploy Loop:** 2 days
-- **Operative AI & Classes:** 4 days
+### Estimated Remaining Work
+- **Operative AI & Squad Behaviors:** 4 days
+- **Weapon Overflow & Buff Feedback:** 2 days
+- **Strategic Pressure Systems:** 2 days
+- **Supply Drop Hot-Starts:** 2 days
 - **Mothership Boss:** 4 days
 - **UI/Feedback Polish:** 2 days
-- **Total to v2.0 MVP:** ~15 Days
+- **Total to v2.0 MVP:** ~16 Days
+
+### Post-MVP Polish (Optional)
+- Dynamic weather/time-of-day cycles.
+- Additional district visual states and destruction feedback.
+- Extended audio feedback for rescue/deploy and mission transitions.
+
+### What We Should Work on Next
+Focus on the **On-Foot Squad Leader + Sacrifice Loop** first. It is the highest-impact missing system for the core “rescue-to-deploy” fantasy and will make the pilot phase feel meaningfully distinct while stabilizing the hangar rebuild loop. Once that is in place, immediately follow with weapon tier overflow so the rescue loop feeds directly into squad power and creates the intended synergy.
