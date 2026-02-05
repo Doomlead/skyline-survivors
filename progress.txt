@@ -9,7 +9,7 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 
 ## 1. Core Concept
 
-**Implementation Status: 65% Complete** ⬇️ (Adjusted for v2.0 Scope)
+**Implementation Status: 70% Complete** ⬆️ (Adjusted for v2.0 Scope)
 
 ### Key Themes Progress:
 
@@ -21,12 +21,10 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - **Defend and Reclaim**: Districts exist in three states (Friendly/Threatened/Occupied)
 
 ⚠️ **Partially Implemented:**
-- **Seamless transition (Ship/Foot):** Ejection exists, but the "Squad Leader" mechanics and "Rebuild at Hangar" loop are missing.
-- **Resource vs. Score (The Rescue Loop):** Humans can be rescued for points, but they are not yet stored as "Cargo/Ammo" nor do they deploy troops upon drop-off.
+- **Seamless transition (Ship/Foot):** Ejection + hangar rebuild exist, but the "Squad Leader" aura/follow behavior is missing.
+- **Resource vs. Score (The Rescue Loop):** Cargo collection + deployment are in place, but tier overflow and squad synergy feedback are missing.
 - **Strategic Territory Control:** District states exist, but the "Loss Aversion" investment mechanics are missing.
-
-❌ **Not Implemented:**
-- **Operative Depth:** The 4 distinct classes (Infantry, Gunner, Medic, Saboteur) and Defensive Perimeter AI are missing.
+- **Operative Depth:** The 4 distinct classes exist with core behaviors (Infantry, Gunner, Medic, Saboteur), but squad formations and Guardian defensive perimeter logic are missing.
 
 ---
 
@@ -50,7 +48,7 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 
 ### 2.2. Side-Scrolling Combat View
 
-**Implementation Status: 60% Complete** ⬇️ (New Hangar/Drop-off requirement)
+**Implementation Status: 70% Complete** ⬆️ (Hangar/Drop-off loop now online)
 
 #### Defense Missions (Threatened Districts)
 **Implementation Status: 75% Complete**
@@ -58,18 +56,16 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - Defend districts (15 waves) / Wave tier progression
 - Mini-boss and boss encounters / Battleship encounter
 - Extraction hub hangar with landing zone rebuild pad
-
-❌ **Not Implemented:**
-- **Deployment Animation:** Spawning squad members upon human drop-off.
+- **Deployment Animation:** Dropping off cargo spawns operative squads.
 
 #### Assault Missions (Occupied Districts)
 **Implementation Status: 75% Complete**
 ✅ **Fully Implemented:**
 - Base core objective with HP / Shield generators / Turrets
 - Garrison defender squads
+- **Saboteur Synergy:** EMP-style disables against turrets/shields.
 
 ❌ **Not Implemented:**
-- **Saboteur Synergy:** Specific interactions where Saboteurs disable turrets.
 - **Guardian Form Synergy:** Increased effectiveness against structures.
 
 ---
@@ -78,15 +74,13 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 
 ### 3.1 The Rescue & Drop-Off Loop (New v2.0 Section)
 
-**Implementation Status: 20% Complete**
+**Implementation Status: 80% Complete**
 
 ✅ **Fully Implemented:**
 - Basic Human Rescue (picking up a human).
-
-❌ **Not Implemented:**
-- **"Strike Force" Carry:** Storing multiple humans in cargo (UI indicator missing).
-- **Inertia Scaling:** Ship physics do not yet change based on human cargo count.
-- **Tactical Deployment:** Dropping humans at a specific Hangar point to spawn AI Comrades.
+- **"Strike Force" Carry:** Multiple humans stored in cargo with HUD indicator.
+- **Inertia Scaling:** Ship physics change based on cargo count.
+- **Tactical Deployment:** Dropping humans at the Hangar spawns AI Comrades.
 
 ### 3.2 Core Loop
 
@@ -109,23 +103,22 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - **Guardian Form:** Toggle, Slowed movement, 360° aim.
 
 ❌ **Not Implemented:**
-- **Variable Inertia Mechanic:** Physics modifier based on `CargoCount`.
 - **Guardian Defensive Perimeter:** Signaling ground AI to form a ring around the ship.
 
 ### 4.2. Operative AI & Combat Behavior ("The Comrades")
 
-**Implementation Status: 10% Complete** (Major Gap for v2.0)
+**Implementation Status: 60% Complete** (Core behaviors online, formation logic missing)
 
 ✅ **Fully Implemented:**
 - Basic concept of an "Ally" entity exists (garrison defenders).
-
-❌ **Not Implemented:**
-- **Squad Formation:** AI following the player or forming fire teams.
 - **Operative Classes:**
   - *Standard Infantry:* (Common)
   - *Heavy Gunner:* (Uncommon - Braced fire)
   - *Combat Medic:* (Rare - Health drops)
-  - *Saboteur:* (Elite - Anti-base logic)
+  - *Saboteur:* (Elite - Anti-base logic + EMP vs base defenses)
+
+❌ **Not Implemented:**
+- **Squad Formation:** AI following the player or forming fire teams.
 - **Weapon Synergy:** Tier 3 ship overflow upgrading ground troops.
 
 ### 4.3. On-Foot Command (Ship Destruction)
@@ -176,7 +169,6 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 - Mission Objectives (Wave Count / Base HP).
 
 ❌ **Not Implemented:**
-- **Cargo/Squad UI:** Indicator for currently carried humans and currently deployed squad count.
 - **Dark Patterns:** Engagement "Combo Meter" and pulsing "Near-Miss" urgency.
 
 ### 6.2. Meta Progression (Shop)
@@ -205,34 +197,34 @@ Because Design Document v2.0 introduces significant new mechanical systems (Squa
 ## Gap Analysis & Next Steps (Updated for v2.0)
 
 **Overall Implementation:**
-- ✅ **Implemented:** ~65% (Dropped from 88% due to new Squad/Physics scope)
+- ✅ **Implemented:** ~70% (Adjusted upward as rescue/deploy loop shipped)
 - ⚠️ **Partially Implemented:** ~20%
-- ❌ **Not Implemented:** ~15%
+- ❌ **Not Implemented:** ~10%
 
 ### 🚨 Critical v2.0 Mechanics (The "New Fun")
-The core Rescue Loop components (cargo carry, hangar drop-off, operative deployment) are now present. The remaining gaps are mostly in *feel*, *feedback*, and *synergy*.
+The core Rescue Loop components (cargo carry, inertia scaling, hangar drop-off, operative deployment, HUD counters) are now present. The remaining gaps are mostly in *feel*, *feedback*, and *synergy*.
 
-1.  **Inertia Scaling:** Ship physics update: `drag = baseDrag + (cargo * weightModifier)`.
-2.  **Cargo/Squad UI:** HUD indicator for carried civilians and active operatives.
-3.  **Guardian Defensive Perimeter:** Operatives forming a ring and prioritizing protection while in Guardian form.
-4.  **Squad Leader Aura:** On-foot comrades follow the pilot and focus fire in formation.
+1.  **Guardian Defensive Perimeter:** Operatives forming a ring and prioritizing protection while in Guardian form.
+2.  **Squad Leader Aura:** On-foot comrades follow the pilot and focus fire in formation.
+3.  **Weapon Tier Overflow:** Redirect max-tier pickups to ground troop upgrades.
+4.  **Sacrifice Behavior:** AI body-blocks during hangar rebuild.
 5.  **Hangar-Based Rebuild Loop:** ✅ Implemented (landing zone hold timer under the hangar).
 
 ### Revised Immediate Next Steps:
 
-**Priority 1: Cargo Weight + HUD Feedback (2-3 Days)**
-- Add inertia scaling to `playerControls` so cargo count influences accel/drag.
-- Add HUD counters for cargo + deployed operatives.
-- Add audio/visual feedback when cargo is dropped off.
-
-**Priority 2: Guardian/On-Foot Squad Behaviors (3-4 Days)**
+**Priority 1: Guardian/On-Foot Squad Behaviors (3-4 Days)**
 - Implement Guardian defensive ring positioning and fire priorities.
 - Add Squad Leader aura: operatives follow pilot and align their firing angles.
+- Add sacrifice behavior for operatives to body-block shots during rebuild.
 - Ensure transition logic between patrol/guardian/on-foot states.
 
-**Priority 3: Hangar Rebuild Flow (2-3 Days)**
-- ✅ Completed: Hangar landing zone rebuild timer with on-foot hold prompt.
-- Add sacrifice behavior for operatives to body-block shots during rebuild.
+**Priority 2: Weapon Tier Overflow + Comrade Scaling (2-3 Days)**
+- Detect max-tier ship pickups and redirect upgrades to ground troops (damage, fire rate, or survivability).
+- Add feedback for comrade buffs (HUD pulse or combat text).
+
+**Priority 3: Dark Patterns & Urgency Feedback (2 Days)**
+- Add "Near-Miss" timer flash and combo meter to reinforce urgency.
+- Add Prosperity/Loss Aversion feedback on the system map.
 
 **Priority 4: Mothership & Campaign Polish (Existing Goal - 4 Days)**
 - Continue with the Multi-phase Mothership boss as planned (this is still the endgame).
@@ -241,8 +233,8 @@ The core Rescue Loop components (cargo carry, hangar drop-off, operative deploym
 
 ## Estimated Remaining Work (v2.0 Scope)
 
-- **Rescue/Deploy Loop:** 4 days
-- **Operative AI & Classes:** 5 days
+- **Rescue/Deploy Loop:** 2 days
+- **Operative AI & Classes:** 4 days
 - **Mothership Boss:** 4 days
 - **UI/Feedback Polish:** 2 days
 - **Total to v2.0 MVP:** ~15 Days
