@@ -53,3 +53,34 @@ function droneHitProjectile(drone, projectile) {
     drone.destroy();
     playerState.powerUps.drone = Math.max((playerState.powerUps.drone || 0) - 1, 0);
 }
+
+function operativeHitProjectile(operative, projectile) {
+    const scene = this;
+    if (!operative || !operative.active || !projectile || !projectile.active) return;
+    if (!operative.isOperative || !operative.isBodyBlocking) return;
+
+    operative.health = (operative.health || 2) - 1;
+    operative.setTint(0xff0000);
+    scene.time.delayedCall(150, () => {
+        if (operative && operative.active) {
+            if (operative.isBodyBlocking) {
+                operative.setTint(0x38bdf8);
+            } else {
+                operative.clearTint();
+            }
+        }
+    });
+
+    const velocity = projectile.body ? projectile.body.velocity : { x: 0, y: 0 };
+    operative.setVelocity(velocity.x * 0.45, -60);
+    operative.stunnedUntil = scene.time.now + 400;
+
+    createExplosion(scene, projectile.x, projectile.y, 0x5eead4);
+    projectile.destroy();
+
+    if (operative.health <= 0) {
+        createExplosion(scene, operative.x, operative.y, 0xf97316);
+        if (scene.audioManager) scene.audioManager.playSound('explosion');
+        operative.destroy();
+    }
+}
