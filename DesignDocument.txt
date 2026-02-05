@@ -69,12 +69,12 @@ Instead of humans being passive scoring items, they are the primary resource for
 ## 4. Player Mechanics & Operative Systems
 
 ### 4.1. The Aegis: Forms & Movement
-**4.1.1. Interceptor Mode (Fighter Form)**
+**4.1.1. Interceptor Mode (Interceptor Form)**
 *   **Movement:** 8-directional. Inertia scales based on number of humans in cargo.
 *   **Primary Weapon:** Forward blaster.
 *   **Secondary:** Smart Bomb / Hyperspace.
 
-**4.1.2. Bulwark Mode (Guardian Replacement)**
+**4.1.2. Bulwark Mode (Bulwark Replacement)**
 *   **Activation:** Toggle button.
 *   **Movement:** Drastically slowed.
 

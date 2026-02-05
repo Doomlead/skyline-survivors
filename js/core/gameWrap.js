@@ -90,7 +90,7 @@ function removeGhostSprite(scene, entity) {
 function updateEntityWrapping(scene) {
     const {
         player,
-        veritech,
+        aegis,
         pilot,
         enemies,
         projectiles,
@@ -161,8 +161,8 @@ function updateEntityWrapping(scene) {
     if (player && player.active) {
         processEntity(player);
     }
-    if (veritech && veritech.active && veritech !== player) {
-        processEntity(veritech);
+    if (aegis && aegis.active && aegis !== player) {
+        processEntity(aegis);
     }
     if (pilot && pilot.active && pilot !== player) {
         processEntity(pilot);

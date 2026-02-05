@@ -24,8 +24,8 @@ function spawnDefenseHangar(scene) {
     if (!scene || !scene.friendlies || !isDefenseMission()) return null;
 
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
-    const spawnX = scene.veritech ? scene.veritech.x : CONFIG.worldWidth * 0.5;
-    const spawnY = scene.veritech ? scene.veritech.y : null;
+    const spawnX = scene.aegis ? scene.aegis.x : CONFIG.worldWidth * 0.5;
+    const spawnY = scene.aegis ? scene.aegis.y : null;
     const terrainVariation = Math.sin(spawnX / 200) * 30;
     const hangarX = spawnX;
     const hangarY = spawnY !== null

@@ -82,7 +82,7 @@ function isPlayerOnLandingZone(scene, landingZone) {
 
 function handleHangarRebuild(scene, hangar, delta) {
     const objective = gameState.rebuildObjective;
-    if (!objective || !objective.active || !veritechState.destroyed || !pilotState.active) return;
+    if (!objective || !objective.active || !aegisState.destroyed || !pilotState.active) return;
     if (objective.stage !== 'hangar_rebuild') return;
     if (!scene || !hangar || !hangar.active) return;
     const landingZone = hangar.landingZone;
@@ -97,7 +97,7 @@ function handleHangarRebuild(scene, hangar, delta) {
 
     objective.extractionX = hangar.x;
     objective.extractionY = hangar.y;
-    rebuildVeritechAtExtraction(scene, objective);
+    rebuildAegisAtExtraction(scene, objective);
     objective.active = false;
     objective.stage = null;
     objective.timer = 0;
@@ -126,7 +126,7 @@ function updateHangars(scene, time, delta) {
             landingZone.x = friendly.x;
             const rebuildPulse = Math.sin(time * 0.005 + landingZone.blinkOffset);
             const targetAlpha = HANGAR_REBUILD_CONFIG.pulseBaseAlpha + rebuildPulse * HANGAR_REBUILD_CONFIG.pulseRange;
-            const shouldPulse = gameState.rebuildObjective?.active && veritechState.destroyed && pilotState.active;
+            const shouldPulse = gameState.rebuildObjective?.active && aegisState.destroyed && pilotState.active;
             landingZone.setAlpha(shouldPulse ? targetAlpha : 0.85);
         }
         dropOffCargo(scene, friendly);
