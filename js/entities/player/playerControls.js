@@ -163,6 +163,7 @@ function updatePlayer(scene, time, delta) {
 
         pilot.flipX = pilotState.facing < 0;
         playerState.direction = pilotState.facing < 0 ? 'left' : 'right';
+        pilotState.aimAngle = getPilotAimAngle(left, right, up, down, pilotState.grounded);
         syncActivePlayer(scene);
     }
 

@@ -68,6 +68,18 @@ const OPERATIVE_RARITY_WEIGHTS = [
     { type: 'saboteur', weight: 5 }
 ];
 
+const SQUAD_AURA_CONFIG = {
+    baseRadius: 70,
+    ringSpacing: 18,
+    angleDrift: 0.0008,
+    followSnapDistance: 10,
+    interceptWindow: 1.4,
+    interceptRadiusScale: 0.35,
+    bodyBlockLeadTime: 0.12,
+    stateCalloutCooldown: 3200,
+    bodyBlockTint: 0x38bdf8
+};
+
 function pickOperativeType() {
     const total = OPERATIVE_RARITY_WEIGHTS.reduce((sum, entry) => sum + entry.weight, 0);
     const roll = Math.random() * total;
@@ -133,6 +145,132 @@ function spawnMedicPickup(scene, x, y) {
     });
 
     return pickup;
+}
+
+function getOperativeFormationOffset(index, squadSize, time) {
+    if (!squadSize) return { x: 0, y: 0 };
+    const ringIndex = index % Math.max(1, Math.ceil(squadSize / 6));
+    const radius = SQUAD_AURA_CONFIG.baseRadius + ringIndex * SQUAD_AURA_CONFIG.ringSpacing;
+    const angleStep = (Math.PI * 2) / squadSize;
+    const angle = angleStep * index + time * SQUAD_AURA_CONFIG.angleDrift;
+    return {
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * (radius * 0.3)
+    };
+}
+
+function getRebuildLandingZone(scene) {
+    const { friendlies } = scene;
+    if (!friendlies || !friendlies.children) return null;
+    for (const friendly of friendlies.children.entries) {
+        if (!friendly || !friendly.active || !friendly.isHangar) continue;
+        if (friendly.landingZone && friendly.landingZone.active) {
+            return friendly.landingZone;
+        }
+    }
+    return null;
+}
+
+function isPilotInRebuildZone(scene, landingZone) {
+    if (!landingZone || !pilotState.active || aegisState.active) return false;
+    if (typeof isPlayerOnLandingZone === 'function') {
+        return isPlayerOnLandingZone(scene, landingZone);
+    }
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(landingZone.x, scene.pilot.x, CONFIG.worldWidth)
+        : (scene.pilot.x - landingZone.x);
+    const zoneCenterY = landingZone.y - landingZone.displayHeight * 0.5;
+    const dy = scene.pilot.y - zoneCenterY;
+    const xRange = landingZone.displayWidth * 0.35;
+    const yRange = landingZone.displayHeight * 0.35;
+    return Math.abs(dx) <= xRange && Math.abs(dy) <= yRange;
+}
+
+function findThreateningProjectile(scene, targetX, targetY, radius, maxTime) {
+    const { enemyProjectiles } = scene;
+    if (!enemyProjectiles || !enemyProjectiles.children) return null;
+    let best = null;
+    let bestDistance = Infinity;
+
+    enemyProjectiles.children.entries.forEach((projectile) => {
+        if (!projectile || !projectile.active || !projectile.body) return;
+        const velocity = projectile.body.velocity;
+        const speedSq = velocity.x * velocity.x + velocity.y * velocity.y;
+        if (speedSq < 1) return;
+
+        const toTargetX = targetX - projectile.x;
+        const toTargetY = targetY - projectile.y;
+        const timeToImpact = (toTargetX * velocity.x + toTargetY * velocity.y) / speedSq;
+        if (timeToImpact <= 0 || timeToImpact > maxTime) return;
+
+        const closestX = projectile.x + velocity.x * timeToImpact;
+        const closestY = projectile.y + velocity.y * timeToImpact;
+        const distance = Phaser.Math.Distance.Between(closestX, closestY, targetX, targetY);
+        if (distance > radius) return;
+
+        const originDistance = Phaser.Math.Distance.Between(projectile.x, projectile.y, targetX, targetY);
+        if (originDistance < bestDistance) {
+            bestDistance = originDistance;
+            best = projectile;
+        }
+    });
+
+    return best;
+}
+
+function applyOperativeDefenseVisual(operative, isDefending) {
+    if (isDefending) {
+        operative.setTint(SQUAD_AURA_CONFIG.bodyBlockTint);
+    } else if (operative.tintTopLeft !== 0xffffff) {
+        operative.clearTint();
+    }
+}
+
+function setOperativeState(scene, operative, nextState, time) {
+    if (operative.currentState === nextState) return;
+    operative.currentState = nextState;
+    const { audioManager } = scene;
+    if (!audioManager) return;
+    if (time < (scene.lastOperativeCallout || 0) + SQUAD_AURA_CONFIG.stateCalloutCooldown) return;
+    const soundKey = nextState === 'BODY_BLOCK' ? 'cargoDrop' : 'powerUpCollect';
+    audioManager.playSound(soundKey);
+    scene.lastOperativeCallout = time;
+}
+
+function updateOperativeSquadFire(scene, operative, time, aimAngle) {
+    const config = OPERATIVE_CLASS_CONFIG[operative.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
+    if (!config.fireCooldown || config.fireCooldown <= 0) return;
+    if (time <= operative.lastShot + config.fireCooldown) return;
+    if (aimAngle === null || aimAngle === undefined) return;
+
+    if (operative.operativeType === 'gunner') {
+        const spread = 0.14;
+        [-spread, 0, spread].forEach((offset) => {
+            createProjectile(
+                scene,
+                operative.x,
+                operative.y,
+                Math.cos(aimAngle + offset) * config.projectileSpeed,
+                Math.sin(aimAngle + offset) * config.projectileSpeed,
+                config.projectileType,
+                config.damage
+            );
+        });
+    } else {
+        const projectile = createProjectile(
+            scene,
+            operative.x,
+            operative.y,
+            Math.cos(aimAngle) * config.projectileSpeed,
+            Math.sin(aimAngle) * config.projectileSpeed,
+            config.projectileType,
+            config.damage
+        );
+        if (operative.operativeType === 'saboteur' && projectile) {
+            projectile.empDisableDuration = config.empDisableDuration;
+        }
+    }
+    operative.lastShot = time;
 }
 
 function findNearestEnemy(scene, origin) {
@@ -347,8 +485,21 @@ function updateOperatives(scene, time, delta) {
     const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const topLimit = 20;
+    const pilotOnFoot = pilotState.active && !aegisState.active;
+    const landingZone = pilotOnFoot ? getRebuildLandingZone(scene) : null;
+    const rebuildActive = pilotOnFoot
+        && gameState.rebuildObjective?.active
+        && gameState.rebuildObjective.stage === 'hangar_rebuild'
+        && landingZone
+        && isPilotInRebuildZone(scene, landingZone);
+    const squadAimAngle = pilotOnFoot
+        ? (pilotState.aimAngle !== undefined ? pilotState.aimAngle : (pilotState.facing < 0 ? Math.PI : 0))
+        : null;
+    const operatives = friendlies.children.entries.filter((friendly) => (
+        friendly && friendly.body && friendly.active && friendly.isOperative
+    ));
 
-    friendlies.children.entries.forEach((friendly) => {
+    operatives.forEach((friendly, index) => {
         if (!friendly || !friendly.body || !friendly.active || !friendly.isOperative) return;
 
         wrapWorldBounds(friendly);
@@ -366,6 +517,65 @@ function updateOperatives(scene, time, delta) {
             friendly.y = topLimit;
             if (friendly.body.velocity.y < 0) friendly.setVelocityY(0);
         }
+
+        if (pilotOnFoot) {
+            const config = OPERATIVE_CLASS_CONFIG[friendly.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
+            const formationOffset = getOperativeFormationOffset(index, operatives.length, time);
+            const anchorX = rebuildActive ? landingZone.x : scene.pilot.x;
+            const anchorY = rebuildActive ? landingZone.y : scene.pilot.y;
+            let targetX = anchorX + formationOffset.x;
+            let targetY = anchorY + formationOffset.y;
+
+            let isBodyBlocking = false;
+            if (rebuildActive && landingZone) {
+                const radius = Math.max(landingZone.displayWidth, landingZone.displayHeight) * SQUAD_AURA_CONFIG.interceptRadiusScale;
+                const threat = findThreateningProjectile(
+                    scene,
+                    anchorX,
+                    anchorY - landingZone.displayHeight * 0.5,
+                    radius,
+                    SQUAD_AURA_CONFIG.interceptWindow
+                );
+                if (threat && threat.body) {
+                    const velocity = threat.body.velocity;
+                    targetX = threat.x + velocity.x * SQUAD_AURA_CONFIG.bodyBlockLeadTime;
+                    targetY = threat.y + velocity.y * SQUAD_AURA_CONFIG.bodyBlockLeadTime;
+                    isBodyBlocking = true;
+                }
+            }
+            friendly.isBodyBlocking = isBodyBlocking;
+
+            const dx = typeof wrappedDistance === 'function'
+                ? wrappedDistance(friendly.x, targetX, CONFIG.worldWidth)
+                : (targetX - friendly.x);
+            if (Math.abs(dx) > SQUAD_AURA_CONFIG.followSnapDistance) {
+                const speedBoost = isBodyBlocking ? 1.35 : 1.0;
+                friendly.setVelocityX(Math.sign(dx) * config.moveSpeed * timeSlowMultiplier * speedBoost);
+            } else {
+                friendly.setVelocityX(0);
+            }
+
+            if (Math.abs(targetY - friendly.y) < 6 && friendly.body.velocity.y !== 0) {
+                friendly.setVelocityY(0);
+            }
+
+            applyOperativeDefenseVisual(friendly, isBodyBlocking);
+            setOperativeState(scene, friendly, isBodyBlocking ? 'BODY_BLOCK' : 'FOLLOW_LEADER', time);
+            updateOperativeSquadFire(scene, friendly, time, squadAimAngle);
+            if (friendly.operativeType === 'medic' && scene.pilot) {
+                const distance = Phaser.Math.Distance.Between(friendly.x, friendly.y, scene.pilot.x, scene.pilot.y);
+                if (distance <= config.supportRange && time > friendly.lastSupport + config.supportCooldown) {
+                    spawnMedicPickup(scene, friendly.x, friendly.y - 8);
+                    createExplosion(scene, friendly.x, friendly.y - 6, 0x5eead4);
+                    friendly.lastSupport = time;
+                }
+            }
+            return;
+        }
+
+        friendly.isBodyBlocking = false;
+        applyOperativeDefenseVisual(friendly, false);
+        setOperativeState(scene, friendly, 'PATROL', time);
 
         switch (friendly.operativeType) {
             case 'infantry':
