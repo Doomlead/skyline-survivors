@@ -353,6 +353,13 @@ function create() {
 
     this.physics.add.overlap(this.drones, this.enemies, droneHitEnemy, null, this);
     this.physics.add.overlap(this.drones, this.enemyProjectiles, droneHitProjectile, null, this);
+    this.physics.add.overlap(
+        this.friendlies,
+        this.enemyProjectiles,
+        operativeHitProjectile,
+        (friendly) => friendly && friendly.isOperative,
+        this
+    );
 
     this.physics.add.overlap(this.pilot, this.enemies, playerHitEnemy, null, this);
     this.physics.add.overlap(this.pilot, this.garrisonDefenders, playerHitGarrisonDefender, null, this);

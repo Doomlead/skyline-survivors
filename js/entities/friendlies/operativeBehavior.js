@@ -68,6 +68,21 @@ const OPERATIVE_RARITY_WEIGHTS = [
     { type: 'saboteur', weight: 5 }
 ];
 
+const SQUAD_AURA_CONFIG = {
+    baseRadius: 70,
+    ringSpacing: 18,
+    angleDrift: 0.0008,
+    followSnapDistance: 10,
+    auraRadius: 160,
+    auraFireRateMultiplier: 0.7,
+    interceptHorizon: 2.0,
+    interceptRadiusScale: 0.35,
+    bodyBlockLeadTime: 0.25,
+    sacrificeSpeed: 180,
+    stateCalloutCooldown: 3200,
+    bodyBlockTint: 0x38bdf8
+};
+
 function pickOperativeType() {
     const total = OPERATIVE_RARITY_WEIGHTS.reduce((sum, entry) => sum + entry.weight, 0);
     const roll = Math.random() * total;
@@ -102,6 +117,8 @@ function spawnOperative(scene, type, x, y) {
     operative.homeX = x;
     operative.homeY = y;
     operative.bracedUntil = 0;
+    operative.health = 2;
+    operative.stunnedUntil = 0;
 
     createSpawnEffect(scene, x, y, 'drone');
     if (audioManager) audioManager.playSound('enemySpawn');
@@ -133,6 +150,124 @@ function spawnMedicPickup(scene, x, y) {
     });
 
     return pickup;
+}
+
+function getOperativeFormationOffset(index, squadSize, time) {
+    if (!squadSize) return { x: 0, y: 0 };
+    const ringIndex = index % Math.max(1, Math.ceil(squadSize / 6));
+    const radius = SQUAD_AURA_CONFIG.baseRadius + ringIndex * SQUAD_AURA_CONFIG.ringSpacing;
+    const angleStep = (Math.PI * 2) / squadSize;
+    const angle = angleStep * index + time * SQUAD_AURA_CONFIG.angleDrift;
+    return {
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * (radius * 0.3)
+    };
+}
+
+function getAuraMultiplier(operative, player, auraActive) {
+    if (!auraActive || !player) return 1.0;
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(operative.x, player.x, CONFIG.worldWidth)
+        : (player.x - operative.x);
+    if (Math.abs(dx) <= SQUAD_AURA_CONFIG.auraRadius) {
+        return SQUAD_AURA_CONFIG.auraFireRateMultiplier;
+    }
+    return 1.0;
+}
+
+function getTargetDistance(origin, target) {
+    if (!origin || !target) return Infinity;
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(origin.x, target.x, CONFIG.worldWidth)
+        : (target.x - origin.x);
+    const dy = target.y - origin.y;
+    return Math.hypot(dx, dy);
+}
+
+function findSquadTarget(scene, operative, player) {
+    if (!player) return findNearestEnemy(scene, operative).target;
+    const { target: nearestToPlayer, distance } = findNearestEnemy(scene, player);
+    if (nearestToPlayer && distance < 200) {
+        return nearestToPlayer;
+    }
+    return findNearestEnemy(scene, operative).target;
+}
+
+function getRebuildLandingZone(scene) {
+    const { friendlies } = scene;
+    if (!friendlies || !friendlies.children) return null;
+    for (const friendly of friendlies.children.entries) {
+        if (!friendly || !friendly.active || !friendly.isHangar) continue;
+        if (friendly.landingZone && friendly.landingZone.active) {
+            return friendly.landingZone;
+        }
+    }
+    return null;
+}
+
+function isPilotInRebuildZone(scene, landingZone) {
+    if (!landingZone || !pilotState.active || aegisState.active) return false;
+    if (typeof isPlayerOnLandingZone === 'function') {
+        return isPlayerOnLandingZone(scene, landingZone);
+    }
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(landingZone.x, scene.pilot.x, CONFIG.worldWidth)
+        : (scene.pilot.x - landingZone.x);
+    const zoneCenterY = landingZone.y - landingZone.displayHeight * 0.5;
+    const dy = scene.pilot.y - zoneCenterY;
+    const xRange = landingZone.displayWidth * 0.35;
+    const yRange = landingZone.displayHeight * 0.35;
+    return Math.abs(dx) <= xRange && Math.abs(dy) <= yRange;
+}
+
+function findThreateningProjectile(scene, targetX, targetY, radius, maxTime) {
+    const { enemyProjectiles } = scene;
+    if (!enemyProjectiles || !enemyProjectiles.children) return null;
+    let best = null;
+    let bestTime = Infinity;
+
+    enemyProjectiles.children.entries.forEach((projectile) => {
+        if (!projectile || !projectile.active || !projectile.body) return;
+        const velocity = projectile.body.velocity;
+        const speedSq = velocity.x * velocity.x + velocity.y * velocity.y;
+        if (speedSq < 1) return;
+
+        const toTargetX = targetX - projectile.x;
+        const toTargetY = targetY - projectile.y;
+        const timeToImpact = (toTargetX * velocity.x + toTargetY * velocity.y) / speedSq;
+        if (timeToImpact <= 0 || timeToImpact > maxTime) return;
+
+        const closestX = projectile.x + velocity.x * timeToImpact;
+        const closestY = projectile.y + velocity.y * timeToImpact;
+        const distance = Phaser.Math.Distance.Between(closestX, closestY, targetX, targetY);
+        if (distance > radius) return;
+
+        if (timeToImpact < bestTime) {
+            bestTime = timeToImpact;
+            best = projectile;
+        }
+    });
+
+    return best;
+}
+
+function applyOperativeDefenseVisual(operative, isDefending) {
+    if (isDefending) {
+        operative.setTint(SQUAD_AURA_CONFIG.bodyBlockTint);
+    } else if (operative.tintTopLeft !== 0xffffff) {
+        operative.clearTint();
+    }
+}
+
+function setOperativeState(scene, operative, nextState, time) {
+    if (operative.currentState === nextState) return;
+    operative.currentState = nextState;
+    const { audioManager } = scene;
+    if (!audioManager) return;
+    if (time < (scene.lastOperativeCallout || 0) + SQUAD_AURA_CONFIG.stateCalloutCooldown) return;
+    const soundKey = nextState === 'SACRIFICE' ? 'cargoDrop' : 'powerUpCollect';
+    audioManager.playSound(soundKey);
+    scene.lastOperativeCallout = time;
 }
 
 function findNearestEnemy(scene, origin) {
@@ -183,7 +318,7 @@ function findNearestAssaultTarget(scene, origin) {
     return { target: nearest, distance: nearestDist };
 }
 
-function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier) {
+function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG.infantry;
     const patrolAngle = (operative.patrolAngle || 0) + 0.02 * timeSlowMultiplier;
     operative.patrolAngle = patrolAngle;
@@ -191,8 +326,10 @@ function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier) {
     const targetX = operative.homeX + sway;
     operative.setVelocityX((targetX - operative.x) * 0.6 * timeSlowMultiplier);
 
-    if (time > operative.lastShot + config.fireCooldown) {
-        const { target, distance } = findNearestEnemy(scene, operative);
+    const auraMultiplier = getAuraMultiplier(operative, player, auraActive);
+    if (time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+        const target = findSquadTarget(scene, operative, player);
+        const distance = getTargetDistance(operative, target);
         if (target && distance <= config.range) {
             const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
             createProjectile(
@@ -209,9 +346,10 @@ function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier) {
     }
 }
 
-function updateOperativeGunner(scene, operative, time, timeSlowMultiplier) {
+function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG.gunner;
-    const { target, distance } = findNearestEnemy(scene, operative);
+    const target = findSquadTarget(scene, operative, player);
+    const distance = getTargetDistance(operative, target);
     const inRange = target && distance <= config.range;
 
     if (inRange) {
@@ -228,7 +366,8 @@ function updateOperativeGunner(scene, operative, time, timeSlowMultiplier) {
         operative.setVelocityX((targetX - operative.x) * 0.5 * timeSlowMultiplier);
     }
 
-    if (inRange && time > operative.lastShot + config.fireCooldown) {
+    const auraMultiplier = getAuraMultiplier(operative, player, auraActive);
+    if (inRange && time > operative.lastShot + config.fireCooldown * auraMultiplier) {
         const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
         const spread = 0.1;
         [-spread, 0, spread].forEach(offset => {
@@ -276,15 +415,21 @@ function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) {
     }
 }
 
-function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier) {
+function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG.saboteur;
     const useAssaultTargets = gameState.mode === 'assault' && scene.assaultTargets;
 
-    let targetData = useAssaultTargets
-        ? findNearestAssaultTarget(scene, operative)
-        : findNearestEnemy(scene, operative);
+    let target = null;
+    let distance = Infinity;
 
-    const { target, distance } = targetData;
+    if (useAssaultTargets) {
+        const targetData = findNearestAssaultTarget(scene, operative);
+        target = targetData.target;
+        distance = targetData.distance;
+    } else {
+        target = findSquadTarget(scene, operative, player);
+        distance = getTargetDistance(operative, target);
+    }
 
     if (target) {
         const dx = typeof wrappedDistance === 'function'
@@ -297,7 +442,8 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier) {
             operative.setVelocityX(0);
         }
 
-        if (distance <= config.range && time > operative.lastShot + config.fireCooldown) {
+        const auraMultiplier = getAuraMultiplier(operative, player, auraActive);
+        if (distance <= config.range && time > operative.lastShot + config.fireCooldown * auraMultiplier) {
             const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
             const projectile = createProjectile(
                 scene,
@@ -319,6 +465,90 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier) {
         const sway = Math.sin(patrolAngle + operative.blinkOffset) * config.patrolRange;
         const targetX = operative.homeX + sway;
         operative.setVelocityX((targetX - operative.x) * 0.5 * timeSlowMultiplier);
+    }
+}
+
+function handleOperativeFire(scene, operative, time, player, auraActive) {
+    const config = OPERATIVE_CLASS_CONFIG[operative.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
+    const auraMultiplier = getAuraMultiplier(operative, player, auraActive);
+
+    if (operative.operativeType === 'infantry') {
+        if (time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+            const target = findSquadTarget(scene, operative, player);
+            const distance = getTargetDistance(operative, target);
+            if (target && distance <= config.range) {
+                const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
+                createProjectile(
+                    scene,
+                    operative.x,
+                    operative.y,
+                    Math.cos(angle) * config.projectileSpeed,
+                    Math.sin(angle) * config.projectileSpeed,
+                    config.projectileType,
+                    config.damage
+                );
+                operative.lastShot = time;
+            }
+        }
+        return;
+    }
+
+    if (operative.operativeType === 'gunner') {
+        const target = findSquadTarget(scene, operative, player);
+        const distance = getTargetDistance(operative, target);
+        const inRange = target && distance <= config.range;
+        if (inRange) {
+            operative.bracedUntil = Math.max(operative.bracedUntil || 0, time + config.braceDuration);
+        }
+        if (inRange && time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+            const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
+            const spread = 0.1;
+            [-spread, 0, spread].forEach(offset => {
+                createProjectile(
+                    scene,
+                    operative.x,
+                    operative.y,
+                    Math.cos(angle + offset) * config.projectileSpeed,
+                    Math.sin(angle + offset) * config.projectileSpeed,
+                    config.projectileType,
+                    config.damage
+                );
+            });
+            operative.lastShot = time;
+        }
+        return;
+    }
+
+    if (operative.operativeType === 'saboteur') {
+        const useAssaultTargets = gameState.mode === 'assault' && scene.assaultTargets;
+        let target = null;
+        let distance = Infinity;
+
+        if (useAssaultTargets) {
+            const targetData = findNearestAssaultTarget(scene, operative);
+            target = targetData.target;
+            distance = targetData.distance;
+        } else {
+            target = findSquadTarget(scene, operative, player);
+            distance = getTargetDistance(operative, target);
+        }
+
+        if (target && distance <= config.range && time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+            const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
+            const projectile = createProjectile(
+                scene,
+                operative.x,
+                operative.y,
+                Math.cos(angle) * config.projectileSpeed,
+                Math.sin(angle) * config.projectileSpeed,
+                config.projectileType,
+                config.damage
+            );
+            if (projectile) {
+                projectile.empDisableDuration = config.empDisableDuration;
+            }
+            operative.lastShot = time;
+        }
     }
 }
 
@@ -347,9 +577,27 @@ function updateOperatives(scene, time, delta) {
     const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const topLimit = 20;
+    const player = getActivePlayer(scene);
+    const pilotOnFoot = pilotState.active && !aegisState.active;
+    const auraActive = pilotOnFoot;
+    const landingZone = pilotOnFoot ? getRebuildLandingZone(scene) : null;
+    const rebuildActive = pilotOnFoot
+        && gameState.rebuildObjective?.active
+        && gameState.rebuildObjective.stage === 'hangar_rebuild'
+        && landingZone
+        && isPilotInRebuildZone(scene, landingZone);
+    const operatives = friendlies.children.entries.filter((friendly) => (
+        friendly && friendly.body && friendly.active && friendly.isOperative
+    ));
 
-    friendlies.children.entries.forEach((friendly) => {
+    operatives.forEach((friendly, index) => {
         if (!friendly || !friendly.body || !friendly.active || !friendly.isOperative) return;
+
+        if (time < (friendly.stunnedUntil || 0)) {
+            friendly.setVelocityX(friendly.body.velocity.x * 0.95);
+            friendly.body.setAllowGravity(true);
+            return;
+        }
 
         wrapWorldBounds(friendly);
         updateOperativeHomeAnchor(scene, friendly, timeSlowMultiplier, delta);
@@ -358,7 +606,7 @@ function updateOperatives(scene, time, delta) {
         const minClearance = 28;
         const operativeGroundY = groundLevel - terrainVariation - minClearance;
 
-        if (friendly.y > operativeGroundY) {
+        if (!friendly.isBodyBlocking && friendly.y > operativeGroundY) {
             friendly.y = operativeGroundY;
             if (friendly.body.velocity.y > 0) friendly.setVelocityY(0);
         }
@@ -367,18 +615,85 @@ function updateOperatives(scene, time, delta) {
             if (friendly.body.velocity.y < 0) friendly.setVelocityY(0);
         }
 
+        if (pilotOnFoot) {
+            const config = OPERATIVE_CLASS_CONFIG[friendly.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
+            const formationOffset = getOperativeFormationOffset(index, operatives.length, time);
+            const anchorX = rebuildActive ? landingZone.x : scene.pilot.x;
+            const anchorY = rebuildActive ? landingZone.y : scene.pilot.y;
+            let targetX = anchorX + formationOffset.x;
+            let targetY = anchorY + formationOffset.y;
+
+            let isBodyBlocking = false;
+            if (rebuildActive && landingZone) {
+                const radius = Math.max(landingZone.displayWidth, landingZone.displayHeight) * SQUAD_AURA_CONFIG.interceptRadiusScale;
+                const threat = findThreateningProjectile(
+                    scene,
+                    anchorX,
+                    anchorY - landingZone.displayHeight * 0.5,
+                    radius,
+                    SQUAD_AURA_CONFIG.interceptHorizon
+                );
+                if (threat && threat.body) {
+                    const velocity = threat.body.velocity;
+                    targetX = threat.x + velocity.x * SQUAD_AURA_CONFIG.bodyBlockLeadTime;
+                    targetY = threat.y + velocity.y * SQUAD_AURA_CONFIG.bodyBlockLeadTime;
+                    isBodyBlocking = true;
+                }
+            }
+            friendly.isBodyBlocking = isBodyBlocking;
+
+            const dx = typeof wrappedDistance === 'function'
+                ? wrappedDistance(friendly.x, targetX, CONFIG.worldWidth)
+                : (targetX - friendly.x);
+            if (Math.abs(dx) > SQUAD_AURA_CONFIG.followSnapDistance) {
+                const moveSpeed = isBodyBlocking ? SQUAD_AURA_CONFIG.sacrificeSpeed : config.moveSpeed;
+                friendly.setVelocityX(Math.sign(dx) * moveSpeed * timeSlowMultiplier);
+            } else {
+                friendly.setVelocityX(0);
+            }
+
+            if (isBodyBlocking) {
+                friendly.body.setAllowGravity(false);
+                const dy = targetY - friendly.y;
+                friendly.setVelocityY(dy * 8);
+            } else {
+                friendly.body.setAllowGravity(true);
+                if (Math.abs(targetY - friendly.y) < 6 && friendly.body.velocity.y !== 0) {
+                    friendly.setVelocityY(0);
+                }
+            }
+
+            applyOperativeDefenseVisual(friendly, isBodyBlocking);
+            setOperativeState(scene, friendly, isBodyBlocking ? 'SACRIFICE' : 'FOLLOW_LEADER', time);
+            handleOperativeFire(scene, friendly, time, player, auraActive);
+            if (friendly.operativeType === 'medic' && scene.pilot) {
+                const distance = Phaser.Math.Distance.Between(friendly.x, friendly.y, scene.pilot.x, scene.pilot.y);
+                if (distance <= config.supportRange && time > friendly.lastSupport + config.supportCooldown) {
+                    spawnMedicPickup(scene, friendly.x, friendly.y - 8);
+                    createExplosion(scene, friendly.x, friendly.y - 6, 0x5eead4);
+                    friendly.lastSupport = time;
+                }
+            }
+            return;
+        }
+
+        friendly.isBodyBlocking = false;
+        friendly.body.setAllowGravity(true);
+        applyOperativeDefenseVisual(friendly, false);
+        setOperativeState(scene, friendly, 'PATROL', time);
+
         switch (friendly.operativeType) {
             case 'infantry':
-                updateOperativeInfantry(scene, friendly, time, timeSlowMultiplier);
+                updateOperativeInfantry(scene, friendly, time, timeSlowMultiplier, player, auraActive);
                 break;
             case 'gunner':
-                updateOperativeGunner(scene, friendly, time, timeSlowMultiplier);
+                updateOperativeGunner(scene, friendly, time, timeSlowMultiplier, player, auraActive);
                 break;
             case 'medic':
                 updateOperativeMedic(scene, friendly, time, timeSlowMultiplier);
                 break;
             case 'saboteur':
-                updateOperativeSaboteur(scene, friendly, time, timeSlowMultiplier);
+                updateOperativeSaboteur(scene, friendly, time, timeSlowMultiplier, player, auraActive);
                 break;
         }
     });
