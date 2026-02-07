@@ -496,6 +496,9 @@ class BuildMapView {
 
     getDistrictStatusColor(state) {
         if (!state) return 0x22c55e;
+        if (state.underAttack && state.status !== 'occupied') {
+            return 0xfacc15;
+        }
         switch (state.status) {
             case 'occupied':
                 return 0xef4444;
