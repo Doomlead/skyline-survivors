@@ -309,6 +309,7 @@ function applyMissionPayload(missionPayload) {
         gameState.missionDirectives = null;
         gameState.rewardMultiplier = 1;
         gameState.spawnMultiplier = 1;
+        gameState.clutchDefenseBonus = 0;
         gameState.missionDistrictState = null;
         CONFIG.backgroundStyle = null;
         return;
@@ -318,6 +319,7 @@ function applyMissionPayload(missionPayload) {
     gameState.missionDistrictState = missionPayload.districtState || missionPayload.directives?.districtState || null;
     gameState.rewardMultiplier = missionPayload?.directives?.rewardMultiplier || 1;
     gameState.spawnMultiplier = missionPayload?.directives?.spawnMultiplier || 1;
+    gameState.clutchDefenseBonus = missionPayload?.directives?.clutchDefenseBonus || 0;
     CONFIG.backgroundStyle = missionPayload?.directives?.backgroundStyle || null;
     if (missionPayload?.directives?.humans) {
         gameState.humans = missionPayload.directives.humans;
@@ -326,6 +328,91 @@ function applyMissionPayload(missionPayload) {
 
 function getMissionScaledReward(base) {
     return Math.round(base * (gameState.rewardMultiplier || 1));
+}
+
+function getCombatScaledReward(base) {
+    const comboMultiplier = gameState.comboMultiplier || 1;
+    return Math.round(getMissionScaledReward(base) * comboMultiplier);
+}
+
+function resetComboMeter() {
+    gameState.comboStacks = 0;
+    gameState.comboTimer = 0;
+    gameState.comboMultiplier = 1;
+    gameState.comboFlowActive = false;
+}
+
+function refreshComboMultiplier() {
+    const steps = Math.floor((gameState.comboStacks || 0) / COMBO_CONFIG.stepSize);
+    const bonus = Math.min(COMBO_CONFIG.maxBonus, steps * COMBO_CONFIG.stepBonus);
+    gameState.comboMultiplier = 1 + bonus;
+}
+
+function registerComboEvent(stacks = 1) {
+    const nextStacks = Math.min(COMBO_CONFIG.maxStacks, (gameState.comboStacks || 0) + stacks);
+    gameState.comboStacks = nextStacks;
+    gameState.comboMaxStacks = Math.max(gameState.comboMaxStacks || 0, nextStacks);
+    gameState.comboTimer = COMBO_CONFIG.decayMs;
+    refreshComboMultiplier();
+}
+
+function getComboObjective(scene, player) {
+    if (!scene || !player) return null;
+    if (gameState.mode === 'assault' && gameState.assaultObjective?.baseX) {
+        return { x: gameState.assaultObjective.baseX, y: player.y };
+    }
+    if (gameState.mode === 'mothership') {
+        const boss = scene.bosses?.children?.entries?.find(entry => entry.active);
+        if (boss) return { x: boss.x, y: boss.y };
+    }
+    const activeBoss = scene.bosses?.children?.entries?.find(entry => entry.active);
+    if (activeBoss) return { x: activeBoss.x, y: activeBoss.y };
+    const enemies = scene.enemies?.children?.entries || [];
+    if (!enemies.length) return null;
+    let best = null;
+    let bestDist = Infinity;
+    enemies.forEach(enemy => {
+        if (!enemy || !enemy.active) return;
+        const dx = typeof wrappedDistance === 'function'
+            ? wrappedDistance(player.x, enemy.x, CONFIG.worldWidth)
+            : (enemy.x - player.x);
+        const dy = enemy.y - player.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < bestDist) {
+            best = enemy;
+            bestDist = dist;
+        }
+    });
+    return best ? { x: best.x, y: best.y } : null;
+}
+
+function isMovingTowardObjective(scene, player) {
+    if (!scene || !player || !player.body) return false;
+    const target = getComboObjective(scene, player);
+    if (!target) return false;
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(player.x, target.x, CONFIG.worldWidth)
+        : (target.x - player.x);
+    const velocity = player.body.velocity || { x: 0, y: 0 };
+    const speed = Math.hypot(velocity.x || 0, velocity.y || 0);
+    if (Math.abs(dx) < 40) return true;
+    if (speed < 20) return false;
+    return Math.sign(dx) === Math.sign(velocity.x || 0);
+}
+
+function updateComboState(scene, delta) {
+    if (!gameState.comboStacks) {
+        gameState.comboFlowActive = false;
+        return;
+    }
+    const flowActive = isMovingTowardObjective(scene, getActivePlayer(scene));
+    gameState.comboFlowActive = flowActive;
+    if (!flowActive) {
+        gameState.comboTimer = Math.max(0, (gameState.comboTimer || 0) - delta);
+        if (gameState.comboTimer === 0) {
+            resetComboMeter();
+        }
+    }
 }
 
 function enterMainMenu() {

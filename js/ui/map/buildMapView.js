@@ -502,6 +502,8 @@ class BuildMapView {
         switch (state.status) {
             case 'occupied':
                 return 0xef4444;
+            case 'critical':
+                return 0xf97316;
             case 'threatened':
                 return 0xfacc15;
             case 'friendly':
@@ -511,16 +513,16 @@ class BuildMapView {
     }
 
     drawDistrictThreatPulse(district, projected, radius) {
-        if (!district?.state || district.state.status !== 'threatened') return;
+        if (!district?.state || !['threatened', 'critical'].includes(district.state.status)) return;
         const maxTimer = district.config?.timer || 1;
-        if (maxTimer <= 0) return;
-        const remaining = Math.max(0, district.state.timer ?? 0);
-        const urgency = Phaser.Math.Clamp(1 - remaining / maxTimer, 0, 1);
-        const pulseSpeed = Phaser.Math.Linear(0.002, 0.006, urgency);
+        const isCritical = district.state.status === 'critical';
+        const remaining = isCritical ? (district.state.criticalTimer ?? 0) : Math.max(0, district.state.timer ?? 0);
+        const urgency = isCritical ? 1 : (maxTimer > 0 ? Phaser.Math.Clamp(1 - remaining / maxTimer, 0, 1) : 1);
+        const pulseSpeed = isCritical ? 0.008 : Phaser.Math.Linear(0.002, 0.006, urgency);
         const pulse = (Math.sin(this.scene.time.now * pulseSpeed) + 1) / 2;
-        const pulseRadius = radius * (1.6 + pulse * 0.6);
-        const pulseAlpha = Phaser.Math.Linear(0.15, 0.55, pulse) * Phaser.Math.Linear(0.7, 1, urgency);
-        const pulseColor = urgency > 0.65 ? 0xf87171 : urgency > 0.35 ? 0xfbbf24 : 0xfef08a;
+        const pulseRadius = radius * (1.7 + pulse * (isCritical ? 0.7 : 0.6));
+        const pulseAlpha = Phaser.Math.Linear(0.2, 0.7, pulse) * Phaser.Math.Linear(0.8, 1, urgency);
+        const pulseColor = isCritical ? 0xf97316 : (urgency > 0.65 ? 0xf87171 : urgency > 0.35 ? 0xfbbf24 : 0xfef08a);
 
         this.districtGraphics.lineStyle(2, pulseColor, pulseAlpha);
         this.districtGraphics.strokeCircle(projected.x, projected.y, pulseRadius);
@@ -703,8 +705,19 @@ class BuildMapView {
             
             // Safety check for destroyed text objects
             if (node.timerText && node.timerText.active) {
-                const timerLabel = node.state.status === 'destroyed' ? 'DESTROYED' : node.state.timer > 0 ? this.scene.formatTimer(node.state.timer) : 'STABLE';
-                const color = node.state.status === 'destroyed' ? '#f87171' : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
+                const isCritical = node.state.status === 'critical';
+                const timerLabel = node.state.status === 'destroyed'
+                    ? 'DESTROYED'
+                    : isCritical
+                        ? `CRITICAL ${this.scene.formatTimer(node.state.criticalTimer || 0)}`
+                        : node.state.timer > 0
+                            ? this.scene.formatTimer(node.state.timer)
+                            : 'STABLE';
+                const color = node.state.status === 'destroyed'
+                    ? '#f87171'
+                    : isCritical
+                        ? '#fb923c'
+                        : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
                 node.timerText.setText(timerLabel);
                 node.timerText.setColor(color);
             }

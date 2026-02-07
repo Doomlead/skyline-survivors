@@ -312,11 +312,13 @@ class BuildMissionUi {
         const lines = mapNodes.map(node => {
             const statusLabel = node.state.status === 'occupied'
                 ? 'OCCUPIED'
-                : node.state.status === 'friendly'
-                    ? 'FRIENDLY'
-                    : node.state.timer > 0
-                        ? `T-${this.scene.formatTimer(node.state.timer)}`
-                        : 'THREATENED';
+                : node.state.status === 'critical'
+                    ? `CRITICAL ${this.scene.formatTimer(node.state.criticalTimer || 0)}`
+                    : node.state.status === 'friendly'
+                        ? 'FRIENDLY'
+                        : node.state.timer > 0
+                            ? `T-${this.scene.formatTimer(node.state.timer)}`
+                            : 'THREATENED';
             return `${node.config.label}: ${statusLabel}`;
         });
         const district = selectedDistrict ? `${selectedDistrict.config.name}: ${selectedDistrict.state.status.toUpperCase()}` : 'No district selected';
@@ -336,7 +338,10 @@ class BuildMissionUi {
         const mode = assaultLocked ? 'assault' : (mission.mode || selectedMode);
         const modeLabel = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Defense';
         const directiveLabel = directives?.urgency ? `${directives.urgency.toUpperCase()} THREAT` : 'Threat mix pending';
-        const rewardLabel = directives?.rewardMultiplier ? `${directives.rewardMultiplier.toFixed(2)}x rewards · ${directives.reward}` : 'Standard rewards';
+        const clutchTag = directives?.clutchDefenseBonus ? ` · CLUTCH +${Math.round(directives.clutchDefenseBonus * 100)}%` : '';
+        const rewardLabel = directives?.rewardMultiplier
+            ? `${directives.rewardMultiplier.toFixed(2)}x rewards · ${directives.reward}${clutchTag}`
+            : 'Standard rewards';
         const launchLabel = mode === 'survival'
             ? 'Launch Survival Run (Space)'
             : mode === 'assault'

@@ -4,6 +4,7 @@
 
 let scoreEl, waveEl, timerEl, bombsEl, livesEl, powerupsEl, cargoEl, operativesEl;
 let districtEl, threatEl, rewardEl;
+let comboEl, comboFillEl, comboFlowEl;
 let assaultHudEl, assaultCoreFillEl, assaultCoreLabelEl, assaultShieldLabelEl;
 let mothershipHudEl, mothershipCoreFillEl, mothershipCoreLabelEl, mothershipPhaseLabelEl;
 let radarCanvas, radarCtx;

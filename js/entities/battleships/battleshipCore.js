@@ -387,7 +387,8 @@ function destroyBattleship(scene, battleship) {
         }, i * 150);
     }
 
-    const score = getMissionScaledReward(getBattleshipScore(battleship.battleshipType));
+    registerComboEvent(2);
+    const score = getCombatScaledReward(getBattleshipScore(battleship.battleshipType));
     gameState.score += score;
 
     const scorePopup = scene.add.text(

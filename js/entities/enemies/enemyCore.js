@@ -419,7 +419,8 @@ function destroyEnemy(scene, enemy) {
         particleManager.enemyExplosion(enemy.x, enemy.y);
     }
     createEnhancedDeathEffect(scene, enemy.x, enemy.y, enemy.enemyType);
-    const score = getMissionScaledReward(getEnemyScore(enemy.enemyType));
+    registerComboEvent(1);
+    const score = getCombatScaledReward(getEnemyScore(enemy.enemyType));
     gameState.score += score;
 
     if (enemy.enemyType === 'pod') {

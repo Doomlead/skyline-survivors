@@ -253,6 +253,7 @@
         assaultTime: 18,
         assaultDrain: 1.6
     };
+    const CRITICAL_WINDOW_SECONDS = 30;
 
     const MOTHERSHIP_CONFIG = {
         id: 'mothership',
@@ -274,6 +275,7 @@
             id: config.id,
             status,
             timer: config.timer,
+            criticalTimer: 0,
             lastOutcome: null,
             clearedRuns: 0
         };
@@ -299,14 +301,32 @@
             const existing = stored?.districts?.[cfg.id];
             const base = existing ? { ...existing } : getDefaultDistrictState(cfg);
             if (base.status === 'threatened') {
-                base.timer = Math.max(0, base.timer - elapsed);
-                if (base.timer === 0) {
+                const remaining = (base.timer ?? 0) - elapsed;
+                if (remaining > 0) {
+                    base.timer = remaining;
+                    base.criticalTimer = 0;
+                } else {
+                    base.timer = 0;
+                    const timePastZero = Math.abs(remaining);
+                    base.criticalTimer = Math.max(0, CRITICAL_WINDOW_SECONDS - timePastZero);
+                    base.status = base.criticalTimer > 0 ? 'critical' : 'occupied';
+                    base.lastOutcome = base.status === 'occupied' ? 'failed' : 'critical';
+                }
+            }
+            if (base.status === 'critical') {
+                base.timer = 0;
+                base.criticalTimer = Math.max(0, (base.criticalTimer ?? CRITICAL_WINDOW_SECONDS) - elapsed);
+                if (base.criticalTimer === 0) {
                     base.status = 'occupied';
                     base.lastOutcome = 'failed';
                 }
             }
             if (base.status === 'occupied') {
                 base.timer = 0;
+                base.criticalTimer = 0;
+            }
+            if (base.status === 'friendly') {
+                base.criticalTimer = 0;
             }
             districtState.districts[cfg.id] = base;
         });
@@ -482,14 +502,16 @@
                     if (targetState.status === 'friendly') {
                         targetState.status = 'threatened';
                         targetState.timer = targetConfig?.timer || targetState.timer;
+                        targetState.criticalTimer = 0;
                     }
                     const drain = seconds * BATTLESHIP_CONFIG.assaultDrain;
                     const nextTimer = Math.max(0, targetState.timer - drain);
                     if (nextTimer !== targetState.timer) {
                         targetState.timer = nextTimer;
                         if (targetState.timer === 0) {
-                            targetState.status = 'occupied';
-                            targetState.lastOutcome = 'failed';
+                            targetState.status = 'critical';
+                            targetState.criticalTimer = CRITICAL_WINDOW_SECONDS;
+                            targetState.lastOutcome = 'critical';
                             ship.active = false;
                             ship.timer = 0;
                         }
@@ -593,13 +615,16 @@
 
     function buildMissionDirectives(config, state, modeOverride = null) {
         if (!config || !state) return null;
-        const timerRatio = config.timer > 0 ? Math.max(0, state.timer) / config.timer : 0;
         const urgency = state.status === 'occupied'
             ? 'occupied'
-            : state.status === 'friendly'
-                ? 'stable'
-                : timerRatio < 0.35 ? 'critical' : 'threatened';
-        const rewardMultiplier = urgency === 'occupied' ? 1.5 : urgency === 'critical' ? 1.25 : 1;
+            : state.status === 'critical'
+                ? 'critical'
+                : state.status === 'friendly'
+                    ? 'stable'
+                    : 'threatened';
+        const baseRewardMultiplier = urgency === 'occupied' ? 1.5 : urgency === 'critical' ? 1.25 : 1;
+        const clutchDefenseBonus = urgency === 'critical' ? 0.2 : 0;
+        const rewardMultiplier = baseRewardMultiplier + clutchDefenseBonus;
         const spawnMultiplier = urgency === 'occupied' ? 1.35 : urgency === 'critical' ? 1.15 : 1;
         const humans = urgency === 'occupied' ? 10 : urgency === 'critical' ? 18 : 15;
         const focusedTypes = [...config.threats];
@@ -620,9 +645,11 @@
             reward: config.reward,
             urgency,
             rewardMultiplier,
+            clutchDefenseBonus,
             spawnMultiplier,
             humans,
             timer: state.timer,
+            criticalTimer: state.criticalTimer ?? 0,
             status: state.status,
             mode: modeOverride,
             districtState: { ...state },
@@ -654,14 +681,28 @@
         const state = safeLoadState();
         let mutated = false;
         Object.values(state.districts).forEach((entry) => {
-            if (entry.status !== 'threatened') return;
-            if (entry.timer > 0 && seconds > 0) {
-                entry.timer = Math.max(0, entry.timer - seconds);
-                mutated = true;
+            if (entry.status === 'threatened') {
+                if (entry.timer > 0 && seconds > 0) {
+                    entry.timer = Math.max(0, entry.timer - seconds);
+                    mutated = true;
+                }
+                if (entry.timer === 0 && entry.status !== 'critical') {
+                    entry.status = 'critical';
+                    entry.criticalTimer = CRITICAL_WINDOW_SECONDS;
+                    entry.lastOutcome = 'critical';
+                    mutated = true;
+                }
             }
-            if (entry.timer === 0 && entry.status !== 'occupied') {
-                entry.status = 'occupied';
-                mutated = true;
+            if (entry.status === 'critical') {
+                if ((entry.criticalTimer || 0) > 0 && seconds > 0) {
+                    entry.criticalTimer = Math.max(0, entry.criticalTimer - seconds);
+                    mutated = true;
+                }
+                if ((entry.criticalTimer || 0) === 0 && entry.status !== 'occupied') {
+                    entry.status = 'occupied';
+                    entry.lastOutcome = 'failed';
+                    mutated = true;
+                }
             }
         });
         if (mutated) {
@@ -680,6 +721,7 @@
         if (success) {
             state.status = 'friendly';
             state.timer = cfg.timer + 60;
+            state.criticalTimer = 0;
             state.clearedRuns = (state.clearedRuns || 0) + 1;
             state.lastOutcome = 'cleared';
             retireBattleshipsForDistrict(currentMission.district);
@@ -687,6 +729,7 @@
             state.lastOutcome = 'failed';
             state.status = 'occupied';
             state.timer = 0;
+            state.criticalTimer = 0;
             retireBattleshipsForDistrict(currentMission.district);
         }
 
