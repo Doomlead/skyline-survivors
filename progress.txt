@@ -177,9 +177,7 @@
 ✅ **Fully Implemented:**
 - Supply Drop Gacha (Credits, Unboxing, Loot History)
 - Pending supply drop inventory display
-
-⚠️ **Partially Implemented:**
-- **Inventory Hot-Starts:** Supply drop items are stored and displayed, but are not yet applied to mission start
+- **Inventory Hot-Starts:** Supply drop items apply at mission start with HUD callout
 
 ---
 
@@ -213,7 +211,7 @@
 **Partially Aligned**
 - Operative depth (classes exist; patrol behavior exists; missing squad upgrades from weapon overflow).
 - Strategic layer urgency (Threatened/Occupied exists; critical urgency and pulse exist, missing explicit near-miss/clutch bonus).
-- Shop loop (Supply Drop unboxing exists; hot-start application missing).
+- Shop loop (Supply Drop unboxing exists; hot-start application now applied at mission start).
 
 **Not Aligned**
 - Prosperity/loss aversion investment system.
@@ -226,19 +224,18 @@
 - Cargo-based inertia and operative deployment.
 - On-foot aura + body-blocking sacrifice loop.
 - Assault base objective with garrisons/turrets/shield nodes.
-- Supply Drop shop, unboxing, and pending drop display.
+- Supply Drop shop, unboxing, pending drop display, and mission-start hot-start application.
 
 ### Critical Missing Features for Design Document Compliance
 1. **Weapon Tier Overflow:** Redirect max-tier ship pickups to comrade scaling.
 2. **Strategic Pressure Systems:** Prosperity/loss aversion, explicit near-miss clutch bonus, combo meter.
-3. **Supply Drop Hot-Starts:** Apply pending supply drops to the next deployment and clear correctly.
-4. **Bulwark Assault Synergy:** Higher structural damage or siege bonuses.
-5. **Assault Loot Rewards & Mystery Drops:** Base destruction rewards and random jackpots.
+3. **Bulwark Assault Synergy:** Higher structural damage or siege bonuses.
+4. **Assault Loot Rewards & Mystery Drops:** Base destruction rewards and random jackpots.
 
 ### Immediate Next Steps (Recommended Order)
-**Priority 1: Wire Supply Drop Hot-Starts (1-2 Days)**
-- Apply `pendingDrop` bonuses at mission start and clear them when consumed.
-- Add mission-start HUD callout for applied bonuses.
+**Priority 1: Wire Supply Drop Hot-Starts (Completed)**
+- ✅ Apply `pendingDrop` bonuses at mission start, then clear them once consumed.
+- ✅ Add mission-start HUD callout for applied bonuses.
 
 **Priority 2: Weapon Tier Overflow → Operative Buffs (2-3 Days)**
 - Detect max-tier pickups and redirect to ground troops (damage/fire rate/HP).
@@ -257,7 +254,7 @@
 - Balance Mothership pacing, UI polish, and feedback passes.
 
 ### Estimated Remaining Work
-- **Supply Drop Hot-Starts + HUD Feedback:** 2 days
+- **Supply Drop Hot-Starts + HUD Feedback:** Complete
 - **Weapon Overflow & Comrade Buff Feedback:** 3 days
 - **Strategic Pressure Systems (Near-miss, Combo Meter, Prosperity):** 3 days
 - **Bulwark Assault Synergy + Assault Rewards:** 3 days

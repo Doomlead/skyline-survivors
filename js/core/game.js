@@ -105,6 +105,33 @@ function showRebuildObjectiveBanner(scene, message, color = '#66ccff') {
     });
 }
 
+function showSupplyDropBanner(scene, message, color = '#38bdf8') {
+    if (!scene || !message) return;
+    const scale = typeof getOverlayScale === 'function' ? getOverlayScale(scene) : 1;
+    const banner = scene.add.text(
+        CONFIG.width / 2,
+        CONFIG.height * 0.2,
+        message,
+        {
+            fontSize: `${Math.round(22 * scale)}px`,
+            fontFamily: 'Orbitron',
+            color,
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 4,
+            lineSpacing: Math.round(6 * scale)
+        }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(210);
+
+    scene.tweens.add({
+        targets: banner,
+        alpha: 0,
+        y: banner.y - 30,
+        duration: 2600,
+        onComplete: () => banner.destroy()
+    });
+}
+
 function initHangarRebuildUi(scene) {
     if (!scene || scene.hangarRebuildUi) return;
     const rebuildText = scene.add.text(0, 0, '', {
@@ -375,11 +402,27 @@ function create() {
     this.audioManager = new AudioManager(this);
     this.audioManager.playAmbientMusic();
 
+    if (window.metaProgression?.applySupplyDropEffects) {
+        const dropResult = metaProgression.applySupplyDropEffects(gameState, playerState);
+        if (dropResult?.applied) {
+            gameState.metaAppliedDrop = dropResult;
+            metaProgression.clearPendingDrop();
+        }
+    }
+
     initializeGame(this);
     this.gameScene = this;
 
     const mainCam = this.cameras.main;
     initParallaxTracking(mainCam ? mainCam.scrollX : 0, mainCam ? mainCam.scrollY : 0);
+
+    if (gameState.metaAppliedDrop?.applied) {
+        const bonuses = gameState.metaAppliedDrop.bonuses || [];
+        const bannerLines = bonuses.length
+            ? `SUPPLY DROP HOT-START\\n${bonuses.join(' • ')}`
+            : 'SUPPLY DROP HOT-START';
+        showSupplyDropBanner(this, bannerLines);
+    }
 }
 
 function update(time, delta) {
