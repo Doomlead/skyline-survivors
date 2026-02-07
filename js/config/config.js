@@ -144,6 +144,7 @@ const gameState = {
     rewardMultiplier: 1,
     spawnMultiplier: 1,
     metaAppliedLoadout: null,
+    metaAppliedDrop: null,
     metaRewardsGranted: false,
     assaultObjective: {
         active: false,
@@ -328,6 +329,7 @@ function resetGameState() {
     gameState.rewardMultiplier = 1;
     gameState.spawnMultiplier = 1;
     gameState.metaAppliedLoadout = null;
+    gameState.metaAppliedDrop = null;
     gameState.metaRewardsGranted = false;
     gameState.assaultObjective = {
         active: false,
