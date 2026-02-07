@@ -154,6 +154,26 @@ function alignGroundedActors(scene) {
             }
         });
     }
+
+    if (scene.hangar && scene.hangar.active) {
+        var hangarX = scene.hangar.x;
+        var hangarTerrainVariation = Math.sin(hangarX / 200) * 30;
+        var hangarOffset = typeof scene.hangar.groundOffset === 'number' ? scene.hangar.groundOffset : 0;
+        scene.hangar.y = groundLevel - hangarTerrainVariation + hangarOffset;
+        if (scene.hangar.body) {
+            scene.hangar.setVelocity(0, 0);
+        }
+
+        var landingZone = scene.hangar.landingZone;
+        if (landingZone && landingZone.active) {
+            var landingOffset = typeof landingZone.groundOffset === 'number' ? landingZone.groundOffset : 0;
+            landingZone.x = hangarX;
+            landingZone.y = groundLevel - hangarTerrainVariation + landingOffset;
+            if (landingZone.body) {
+                landingZone.setVelocity(0, 0);
+            }
+        }
+    }
 }
 
 function destroyParallax() {

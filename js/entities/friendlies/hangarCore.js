@@ -43,6 +43,7 @@ function spawnDefenseHangar(scene) {
     }
     hangar.isHangar = true;
     hangar.baseY = hangarY;
+    hangar.groundOffset = HANGAR_CONFIG.groundOffset;
     hangar.blinkOffset = Math.random() * Math.PI * 2;
 
     const landingZoneY = groundLevel - terrainVariation + LANDING_ZONE_CONFIG.groundOffset;
@@ -58,6 +59,7 @@ function spawnDefenseHangar(scene) {
     }
     landingZone.isLandingZone = true;
     landingZone.baseY = landingZoneY;
+    landingZone.groundOffset = LANDING_ZONE_CONFIG.groundOffset;
     landingZone.blinkOffset = Math.random() * Math.PI * 2;
     hangar.landingZone = landingZone;
 
