@@ -76,6 +76,7 @@ function collectPowerUp(playerSprite, powerUp) {
     const audioManager = this.audioManager;
     if (audioManager) audioManager.playSound('powerUpCollect');
     const p = playerState.powerUps;
+    const overflowUpgrade = shouldOverflowToComrades(powerUp.powerUpType, p);
     const powerUpNames = {
         laser: 'LASER UPGRADE',
         drone: 'FORCE DRONE',
@@ -95,14 +96,18 @@ function collectPowerUp(playerSprite, powerUp) {
         timeSlow: 'TIME SLOW'
     };
 
+    const displayName = overflowUpgrade
+        ? 'COMRADE UPGRADE'
+        : (powerUpNames[powerUp.powerUpType] || 'POWER-UP');
+
     const nameText = this.add.text(
         powerUp.x,
         powerUp.y - 20,
-        powerUpNames[powerUp.powerUpType] || 'POWER-UP',
+        displayName,
         {
             fontSize: '14px',
             fontFamily: 'Orbitron',
-            color: '#00ff00',
+            color: overflowUpgrade ? '#60a5fa' : '#00ff00',
             stroke: '#000000',
             strokeThickness: 3
         }
@@ -115,6 +120,12 @@ function collectPowerUp(playerSprite, powerUp) {
         duration: 1500,
         onComplete: () => nameText.destroy()
     });
+
+    if (overflowUpgrade) {
+        applyComradeOverflowUpgrade(this, powerUp);
+        powerUp.destroy();
+        return;
+    }
 
     switch (powerUp.powerUpType) {
         case 'laser':
@@ -191,6 +202,46 @@ function collectPowerUp(playerSprite, powerUp) {
 
     createPowerUpCollectionEffect(this, powerUp.x, powerUp.y, powerUp.powerUpType);
     powerUp.destroy();
+}
+
+function shouldOverflowToComrades(powerUpType, powerUps) {
+    const tiers = {
+        laser: 2,
+        multiShot: 3,
+        missile: 3,
+        rear: 2,
+        side: 2
+    };
+    if (!tiers[powerUpType]) return false;
+    const currentTier = powerUpType === 'rear' || powerUpType === 'side'
+        ? (powerUps.coverage || 0)
+        : (powerUps[powerUpType] || 0);
+    return currentTier >= tiers[powerUpType];
+}
+
+function applyComradeOverflowUpgrade(scene, powerUp) {
+    const currentLevel = playerState.comradeBuffs?.level || 0;
+    const nextLevel = Math.min(currentLevel + 1, 12);
+    playerState.comradeBuffs = {
+        level: nextLevel
+    };
+    if (scene?.friendlies?.children) {
+        scene.friendlies.children.entries.forEach((friendly) => {
+            if (!friendly || !friendly.active || !friendly.isOperative) return;
+            const baseHealth = friendly.baseHealth || 2;
+            const nextMax = baseHealth + nextLevel;
+            const currentMax = friendly.maxHealth || baseHealth;
+            const delta = Math.max(0, nextMax - currentMax);
+            friendly.maxHealth = nextMax;
+            friendly.health = Math.min(friendly.health + delta, friendly.maxHealth);
+        });
+    }
+    if (typeof createComradeUpgradeEffect === 'function') {
+        createComradeUpgradeEffect(scene, powerUp.x, powerUp.y);
+    }
+    if (typeof showSupplyDropBanner === 'function') {
+        showSupplyDropBanner(scene, 'COMRADES UPGRADED\n+DMG • +ROF • +HP', '#60a5fa');
+    }
 }
 
 function updatePowerUpMagnet(scene) {

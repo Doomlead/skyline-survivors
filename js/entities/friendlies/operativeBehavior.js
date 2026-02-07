@@ -6,6 +6,7 @@ const OPERATIVE_CLASS_CONFIG = {
     infantry: {
         texture: 'operativeInfantry',
         scale: 1.25,
+        baseHealth: 2,
         fireCooldown: 650,
         range: 420,
         projectileSpeed: 440,
@@ -19,6 +20,7 @@ const OPERATIVE_CLASS_CONFIG = {
     gunner: {
         texture: 'operativeGunner',
         scale: 1.25,
+        baseHealth: 2,
         fireCooldown: 900,
         range: 500,
         projectileSpeed: 500,
@@ -33,6 +35,7 @@ const OPERATIVE_CLASS_CONFIG = {
     medic: {
         texture: 'operativeMedic',
         scale: 1.2,
+        baseHealth: 2,
         fireCooldown: 0,
         range: 0,
         projectileSpeed: 0,
@@ -48,6 +51,7 @@ const OPERATIVE_CLASS_CONFIG = {
     saboteur: {
         texture: 'operativeSaboteur',
         scale: 1.2,
+        baseHealth: 2,
         fireCooldown: 1200,
         range: 360,
         projectileSpeed: 360,
@@ -83,6 +87,13 @@ const SQUAD_AURA_CONFIG = {
     bodyBlockTint: 0x38bdf8
 };
 
+const COMRADE_BUFF_CONFIG = {
+    damagePerLevel: 0.25,
+    fireRateReductionPerLevel: 0.05,
+    healthPerLevel: 1,
+    minFireRateMultiplier: 0.6
+};
+
 function pickOperativeType() {
     const total = OPERATIVE_RARITY_WEIGHTS.reduce((sum, entry) => sum + entry.weight, 0);
     const roll = Math.random() * total;
@@ -98,6 +109,7 @@ function spawnOperative(scene, type, x, y) {
     const { friendlies, audioManager } = scene;
     if (!friendlies) return null;
     const config = OPERATIVE_CLASS_CONFIG[type] || OPERATIVE_CLASS_CONFIG.infantry;
+    const buffs = getComradeBuffs();
 
     const operative = friendlies.create(x, y, config.texture);
     operative.setDepth(FG_DEPTH_BASE + 2);
@@ -117,7 +129,9 @@ function spawnOperative(scene, type, x, y) {
     operative.homeX = x;
     operative.homeY = y;
     operative.bracedUntil = 0;
-    operative.health = 2;
+    operative.baseHealth = config.baseHealth || 2;
+    operative.maxHealth = operative.baseHealth + buffs.healthBonus;
+    operative.health = operative.maxHealth;
     operative.stunnedUntil = 0;
 
     createSpawnEffect(scene, x, y, 'drone');
@@ -173,6 +187,20 @@ function getAuraMultiplier(operative, player, auraActive) {
         return SQUAD_AURA_CONFIG.auraFireRateMultiplier;
     }
     return 1.0;
+}
+
+function getComradeBuffs() {
+    const level = Math.max(0, playerState.comradeBuffs?.level || 0);
+    const fireRateMultiplier = Math.max(
+        COMRADE_BUFF_CONFIG.minFireRateMultiplier,
+        1 - level * COMRADE_BUFF_CONFIG.fireRateReductionPerLevel
+    );
+    return {
+        level,
+        damageBonus: level * COMRADE_BUFF_CONFIG.damagePerLevel,
+        fireRateMultiplier,
+        healthBonus: level * COMRADE_BUFF_CONFIG.healthPerLevel
+    };
 }
 
 function getTargetDistance(origin, target) {
@@ -320,6 +348,7 @@ function findNearestAssaultTarget(scene, origin) {
 
 function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG.infantry;
+    const buffs = getComradeBuffs();
     const patrolAngle = (operative.patrolAngle || 0) + 0.02 * timeSlowMultiplier;
     operative.patrolAngle = patrolAngle;
     const sway = Math.sin(patrolAngle + operative.blinkOffset) * config.patrolRange;
@@ -327,7 +356,8 @@ function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, pla
     operative.setVelocityX((targetX - operative.x) * 0.6 * timeSlowMultiplier);
 
     const auraMultiplier = getAuraMultiplier(operative, player, auraActive);
-    if (time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+    const fireCooldown = config.fireCooldown * auraMultiplier * buffs.fireRateMultiplier;
+    if (time > operative.lastShot + fireCooldown) {
         const target = findSquadTarget(scene, operative, player);
         const distance = getTargetDistance(operative, target);
         if (target && distance <= config.range) {
@@ -339,7 +369,7 @@ function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, pla
                 Math.cos(angle) * config.projectileSpeed,
                 Math.sin(angle) * config.projectileSpeed,
                 config.projectileType,
-                config.damage
+                config.damage + buffs.damageBonus
             );
             operative.lastShot = time;
         }
@@ -348,6 +378,7 @@ function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, pla
 
 function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG.gunner;
+    const buffs = getComradeBuffs();
     const target = findSquadTarget(scene, operative, player);
     const distance = getTargetDistance(operative, target);
     const inRange = target && distance <= config.range;
@@ -367,7 +398,8 @@ function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, playe
     }
 
     const auraMultiplier = getAuraMultiplier(operative, player, auraActive);
-    if (inRange && time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+    const fireCooldown = config.fireCooldown * auraMultiplier * buffs.fireRateMultiplier;
+    if (inRange && time > operative.lastShot + fireCooldown) {
         const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
         const spread = 0.1;
         [-spread, 0, spread].forEach(offset => {
@@ -378,7 +410,7 @@ function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, playe
                 Math.cos(angle + offset) * config.projectileSpeed,
                 Math.sin(angle + offset) * config.projectileSpeed,
                 config.projectileType,
-                config.damage
+                config.damage + buffs.damageBonus
             );
         });
         operative.lastShot = time;
@@ -417,6 +449,7 @@ function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) {
 
 function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG.saboteur;
+    const buffs = getComradeBuffs();
     const useAssaultTargets = gameState.mode === 'assault' && scene.assaultTargets;
 
     let target = null;
@@ -443,7 +476,8 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, pla
         }
 
         const auraMultiplier = getAuraMultiplier(operative, player, auraActive);
-        if (distance <= config.range && time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+        const fireCooldown = config.fireCooldown * auraMultiplier * buffs.fireRateMultiplier;
+        if (distance <= config.range && time > operative.lastShot + fireCooldown) {
             const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
             const projectile = createProjectile(
                 scene,
@@ -452,7 +486,7 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, pla
                 Math.cos(angle) * config.projectileSpeed,
                 Math.sin(angle) * config.projectileSpeed,
                 config.projectileType,
-                config.damage
+                config.damage + buffs.damageBonus
             );
             if (projectile) {
                 projectile.empDisableDuration = config.empDisableDuration;
@@ -470,10 +504,12 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, pla
 
 function handleOperativeFire(scene, operative, time, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG[operative.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
+    const buffs = getComradeBuffs();
     const auraMultiplier = getAuraMultiplier(operative, player, auraActive);
+    const fireCooldown = config.fireCooldown * auraMultiplier * buffs.fireRateMultiplier;
 
     if (operative.operativeType === 'infantry') {
-        if (time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+        if (time > operative.lastShot + fireCooldown) {
             const target = findSquadTarget(scene, operative, player);
             const distance = getTargetDistance(operative, target);
             if (target && distance <= config.range) {
@@ -485,7 +521,7 @@ function handleOperativeFire(scene, operative, time, player, auraActive) {
                     Math.cos(angle) * config.projectileSpeed,
                     Math.sin(angle) * config.projectileSpeed,
                     config.projectileType,
-                    config.damage
+                    config.damage + buffs.damageBonus
                 );
                 operative.lastShot = time;
             }
@@ -500,7 +536,7 @@ function handleOperativeFire(scene, operative, time, player, auraActive) {
         if (inRange) {
             operative.bracedUntil = Math.max(operative.bracedUntil || 0, time + config.braceDuration);
         }
-        if (inRange && time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+        if (inRange && time > operative.lastShot + fireCooldown) {
             const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
             const spread = 0.1;
             [-spread, 0, spread].forEach(offset => {
@@ -511,7 +547,7 @@ function handleOperativeFire(scene, operative, time, player, auraActive) {
                     Math.cos(angle + offset) * config.projectileSpeed,
                     Math.sin(angle + offset) * config.projectileSpeed,
                     config.projectileType,
-                    config.damage
+                    config.damage + buffs.damageBonus
                 );
             });
             operative.lastShot = time;
@@ -533,7 +569,7 @@ function handleOperativeFire(scene, operative, time, player, auraActive) {
             distance = getTargetDistance(operative, target);
         }
 
-        if (target && distance <= config.range && time > operative.lastShot + config.fireCooldown * auraMultiplier) {
+        if (target && distance <= config.range && time > operative.lastShot + fireCooldown) {
             const angle = Phaser.Math.Angle.Between(operative.x, operative.y, target.x, target.y);
             const projectile = createProjectile(
                 scene,
@@ -542,7 +578,7 @@ function handleOperativeFire(scene, operative, time, player, auraActive) {
                 Math.cos(angle) * config.projectileSpeed,
                 Math.sin(angle) * config.projectileSpeed,
                 config.projectileType,
-                config.damage
+                config.damage + buffs.damageBonus
             );
             if (projectile) {
                 projectile.empDisableDuration = config.empDisableDuration;
