@@ -203,31 +203,6 @@
 
 ---
 
-## Estimated Remaining Work
-
-### MVP Completion:
-- **Current Progress:** ~86% complete (adjusted after code audit)
-- **Remaining Critical Work:**
-  - Mothership Boss Mission (multi-phase upgrade): 4-6 days
-  - Assault failure/retreat polish: 1-2 days
-  - Strategic layer MVP slice: 2-3 days
-  - Testing & Polish: 1-2 days
-- **Total Time to Complete MVP:** 7-9 days
-
-### Full Design Document:
-- **High Priority Features:** ~38% remaining
-  - Assault mission polish (multi-phase core, base rewards)
-  - Strategic campaign layer + planetary control tracker
-  - Enhanced rewards system + post-boss presentation polish
-- **Medium Priority Features:** ~62% remaining
-  - Ground combat depth (operatives, weapons, cover)
-  - Power-up progression tiers (homing, drone, laser)
-  - Environmental variety (weather, day/night, district themes)
-- **Low Priority Features:** ~85% remaining
-  - Additional game modes
-  - District themes
-  - Challenge systems
-
 ## MVP Completion
 
 - **Status:** ~86% complete (core loop intact, Mothership fight present but simplified)
@@ -299,11 +274,39 @@
 
 
 ### Estimated Remaining Work
+
+## Estimated Remaining Work
+
+### MVP Completion:
+- **Current Progress:** ~86% complete (adjusted after code audit)
+- **Remaining Critical Work:**
+  - Mothership Boss Mission (multi-phase upgrade): 4-6 days
+  - Assault failure/retreat polish: 1-2 days
 - **Weapon Overflow & Comrade Buff Feedback:** 3 days
 - **Strategic Pressure Systems (Near-miss, Combo Meter, Prosperity):** 3 days
 - **Bulwark Assault Synergy + Assault Rewards:** 3 days
 - **UI/FX Feedback Polish:** 2 days
-- **Total to v2.0 MVP:** ~11 Days
+- **Total to v2.0 MVP:** ~19 Days
+  - Strategic layer MVP slice: 2-3 days
+  - Testing & Polish: 1-2 days
+- **Total Time to Complete MVP:** 7-9 days
+
+### Full Design Document:
+- **High Priority Features:** ~38% remaining
+  - Assault mission polish (multi-phase core, base rewards)
+  - Strategic campaign layer + planetary control tracker
+  - Enhanced rewards system + post-boss presentation polish
+- **Medium Priority Features:** ~62% remaining
+  - Ground combat depth (operatives, weapons, cover)
+  - Power-up progression tiers (homing, drone, laser)
+  - Environmental variety (weather, day/night, district themes)
+- **Low Priority Features:** ~85% remaining
+  - Additional game modes
+  - District themes
+  - Challenge systems
+
+
+
 
 ### Post-MVP Polish (Optional)
 - Dynamic weather/time-of-day cycles.
