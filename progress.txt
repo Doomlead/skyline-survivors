@@ -252,7 +252,8 @@
 - Add structural damage bonus for Bulwark mode.
 - Add assault base loot drops and mystery jackpots.
 
-**Priority 5: Campaign Polish (3-4 Days)**
+**Priority 5: Mothership & Campaign Polish (4 Days)**
+- Continue with the multi-phase Mothership boss as planned (endgame).
 - Balance Mothership pacing, UI polish, and feedback passes.
 
 ### Estimated Remaining Work
