@@ -2,7 +2,7 @@
 
 ## 1. Core Concept
 
-**Implementation Status: 70% Complete**  
+**Implementation Status: 78% Complete**  
 
 ### Key Themes Progress:
 
@@ -12,12 +12,13 @@
 - Human rescue mechanics with landers and mutants
 - Escalating difficulty through wave systems and boss encounters
 - **Defend and Reclaim**: Districts exist in three states (Friendly/Threatened/Occupied)
+- **Squad Leader Fantasy (Core Loop):** On-foot aura, formation follow, and sacrifice/body-block behaviors
 
 ⚠️ **Partially Implemented:**
-- **Seamless transition (Ship/Foot):** Ejection + hangar rebuild exist, but the "Squad Leader" aura/follow behavior is missing.
+- **Seamless transition (Ship/Foot):** Ejection + hangar rebuild + squad leader aura exist, but Bulwark/ground synergies and stronger UI messaging are missing.
 - **Resource vs. Score (The Rescue Loop):** Cargo collection + deployment are in place, but tier overflow and squad synergy feedback are missing.
-- **Strategic Territory Control:** District states exist, but the "Loss Aversion" investment mechanics are missing.
-- **Operative Depth:** The 4 distinct classes exist with core behaviors (Infantry, Gunner, Medic, Saboteur), but squad formations and Bulwark defensive perimeter logic are missing.
+- **Strategic Territory Control:** District states and timers exist, but the "Loss Aversion" investment mechanics are missing.
+- **Operative Depth:** 4 distinct classes exist with combat behaviors (Infantry, Gunner, Medic, Saboteur), but long-range fire team coordination outside of the on-foot formation and Tier Overflow scaling are missing.
 
 ---
 
@@ -25,7 +26,7 @@
 
 ### 2.1. System View Orbital Map
 
-**Implementation Status: 83% Complete**
+**Implementation Status: 88% Complete**
 
 ✅ **Fully Implemented:**
 - 3D rotating globe with selectable districts
@@ -34,32 +35,35 @@
 - **Special nodes:** Weapons Satellite, Mothership (Endgame)
 - Consequence system: Threatened → Occupied
 - **Victory Condition:** Complete Mothership assault
+- Threat timer-based urgency and pulsing visuals for threatened districts
+
+⚠️ **Partially Implemented:**
+- **The "Near-Miss" Timer:** Critical state and pulsing exist, but no explicit 30s "CRITICAL" window or clutch-defense bonus.
 
 ❌ **Not Implemented:**
 - **District Investment Levels (Dark Pattern):** Friendly districts accumulating "Prosperity Multiplier" (Loss Aversion mechanic).
-- **The "Near-Miss" Timer:** 30-second flashing "CRITICAL" state.
 
 ### 2.2. Side-Scrolling Combat View
 
-**Implementation Status: 70% Complete** ⬆️ (Hangar/Drop-off loop now online)
+**Implementation Status: 75% Complete**
 
 #### Defense Missions (Threatened Districts)
-**Implementation Status: 75% Complete**
+**Implementation Status: 80% Complete**
 ✅ **Fully Implemented:**
 - Defend districts (15 waves) / Wave tier progression
 - Mini-boss and boss encounters / Battleship encounter
 - Extraction hub hangar with landing zone rebuild pad
-- **Deployment Animation:** Dropping off cargo spawns operative squads.
+- **Deployment Animation:** Dropping off cargo spawns operative squads
 
 #### Assault Missions (Occupied Districts)
 **Implementation Status: 75% Complete**
 ✅ **Fully Implemented:**
 - Base core objective with HP / Shield generators / Turrets
 - Garrison defender squads
-- **Saboteur Synergy:** EMP-style disables against turrets/shields.
+- **Saboteur Synergy:** EMP-style disables against turrets/shields
 
 ❌ **Not Implemented:**
-- **Bulwark Form Synergy:** Increased effectiveness against structures.
+- **Bulwark Form Synergy:** Increased effectiveness against structures
 
 ---
 
@@ -67,21 +71,24 @@
 
 ### 3.1 The Rescue & Drop-Off Loop (New v2.0 Section)
 
-**Implementation Status: 80% Complete**
+**Implementation Status: 85% Complete**
 
 ✅ **Fully Implemented:**
-- Basic Human Rescue (picking up a human).
-- **"Strike Force" Carry:** Multiple humans stored in cargo with HUD indicator.
-- **Inertia Scaling:** Ship physics change based on cargo count.
-- **Tactical Deployment:** Dropping humans at the Hangar spawns AI Comrades.
+- Basic Human Rescue (picking up a human)
+- **"Strike Force" Carry:** Multiple humans stored in cargo with HUD indicator
+- **Inertia Scaling:** Ship physics change based on cargo count
+- **Tactical Deployment:** Dropping humans at the Hangar spawns AI Comrades
+
+⚠️ **Partially Implemented:**
+- **Operative Scaling Feedback:** Squad size and power scaling lacks strong UI/FX feedback loops
 
 ### 3.2 Core Loop
 
-**Implementation Status: 80% Complete**
+**Implementation Status: 85% Complete**
 ✅ **Fully Implemented:**
-- System Map -> Combat -> Upgrade cycle.
-- Ship Destruction -> Ejection.
-- Crisis Management: on-foot rebuild by holding the landing zone under the hangar.
+- System Map -> Combat -> Upgrade cycle
+- Ship Destruction -> Ejection
+- Crisis Management: on-foot rebuild by holding the landing zone under the hangar
 
 ---
 
@@ -92,50 +99,50 @@
 **Implementation Status: 90% Complete**
 
 ✅ **Fully Implemented:**
-- **Normal Interceptor Form:** 8-directional movement, Primary Weapon, Smart Bomb, Hyperspace.
-- **Bulwark Form:** Toggle, Slowed movement, 360° aim.
-
+- **Normal Interceptor Form:** 8-directional movement, Primary Weapon, Smart Bomb, Hyperspace
+- **Bulwark Form:** Toggle, Slowed movement, 360° aim
 
 ### 4.2. Operative AI & Combat Behavior ("The Comrades")
 
-**Implementation Status: 60% Complete** (Core behaviors online, formation logic missing)
+**Implementation Status: 80% Complete**
 
 ✅ **Fully Implemented:**
-- Basic concept of an "Ally" entity exists (garrison defenders).
-- **Operative Classes:**
-  - *Standard Infantry:* (Common)
-  - *Heavy Gunner:* (Uncommon - Braced fire)
-  - *Saboteur:* (Elite - Anti-base logic + EMP vs base defenses)
+- Operative spawning from hangar deployment
+- **Operative Classes:** Infantry, Gunner, Medic, Saboteur
+- **Formation + Aura:** On-foot squad formation, fire-rate aura, and formation offsets
+- **Saboteur Assault Logic:** Assault targets prioritized with EMP disable
 
-❌ **Not Implemented:**
-- **Squad Formation:** AI following the player or forming fire teams.
-- **Weapon Synergy:** Tier 3 ship overflow upgrading ground troops.
+⚠️ **Partially Implemented:**
+- **Fire-Team Coordination:** Patrol behaviors exist, but stronger group coordination and defensive perimeter logic are still minimal when the pilot is airborne.
+- **Weapon Synergy:** Tier 3 ship overflow upgrading ground troops is missing.
 
 ### 4.3. On-Foot Command (Ship Destruction)
 
-**Implementation Status: 45% Complete**
+**Implementation Status: 80% Complete**
 
 ✅ **Fully Implemented:**
-- Ejection Sequence (Pilot sprite, basic pistol).
-- **Extraction Defense:** Hold the landing zone under the hangar for 30s to rebuild the Aegis (with UI prompt).
+- Ejection Sequence (Pilot sprite, basic pistol)
+- **Extraction Defense:** Hold the landing zone under the hangar for 30s to rebuild the Aegis (with UI prompt)
+- **Squad Leader Aura:** Comrades follow pilot movement in formation, boost fire rate, and re-anchor to the pilot
+- **Sacrifice Mechanic:** Operatives body-block incoming projectiles during rebuild
 
-❌ **Not Implemented:**
-- **Squad Leader Aura:** Comrades following pilot movement (Bullet Hell wall).
-- **Sacrifice Mechanic:** AI behavior to body-block shots during rebuild.
+⚠️ **Partially Implemented:**
+- **Rebuild Feedback:** Needs clearer HUD emphasis for when sacrifice behavior is active
 
 ### 4.4. Power-Up System
 
 **Implementation Status: 65% Complete**
 
 ✅ **Fully Implemented:**
-- Core Weapons (Laser, Spread, Missiles) - 3 Tiers.
-- Defensive (Shields, Speed).
-- Utility (Smart Bombs, Multipliers).
-- Weapon Decay & Switching.
+- Core Weapons (Laser, Spread, Missiles) - 3 Tiers
+- Defensive (Shields, Speed)
+- Utility (Smart Bombs, Multipliers)
+- Weapon Decay & Switching
 
 ❌ **Not Implemented:**
-- **Tier 3 Overflow:** Logic to detect Max Tier and redirect power-up to Ground Troop stats.
-- **Assault Rewards:** Base destruction dropping specific loot.
+- **Tier 3 Overflow:** Logic to detect Max Tier and redirect power-up to Ground Troop stats
+- **Assault Rewards:** Base destruction dropping specific loot
+- **Mystery Drops:** Random effects/Jackpots
 
 ---
 
@@ -143,9 +150,9 @@
 
 **Implementation Status: 100% Complete**
 ✅ **Fully Implemented:**
-- Landers, Mutants, Bombers, Pods, Baiters, Swarmers.
-- Advanced variants (Kamikaze, Turret, Shield, Seeker, etc.).
-- Bosses (Mega Lander, Titan Mutant, etc.).
+- Landers, Mutants, Bombers, Pods, Baiters, Swarmers
+- Advanced variants (Kamikaze, Turret, Shield, Seeker, etc.)
+- Bosses (Mega Lander, Titan Mutant, etc.)
 
 ---
 
@@ -153,99 +160,108 @@
 
 ### 6.1. Radar / HUD
 
-**Implementation Status: 80% Complete**
+**Implementation Status: 85% Complete**
+
 ✅ **Fully Implemented:**
-- Radar (Player, Enemies, Objectives).
-- Mission Objectives (Wave Count / Base HP).
+- Radar (Player, Enemies, Objectives)
+- Mission Objectives (Wave Count / Base HP)
+- Threat/urgency display and pulsing map indicators
 
 ❌ **Not Implemented:**
-- **Dark Patterns:** Engagement "Combo Meter" and pulsing "Near-Miss" urgency.
+- **Dark Patterns:** Engagement "Combo Meter" and explicit near-miss clutch bonus
 
 ### 6.2. Meta Progression (Shop)
 
-**Implementation Status: 75% Complete**
-✅ **Fully Implemented:**
-- Supply Drop Gacha (Credits, Unboxing, Loot History).
+**Implementation Status: 80% Complete**
 
-❌ **Not Implemented:**
-- **Inventory Hot-Starts:** Applying the "Supply Drop" items to the very next run.
+✅ **Fully Implemented:**
+- Supply Drop Gacha (Credits, Unboxing, Loot History)
+- Pending supply drop inventory display
+
+⚠️ **Partially Implemented:**
+- **Inventory Hot-Starts:** Supply drop items are stored and displayed, but are not yet applied to mission start
 
 ---
 
 ## 7. Environment Design
 
 **Implementation Status: 55% Complete**
+
 ✅ **Fully Implemented:**
-- Multi-layer parallax (Sky, City, Street).
-- Extraction hub hangar with ground landing zone.
+- Multi-layer parallax (Sky, City, Street)
+- Extraction hub hangar with ground landing zone
 
 ❌ **Not Implemented:**
-- Dynamic Weather/Time of Day.
+- Dynamic Weather/Time of Day
 
 ---
 
 ## Gap Analysis & Next Steps
 
 ### Overall Completion Statistics
-- **MVP Completion:** ~70% (Core rescue/deploy loop and district flow are playable.)
-- **Design Document Alignment:** ~65% (Key systems exist, but several design-only mechanics are missing.)
-- **Major Milestones Achieved:** Rescue/Deploy loop, district states, assault/defense modes, hangar rebuild, operative spawning.
+- **MVP Completion:** ~75% (Core rescue/deploy loop, on-foot aura, and district flow are playable.)
+- **Design Document Alignment:** ~70% (Key systems exist, but several signature design mechanics are missing.)
+- **Major Milestones Achieved:** Rescue/Deploy loop, district states, assault/defense modes, hangar rebuild, operative spawning + formation + sacrifice behaviors, supply drop unboxing.
 
 ### Design Document Alignment
 **Aligned/Implemented**
 - District state system (Friendly/Threatened/Occupied).
 - Rescue-to-Deploy loop (cargo carry, inertia, hangar drop-off, operative deployment).
 - Assault/Defense mission flows with hangar rebuild loop.
+- On-foot squad aura + sacrifice behavior.
 
 **Partially Aligned**
-- Operative depth (classes exist; missing squad leader aura/formation logic).
-- Power-up progression (tiering and decay exist; missing tier overflow to operatives).
-- Strategic layer urgency (Threatened/Occupied exists; missing near-miss timer, prosperity loss aversion).
+- Operative depth (classes exist; patrol behavior exists; missing squad upgrades from weapon overflow).
+- Strategic layer urgency (Threatened/Occupied exists; critical urgency and pulse exist, missing explicit near-miss/clutch bonus).
+- Shop loop (Supply Drop unboxing exists; hot-start application missing).
 
 **Not Aligned**
-- Supply Drop hot-start inventory application to next run.
-- Combo/urgency feedback loops (near-miss pulses, combo meter).
+- Prosperity/loss aversion investment system.
+- Combo/urgency feedback loops (combo meter, clutch defense bonus).
+- Tier 3 overflow upgrades for operatives.
+- Assault rewards and mystery drops.
 
 ### Major Milestones Achieved
 - Ship/foot transition with pilot ejection and hangar rebuild.
 - Cargo-based inertia and operative deployment.
+- On-foot aura + body-blocking sacrifice loop.
 - Assault base objective with garrisons/turrets/shield nodes.
+- Supply Drop shop, unboxing, and pending drop display.
 
 ### Critical Missing Features for Design Document Compliance
-1. **Squad Leader Aura + Sacrifice Behavior:** Operatives follow pilot and body-block during rebuild.
-2. **Weapon Tier Overflow:** Redirect max-tier ship pickups to comrade scaling.
-3. **Strategic Pressure Systems:** Near-miss timer flash, combo meter, prosperity/loss aversion.
-4. **Supply Drop Hot-Starts:** Apply shop rewards to the next run with UI feedback.
+1. **Weapon Tier Overflow:** Redirect max-tier ship pickups to comrade scaling.
+2. **Strategic Pressure Systems:** Prosperity/loss aversion, explicit near-miss clutch bonus, combo meter.
+3. **Supply Drop Hot-Starts:** Apply pending supply drops to the next deployment and clear correctly.
+4. **Bulwark Assault Synergy:** Higher structural damage or siege bonuses.
+5. **Assault Loot Rewards & Mystery Drops:** Base destruction rewards and random jackpots.
 
 ### Immediate Next Steps (Recommended Order)
-**Priority 1: On-Foot Squad Leader + Sacrifice Loop (3-4 Days)**
-- Implement squad leader aura so operatives follow the pilot and concentrate fire while on foot.
-- Add sacrifice behavior for operatives to body-block shots during rebuild.
-- Ensure clean transition logic between patrol/bulwark/on-foot states.
+**Priority 1: Wire Supply Drop Hot-Starts (1-2 Days)**
+- Apply `pendingDrop` bonuses at mission start and clear them when consumed.
+- Add mission-start HUD callout for applied bonuses.
 
-**Priority 2: Weapon Tier Overflow + Comrade Scaling (2-3 Days)**
-- Detect max-tier ship pickups and redirect upgrades to ground troops (damage, fire rate, survivability).
-- Add visible feedback for comrade buffs (HUD pulse or combat text).
+**Priority 2: Weapon Tier Overflow → Operative Buffs (2-3 Days)**
+- Detect max-tier pickups and redirect to ground troops (damage/fire rate/HP).
+- Add FX/HUD feedback for comrade upgrades.
 
-**Priority 3: Strategic Pressure & Urgency (2 Days)**
-- Add near-miss timer flash and combo meter to reinforce urgency.
-- Add prosperity/loss aversion feedback on the system map (district investment levels).
+**Priority 3: Strategic Pressure & Near-Miss Clutch Bonus (2 Days)**
+- Add explicit 30s "CRITICAL" near-miss window.
+- Add clutch defense bonus and combo meter to reinforce urgency.
 
-**Priority 4: Supply Drop Hot-Starts (1-2 Days)**
-- Apply supply drop rewards to the next run (inventory hot-starts).
-- Add clear UI feedback for queued hot-start items.
+**Priority 4: Bulwark Assault Synergy + Assault Rewards (2-3 Days)**
+- Add structural damage bonus for Bulwark mode.
+- Add assault base loot drops and mystery jackpots.
 
-**Priority 5: Mothership & Campaign Polish (4 Days)**
-- Continue with the multi-phase Mothership boss as planned (endgame).
+**Priority 5: Campaign Polish (3-4 Days)**
+- Balance Mothership pacing, UI polish, and feedback passes.
 
 ### Estimated Remaining Work
-- **Operative AI & Squad Behaviors:** 4 days
-- **Weapon Overflow & Buff Feedback:** 2 days
-- **Strategic Pressure Systems:** 2 days
-- **Supply Drop Hot-Starts:** 2 days
-- **Mothership Boss:** 4 days
-- **UI/Feedback Polish:** 2 days
-- **Total to v2.0 MVP:** ~16 Days
+- **Supply Drop Hot-Starts + HUD Feedback:** 2 days
+- **Weapon Overflow & Comrade Buff Feedback:** 3 days
+- **Strategic Pressure Systems (Near-miss, Combo Meter, Prosperity):** 3 days
+- **Bulwark Assault Synergy + Assault Rewards:** 3 days
+- **UI/FX Feedback Polish:** 2 days
+- **Total to v2.0 MVP:** ~13 Days
 
 ### Post-MVP Polish (Optional)
 - Dynamic weather/time-of-day cycles.
@@ -253,4 +269,4 @@
 - Extended audio feedback for rescue/deploy and mission transitions.
 
 ### What We Should Work on Next
-Focus on the **On-Foot Squad Leader + Sacrifice Loop** first. It is the highest-impact missing system for the core “rescue-to-deploy” fantasy and will make the pilot phase feel meaningfully distinct while stabilizing the hangar rebuild loop. Once that is in place, immediately follow with weapon tier overflow so the rescue loop feeds directly into squad power and creates the intended synergy.
+Start with **Supply Drop Hot-Starts** because the pending inventory pipeline is already built and visible in the shop UI, but it never impacts gameplay. Once those items actually apply at mission start, the shop loop becomes meaningful and will immediately increase player power fantasy. After that, move directly into **Weapon Tier Overflow** so rescue performance feeds into squad strength and closes the core rescue-to-deploy loop.
