@@ -2,7 +2,7 @@
 
 ## 1. Core Concept
 
-**Implementation Status: 80% Complete**  
+**Implementation Status: 78% Complete**  
 
 ### Key Themes Progress:
 
@@ -18,8 +18,8 @@
 ⚠️ **Partially Implemented:**
 - **Seamless transition (Ship/Foot):** Ejection + hangar rebuild + squad leader aura exist, but Bulwark/ground synergies and stronger UI messaging are missing.
 - **Resource vs. Score (The Rescue Loop):** Cargo collection + deployment are in place, but tier overflow and squad synergy feedback are missing.
-- **Strategic Territory Control:** District states and timers exist, but the "Loss Aversion" investment mechanics are missing.
-- **Operative Depth:** 4 distinct classes exist with combat behaviors (Infantry, Gunner, Medic, Saboteur), but long-range fire team coordination outside of the on-foot formation and Tier Overflow scaling are missing.
+- **Strategic Territory Control:** District states and timers exist, but the "Loss Aversion" investment/prosperity mechanics are missing.
+- **Operative Depth:** 4 distinct classes exist with combat behaviors (Infantry, Gunner, Medic, Saboteur), but stronger fire-team coordination outside of the on-foot formation and Tier Overflow scaling are missing.
 
 ---
 
@@ -27,20 +27,20 @@
 
 ### 2.1. System View Orbital Map
 
-**Implementation Status: 90% Complete**
+**Implementation Status: 88% Complete**
 
 ✅ **Fully Implemented:**
 - 3D rotating globe with selectable districts
 - **City districts** displayed as nodes with three states (Friendly, Threatened, Occupied)
 - **Battleships** roam between nodes
-- **Special nodes:** Weapons Satellite, Mothership (Endgame)
+- **Special node:** Mothership (Endgame)
 - Consequence system: Threatened → Occupied
 - **Victory Condition:** Complete Mothership assault
 - Threat timer-based urgency and pulsing visuals for threatened districts
 - Critical urgency logic drives spawn/reward multipliers
 
 ⚠️ **Partially Implemented:**
-- **The "Near-Miss" Timer:** Critical state exists, but no explicit 30s "CRITICAL" window or clutch-defense bonus callout.
+- **The "Near-Miss" Timer:** Critical state exists via timer ratio, but no explicit 30s "CRITICAL" window or clutch-defense bonus callout.
 
 ❌ **Not Implemented:**
 - **District Investment Levels (Dark Pattern):** Friendly districts accumulating "Prosperity Multiplier" (Loss Aversion mechanic).
@@ -110,7 +110,7 @@
 
 ### 4.2. Operative AI & Combat Behavior ("The Comrades")
 
-**Implementation Status: 82% Complete**
+**Implementation Status: 80% Complete**
 
 ✅ **Fully Implemented:**
 - Operative spawning from hangar deployment
@@ -167,7 +167,7 @@
 
 ### 6.1. Radar / HUD
 
-**Implementation Status: 85% Complete**
+**Implementation Status: 82% Complete**
 
 ✅ **Fully Implemented:**
 - Radar (Player, Enemies, Objectives)
@@ -205,15 +205,15 @@
 
 ## MVP Completion
 
-- **Status:** ~86% complete (core loop intact, Mothership fight present but simplified)
-- **Primary Blockers:** Multi-phase Mothership mission, assault retreat/retry polish, planetary control tracker slice
+- **Status:** ~74% complete (core loop intact, Mothership core fight present but simplified)
+- **Primary Blockers:** Multi-phase Mothership mission, tier overflow/comrade scaling, strategic pressure systems, assault rewards + bulwark siege bonuses
 
 ## Gap Analysis & Next Steps
 
 ### Overall Completion Statistics
-- **MVP Completion:** ~78% (Core rescue/deploy loop, on-foot aura, and district flow are playable with supply-drop hot-starts.)
-- **Design Document Alignment:** ~72% (Key systems exist, but several signature mechanics are still missing.)
-- **Major Milestones Achieved:** Rescue/Deploy loop, district states, assault/defense modes, hangar rebuild, operative spawning + formation + sacrifice behaviors, supply drop unboxing + hot-start application, mothership encounter.
+- **MVP Completion:** ~74% (Core rescue/deploy loop, on-foot aura, and district flow are playable with supply-drop hot-starts.)
+- **Design Document Alignment:** ~67% (Key systems exist, but several signature mechanics are still missing.)
+- **Major Milestones Achieved:** Rescue/Deploy loop, district states, assault/defense modes, hangar rebuild, operative spawning + formation + sacrifice behaviors, supply drop unboxing + hot-start application, mothership core encounter.
 
 ### Design Document Alignment
 **Aligned/Implemented**
@@ -234,6 +234,7 @@
 - Combo/urgency feedback loops (combo meter, clutch defense bonus).
 - Tier 3 overflow upgrades for operatives.
 - Assault rewards and mystery drops.
+- Multi-phase mothership mission structure (exterior → interior → core).
 
 ### Major Milestones Achieved
 - Ship/foot transition with pilot ejection and hangar rebuild.
@@ -241,20 +242,21 @@
 - On-foot aura + body-blocking sacrifice loop.
 - Assault base objective with garrisons/turrets/shield nodes.
 - Supply Drop shop, unboxing, pending drop display, and mission-start hot-start application.
-- Mothership node unlock and boss flow.
+- Mothership node unlock and core boss flow.
 
 ### Critical Missing Features for Design Document Compliance
 1. **Weapon Tier Overflow:** Redirect max-tier ship pickups to comrade scaling.
 2. **Strategic Pressure Systems:** Prosperity/loss aversion, explicit near-miss clutch bonus, combo meter.
 3. **Bulwark Assault Synergy:** Higher structural damage or siege bonuses.
 4. **Assault Loot Rewards & Mystery Drops:** Base destruction rewards and random jackpots.
+5. **Multi-phase Mothership Mission:** Exterior → interior → core progression with phase-gated objectives.
 
 ### Immediate Next Steps (Recommended Order)
 **Priority 1: Weapon Tier Overflow → Operative Buffs (2-3 Days)**
 - Detect max-tier pickups and redirect to ground troops (damage/fire rate/HP).
 - Add FX/HUD feedback for comrade upgrades.
 
-**Priority 2: Strategic Pressure & Near-Miss Clutch Bonus (2-3 Days)**
+**Priority 2: Strategic Pressure & Near-Miss Clutch Bonus (3-4 Days)**
 - Add explicit 30s "CRITICAL" near-miss window.
 - Add clutch defense bonus and combo meter to reinforce urgency.
 - Add prosperity investment loop to friendly districts.
@@ -263,40 +265,35 @@
 - Add structural damage bonus for Bulwark mode.
 - Add assault base loot drops and mystery jackpots.
 
-**Priority 4: Feedback + UI Polish (2 Days)**
-- Stronger UI/FX for operative scaling, rebuild sacrifice, and squad power-ups.
+**Priority 4: Expand Mothership Final Boss Mission (4-6 days)**
+- Build Phase 1 exterior assault + phase transition setup.
+- Implement Phase 2 interior encounter space (on-foot focus) with objective gating.
+- Upgrade Phase 3 core boss to multi-step shield/HP phases (current fight is HP-based, single arena).
+- Add phase-gated UI beats and cinematic transition (dock/boarding).
 
-**Priority 5: Expand Mothership Final Boss Mission (4-6 days)**
-- Build Phase 1 exterior assault + phase transition setup
-- Implement Phase 2 interior encounter space (on-foot focus) with objective gating
-- Upgrade Phase 3 core boss to multi-step shield/HP phases (current fight is HP-based, single arena)
-- Add phase-gated UI beats and cinematic transition (dock/boarding)
+**Priority 5: Feedback + UI Polish (2 Days)**
+- Stronger UI/FX for operative scaling, rebuild sacrifice, and squad power-ups.
 
 
 ### Estimated Remaining Work
 
-## Estimated Remaining Work
-
 ### MVP Completion:
-- **Current Progress:** ~86% complete (adjusted after code audit)
+- **Current Progress:** ~74% complete (adjusted after code audit)
 - **Remaining Critical Work:**
   - Mothership Boss Mission (multi-phase upgrade): 4-6 days
+  - Weapon Overflow & Comrade Buff Feedback: 2-3 days
+  - Strategic Pressure Systems (near-miss, combo meter, prosperity): 3-4 days
+  - Bulwark Assault Synergy + Assault Rewards: 2-3 days
   - Assault failure/retreat polish: 1-2 days
-- **Weapon Overflow & Comrade Buff Feedback:** 3 days
-- **Strategic Pressure Systems (Near-miss, Combo Meter, Prosperity):** 3 days
-- **Bulwark Assault Synergy + Assault Rewards:** 3 days
-- **UI/FX Feedback Polish:** 2 days
-- **Total to v2.0 MVP:** ~19 Days
-  - Strategic layer MVP slice: 2-3 days
-  - Testing & Polish: 1-2 days
-- **Total Time to Complete MVP:** 7-9 days
+  - UI/FX Feedback Polish: 2 days
+- **Total to v2.0 MVP:** ~14-20 Days (feature-implementation + polish)
 
 ### Full Design Document:
-- **High Priority Features:** ~38% remaining
+- **High Priority Features:** ~35% remaining
   - Assault mission polish (multi-phase core, base rewards)
   - Strategic campaign layer + planetary control tracker
   - Enhanced rewards system + post-boss presentation polish
-- **Medium Priority Features:** ~62% remaining
+- **Medium Priority Features:** ~60% remaining
   - Ground combat depth (operatives, weapons, cover)
   - Power-up progression tiers (homing, drone, laser)
   - Environmental variety (weather, day/night, district themes)
@@ -312,21 +309,16 @@
 - Dynamic weather/time-of-day cycles.
 - Additional district visual states and destruction feedback.
 - Extended audio feedback for rescue/deploy and mission transitions.
-- Implement multi-phase core reactor
-- Add high-value power-up drops in bases
-- Polish assault difficulty scaling
- District value indicators
+- Implement multi-phase core reactor.
+- Add high-value power-up drops in bases.
+- Polish assault difficulty scaling.
+- District value indicators.
 - Global difficulty scaling tied to occupied districts
 - Battleship “kidnap” mechanic for shop items
 
 ### What We Should Work on Next
-1. **Weapon Tier Overflow → Operative Buffs**. It directly connects the core rescue loop to squad power, reinforces the comrade fantasy from the design doc, and unlocks a clear UI/FX feedback opportunity. 
+1. **Weapon Tier Overflow → Operative Buffs**. It directly connects the core rescue loop to squad power, reinforces the comrade fantasy from the design doc, and unlocks a clear UI/FX feedback opportunity.
 2. **Strategic Pressure Systems** (prosperity + clutch bonus + combo meter) to make the district layer emotionally meaningful and to amplify urgency on the map.
-3. **Mothership multi-phase upgrade (Exterior → Interior → Core)**  
-   This is the single largest compliance gap and the primary MVP blocker.
-4. **Assault mission retreat/redo loop polish**  
-   Clarifies assault failure flow and reduces dead-end game-over friction.
-5. **Strategic layer MVP slice (control tracker + priority hints + district values)**  
-   Reinforces the design doc’s strategic layer and drives decision-making on the map.
-6. **Multi-phase base reactor + assault reward drops**  
-   Makes occupied district assaults feel meaningfully distinct and rewards risk.
+3. **Mothership multi-phase upgrade (Exterior → Interior → Core)**. This is the single largest compliance gap and the primary MVP blocker.
+4. **Bulwark assault synergy + assault reward drops** to differentiate assault missions and pay off the Bulwark mode fantasy.
+5. **Assault mission retreat/redo loop polish** to clarify failure flow and reduce dead-end friction.
