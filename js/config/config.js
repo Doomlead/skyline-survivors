@@ -216,6 +216,9 @@ const playerState = {
         coverage: 0,
         missile: 0
     },
+    comradeBuffs: {
+        level: 0
+    },
     direction: 'right',
     baseSpeed: 300
 };
@@ -298,6 +301,9 @@ function resetGameState() {
         multiShot: 0,
         coverage: 0,
         missile: 0
+    };
+    playerState.comradeBuffs = {
+        level: 0
     };
     playerState.direction = 'right';
     aegisState.mode = 'interceptor';

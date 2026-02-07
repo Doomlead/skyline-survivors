@@ -131,6 +131,38 @@ function createPowerUpCollectionEffect(scene, x, y, powerUpType) {
     }
 }
 
+function createComradeUpgradeEffect(scene, x, y) {
+    const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
+    const ringColor = 0x60a5fa;
+    const ring = scene.add.circle(x, y, 18, ringColor, reduceFlashes ? 0.25 : 0.5);
+    ring.setDepth(55);
+    scene.tweens.add({
+        targets: ring,
+        radius: reduceFlashes ? 40 : 55,
+        alpha: 0,
+        duration: 500,
+        ease: 'Power2.easeOut',
+        onComplete: () => ring.destroy()
+    });
+    const shardCount = reduceFlashes ? 4 : 8;
+    for (let i = 0; i < shardCount; i++) {
+        const shard = scene.add.circle(x, y, 3, ringColor, 1);
+        const angle = (Math.PI * 2 / shardCount) * i;
+        scene.tweens.add({
+            targets: shard,
+            x: x + Math.cos(angle) * (reduceFlashes ? 28 : 40),
+            y: y + Math.sin(angle) * (reduceFlashes ? 28 : 40),
+            alpha: 0,
+            scale: 0.2,
+            duration: 500,
+            delay: i * 40,
+            onComplete: () => shard.destroy()
+        });
+    }
+    const shakeIntensity = reduceFlashes ? 3 : 6;
+    screenShake(scene, shakeIntensity, 140);
+}
+
 function createEnhancedDeathEffect(scene, x, y, enemyType) {
     const deathColors = {
         'lander': 0xff4444,
