@@ -40,7 +40,7 @@
 - Critical urgency logic drives spawn/reward multipliers
 
 ⚠️ **Partially Implemented:**
-- **The "Near-Miss" Timer:** Explicit 30s "CRITICAL" window and clutch-defense bonus are now implemented, but map/UI feedback could use additional FX polish.
+- **The "Near-Miss" Timer:** Explicit 30s "CRITICAL" window and clutch-defense bonus are now implemented, with added map/HUD pulse FX (additional polish still possible).
 
 ❌ **Not Implemented:**
 - **District Investment Levels (Dark Pattern):** Friendly districts accumulating "Prosperity Multiplier" (Loss Aversion mechanic).

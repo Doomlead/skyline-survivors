@@ -285,11 +285,17 @@ function updateUI(scene) {
             const districtName = directives.districtName || directives.districtId || 'Unknown';
             districtEl.innerText = `DISTRICT: ${districtName} (${directives.status || 'unknown'})`;
             threatEl.innerText = `THREAT: ${directives.urgency ? directives.urgency.toUpperCase() : 'STABLE'} · T-${timerLabel}`;
-            const clutchTag = directives.clutchDefenseBonus ? ` · CLUTCH +${Math.round(directives.clutchDefenseBonus * 100)}%` : '';
-            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}`;
+            const criticalAlert = isCritical || directives.urgency === 'critical';
+            threatEl.classList.toggle('animate-pulse', criticalAlert);
+            threatEl.classList.toggle('text-amber-200', !criticalAlert);
+            threatEl.classList.toggle('text-red-300', criticalAlert);
+        const clutchTag = directives.clutchDefenseBonus ? ` · CLUTCH +${Math.round(directives.clutchDefenseBonus * 100)}%` : '';
+        rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}`;
         } else {
             districtEl.innerText = 'DISTRICT: Free Patrol';
             threatEl.innerText = 'THREAT: Neutral';
+            threatEl.classList.remove('animate-pulse', 'text-red-300');
+            threatEl.classList.add('text-amber-200');
             rewardEl.innerText = 'REWARDS: x1.00 standard loot';
         }
     }

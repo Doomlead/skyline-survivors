@@ -526,6 +526,14 @@ class BuildMapView {
 
         this.districtGraphics.lineStyle(2, pulseColor, pulseAlpha);
         this.districtGraphics.strokeCircle(projected.x, projected.y, pulseRadius);
+
+        if (isCritical) {
+            const alertPulse = (Math.sin(this.scene.time.now * 0.012) + 1) / 2;
+            const alertRadius = radius * (2.4 + alertPulse * 0.9);
+            const alertAlpha = Phaser.Math.Linear(0.1, 0.55, alertPulse);
+            this.districtGraphics.lineStyle(1.5, 0xfca5a5, alertAlpha);
+            this.districtGraphics.strokeCircle(projected.x, projected.y, alertRadius);
+        }
     }
 
     setupDistrictInteraction() {
