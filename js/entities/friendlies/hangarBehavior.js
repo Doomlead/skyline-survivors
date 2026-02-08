@@ -32,7 +32,8 @@ function dropOffCargo(scene, hangar) {
     if (!isPlayerOverHangar(scene, hangar)) return;
 
     window.ShipController?.resetCargo();
-    const dropOffScore = getMissionScaledReward(HUMAN_RESCUE_SCORE * HUMAN_DROP_OFF_SCORE_MULTIPLIER * cargoCount);
+    registerComboEvent(Math.min(3, cargoCount));
+    const dropOffScore = getCombatScaledReward(HUMAN_RESCUE_SCORE * HUMAN_DROP_OFF_SCORE_MULTIPLIER * cargoCount);
     gameState.score += dropOffScore;
 
     if (audioManager) audioManager.playSound('cargoDrop');

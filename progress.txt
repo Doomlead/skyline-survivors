@@ -18,7 +18,7 @@
 ⚠️ **Partially Implemented:**
 - **Seamless transition (Ship/Foot):** Ejection + hangar rebuild + squad leader aura exist, but Bulwark/ground synergies and stronger UI messaging are missing.
 - **Resource vs. Score (The Rescue Loop):** Cargo collection + deployment are in place; operative overflow scaling now routes max-tier pickups into comrade buffs with HUD/FX, but deeper squad synergy feedback loops still need polish.
-- **Strategic Territory Control:** District states and timers exist, but the "Loss Aversion" investment/prosperity mechanics are missing.
+- **Strategic Territory Control:** District states, timers, and prosperity investment are in; still needs tuning/balance.
 - **Operative Depth:** 4 distinct classes exist with combat behaviors (Infantry, Gunner, Medic, Saboteur); Tier Overflow scaling now boosts ground troops, but stronger fire-team coordination outside of the on-foot formation is still minimal.
 
 ---
@@ -38,12 +38,11 @@
 - **Victory Condition:** Complete Mothership assault
 - Threat timer-based urgency and pulsing visuals for threatened districts
 - Critical urgency logic drives spawn/reward multipliers
+- Prosperity investment loop with loss-aversion reset on occupied districts
 
 ⚠️ **Partially Implemented:**
-- **The "Near-Miss" Timer:** Critical state exists via timer ratio, but no explicit 30s "CRITICAL" window or clutch-defense bonus callout.
-
-❌ **Not Implemented:**
-- **District Investment Levels (Dark Pattern):** Friendly districts accumulating "Prosperity Multiplier" (Loss Aversion mechanic).
+- **The "Near-Miss" Timer:** Explicit 30s "CRITICAL" window and clutch-defense bonus are now implemented, with added map/HUD pulse FX (additional polish still possible).
+- **District Investment Levels (Dark Pattern):** Prosperity multiplier exists with stronger map/HUD feedback; still needs balance tuning and cinematic polish.
 
 ### 2.2. Side-Scrolling Combat View
 
@@ -176,7 +175,7 @@
 - Mothership HUD phase and core health
 
 ❌ **Not Implemented:**
-- **Dark Patterns:** Engagement "Combo Meter" and explicit near-miss clutch bonus
+- **Dark Patterns:** Additional loss-aversion presentation polish (cinematics, audio sting, global UI beat)
 
 ### 6.2. Meta Progression (Shop)
 
@@ -223,15 +222,16 @@
 - On-foot squad aura + sacrifice behavior.
 - Supply Drop gacha shop + hot-start delivery at mission start.
 - Mothership unlock node and boss encounter.
+- Explicit 30s critical near-miss window + clutch-defense bonus.
+- Engagement combo meter with flow-state persistence.
+- Prosperity investment loop with district value indicators + loss-aversion reset.
 
 **Partially Aligned**
 - Operative depth (classes exist; patrol behavior exists; fire-team coordination still needs polish).
-- Strategic layer urgency (Threatened/Occupied exists; critical urgency exists; missing explicit near-miss/clutch bonus and prosperity investment feedback).
+- Strategic layer urgency (Threatened/Occupied exists; critical urgency exists; further prosperity feedback polish still missing).
 - Bulwark form (functional, but no siege/structure bonus or UI feedback).
 
 **Not Aligned**
-- Prosperity/loss aversion investment system.
-- Combo/urgency feedback loops (combo meter, clutch defense bonus).
 - Assault rewards and mystery drops.
 - Multi-phase mothership mission structure (exterior → interior → core).
 
@@ -244,29 +244,24 @@
 - Mothership node unlock and core boss flow.
 
 ### Critical Missing Features for Design Document Compliance
-1. **Strategic Pressure Systems:** Prosperity/loss aversion, explicit near-miss clutch bonus, combo meter.
-2. **Bulwark Assault Synergy:** Higher structural damage or siege bonuses.
-3. **Assault Loot Rewards & Mystery Drops:** Base destruction rewards and random jackpots.
-4. **Multi-phase Mothership Mission:** Exterior → interior → core progression with phase-gated objectives.
+1. **Bulwark Assault Synergy:** Higher structural damage or siege bonuses.
+2. **Assault Loot Rewards & Mystery Drops:** Base destruction rewards and random jackpots.
+3. **Multi-phase Mothership Mission:** Exterior → interior → core progression with phase-gated objectives.
 
 ### Immediate Next Steps (Recommended Order)
-**Priority 1: Strategic Pressure & Near-Miss Clutch Bonus (3-4 Days)**
-- Add explicit 30s "CRITICAL" near-miss window.
-- Add clutch defense bonus and combo meter to reinforce urgency.
-- Add prosperity investment loop to friendly districts.
-
-**Priority 2: Bulwark Assault Synergy + Assault Rewards (2-3 Days)**
+**Priority 1: Bulwark Assault Synergy + Assault Rewards (2-3 Days)**
 - Add structural damage bonus for Bulwark mode.
 - Add assault base loot drops and mystery jackpots.
 
-**Priority 3: Expand Mothership Final Boss Mission (4-6 days)**
+**Priority 2: Expand Mothership Final Boss Mission (4-6 days)**
 - Build Phase 1 exterior assault + phase transition setup.
 - Implement Phase 2 interior encounter space (on-foot focus) with objective gating.
 - Upgrade Phase 3 core boss to multi-step shield/HP phases (current fight is HP-based, single arena).
 - Add phase-gated UI beats and cinematic transition (dock/boarding).
 
-**Priority 4: Feedback + UI Polish (2 Days)**
+**Priority 3: Feedback + UI Polish (2 Days)**
 - Stronger UI/FX for operative scaling, rebuild sacrifice, and squad power-ups.
+- Add prosperity loss-aversion presentation polish (audio sting, global UI beat).
 
 
 ### Estimated Remaining Work
@@ -275,10 +270,9 @@
 - **Current Progress:** ~74% complete (adjusted after code audit)
 - **Remaining Critical Work:**
   - Mothership Boss Mission (multi-phase upgrade): 4-6 days
-  - Strategic Pressure Systems (near-miss, combo meter, prosperity): 3-4 days
   - Bulwark Assault Synergy + Assault Rewards: 2-3 days
   - Assault failure/retreat polish: 1-2 days
-  - UI/FX Feedback Polish: 2 days
+  - UI/FX Feedback Polish (including prosperity loss feedback): 2 days
 - **Total to v2.0 MVP:** ~14-20 Days (feature-implementation + polish)
 
 ### Full Design Document:
@@ -305,12 +299,10 @@
 - Implement multi-phase core reactor.
 - Add high-value power-up drops in bases.
 - Polish assault difficulty scaling.
-- District value indicators.
 - Global difficulty scaling tied to occupied districts
 - Battleship “kidnap” mechanic for shop items
 
 ### What We Should Work on Next
-1. **Strategic Pressure Systems** (prosperity + clutch bonus + combo meter) to make the district layer emotionally meaningful and to amplify urgency on the map.
+1. **Bulwark Assault Synergy + Assault Rewards** to differentiate assault missions and pay off the Bulwark mode fantasy.
 2. **Mothership multi-phase upgrade (Exterior → Interior → Core)**. This is the single largest compliance gap and the primary MVP blocker.
-3. **Bulwark assault synergy + assault reward drops** to differentiate assault missions and pay off the Bulwark mode fantasy.
-4. **Assault mission retreat/redo loop polish** to clarify failure flow and reduce dead-end friction.
+3. **Assault mission retreat/redo loop polish** to clarify failure flow and reduce dead-end friction.

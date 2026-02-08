@@ -19,6 +19,13 @@ const CONFIG = {
 const CLASSIC_WAVE_LIMIT = 15;
 const HUMAN_RESCUE_SCORE = 150;
 const HUMAN_DROP_OFF_SCORE_MULTIPLIER = 2;
+const COMBO_CONFIG = {
+    maxStacks: 30,
+    decayMs: 4500,
+    stepSize: 5,
+    stepBonus: 0.1,
+    maxBonus: 0.5
+};
 
 const POWERUP_DECAY_CONFIG = {
     assaultMultiplier: 0.75,
@@ -143,6 +150,12 @@ const gameState = {
     missionDistrictState: null,
     rewardMultiplier: 1,
     spawnMultiplier: 1,
+    clutchDefenseBonus: 0,
+    comboStacks: 0,
+    comboTimer: 0,
+    comboMultiplier: 1,
+    comboMaxStacks: 0,
+    comboFlowActive: false,
     metaAppliedLoadout: null,
     metaAppliedDrop: null,
     metaRewardsGranted: false,
@@ -334,6 +347,12 @@ function resetGameState() {
     gameState.missionDirectives = null;
     gameState.rewardMultiplier = 1;
     gameState.spawnMultiplier = 1;
+    gameState.clutchDefenseBonus = 0;
+    gameState.comboStacks = 0;
+    gameState.comboTimer = 0;
+    gameState.comboMultiplier = 1;
+    gameState.comboMaxStacks = 0;
+    gameState.comboFlowActive = false;
     gameState.metaAppliedLoadout = null;
     gameState.metaAppliedDrop = null;
     gameState.metaRewardsGranted = false;

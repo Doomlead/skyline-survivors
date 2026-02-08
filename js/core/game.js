@@ -466,6 +466,7 @@ function update(time, delta) {
     }
 
     updatePlayer(this, time, delta);
+    updateComboState(this, delta);
     updateRebuildObjective(this, delta);
     updateHangarRebuildUi(this);
 
