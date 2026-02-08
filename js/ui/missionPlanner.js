@@ -254,6 +254,12 @@
         assaultDrain: 1.6
     };
     const CRITICAL_WINDOW_SECONDS = 30;
+    const PROSPERITY_CONFIG = {
+        maxLevel: 5,
+        gainPerSecond: 0.01,
+        bonusPerLevel: 0.05,
+        lossFlashSeconds: 12
+    };
 
     const MOTHERSHIP_CONFIG = {
         id: 'mothership',
@@ -271,14 +277,45 @@
     function getDefaultDistrictState(config) {
         const roll = Math.random();
         const status = roll < 0.4 ? 'friendly' : 'occupied';
-        return {
+        const state = {
             id: config.id,
             status,
             timer: config.timer,
             criticalTimer: 0,
+            prosperity: 0,
+            lastProsperityLoss: 0,
+            prosperityLossTimer: 0,
             lastOutcome: null,
             clearedRuns: 0
         };
+        syncProsperityMetrics(state);
+        return state;
+    }
+
+    function syncProsperityMetrics(entry) {
+        if (!entry) return;
+        const level = Math.max(0, Math.floor(entry.prosperity || 0));
+        entry.prosperityLevel = level;
+        entry.prosperityMultiplier = 1 + level * PROSPERITY_CONFIG.bonusPerLevel;
+    }
+
+    function applyProsperityGain(entry, seconds = 0) {
+        if (!entry || seconds <= 0) return false;
+        const current = Number(entry.prosperity || 0);
+        const next = Math.min(PROSPERITY_CONFIG.maxLevel, current + seconds * PROSPERITY_CONFIG.gainPerSecond);
+        if (next === current) return false;
+        entry.prosperity = next;
+        syncProsperityMetrics(entry);
+        return true;
+    }
+
+    function applyProsperityLoss(entry) {
+        if (!entry) return;
+        const lost = Math.max(0, Math.round(entry.prosperity || 0));
+        entry.lastProsperityLoss = lost;
+        entry.prosperityLossTimer = PROSPERITY_CONFIG.lossFlashSeconds;
+        entry.prosperity = 0;
+        syncProsperityMetrics(entry);
     }
 
     function safeLoadState() {
@@ -324,10 +361,18 @@
             if (base.status === 'occupied') {
                 base.timer = 0;
                 base.criticalTimer = 0;
+                if (base.prosperity > 0) {
+                    applyProsperityLoss(base);
+                }
             }
             if (base.status === 'friendly') {
                 base.criticalTimer = 0;
+                applyProsperityGain(base, elapsed);
             }
+            if (base.prosperityLossTimer > 0) {
+                base.prosperityLossTimer = Math.max(0, base.prosperityLossTimer - elapsed);
+            }
+            syncProsperityMetrics(base);
             districtState.districts[cfg.id] = base;
         });
 
@@ -623,8 +668,10 @@
                     ? 'stable'
                     : 'threatened';
         const baseRewardMultiplier = urgency === 'occupied' ? 1.5 : urgency === 'critical' ? 1.25 : 1;
+        const prosperityLevel = Math.max(0, state.prosperityLevel || 0);
+        const prosperityMultiplier = state.prosperityMultiplier || 1;
         const clutchDefenseBonus = urgency === 'critical' ? 0.2 : 0;
-        const rewardMultiplier = baseRewardMultiplier + clutchDefenseBonus;
+        const rewardMultiplier = baseRewardMultiplier * prosperityMultiplier + clutchDefenseBonus;
         const spawnMultiplier = urgency === 'occupied' ? 1.35 : urgency === 'critical' ? 1.15 : 1;
         const humans = urgency === 'occupied' ? 10 : urgency === 'critical' ? 18 : 15;
         const focusedTypes = [...config.threats];
@@ -646,10 +693,14 @@
             urgency,
             rewardMultiplier,
             clutchDefenseBonus,
+            prosperityLevel,
+            prosperityMultiplier,
             spawnMultiplier,
             humans,
             timer: state.timer,
             criticalTimer: state.criticalTimer ?? 0,
+            prosperityLossTimer: state.prosperityLossTimer ?? 0,
+            lastProsperityLoss: state.lastProsperityLoss ?? 0,
             status: state.status,
             mode: modeOverride,
             districtState: { ...state },
@@ -701,8 +752,18 @@
                 if ((entry.criticalTimer || 0) === 0 && entry.status !== 'occupied') {
                     entry.status = 'occupied';
                     entry.lastOutcome = 'failed';
+                    applyProsperityLoss(entry);
                     mutated = true;
                 }
+            }
+            if (entry.status === 'friendly') {
+                if (applyProsperityGain(entry, seconds)) {
+                    mutated = true;
+                }
+            }
+            if (entry.prosperityLossTimer > 0 && seconds > 0) {
+                entry.prosperityLossTimer = Math.max(0, entry.prosperityLossTimer - seconds);
+                mutated = true;
             }
         });
         if (mutated) {
@@ -730,6 +791,7 @@
             state.status = 'occupied';
             state.timer = 0;
             state.criticalTimer = 0;
+            applyProsperityLoss(state);
             retireBattleshipsForDistrict(currentMission.district);
         }
 

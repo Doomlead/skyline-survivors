@@ -319,7 +319,13 @@ class BuildMissionUi {
                         : node.state.timer > 0
                             ? `T-${this.scene.formatTimer(node.state.timer)}`
                             : 'THREATENED';
-            return `${node.config.label}: ${statusLabel}`;
+            const prosperityTag = node.state.prosperityMultiplier
+                ? ` · P x${node.state.prosperityMultiplier.toFixed(2)}`
+                : '';
+            const lossTag = node.state.prosperityLossTimer > 0 && node.state.lastProsperityLoss
+                ? ` · LOSS -${node.state.lastProsperityLoss}`
+                : '';
+            return `${node.config.label}: ${statusLabel}${prosperityTag}${lossTag}`;
         });
         const district = selectedDistrict ? `${selectedDistrict.config.name}: ${selectedDistrict.state.status.toUpperCase()}` : 'No district selected';
         this.nodeStatusText.setText([
@@ -339,8 +345,9 @@ class BuildMissionUi {
         const modeLabel = mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Defense';
         const directiveLabel = directives?.urgency ? `${directives.urgency.toUpperCase()} THREAT` : 'Threat mix pending';
         const clutchTag = directives?.clutchDefenseBonus ? ` · CLUTCH +${Math.round(directives.clutchDefenseBonus * 100)}%` : '';
+        const prosperityTag = directives?.prosperityMultiplier ? ` · PROSPERITY x${directives.prosperityMultiplier.toFixed(2)}` : '';
         const rewardLabel = directives?.rewardMultiplier
-            ? `${directives.rewardMultiplier.toFixed(2)}x rewards · ${directives.reward}${clutchTag}`
+            ? `${directives.rewardMultiplier.toFixed(2)}x rewards · ${directives.reward}${clutchTag}${prosperityTag}`
             : 'Standard rewards';
         const launchLabel = mode === 'survival'
             ? 'Launch Survival Run (Space)'

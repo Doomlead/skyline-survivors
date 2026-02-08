@@ -289,8 +289,9 @@ function updateUI(scene) {
             threatEl.classList.toggle('animate-pulse', criticalAlert);
             threatEl.classList.toggle('text-amber-200', !criticalAlert);
             threatEl.classList.toggle('text-red-300', criticalAlert);
-        const clutchTag = directives.clutchDefenseBonus ? ` · CLUTCH +${Math.round(directives.clutchDefenseBonus * 100)}%` : '';
-        rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}`;
+            const clutchTag = directives.clutchDefenseBonus ? ` · CLUTCH +${Math.round(directives.clutchDefenseBonus * 100)}%` : '';
+            const prosperityTag = directives.prosperityMultiplier ? ` · PROSPERITY x${directives.prosperityMultiplier.toFixed(2)}` : '';
+            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}${prosperityTag}`;
         } else {
             districtEl.innerText = 'DISTRICT: Free Patrol';
             threatEl.innerText = 'THREAT: Neutral';

@@ -714,6 +714,10 @@ class BuildMapView {
             // Safety check for destroyed text objects
             if (node.timerText && node.timerText.active) {
                 const isCritical = node.state.status === 'critical';
+                const prosperityMultiplier = node.state.prosperityMultiplier || 1;
+                const prosperityLabel = `PROSPERITY x${prosperityMultiplier.toFixed(2)}`;
+                const lossActive = node.state.prosperityLossTimer > 0 && node.state.lastProsperityLoss > 0;
+                const lossLabel = lossActive ? `LOSS -${node.state.lastProsperityLoss}` : null;
                 const timerLabel = node.state.status === 'destroyed'
                     ? 'DESTROYED'
                     : isCritical
@@ -721,12 +725,16 @@ class BuildMapView {
                         : node.state.timer > 0
                             ? this.scene.formatTimer(node.state.timer)
                             : 'STABLE';
-                const color = node.state.status === 'destroyed'
+                const color = lossActive
                     ? '#f87171'
-                    : isCritical
-                        ? '#fb923c'
-                        : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
-                node.timerText.setText(timerLabel);
+                    : node.state.status === 'destroyed'
+                        ? '#f87171'
+                        : isCritical
+                            ? '#fb923c'
+                            : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
+                const lines = [timerLabel, prosperityLabel];
+                if (lossLabel) lines.unshift(lossLabel);
+                node.timerText.setText(lines.join('\n'));
                 node.timerText.setColor(color);
             }
         });
