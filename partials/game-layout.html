@@ -71,6 +71,21 @@
                 <div id="reward-el" class="text-emerald-200 uppercase tracking-wider text-right w-44">REWARDS: x1.00 standard loot</div>
             </div>
 
+            <div class="px-2 flex flex-wrap items-center justify-between gap-2 text-[10px] md:text-xs uppercase tracking-[0.2em]">
+                <div class="flex items-center gap-2 text-cyan-200">
+                    <span>Combo</span>
+                    <span id="combo-el" class="text-emerald-200">x1.00</span>
+                </div>
+                <div class="flex items-center gap-2 text-[9px] text-emerald-300">
+                    <span id="combo-flow" class="hidden">FLOW</span>
+                </div>
+                <div class="flex-1 min-w-[140px]">
+                    <div class="relative h-1.5 bg-slate-900 border border-emerald-400/40 rounded overflow-hidden">
+                        <div id="combo-fill" class="absolute left-0 top-0 h-full bg-emerald-400"></div>
+                    </div>
+                </div>
+            </div>
+
             <div id="radar-container" class="w-full h-[40px] bg-black border border-cyan-900 relative overflow-hidden rounded">
                 <canvas id="radar-canvas" width="800" height="40" class="w-full h-full block"></canvas>
             </div>

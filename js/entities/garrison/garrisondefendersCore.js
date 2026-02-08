@@ -162,7 +162,8 @@ function destroyGarrisonDefender(scene, defender) {
     }
     createEnhancedDeathEffect(scene, defender.x, defender.y, defender.garrisonType);
 
-    const score = getMissionScaledReward(getGarrisonDefenderScore(defender.garrisonType));
+    registerComboEvent(1);
+    const score = getCombatScaledReward(getGarrisonDefenderScore(defender.garrisonType));
     gameState.score += score;
 
     const scorePopup = scene.add.text(

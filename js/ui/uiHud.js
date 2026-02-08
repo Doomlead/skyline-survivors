@@ -14,6 +14,9 @@ function createUI(scene) {
     districtEl = document.getElementById('district-el');
     threatEl = document.getElementById('threat-el');
     rewardEl = document.getElementById('reward-el');
+    comboEl = document.getElementById('combo-el');
+    comboFillEl = document.getElementById('combo-fill');
+    comboFlowEl = document.getElementById('combo-flow');
     assaultHudEl = document.getElementById('assault-hud');
     assaultCoreFillEl = document.getElementById('assault-core-fill');
     assaultCoreLabelEl = document.getElementById('assault-core-label');
@@ -187,6 +190,22 @@ function updateUI(scene) {
 
     powerupsEl.innerText = powerUpText || '[NORMAL FIRE]';
 
+    if (comboEl) {
+        const stacks = gameState.comboStacks || 0;
+        const multiplier = (gameState.comboMultiplier || 1).toFixed(2);
+        comboEl.innerText = stacks > 0 ? `x${multiplier} (${stacks})` : 'x1.00';
+    }
+    if (comboFillEl) {
+        const pct = gameState.comboStacks > 0
+            ? Math.max(0, Math.min(1, (gameState.comboTimer || 0) / COMBO_CONFIG.decayMs))
+            : 0;
+        comboFillEl.style.width = `${Math.round(pct * 100)}%`;
+        comboFillEl.classList.toggle('animate-pulse', gameState.comboFlowActive && gameState.comboStacks > 0);
+    }
+    if (comboFlowEl) {
+        comboFlowEl.classList.toggle('hidden', !(gameState.comboFlowActive && gameState.comboStacks > 0));
+    }
+
     if (decayHudEl) {
         const decay = playerState.powerUpDecay || {};
         const primaryWeapon = playerState.primaryWeapon || (p.laser > 0 ? 'laser' : 'multiShot');
@@ -258,16 +277,29 @@ function updateUI(scene) {
     if (districtEl && threatEl && rewardEl) {
         const directives = gameState.missionDirectives;
         if (directives) {
-            const timerLabel = typeof directives.timer === 'number'
-                ? formatMetaTimer(directives.timer)
+            const isCritical = directives.status === 'critical';
+            const timeValue = isCritical ? directives.criticalTimer : directives.timer;
+            const timerLabel = typeof timeValue === 'number'
+                ? formatMetaTimer(timeValue)
                 : 'N/A';
             const districtName = directives.districtName || directives.districtId || 'Unknown';
             districtEl.innerText = `DISTRICT: ${districtName} (${directives.status || 'unknown'})`;
             threatEl.innerText = `THREAT: ${directives.urgency ? directives.urgency.toUpperCase() : 'STABLE'} · T-${timerLabel}`;
-            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}`;
+            const criticalAlert = isCritical || directives.urgency === 'critical';
+            threatEl.classList.toggle('animate-pulse', criticalAlert);
+            threatEl.classList.toggle('text-amber-200', !criticalAlert);
+            threatEl.classList.toggle('text-red-300', criticalAlert);
+            const clutchTag = directives.clutchDefenseBonus ? ` · CLUTCH +${Math.round(directives.clutchDefenseBonus * 100)}%` : '';
+            const prosperityTag = directives.prosperityMultiplier ? ` · PROSPERITY x${directives.prosperityMultiplier.toFixed(2)}` : '';
+            const lossTag = directives.prosperityLossTimer > 0 && directives.lastProsperityLoss
+                ? ` · LOSS -${directives.lastProsperityLoss}`
+                : '';
+            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}${prosperityTag}${lossTag}`;
         } else {
             districtEl.innerText = 'DISTRICT: Free Patrol';
             threatEl.innerText = 'THREAT: Neutral';
+            threatEl.classList.remove('animate-pulse', 'text-red-300');
+            threatEl.classList.add('text-amber-200');
             rewardEl.innerText = 'REWARDS: x1.00 standard loot';
         }
     }

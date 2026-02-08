@@ -70,6 +70,7 @@ function playerDie(scene) {
     if (!player) return;
     if (scene._isRespawning || gameState.gameOver) return;
     const isAegisActive = aegisState.active || player === scene.aegis;
+    resetComboMeter();
     if (particleManager) {
         if (audioManager) audioManager.playSound('explosion');
         particleManager.playerExplosion(player.x, player.y);

@@ -347,8 +347,9 @@ function destroyBoss(scene, boss) {
             break;
     }
 
+    registerComboEvent(3);
     const score = getBossScore(boss.bossType);
-    const scaledReward = getMissionScaledReward(score) * 2;
+    const scaledReward = getCombatScaledReward(score) * 2;
     gameState.score += scaledReward;  // Double score for bosses
 
     const scorePopup = scene.add.text(

@@ -137,9 +137,10 @@ function calculateRunCredits(outcome) {
         : outcome.directives?.urgency === 'collapse'
             ? 45
             : 15;
+    const clutchBonus = outcome.directives?.clutchDefenseBonus ? 20 : 0;
     const successBonus = outcome.success ? 80 : 35;
     const rewardScale = outcome.directives?.rewardMultiplier || 1;
-    return Math.max(25, Math.round((baseScore + rescueBonus + successBonus + urgencyBonus) * rewardScale));
+    return Math.max(25, Math.round((baseScore + rescueBonus + successBonus + urgencyBonus + clutchBonus) * rewardScale));
 }
 
 function recordRunOutcome(outcome) {

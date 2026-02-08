@@ -253,6 +253,13 @@
         assaultTime: 18,
         assaultDrain: 1.6
     };
+    const CRITICAL_WINDOW_SECONDS = 30;
+    const PROSPERITY_CONFIG = {
+        maxLevel: 6,
+        gainPerSecond: 0.02,
+        bonusPerLevel: 0.06,
+        lossFlashSeconds: 14
+    };
 
     const MOTHERSHIP_CONFIG = {
         id: 'mothership',
@@ -270,13 +277,45 @@
     function getDefaultDistrictState(config) {
         const roll = Math.random();
         const status = roll < 0.4 ? 'friendly' : 'occupied';
-        return {
+        const state = {
             id: config.id,
             status,
             timer: config.timer,
+            criticalTimer: 0,
+            prosperity: 0,
+            lastProsperityLoss: 0,
+            prosperityLossTimer: 0,
             lastOutcome: null,
             clearedRuns: 0
         };
+        syncProsperityMetrics(state);
+        return state;
+    }
+
+    function syncProsperityMetrics(entry) {
+        if (!entry) return;
+        const level = Math.max(0, Math.floor(entry.prosperity || 0));
+        entry.prosperityLevel = level;
+        entry.prosperityMultiplier = 1 + level * PROSPERITY_CONFIG.bonusPerLevel;
+    }
+
+    function applyProsperityGain(entry, seconds = 0) {
+        if (!entry || seconds <= 0) return false;
+        const current = Number(entry.prosperity || 0);
+        const next = Math.min(PROSPERITY_CONFIG.maxLevel, current + seconds * PROSPERITY_CONFIG.gainPerSecond);
+        if (next === current) return false;
+        entry.prosperity = next;
+        syncProsperityMetrics(entry);
+        return true;
+    }
+
+    function applyProsperityLoss(entry) {
+        if (!entry) return;
+        const lost = Math.max(0, Math.round(entry.prosperity || 0));
+        entry.lastProsperityLoss = lost;
+        entry.prosperityLossTimer = PROSPERITY_CONFIG.lossFlashSeconds;
+        entry.prosperity = 0;
+        syncProsperityMetrics(entry);
     }
 
     function safeLoadState() {
@@ -299,15 +338,41 @@
             const existing = stored?.districts?.[cfg.id];
             const base = existing ? { ...existing } : getDefaultDistrictState(cfg);
             if (base.status === 'threatened') {
-                base.timer = Math.max(0, base.timer - elapsed);
-                if (base.timer === 0) {
+                const remaining = (base.timer ?? 0) - elapsed;
+                if (remaining > 0) {
+                    base.timer = remaining;
+                    base.criticalTimer = 0;
+                } else {
+                    base.timer = 0;
+                    const timePastZero = Math.abs(remaining);
+                    base.criticalTimer = Math.max(0, CRITICAL_WINDOW_SECONDS - timePastZero);
+                    base.status = base.criticalTimer > 0 ? 'critical' : 'occupied';
+                    base.lastOutcome = base.status === 'occupied' ? 'failed' : 'critical';
+                }
+            }
+            if (base.status === 'critical') {
+                base.timer = 0;
+                base.criticalTimer = Math.max(0, (base.criticalTimer ?? CRITICAL_WINDOW_SECONDS) - elapsed);
+                if (base.criticalTimer === 0) {
                     base.status = 'occupied';
                     base.lastOutcome = 'failed';
                 }
             }
             if (base.status === 'occupied') {
                 base.timer = 0;
+                base.criticalTimer = 0;
+                if (base.prosperity > 0) {
+                    applyProsperityLoss(base);
+                }
             }
+            if (base.status === 'friendly') {
+                base.criticalTimer = 0;
+                applyProsperityGain(base, elapsed);
+            }
+            if (base.prosperityLossTimer > 0) {
+                base.prosperityLossTimer = Math.max(0, base.prosperityLossTimer - elapsed);
+            }
+            syncProsperityMetrics(base);
             districtState.districts[cfg.id] = base;
         });
 
@@ -482,14 +547,16 @@
                     if (targetState.status === 'friendly') {
                         targetState.status = 'threatened';
                         targetState.timer = targetConfig?.timer || targetState.timer;
+                        targetState.criticalTimer = 0;
                     }
                     const drain = seconds * BATTLESHIP_CONFIG.assaultDrain;
                     const nextTimer = Math.max(0, targetState.timer - drain);
                     if (nextTimer !== targetState.timer) {
                         targetState.timer = nextTimer;
                         if (targetState.timer === 0) {
-                            targetState.status = 'occupied';
-                            targetState.lastOutcome = 'failed';
+                            targetState.status = 'critical';
+                            targetState.criticalTimer = CRITICAL_WINDOW_SECONDS;
+                            targetState.lastOutcome = 'critical';
                             ship.active = false;
                             ship.timer = 0;
                         }
@@ -593,13 +660,18 @@
 
     function buildMissionDirectives(config, state, modeOverride = null) {
         if (!config || !state) return null;
-        const timerRatio = config.timer > 0 ? Math.max(0, state.timer) / config.timer : 0;
         const urgency = state.status === 'occupied'
             ? 'occupied'
-            : state.status === 'friendly'
-                ? 'stable'
-                : timerRatio < 0.35 ? 'critical' : 'threatened';
-        const rewardMultiplier = urgency === 'occupied' ? 1.5 : urgency === 'critical' ? 1.25 : 1;
+            : state.status === 'critical'
+                ? 'critical'
+                : state.status === 'friendly'
+                    ? 'stable'
+                    : 'threatened';
+        const baseRewardMultiplier = urgency === 'occupied' ? 1.5 : urgency === 'critical' ? 1.25 : 1;
+        const prosperityLevel = Math.max(0, state.prosperityLevel || 0);
+        const prosperityMultiplier = state.prosperityMultiplier || 1;
+        const clutchDefenseBonus = urgency === 'critical' ? 0.2 : 0;
+        const rewardMultiplier = baseRewardMultiplier * prosperityMultiplier + clutchDefenseBonus;
         const spawnMultiplier = urgency === 'occupied' ? 1.35 : urgency === 'critical' ? 1.15 : 1;
         const humans = urgency === 'occupied' ? 10 : urgency === 'critical' ? 18 : 15;
         const focusedTypes = [...config.threats];
@@ -620,9 +692,15 @@
             reward: config.reward,
             urgency,
             rewardMultiplier,
+            clutchDefenseBonus,
+            prosperityLevel,
+            prosperityMultiplier,
             spawnMultiplier,
             humans,
             timer: state.timer,
+            criticalTimer: state.criticalTimer ?? 0,
+            prosperityLossTimer: state.prosperityLossTimer ?? 0,
+            lastProsperityLoss: state.lastProsperityLoss ?? 0,
             status: state.status,
             mode: modeOverride,
             districtState: { ...state },
@@ -654,13 +732,37 @@
         const state = safeLoadState();
         let mutated = false;
         Object.values(state.districts).forEach((entry) => {
-            if (entry.status !== 'threatened') return;
-            if (entry.timer > 0 && seconds > 0) {
-                entry.timer = Math.max(0, entry.timer - seconds);
-                mutated = true;
+            if (entry.status === 'threatened') {
+                if (entry.timer > 0 && seconds > 0) {
+                    entry.timer = Math.max(0, entry.timer - seconds);
+                    mutated = true;
+                }
+                if (entry.timer === 0 && entry.status !== 'critical') {
+                    entry.status = 'critical';
+                    entry.criticalTimer = CRITICAL_WINDOW_SECONDS;
+                    entry.lastOutcome = 'critical';
+                    mutated = true;
+                }
             }
-            if (entry.timer === 0 && entry.status !== 'occupied') {
-                entry.status = 'occupied';
+            if (entry.status === 'critical') {
+                if ((entry.criticalTimer || 0) > 0 && seconds > 0) {
+                    entry.criticalTimer = Math.max(0, entry.criticalTimer - seconds);
+                    mutated = true;
+                }
+                if ((entry.criticalTimer || 0) === 0 && entry.status !== 'occupied') {
+                    entry.status = 'occupied';
+                    entry.lastOutcome = 'failed';
+                    applyProsperityLoss(entry);
+                    mutated = true;
+                }
+            }
+            if (entry.status === 'friendly') {
+                if (applyProsperityGain(entry, seconds)) {
+                    mutated = true;
+                }
+            }
+            if (entry.prosperityLossTimer > 0 && seconds > 0) {
+                entry.prosperityLossTimer = Math.max(0, entry.prosperityLossTimer - seconds);
                 mutated = true;
             }
         });
@@ -680,6 +782,7 @@
         if (success) {
             state.status = 'friendly';
             state.timer = cfg.timer + 60;
+            state.criticalTimer = 0;
             state.clearedRuns = (state.clearedRuns || 0) + 1;
             state.lastOutcome = 'cleared';
             retireBattleshipsForDistrict(currentMission.district);
@@ -687,6 +790,8 @@
             state.lastOutcome = 'failed';
             state.status = 'occupied';
             state.timer = 0;
+            state.criticalTimer = 0;
+            applyProsperityLoss(state);
             retireBattleshipsForDistrict(currentMission.district);
         }
 
