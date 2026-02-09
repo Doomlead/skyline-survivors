@@ -9,9 +9,8 @@ function updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.setPosition(anchorX, anchorY);
     boss.setVelocity(0, 0);
 
-    const hpRatio = boss.maxHp > 0 ? boss.hp / boss.maxHp : 1;
-    const phase = hpRatio < 0.33 ? 2 : hpRatio < 0.66 ? 1 : 0;
-    boss.corePhase = phase;
+    const objective = gameState.mothershipObjective;
+    const phase = objective?.currentPhase ?? 0;
 
     const shotInterval = phase === 2 ? 900 : phase === 1 ? 1200 : 1600;
     if (time > boss.lastShot + shotInterval) {
