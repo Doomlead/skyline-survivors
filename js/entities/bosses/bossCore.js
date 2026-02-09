@@ -250,6 +250,15 @@ function hitBoss(projectile, boss) {
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
     const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
+    if (boss.bossType === 'mothershipCore' && gameState.mode === 'mothership') {
+        const phase = gameState.mothershipObjective?.phase ?? 0;
+        if (phase < 2) {
+            if (projectile && projectile.active && !projectile.isPiercing) {
+                projectile.destroy();
+            }
+            return;
+        }
+    }
     boss.hp -= applyBossDamage(boss, projectile.damage);
 
     // Visual hit feedback
@@ -284,6 +293,14 @@ function hitBoss(projectile, boss) {
 function playerHitBoss(playerSprite, boss) {
     const scene = boss.scene;
     const audioManager = scene.audioManager;
+
+    if (boss.bossType === 'mothershipCore' && gameState.mode === 'mothership') {
+        const phase = gameState.mothershipObjective?.phase ?? 0;
+        if (phase < 2) {
+            screenShake(scene, 8, 180);
+            return;
+        }
+    }
 
     if (playerState.powerUps.invincibility > 0) {
         boss.hp -= applyBossDamage(boss, 3);
