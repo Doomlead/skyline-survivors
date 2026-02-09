@@ -250,16 +250,17 @@ function hitBoss(projectile, boss) {
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
     const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
+    let isMothershipCoreLocked = false;
     if (boss.bossType === 'mothershipCore' && gameState.mode === 'mothership') {
         const phase = gameState.mothershipObjective?.phase ?? 0;
-        if (phase < 2) {
-            if (projectile && projectile.active && !projectile.isPiercing) {
-                projectile.destroy();
-            }
-            return;
-        }
+        isMothershipCoreLocked = phase < 2;
     }
-    boss.hp -= applyBossDamage(boss, projectile.damage);
+    const damage = applyBossDamage(boss, projectile.damage);
+    if (isMothershipCoreLocked) {
+        boss.hp = Math.max(1, boss.hp - damage);
+    } else {
+        boss.hp -= damage;
+    }
 
     // Visual hit feedback
     scene.tweens.add({
@@ -284,7 +285,7 @@ function hitBoss(projectile, boss) {
         projectile.hasClustered = true;
         spawnClusterMissiles(scene, projectile, boss);
     }
-    if (boss.hp <= 0) destroyBoss(scene, boss);
+    if (boss.hp <= 0 && !isMothershipCoreLocked) destroyBoss(scene, boss);
     if (projectile && projectile.active && !projectile.isPiercing) {
         projectile.destroy();
     }
@@ -294,23 +295,34 @@ function playerHitBoss(playerSprite, boss) {
     const scene = boss.scene;
     const audioManager = scene.audioManager;
 
-    if (boss.bossType === 'mothershipCore' && gameState.mode === 'mothership') {
-        const phase = gameState.mothershipObjective?.phase ?? 0;
-        if (phase < 2) {
-            screenShake(scene, 8, 180);
-            return;
-        }
-    }
-
     if (playerState.powerUps.invincibility > 0) {
-        boss.hp -= applyBossDamage(boss, 3);
+        const damage = applyBossDamage(boss, 3);
+        if (boss.bossType === 'mothershipCore' && gameState.mode === 'mothership') {
+            const phase = gameState.mothershipObjective?.phase ?? 0;
+            if (phase < 2) {
+                boss.hp = Math.max(1, boss.hp - damage);
+                screenShake(scene, 8, 180);
+                return;
+            }
+        }
+        boss.hp -= damage;
         if (boss.hp <= 0) destroyBoss(scene, boss);
         return;
     }
 
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
-        boss.hp -= applyBossDamage(boss, 2);
+        const damage = applyBossDamage(boss, 2);
+        if (boss.bossType === 'mothershipCore' && gameState.mode === 'mothership') {
+            const phase = gameState.mothershipObjective?.phase ?? 0;
+            if (phase < 2) {
+                boss.hp = Math.max(1, boss.hp - damage);
+                screenShake(scene, 8, 180);
+                if (audioManager) audioManager.playSound('hitPlayer');
+                return;
+            }
+        }
+        boss.hp -= damage;
         if (boss.hp <= 0) destroyBoss(scene, boss);
         screenShake(scene, 10, 200);
         if (audioManager) audioManager.playSound('hitPlayer');
