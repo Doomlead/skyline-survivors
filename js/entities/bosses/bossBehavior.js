@@ -8,16 +8,18 @@ function fireBossBulletPattern(scene, boss, time, timeSlowMultiplier) {
     const shotConfig = getBossShotConfig(boss.bossType);
     if (!shotConfig || !shotConfig.pattern) return;
     if (!boss.lastPatternShot) boss.lastPatternShot = 0;
-    if (time - boss.lastPatternShot < shotConfig.interval) return;
+    const phaseInterval = getBossPhaseInterval(boss, shotConfig.interval);
+    if (time - boss.lastPatternShot < phaseInterval) return;
     boss.lastPatternShot = time;
 
     const { sources, projectileType, speed, damage, pattern } = shotConfig;
+    const phaseSources = getBossPhaseSources(boss, sources);
     const adjustedSpeed = speed * timeSlowMultiplier;
 
     switch (pattern) {
         case 'radial':
-            for (let i = 0; i < sources; i++) {
-                const angle = (Math.PI * 2 / sources) * i;
+            for (let i = 0; i < phaseSources; i++) {
+                const angle = (Math.PI * 2 / phaseSources) * i;
                 const bullet = enemyProjectiles.create(boss.x, boss.y, projectileType);
                 bullet.setDepth(FG_DEPTH_BASE + 4);
                 bullet.setScale(1.2);
@@ -31,7 +33,7 @@ function fireBossBulletPattern(scene, boss, time, timeSlowMultiplier) {
             if (!player) return;
             const baseAngle = Phaser.Math.Angle.Between(boss.x, boss.y, player.x, player.y);
             const spreadAngle = Math.PI / 6;
-            const count = Math.max(1, sources);
+            const count = Math.max(1, phaseSources);
             for (let i = 0; i < count; i++) {
                 const offset = count === 1 ? 0 : (spreadAngle * (i / (count - 1))) - (spreadAngle / 2);
                 const angle = baseAngle + offset;
@@ -47,8 +49,8 @@ function fireBossBulletPattern(scene, boss, time, timeSlowMultiplier) {
         case 'spiral':
             if (!boss.spiralAngle) boss.spiralAngle = 0;
             boss.spiralAngle += 0.2 * timeSlowMultiplier;
-            for (let i = 0; i < sources; i++) {
-                const angle = boss.spiralAngle + (Math.PI * 2 / sources) * i;
+            for (let i = 0; i < phaseSources; i++) {
+                const angle = boss.spiralAngle + (Math.PI * 2 / phaseSources) * i;
                 const bullet = enemyProjectiles.create(boss.x, boss.y, projectileType);
                 bullet.setDepth(FG_DEPTH_BASE + 4);
                 bullet.setScale(1.2);
@@ -75,10 +77,12 @@ function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.y = centerY + Math.sin(boss.orbitAngle) * orbitRadius * 0.6;
     
     // Shoot from 4 tentacles
-    if (time > boss.lastShot + 1200) {
-        const shotConfig = getBossShotConfig('megaLander');
-        for (let i = 0; i < 4; i++) {
-            const angle = (i / 4) * Math.PI * 2;
+    const shotConfig = getBossShotConfig('megaLander');
+    const shotInterval = getBossPhaseInterval(boss, shotConfig.interval);
+    if (time > boss.lastShot + shotInterval) {
+        const phaseSources = getBossPhaseSources(boss, 4);
+        for (let i = 0; i < phaseSources; i++) {
+            const angle = (i / phaseSources) * Math.PI * 2;
             const sourceX = boss.x + Math.cos(angle) * 30;
             const sourceY = boss.y + Math.sin(angle) * 30;
             shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig);
@@ -101,10 +105,13 @@ function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
     );
     
     // 3 arm shooting - spread pattern
-    if (time > boss.lastShot + 1400) {
-        const shotConfig = getBossShotConfig('titanMutant');
-        for (let i = 0; i < 3; i++) {
-            const armAngle = angle + (i - 1) * 0.4;
+    const shotConfig = getBossShotConfig('titanMutant');
+    const shotInterval = getBossPhaseInterval(boss, shotConfig.interval);
+    if (time > boss.lastShot + shotInterval) {
+        const phaseSources = getBossPhaseSources(boss, 3);
+        const spreadOffset = phaseSources > 1 ? 0.4 : 0;
+        for (let i = 0; i < phaseSources; i++) {
+            const armAngle = angle + (i - (phaseSources - 1) / 2) * spreadOffset;
             const sourceX = boss.x + Math.cos(armAngle) * 40;
             const sourceY = boss.y + Math.sin(armAngle) * 40;
             shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, armAngle);
@@ -129,10 +136,12 @@ function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) {
     }
     
     // 6 hexagonal gun ports fire
-    if (time > boss.lastShot + 1000) {
-        const shotConfig = getBossShotConfig('hiveDrone');
-        for (let i = 0; i < 6; i++) {
-            const portAngle = (i / 6) * Math.PI * 2;
+    const shotConfig = getBossShotConfig('hiveDrone');
+    const shotInterval = getBossPhaseInterval(boss, shotConfig.interval);
+    if (time > boss.lastShot + shotInterval) {
+        const phaseSources = getBossPhaseSources(boss, 6);
+        for (let i = 0; i < phaseSources; i++) {
+            const portAngle = (i / phaseSources) * Math.PI * 2;
             const sourceX = boss.x + Math.cos(portAngle) * 35;
             const sourceY = boss.y + Math.sin(portAngle) * 35;
             shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, portAngle);
@@ -157,10 +166,13 @@ function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultipli
     else if (boss.y > CONFIG.height * 0.7) boss.setVelocityY(-30 * timeSlowMultiplier);
     
     // Drop mines from 3 bomb bays + 2 side shots
-    if (time > boss.lastBombDrop + 2000) {
+    const shotConfig = getBossShotConfig('behemothBomber');
+    const bombInterval = getBossPhaseInterval(boss, 2000);
+    if (time > boss.lastBombDrop + bombInterval) {
         // 3 bomb bays - drop mines downward
-        for (let i = 0; i < 3; i++) {
-            const bayX = boss.x + (i - 1) * 30;
+        const mineCount = getBossPhaseSources(boss, 3);
+        for (let i = 0; i < mineCount; i++) {
+            const bayX = boss.x + (i - (mineCount - 1) / 2) * 30;
             const mine = enemyProjectiles.create(bayX, boss.y + 20, 'mine');
             mine.setDepth(FG_DEPTH_BASE + 4);
             mine.setScale(1.5);
@@ -181,7 +193,6 @@ function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultipli
         }
         
         // 2 side guns - lateral shots
-        const shotConfig = getBossShotConfig('behemothBomber');
         shootFromBossSource(scene, boss.x - 40, boss.y, boss, shotConfig, Math.PI);
         shootFromBossSource(scene, boss.x + 40, boss.y, boss, shotConfig, 0);
         
@@ -201,10 +212,12 @@ function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.setVelocityX(30 * timeSlowMultiplier);
     
     // 4 spawn ports radial fire
-    if (time > boss.lastShot + 1500) {
-        const shotConfig = getBossShotConfig('colossalPod');
-        for (let i = 0; i < 4; i++) {
-            const angle = (i / 4) * Math.PI * 2;
+    const shotConfig = getBossShotConfig('colossalPod');
+    const shotInterval = getBossPhaseInterval(boss, shotConfig.interval);
+    if (time > boss.lastShot + shotInterval) {
+        const phaseSources = getBossPhaseSources(boss, 4);
+        for (let i = 0; i < phaseSources; i++) {
+            const angle = (i / phaseSources) * Math.PI * 2;
             const sourceX = boss.x + Math.cos(angle) * 40;
             const sourceY = boss.y + Math.sin(angle) * 40;
             shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, angle);
@@ -230,10 +243,12 @@ function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
     );
     
     // 5 thrusters fire in quick sequence
-    if (time > boss.lastShot + 900) {
-        const shotConfig = getBossShotConfig('leviathanBaiter');
-        for (let i = 0; i < 5; i++) {
-            const thrusterAngle = (i / 5) * Math.PI * 2;
+    const shotConfig = getBossShotConfig('leviathanBaiter');
+    const shotInterval = getBossPhaseInterval(boss, shotConfig.interval);
+    if (time > boss.lastShot + shotInterval) {
+        const phaseSources = getBossPhaseSources(boss, 5);
+        for (let i = 0; i < phaseSources; i++) {
+            const thrusterAngle = (i / phaseSources) * Math.PI * 2;
             const sourceX = boss.x + Math.cos(thrusterAngle) * 35;
             const sourceY = boss.y + Math.sin(thrusterAngle) * 35;
             shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, thrusterAngle - Math.PI);
@@ -255,10 +270,12 @@ function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.rotation += 0.1 * timeSlowMultiplier;
     
     // 4 explosive appendages burst fire
-    if (time > boss.lastShot + 800) {
-        const shotConfig = getBossShotConfig('apexKamikaze');
-        for (let i = 0; i < 4; i++) {
-            const appendageAngle = (i / 4) * Math.PI * 2 + (time * 0.005);
+    const shotConfig = getBossShotConfig('apexKamikaze');
+    const shotInterval = getBossPhaseInterval(boss, shotConfig.interval);
+    if (time > boss.lastShot + shotInterval) {
+        const phaseSources = getBossPhaseSources(boss, 4);
+        for (let i = 0; i < phaseSources; i++) {
+            const appendageAngle = (i / phaseSources) * Math.PI * 2 + (time * 0.005);
             const sourceX = boss.x + Math.cos(appendageAngle) * 25;
             const sourceY = boss.y + Math.sin(appendageAngle) * 25;
             shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, appendageAngle);
@@ -281,26 +298,22 @@ function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
     }
     
     // 8 barrel rotating pattern
-    if (time > boss.lastShot + 1100) {
+    const shotInterval = getBossPhaseInterval(boss, 1100);
+    if (time > boss.lastShot + shotInterval) {
+        const phaseDirections = getBossPhaseSources(boss, 8);
         let directions;
         
         if (boss.barrelMode === 0) {
             // Cardinal + diagonal (8 directions)
-            directions = [
-                -Math.PI / 2,      // Up
-                -Math.PI / 4,      // Up-Right
-                0,                 // Right
-                Math.PI / 4,       // Down-Right
-                Math.PI / 2,       // Down
-                3 * Math.PI / 4,   // Down-Left
-                Math.PI,           // Left
-                -3 * Math.PI / 4   // Up-Left
-            ];
+            directions = [];
+            for (let i = 0; i < phaseDirections; i++) {
+                directions.push((i / phaseDirections) * Math.PI * 2 - Math.PI / 2);
+            }
         } else {
             // Offset by 22.5 degrees
             directions = [];
-            for (let i = 0; i < 8; i++) {
-                directions.push((i / 8) * Math.PI * 2 + Math.PI / 8);
+            for (let i = 0; i < phaseDirections; i++) {
+                directions.push((i / phaseDirections) * Math.PI * 2 + Math.PI / 8);
             }
         }
         
@@ -340,10 +353,12 @@ function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.y = centerY + Math.sin(boss.orbitAngle) * orbitRadius * 0.8;
     
     // 6 energy nodes fire slow, powerful beams
-    if (time > boss.lastShot + 1800) {
-        const shotConfig = getBossShotConfig('overlordShield');
-        for (let i = 0; i < 6; i++) {
-            const nodeAngle = (i / 6) * Math.PI * 2;
+    const shotConfig = getBossShotConfig('overlordShield');
+    const shotInterval = getBossPhaseInterval(boss, shotConfig.interval);
+    if (time > boss.lastShot + shotInterval) {
+        const phaseSources = getBossPhaseSources(boss, 6);
+        for (let i = 0; i < phaseSources; i++) {
+            const nodeAngle = (i / phaseSources) * Math.PI * 2;
             const sourceX = boss.x + Math.cos(nodeAngle) * 45;
             const sourceY = boss.y + Math.sin(nodeAngle) * 45;
             shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, nodeAngle);
@@ -375,6 +390,7 @@ function updateBosses(scene, time, delta) {
         }
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
+        updateBossPhaseState(scene, boss, time);
 
         switch (boss.bossType) {
             case 'megaLander':
@@ -406,6 +422,7 @@ function updateBosses(scene, time, delta) {
                 break;
         }
 
+        updateBossShieldNodes(scene, boss, timeSlowMultiplier);
         fireBossBulletPattern(scene, boss, time, timeSlowMultiplier);
     });
 }

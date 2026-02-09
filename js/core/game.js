@@ -319,6 +319,8 @@ function create() {
     this.drones = this.physics.add.group();
     this.explosions = this.add.group();
     this.bosses = this.physics.add.group();
+    this.bossShields = this.physics.add.group();
+    this.battleshipShields = this.physics.add.group();
     this.battleships = this.physics.add.group();
     this.assaultTargets = this.physics.add.group();
     this.garrisonDefenders = this.physics.add.group();
@@ -368,11 +370,15 @@ function create() {
     this.physics.add.overlap(this.projectiles, this.enemies, hitEnemy, null, this);
     this.physics.add.overlap(this.projectiles, this.garrisonDefenders, hitGarrisonDefender, null, this);
     this.physics.add.overlap(this.projectiles, this.bosses, hitBoss, null, this);
+    this.physics.add.overlap(this.projectiles, this.bossShields, hitBossShield, null, this);
+    this.physics.add.overlap(this.projectiles, this.battleshipShields, hitBattleshipShield, null, this);
     this.physics.add.overlap(this.projectiles, this.battleships, hitBattleship, null, this);
     this.physics.add.overlap(this.projectiles, this.assaultTargets, hitAssaultTarget, null, this);
     this.physics.add.overlap(this.aegis, this.enemies, playerHitEnemy, null, this);
     this.physics.add.overlap(this.aegis, this.garrisonDefenders, playerHitGarrisonDefender, null, this);
     this.physics.add.overlap(this.aegis, this.bosses, playerHitBoss, null, this);
+    this.physics.add.overlap(this.aegis, this.bossShields, playerHitBossShield, null, this);
+    this.physics.add.overlap(this.aegis, this.battleshipShields, playerHitBattleshipShield, null, this);
     this.physics.add.overlap(this.aegis, this.battleships, playerHitBattleship, null, this);
     this.physics.add.overlap(this.aegis, this.enemyProjectiles, playerHitProjectile, null, this);
     this.physics.add.overlap(this.aegis, this.powerUps, collectPowerUp, null, this);
@@ -391,6 +397,8 @@ function create() {
     this.physics.add.overlap(this.pilot, this.enemies, playerHitEnemy, null, this);
     this.physics.add.overlap(this.pilot, this.garrisonDefenders, playerHitGarrisonDefender, null, this);
     this.physics.add.overlap(this.pilot, this.bosses, playerHitBoss, null, this);
+    this.physics.add.overlap(this.pilot, this.bossShields, playerHitBossShield, null, this);
+    this.physics.add.overlap(this.pilot, this.battleshipShields, playerHitBattleshipShield, null, this);
     this.physics.add.overlap(this.pilot, this.battleships, playerHitBattleship, null, this);
     this.physics.add.overlap(this.pilot, this.enemyProjectiles, playerHitProjectile, null, this);
     this.physics.add.overlap(this.pilot, this.powerUps, collectPowerUp, null, this);

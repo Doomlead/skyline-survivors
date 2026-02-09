@@ -114,6 +114,69 @@ const BATTLESHIP_SHOT_CONFIGS = {
     }
 };
 
+const BATTLESHIP_PHASE_CONFIGS = {
+    default: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4200,
+        shotIntervalScales: [1.1, 0.95, 0.8],
+        bonusBursts: [0, 1, 2]
+    },
+    raider: {
+        shieldStages: [2],
+        damageWindowMs: 3600,
+        shotIntervalScales: [1.05, 0.9],
+        bonusBursts: [0, 1]
+    },
+    carrier: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4500,
+        shotIntervalScales: [1.1, 0.95, 0.8],
+        bonusBursts: [0, 1, 2]
+    },
+    nova: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4000,
+        shotIntervalScales: [1.1, 0.9, 0.8],
+        bonusBursts: [0, 1, 2]
+    },
+    siege: {
+        shieldStages: [3, 2],
+        damageWindowMs: 4600,
+        shotIntervalScales: [1.15, 1.0, 0.85],
+        bonusBursts: [0, 1, 2]
+    },
+    dreadnought: {
+        shieldStages: [3, 2],
+        damageWindowMs: 5200,
+        shotIntervalScales: [1.2, 1.0, 0.8],
+        bonusBursts: [0, 2, 3]
+    }
+};
+
+const BATTLESHIP_SHIELD_CONFIGS = {
+    default: {
+        hp: 14,
+        orbitRadius: 50,
+        orbitSpeed: 0.012,
+        scale: 0.65,
+        texture: 'assaultShieldGen'
+    },
+    siege: {
+        hp: 18,
+        orbitRadius: 70,
+        orbitSpeed: 0.011,
+        scale: 0.8,
+        texture: 'assaultShieldGen'
+    },
+    dreadnought: {
+        hp: 22,
+        orbitRadius: 85,
+        orbitSpeed: 0.013,
+        scale: 0.9,
+        texture: 'assaultShieldGen'
+    }
+};
+
 function getRandomBattleshipType() {
     return Phaser.Utils.Array.GetRandom(BATTLESHIP_TYPES);
 }
@@ -133,6 +196,134 @@ function getBattleshipScale(type) {
 
 function getBattleshipShotConfig(type) {
     return BATTLESHIP_SHOT_CONFIGS[type] || BATTLESHIP_SHOT_CONFIGS.raider;
+}
+
+function getBattleshipPhaseConfig(type) {
+    return BATTLESHIP_PHASE_CONFIGS[type] || BATTLESHIP_PHASE_CONFIGS.default;
+}
+
+function getBattleshipShieldConfig(type) {
+    return BATTLESHIP_SHIELD_CONFIGS[type] || BATTLESHIP_SHIELD_CONFIGS.default;
+}
+
+function getBattleshipPhaseInterval(battleship, baseInterval) {
+    const config = getBattleshipPhaseConfig(battleship?.battleshipType);
+    const phaseIndex = Math.max(0, battleship?.phaseIndex ?? 0);
+    const scales = config.shotIntervalScales || [];
+    const scale = scales[Math.min(phaseIndex, scales.length - 1)] ?? 1;
+    return Math.max(240, baseInterval * scale);
+}
+
+function getBattleshipDamageWindowMs(battleship) {
+    const config = getBattleshipPhaseConfig(battleship?.battleshipType);
+    return config.damageWindowMs || 4000;
+}
+
+function getBattleshipBonusBursts(battleship) {
+    const config = getBattleshipPhaseConfig(battleship?.battleshipType);
+    const phaseIndex = Math.max(0, battleship?.phaseIndex ?? 0);
+    const bonuses = config.bonusBursts || [];
+    return bonuses[Math.min(phaseIndex, bonuses.length - 1)] ?? 0;
+}
+
+function createBattleshipShieldNode(scene, battleship, index, total) {
+    const { battleshipShields } = scene;
+    if (!battleshipShields) return null;
+    const shieldConfig = getBattleshipShieldConfig(battleship.battleshipType);
+    const texture = shieldConfig.texture || 'assaultShieldGen';
+    const shield = battleshipShields.create(battleship.x, battleship.y, texture);
+    shield.setDepth(FG_DEPTH_BASE + 4);
+    shield.setImmovable(true);
+    shield.body.setAllowGravity(false);
+    shield.setScale(shieldConfig.scale || 0.7);
+    shield.hp = shieldConfig.hp;
+    shield.maxHp = shieldConfig.hp;
+    shield.battleshipOwner = battleship;
+    shield.orbitRadius = shieldConfig.orbitRadius || 55;
+    shield.orbitSpeed = shieldConfig.orbitSpeed || 0.012;
+    shield.orbitAngle = (index / total) * Math.PI * 2;
+    return shield;
+}
+
+function clearBattleshipShields(battleship) {
+    if (!battleship?.shieldNodes) return;
+    battleship.shieldNodes.forEach((shield) => {
+        if (shield && shield.active) {
+            shield.destroy();
+        }
+    });
+    battleship.shieldNodes = [];
+}
+
+function spawnBattleshipShieldStage(scene, battleship) {
+    const stageCount = battleship?.shieldStages?.[battleship.shieldStageIndex] || 0;
+    if (!stageCount) {
+        battleship.coreInvulnerable = false;
+        return;
+    }
+    clearBattleshipShields(battleship);
+    battleship.shieldNodes = [];
+    battleship.shieldsRemaining = stageCount;
+    for (let i = 0; i < stageCount; i++) {
+        const shield = createBattleshipShieldNode(scene, battleship, i, stageCount);
+        if (shield) battleship.shieldNodes.push(shield);
+    }
+}
+
+function initializeBattleshipPhases(scene, battleship) {
+    const phaseConfig = getBattleshipPhaseConfig(battleship.battleshipType);
+    const shieldStages = phaseConfig.shieldStages || [];
+    battleship.phaseIndex = 0;
+    battleship.phaseCount = shieldStages.length + 1;
+    battleship.shieldStages = shieldStages;
+    battleship.shieldStageIndex = 0;
+    battleship.shieldsRemaining = 0;
+    battleship.damageWindowUntil = 0;
+    battleship.coreInvulnerable = shieldStages.length > 0;
+    battleship.shieldNodes = [];
+    if (battleship.coreInvulnerable) {
+        spawnBattleshipShieldStage(scene, battleship);
+    }
+    battleship.once('destroy', () => {
+        clearBattleshipShields(battleship);
+    });
+}
+
+function updateBattleshipShieldNodes(scene, battleship, timeSlowMultiplier) {
+    if (!battleship?.shieldNodes?.length) return;
+    battleship.shieldNodes.forEach((shield) => {
+        if (!shield.active || !battleship.active) return;
+        shield.orbitAngle += shield.orbitSpeed * timeSlowMultiplier;
+        const radius = shield.orbitRadius;
+        shield.x = battleship.x + Math.cos(shield.orbitAngle) * radius;
+        shield.y = battleship.y + Math.sin(shield.orbitAngle) * radius * 0.8;
+    });
+}
+
+function handleBattleshipShieldStageCleared(scene, battleship) {
+    battleship.phaseIndex = Math.min(battleship.phaseIndex + 1, (battleship.phaseCount || 1) - 1);
+    battleship.coreInvulnerable = false;
+    const phaseLabel = `PHASE ${battleship.phaseIndex + 1}/${battleship.phaseCount}`;
+    if (battleship.shieldStageIndex >= battleship.shieldStages.length) {
+        battleship.damageWindowUntil = 0;
+        showRebuildObjectiveBanner(scene, 'FINAL PHASE - HULL EXPOSED', '#38bdf8');
+        return;
+    }
+    const now = scene.time?.now || 0;
+    battleship.damageWindowUntil = now + getBattleshipDamageWindowMs(battleship);
+    showRebuildObjectiveBanner(scene, `${phaseLabel} - HULL EXPOSED`, '#22d3ee');
+}
+
+function updateBattleshipPhaseState(scene, battleship, time) {
+    if (!battleship || !battleship.damageWindowUntil) return;
+    if (time < battleship.damageWindowUntil) return;
+    battleship.damageWindowUntil = 0;
+    if (battleship.shieldStageIndex < battleship.shieldStages.length) {
+        battleship.coreInvulnerable = true;
+        spawnBattleshipShieldStage(scene, battleship);
+    } else {
+        battleship.coreInvulnerable = false;
+    }
 }
 
 function createBattleshipTrail(scene, battleship) {
@@ -202,6 +393,7 @@ function spawnBattleship(scene, type, x, y) {
     createSpawnEffect(scene, x, spawnY, 'boss');
     if (audioManager) audioManager.playSound('enemySpawn');
     createBattleshipTrail(scene, battleship);
+    initializeBattleshipPhases(scene, battleship);
 
     return battleship;
 }
@@ -239,6 +431,11 @@ function hitBattleship(projectile, battleship) {
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
 
+    if (battleship.coreInvulnerable) {
+        createExplosion(scene, battleship.x, battleship.y, 0x38bdf8);
+        if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+        return;
+    }
     battleship.hp -= projectile.damage || 1;
 
     scene.tweens.add({
@@ -267,19 +464,78 @@ function hitBattleship(projectile, battleship) {
 function playerHitBattleship(playerSprite, battleship) {
     const scene = battleship.scene;
     const audioManager = scene.audioManager;
+    const invulnerable = battleship.coreInvulnerable;
 
     if (playerState.powerUps.invincibility > 0) {
-        battleship.hp -= 2;
-        if (battleship.hp <= 0) destroyBattleship(scene, battleship);
+        if (!invulnerable) {
+            battleship.hp -= 2;
+            if (battleship.hp <= 0) destroyBattleship(scene, battleship);
+        }
         return;
     }
 
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
-        battleship.hp -= 1;
-        if (battleship.hp <= 0) destroyBattleship(scene, battleship);
+        if (!invulnerable) {
+            battleship.hp -= 1;
+            if (battleship.hp <= 0) destroyBattleship(scene, battleship);
+        }
         screenShake(scene, 12, 200);
         if (audioManager) audioManager.playSound('hitPlayer');
+    } else {
+        screenShake(scene, 18, 320);
+        playerDie(scene);
+    }
+}
+
+function applyBattleshipShieldDamage(scene, shield, damage) {
+    const battleship = shield?.battleshipOwner;
+    if (!battleship || !battleship.active || !shield?.active) return;
+    shield.hp -= damage || 1;
+    createExplosion(scene, shield.x, shield.y, 0x22d3ee);
+    if (shield.hp > 0) return;
+
+    shield.destroy();
+    battleship.shieldsRemaining = Math.max(0, (battleship.shieldsRemaining || 0) - 1);
+    battleship.shieldNodes = battleship.shieldNodes?.filter(node => node && node.active) || [];
+    if (battleship.shieldsRemaining <= 0) {
+        battleship.shieldStageIndex = Math.min(
+            (battleship.shieldStageIndex || 0) + 1,
+            battleship.shieldStages?.length || 0
+        );
+        handleBattleshipShieldStageCleared(scene, battleship);
+    }
+}
+
+function hitBattleshipShield(projectile, shield) {
+    const scene = projectile.scene;
+    const battleship = shield.battleshipOwner;
+    if (!battleship || !battleship.active) {
+        if (projectile && projectile.active) projectile.destroy();
+        if (shield && shield.active) shield.destroy();
+        return;
+    }
+    applyBattleshipShieldDamage(scene, shield, projectile.damage || 1);
+    if (projectile && projectile.active && !projectile.isPiercing) {
+        projectile.destroy();
+    }
+}
+
+function playerHitBattleshipShield(playerSprite, shield) {
+    const scene = shield.scene;
+    const battleship = shield.battleshipOwner;
+    if (!battleship || !battleship.active) return;
+
+    if (playerState.powerUps.invincibility > 0) {
+        applyBattleshipShieldDamage(scene, shield, 2);
+        return;
+    }
+
+    if (playerState.powerUps.shield > 0) {
+        playerState.powerUps.shield = 0;
+        applyBattleshipShieldDamage(scene, shield, 1);
+        screenShake(scene, 10, 200);
+        if (scene.audioManager) scene.audioManager.playSound('hitPlayer');
     } else {
         screenShake(scene, 18, 320);
         playerDie(scene);
@@ -378,6 +634,7 @@ function completeBattleshipWave(scene) {
 function destroyBattleship(scene, battleship) {
     const { battleships } = scene;
     if (!battleships) return;
+    clearBattleshipShields(battleship);
 
     screenShake(scene, 18, 400);
 

@@ -165,10 +165,17 @@ const gameState = {
         baseHpMax: 0,
         spawnTimer: 0,
         shieldsRemaining: 0,
+        shieldStages: [],
+        shieldStageIndex: 0,
+        phaseIndex: 0,
+        phaseCount: 0,
+        coreInvulnerable: false,
+        damageWindowUntil: 0,
         shieldHitCooldown: 0,
         turretFireTimer: 0,
         reinforcementTimer: 0,
-        baseX: 0
+        baseX: 0,
+        baseY: 0
     },
     mothershipObjective: {
         active: false,
@@ -176,7 +183,8 @@ const gameState = {
         bossHp: 0,
         bossHpMax: 0,
         reinforcementTimer: 0,
-        phase: 0
+        phase: 0,
+        shieldsRemaining: 0
     },
     rebuildObjective: {
         active: false,
@@ -362,10 +370,17 @@ function resetGameState() {
         baseHpMax: 0,
         spawnTimer: 0,
         shieldsRemaining: 0,
+        shieldStages: [],
+        shieldStageIndex: 0,
+        phaseIndex: 0,
+        phaseCount: 0,
+        coreInvulnerable: false,
+        damageWindowUntil: 0,
         shieldHitCooldown: 0,
         turretFireTimer: 0,
         reinforcementTimer: 0,
-        baseX: 0
+        baseX: 0,
+        baseY: 0
     };
     gameState.mothershipObjective = {
         active: false,
@@ -373,7 +388,8 @@ function resetGameState() {
         bossHp: 0,
         bossHpMax: 0,
         reinforcementTimer: 0,
-        phase: 0
+        phase: 0,
+        shieldsRemaining: 0
     };
     gameState.rebuildObjective = {
         active: false,

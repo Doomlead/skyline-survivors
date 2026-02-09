@@ -19,28 +19,35 @@ function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultipl
     );
 
     const shotConfig = getBattleshipShotConfig('raider');
-    if (time > battleship.lastShot + shotConfig.interval) {
+    const shotInterval = getBattleshipPhaseInterval(battleship, shotConfig.interval);
+    if (time > battleship.lastShot + shotInterval) {
         const spread = 0.18;
         const leftAngle = angle - spread;
         const rightAngle = angle + spread;
         const sourceOffset = 18;
+        const burstCount = 1 + getBattleshipBonusBursts(battleship);
 
-        shootFromBattleshipSource(
-            scene,
-            battleship.x + Math.cos(leftAngle) * sourceOffset,
-            battleship.y + Math.sin(leftAngle) * sourceOffset,
-            battleship,
-            shotConfig,
-            leftAngle
-        );
-        shootFromBattleshipSource(
-            scene,
-            battleship.x + Math.cos(rightAngle) * sourceOffset,
-            battleship.y + Math.sin(rightAngle) * sourceOffset,
-            battleship,
-            shotConfig,
-            rightAngle
-        );
+        for (let i = 0; i < burstCount; i++) {
+            const burstOffset = i * 0.03;
+            const burstLeft = leftAngle - burstOffset;
+            const burstRight = rightAngle + burstOffset;
+            shootFromBattleshipSource(
+                scene,
+                battleship.x + Math.cos(burstLeft) * sourceOffset,
+                battleship.y + Math.sin(burstLeft) * sourceOffset,
+                battleship,
+                shotConfig,
+                burstLeft
+            );
+            shootFromBattleshipSource(
+                scene,
+                battleship.x + Math.cos(burstRight) * sourceOffset,
+                battleship.y + Math.sin(burstRight) * sourceOffset,
+                battleship,
+                shotConfig,
+                burstRight
+            );
+        }
         battleship.lastShot = time;
     }
 }
@@ -70,9 +77,14 @@ function updateCarrierBattleshipBehavior(scene, battleship, time, delta, timeSlo
     }
 
     const shotConfig = getBattleshipShotConfig('carrier');
-    if (time > battleship.lastShot + shotConfig.interval) {
+    const shotInterval = getBattleshipPhaseInterval(battleship, shotConfig.interval);
+    if (time > battleship.lastShot + shotInterval) {
         const angle = Phaser.Math.Angle.Between(battleship.x, battleship.y, player.x, player.y);
-        shootFromBattleshipSource(scene, battleship.x, battleship.y, battleship, shotConfig, angle);
+        const burstCount = 1 + getBattleshipBonusBursts(battleship);
+        for (let i = 0; i < burstCount; i++) {
+            const jitter = (i - (burstCount - 1) / 2) * 0.05;
+            shootFromBattleshipSource(scene, battleship.x, battleship.y, battleship, shotConfig, angle + jitter);
+        }
         battleship.lastShot = time;
     }
 }
@@ -92,12 +104,17 @@ function updateNovaBattleshipBehavior(scene, battleship, time, timeSlowMultiplie
     battleship.y = targetY;
 
     const shotConfig = getBattleshipShotConfig('nova');
-    if (time > battleship.lastShot + shotConfig.interval) {
-        for (let i = 0; i < 6; i++) {
-            const angle = (i / 6) * Math.PI * 2 + battleship.orbitAngle;
-            const sourceX = battleship.x + Math.cos(angle) * 22;
-            const sourceY = battleship.y + Math.sin(angle) * 22;
-            shootFromBattleshipSource(scene, sourceX, sourceY, battleship, shotConfig, angle);
+    const shotInterval = getBattleshipPhaseInterval(battleship, shotConfig.interval);
+    if (time > battleship.lastShot + shotInterval) {
+        const burstCount = 1 + getBattleshipBonusBursts(battleship);
+        for (let burst = 0; burst < burstCount; burst++) {
+            const rotationOffset = burst * 0.35;
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2 + battleship.orbitAngle + rotationOffset;
+                const sourceX = battleship.x + Math.cos(angle) * 22;
+                const sourceY = battleship.y + Math.sin(angle) * 22;
+                shootFromBattleshipSource(scene, sourceX, sourceY, battleship, shotConfig, angle);
+            }
         }
         battleship.lastShot = time;
     }
@@ -125,11 +142,16 @@ function updateSiegeBattleshipBehavior(scene, battleship, time, timeSlowMultipli
     battleship.y += Math.sin(battleship.siegePhase) * 0.5;
 
     const shotConfig = getBattleshipShotConfig('siege');
-    if (time > battleship.lastShot + shotConfig.interval) {
+    const shotInterval = getBattleshipPhaseInterval(battleship, shotConfig.interval);
+    if (time > battleship.lastShot + shotInterval) {
         const fireAngle = angleToPlayer + battleship.siegeOffset * 0.05;
-        const barrelX = battleship.x + Math.cos(fireAngle) * 26;
-        const barrelY = battleship.y + Math.sin(fireAngle) * 26;
-        shootFromBattleshipSource(scene, barrelX, barrelY, battleship, shotConfig, fireAngle);
+        const burstCount = 1 + getBattleshipBonusBursts(battleship);
+        for (let i = 0; i < burstCount; i++) {
+            const burstAngle = fireAngle + (i - (burstCount - 1) / 2) * 0.04;
+            const barrelX = battleship.x + Math.cos(burstAngle) * 26;
+            const barrelY = battleship.y + Math.sin(burstAngle) * 26;
+            shootFromBattleshipSource(scene, barrelX, barrelY, battleship, shotConfig, burstAngle);
+        }
         battleship.lastShot = time;
     }
 }
@@ -151,14 +173,19 @@ function updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMu
     );
 
     const shotConfig = getBattleshipShotConfig('dreadnought');
-    if (time > battleship.lastShot + shotConfig.interval) {
-        const offsets = [-0.35, -0.15, 0.15, 0.35];
-        offsets.forEach(offset => {
-            const fireAngle = angle + offset;
-            const sourceX = battleship.x + Math.cos(fireAngle) * 30;
-            const sourceY = battleship.y + Math.sin(fireAngle) * 30;
-            shootFromBattleshipSource(scene, sourceX, sourceY, battleship, shotConfig, fireAngle);
-        });
+    const shotInterval = getBattleshipPhaseInterval(battleship, shotConfig.interval);
+    if (time > battleship.lastShot + shotInterval) {
+        const burstCount = 1 + getBattleshipBonusBursts(battleship);
+        for (let burst = 0; burst < burstCount; burst++) {
+            const offsets = [-0.35, -0.15, 0.15, 0.35];
+            const spreadScale = 1 + burst * 0.15;
+            offsets.forEach(offset => {
+                const fireAngle = angle + offset * spreadScale;
+                const sourceX = battleship.x + Math.cos(fireAngle) * 30;
+                const sourceY = battleship.y + Math.sin(fireAngle) * 30;
+                shootFromBattleshipSource(scene, sourceX, sourceY, battleship, shotConfig, fireAngle);
+            });
+        }
         battleship.lastShot = time;
     }
 }
@@ -186,6 +213,7 @@ function updateBattleships(scene, time, delta) {
         }
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
+        updateBattleshipPhaseState(scene, battleship, time);
 
         switch (battleship.battleshipType) {
             case 'raider':
@@ -204,5 +232,7 @@ function updateBattleships(scene, time, delta) {
                 updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMultiplier);
                 break;
         }
+
+        updateBattleshipShieldNodes(scene, battleship, timeSlowMultiplier);
     });
 }

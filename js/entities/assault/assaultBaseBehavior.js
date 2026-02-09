@@ -20,6 +20,7 @@ function updateAssaultObjective(scene, delta) {
     objective.turretFireTimer += delta;
     objective.reinforcementTimer += delta;
     objective.shieldHitCooldown = Math.max(0, objective.shieldHitCooldown - delta);
+    updateAssaultPhaseState(scene);
     if (objective.spawnTimer >= ASSAULT_BASE_CONFIG.spawnInterval) {
         objective.spawnTimer = 0;
         const assaultMix = ['mutant', 'shield', 'spawner', 'kamikaze', 'seeker', 'turret'];

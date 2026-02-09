@@ -204,15 +204,15 @@
 
 ## MVP Completion
 
-- **Status:** ~74% complete (core loop intact, Mothership core fight present but simplified)
-- **Primary Blockers:** Multi-phase Mothership mission, strategic pressure systems, assault rewards + bulwark siege bonuses
+- **Status:** ~75% complete (core loop intact, Mothership core fight now uses shield-gated phases but lacks exterior/interior sequencing)
+- **Primary Blockers:** Multi-phase Mothership mission (exterior/interior), strategic pressure systems, assault rewards + bulwark siege bonuses
 
 ## Gap Analysis & Next Steps
 
 ### Overall Completion Statistics
-- **MVP Completion:** ~74% (Core rescue/deploy loop, on-foot aura, and district flow are playable with supply-drop hot-starts.)
-- **Design Document Alignment:** ~67% (Key systems exist, but several signature mechanics are still missing.)
-- **Major Milestones Achieved:** Rescue/Deploy loop, district states, assault/defense modes, hangar rebuild, operative spawning + formation + sacrifice behaviors, supply drop unboxing + hot-start application, mothership core encounter.
+- **MVP Completion:** ~75% (Core rescue/deploy loop, on-foot aura, and district flow are playable with supply-drop hot-starts.)
+- **Design Document Alignment:** ~68% (Key systems exist, but several signature mechanics are still missing.)
+- **Major Milestones Achieved:** Rescue/Deploy loop, district states, assault/defense modes, hangar rebuild, operative spawning + formation + sacrifice behaviors, supply drop unboxing + hot-start application, mothership core encounter with shield-gated phases.
 
 ### Design Document Alignment
 **Aligned/Implemented**
@@ -233,7 +233,7 @@
 
 **Not Aligned**
 - Assault rewards and mystery drops.
-- Multi-phase mothership mission structure (exterior → interior → core).
+- Multi-phase mothership mission structure (exterior → interior → core), though the core fight now uses shield-gated phases.
 
 ### Major Milestones Achieved
 - Ship/foot transition with pilot ejection and hangar rebuild.
@@ -241,12 +241,12 @@
 - On-foot aura + body-blocking sacrifice loop.
 - Assault base objective with garrisons/turrets/shield nodes.
 - Supply Drop shop, unboxing, pending drop display, and mission-start hot-start application.
-- Mothership node unlock and core boss flow.
+- Mothership node unlock and core boss flow with shield-gated phases.
 
 ### Critical Missing Features for Design Document Compliance
 1. **Bulwark Assault Synergy:** Higher structural damage or siege bonuses.
 2. **Assault Loot Rewards & Mystery Drops:** Base destruction rewards and random jackpots.
-3. **Multi-phase Mothership Mission:** Exterior → interior → core progression with phase-gated objectives.
+3. **Multi-phase Mothership Mission:** Exterior → interior → core progression with phase-gated objectives (core fight now has shield phases, but the mission structure is still missing).
 
 ### Immediate Next Steps (Recommended Order)
 **Priority 1: Bulwark Assault Synergy + Assault Rewards (2-3 Days)**
@@ -256,7 +256,6 @@
 **Priority 2: Expand Mothership Final Boss Mission (4-6 days)**
 - Build Phase 1 exterior assault + phase transition setup.
 - Implement Phase 2 interior encounter space (on-foot focus) with objective gating.
-- Upgrade Phase 3 core boss to multi-step shield/HP phases (current fight is HP-based, single arena).
 - Add phase-gated UI beats and cinematic transition (dock/boarding).
 
 **Priority 3: Feedback + UI Polish (2 Days)**

@@ -211,6 +211,108 @@ const BOSS_SHOT_CONFIGS = {
     }
 };
 
+const BOSS_PHASE_CONFIGS = {
+    default: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4500,
+        shotIntervalScales: [1.1, 0.95, 0.8],
+        bonusSources: [0, 1, 2],
+        reinforcementIntervalScales: [1.1, 0.95, 0.8]
+    },
+    megaLander: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4200,
+        shotIntervalScales: [1.1, 0.95, 0.8],
+        bonusSources: [0, 1, 2]
+    },
+    titanMutant: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4200,
+        shotIntervalScales: [1.05, 0.9, 0.75],
+        bonusSources: [0, 1, 2]
+    },
+    hiveDrone: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4000,
+        shotIntervalScales: [1.1, 0.9, 0.8],
+        bonusSources: [0, 2, 3]
+    },
+    behemothBomber: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4500,
+        shotIntervalScales: [1.15, 0.95, 0.8],
+        bonusSources: [0, 1, 2]
+    },
+    colossalPod: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4300,
+        shotIntervalScales: [1.1, 0.9, 0.8],
+        bonusSources: [0, 1, 2]
+    },
+    leviathanBaiter: {
+        shieldStages: [2, 2],
+        damageWindowMs: 4000,
+        shotIntervalScales: [1.05, 0.9, 0.75],
+        bonusSources: [0, 1, 2]
+    },
+    apexKamikaze: {
+        shieldStages: [2],
+        damageWindowMs: 3500,
+        shotIntervalScales: [1.0, 0.85],
+        bonusSources: [0, 1]
+    },
+    fortressTurret: {
+        shieldStages: [3, 2],
+        damageWindowMs: 5000,
+        shotIntervalScales: [1.1, 0.95, 0.8],
+        bonusSources: [0, 2, 3]
+    },
+    overlordShield: {
+        shieldStages: [3, 2],
+        damageWindowMs: 5200,
+        shotIntervalScales: [1.1, 0.9, 0.75],
+        bonusSources: [0, 2, 4]
+    },
+    mothershipCore: {
+        shieldStages: [3, 3, 2],
+        damageWindowMs: 6000,
+        shotIntervalScales: [1.2, 1.0, 0.85, 0.7],
+        bonusSources: [0, 2, 4, 6],
+        reinforcementIntervalScales: [1.2, 1.0, 0.85, 0.7]
+    }
+};
+
+const BOSS_SHIELD_CONFIGS = {
+    default: {
+        hp: 16,
+        orbitRadius: 55,
+        orbitSpeed: 0.012,
+        scale: 0.7,
+        texture: 'assaultShieldGen'
+    },
+    fortressTurret: {
+        hp: 22,
+        orbitRadius: 80,
+        orbitSpeed: 0.01,
+        scale: 0.9,
+        texture: 'assaultShieldGen'
+    },
+    overlordShield: {
+        hp: 24,
+        orbitRadius: 90,
+        orbitSpeed: 0.014,
+        scale: 0.95,
+        texture: 'assaultShieldGen'
+    },
+    mothershipCore: {
+        hp: 30,
+        orbitRadius: 110,
+        orbitSpeed: 0.015,
+        scale: 1.1,
+        texture: 'assaultShieldGen'
+    }
+};
+
 const BOSS_TYPES = [
     'megaLander', 'titanMutant', 'hiveDrone', 'behemothBomber', 'colossalPod',
     'leviathanBaiter', 'apexKamikaze', 'fortressTurret', 'overlordShield',
@@ -232,4 +334,41 @@ function getBossScale(type) {
 
 function getBossShotConfig(type) {
     return BOSS_SHOT_CONFIGS[type] || BOSS_SHOT_CONFIGS.megaLander;
+}
+
+function getBossPhaseConfig(type) {
+    return BOSS_PHASE_CONFIGS[type] || BOSS_PHASE_CONFIGS.default;
+}
+
+function getBossShieldConfig(type) {
+    return BOSS_SHIELD_CONFIGS[type] || BOSS_SHIELD_CONFIGS.default;
+}
+
+function getBossPhaseInterval(boss, baseInterval) {
+    const config = getBossPhaseConfig(boss?.bossType);
+    const phaseIndex = Math.max(0, boss?.phaseIndex ?? 0);
+    const scales = config.shotIntervalScales || [];
+    const scale = scales[Math.min(phaseIndex, scales.length - 1)] ?? 1;
+    return Math.max(200, baseInterval * scale);
+}
+
+function getBossPhaseSources(boss, baseSources) {
+    const config = getBossPhaseConfig(boss?.bossType);
+    const phaseIndex = Math.max(0, boss?.phaseIndex ?? 0);
+    const bonuses = config.bonusSources || [];
+    const bonus = bonuses[Math.min(phaseIndex, bonuses.length - 1)] ?? 0;
+    return Math.max(1, baseSources + bonus);
+}
+
+function getBossDamageWindowMs(boss) {
+    const config = getBossPhaseConfig(boss?.bossType);
+    return config.damageWindowMs || 4000;
+}
+
+function getBossReinforcementInterval(boss, baseInterval) {
+    const config = getBossPhaseConfig(boss?.bossType);
+    const phaseIndex = Math.max(0, boss?.phaseIndex ?? 0);
+    const scales = config.reinforcementIntervalScales || [];
+    const scale = scales[Math.min(phaseIndex, scales.length - 1)] ?? 1;
+    return Math.max(1200, baseInterval * scale);
 }

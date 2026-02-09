@@ -88,6 +88,106 @@ function applyBossDamage(boss, rawDamage) {
     return Math.max(0, damage * (1 - reduction));
 }
 
+function createBossShieldNode(scene, boss, index, total) {
+    const { bossShields } = scene;
+    if (!bossShields) return null;
+    const shieldConfig = getBossShieldConfig(boss.bossType);
+    const texture = shieldConfig.texture || 'assaultShieldGen';
+    const shield = bossShields.create(boss.x, boss.y, texture);
+    shield.setDepth(FG_DEPTH_BASE + 4);
+    shield.setImmovable(true);
+    shield.body.setAllowGravity(false);
+    shield.setScale(shieldConfig.scale || 0.7);
+    shield.hp = shieldConfig.hp;
+    shield.maxHp = shieldConfig.hp;
+    shield.bossOwner = boss;
+    shield.orbitRadius = shieldConfig.orbitRadius || 55;
+    shield.orbitSpeed = shieldConfig.orbitSpeed || 0.012;
+    shield.orbitAngle = (index / total) * Math.PI * 2;
+    return shield;
+}
+
+function clearBossShields(boss) {
+    if (!boss?.shieldNodes) return;
+    boss.shieldNodes.forEach((shield) => {
+        if (shield && shield.active) {
+            shield.destroy();
+        }
+    });
+    boss.shieldNodes = [];
+}
+
+function spawnBossShieldStage(scene, boss) {
+    const stageCount = boss?.shieldStages?.[boss.shieldStageIndex] || 0;
+    if (!stageCount) {
+        boss.coreInvulnerable = false;
+        return;
+    }
+    clearBossShields(boss);
+    boss.shieldNodes = [];
+    boss.shieldsRemaining = stageCount;
+    for (let i = 0; i < stageCount; i++) {
+        const shield = createBossShieldNode(scene, boss, i, stageCount);
+        if (shield) boss.shieldNodes.push(shield);
+    }
+}
+
+function initializeBossPhases(scene, boss) {
+    const phaseConfig = getBossPhaseConfig(boss.bossType);
+    const shieldStages = phaseConfig.shieldStages || [];
+    boss.phaseIndex = 0;
+    boss.phaseCount = shieldStages.length + 1;
+    boss.shieldStages = shieldStages;
+    boss.shieldStageIndex = 0;
+    boss.shieldsRemaining = 0;
+    boss.damageWindowUntil = 0;
+    boss.coreInvulnerable = shieldStages.length > 0;
+    boss.shieldNodes = [];
+    if (boss.coreInvulnerable) {
+        spawnBossShieldStage(scene, boss);
+    }
+    boss.once('destroy', () => {
+        clearBossShields(boss);
+    });
+}
+
+function updateBossShieldNodes(scene, boss, timeSlowMultiplier) {
+    if (!boss?.shieldNodes?.length) return;
+    boss.shieldNodes.forEach((shield) => {
+        if (!shield.active || !boss.active) return;
+        shield.orbitAngle += shield.orbitSpeed * timeSlowMultiplier;
+        const radius = shield.orbitRadius;
+        shield.x = boss.x + Math.cos(shield.orbitAngle) * radius;
+        shield.y = boss.y + Math.sin(shield.orbitAngle) * radius * 0.8;
+    });
+}
+
+function handleBossShieldStageCleared(scene, boss) {
+    boss.phaseIndex = Math.min(boss.phaseIndex + 1, (boss.phaseCount || 1) - 1);
+    boss.coreInvulnerable = false;
+    const phaseLabel = `PHASE ${boss.phaseIndex + 1}/${boss.phaseCount}`;
+    if (boss.shieldStageIndex >= boss.shieldStages.length) {
+        boss.damageWindowUntil = 0;
+        showRebuildObjectiveBanner(scene, 'FINAL PHASE - CORE VULNERABLE', '#38bdf8');
+        return;
+    }
+    const now = scene.time?.now || 0;
+    boss.damageWindowUntil = now + getBossDamageWindowMs(boss);
+    showRebuildObjectiveBanner(scene, `${phaseLabel} - CORE EXPOSED`, '#22d3ee');
+}
+
+function updateBossPhaseState(scene, boss, time) {
+    if (!boss || !boss.damageWindowUntil) return;
+    if (time < boss.damageWindowUntil) return;
+    boss.damageWindowUntil = 0;
+    if (boss.shieldStageIndex < boss.shieldStages.length) {
+        boss.coreInvulnerable = true;
+        spawnBossShieldStage(scene, boss);
+    } else {
+        boss.coreInvulnerable = false;
+    }
+}
+
 function spawnBoss(scene, type, x, y) {
     const { bosses, audioManager } = scene;
     if (!bosses) return null;
@@ -123,6 +223,7 @@ function spawnBoss(scene, type, x, y) {
     if (type === 'mothershipCore' && typeof initializeMothershipCore === 'function') {
         initializeMothershipCore(boss);
     }
+    initializeBossPhases(scene, boss);
     
     // Initial velocity for most bosses
     let speed = 0;
@@ -250,6 +351,11 @@ function hitBoss(projectile, boss) {
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
     const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
+    if (boss.coreInvulnerable) {
+        createExplosion(scene, boss.x, boss.y, 0x38bdf8);
+        if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+        return;
+    }
     boss.hp -= applyBossDamage(boss, projectile.damage);
 
     // Visual hit feedback
@@ -284,19 +390,78 @@ function hitBoss(projectile, boss) {
 function playerHitBoss(playerSprite, boss) {
     const scene = boss.scene;
     const audioManager = scene.audioManager;
+    const invulnerable = boss.coreInvulnerable;
 
     if (playerState.powerUps.invincibility > 0) {
-        boss.hp -= applyBossDamage(boss, 3);
-        if (boss.hp <= 0) destroyBoss(scene, boss);
+        if (!invulnerable) {
+            boss.hp -= applyBossDamage(boss, 3);
+            if (boss.hp <= 0) destroyBoss(scene, boss);
+        }
         return;
     }
 
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
-        boss.hp -= applyBossDamage(boss, 2);
-        if (boss.hp <= 0) destroyBoss(scene, boss);
+        if (!invulnerable) {
+            boss.hp -= applyBossDamage(boss, 2);
+            if (boss.hp <= 0) destroyBoss(scene, boss);
+        }
         screenShake(scene, 10, 200);
         if (audioManager) audioManager.playSound('hitPlayer');
+    } else {
+        screenShake(scene, 18, 320);
+        playerDie(scene);
+    }
+}
+
+function applyBossShieldDamage(scene, shield, damage) {
+    const boss = shield?.bossOwner;
+    if (!boss || !boss.active || !shield?.active) return;
+    shield.hp -= damage || 1;
+    createExplosion(scene, shield.x, shield.y, 0x22d3ee);
+    if (shield.hp > 0) return;
+
+    shield.destroy();
+    boss.shieldsRemaining = Math.max(0, (boss.shieldsRemaining || 0) - 1);
+    boss.shieldNodes = boss.shieldNodes?.filter(node => node && node.active) || [];
+    if (boss.shieldsRemaining <= 0) {
+        boss.shieldStageIndex = Math.min(
+            (boss.shieldStageIndex || 0) + 1,
+            boss.shieldStages?.length || 0
+        );
+        handleBossShieldStageCleared(scene, boss);
+    }
+}
+
+function hitBossShield(projectile, shield) {
+    const scene = projectile.scene;
+    const boss = shield.bossOwner;
+    if (!boss || !boss.active) {
+        if (projectile && projectile.active) projectile.destroy();
+        if (shield && shield.active) shield.destroy();
+        return;
+    }
+    applyBossShieldDamage(scene, shield, projectile.damage || 1);
+    if (projectile && projectile.active && !projectile.isPiercing) {
+        projectile.destroy();
+    }
+}
+
+function playerHitBossShield(playerSprite, shield) {
+    const scene = shield.scene;
+    const boss = shield.bossOwner;
+    if (!boss || !boss.active) return;
+
+    if (playerState.powerUps.invincibility > 0) {
+        applyBossShieldDamage(scene, shield, applyBossDamage(boss, 3));
+        return;
+    }
+
+    if (playerState.powerUps.shield > 0) {
+        playerState.powerUps.shield = 0;
+        applyBossShieldDamage(scene, shield, applyBossDamage(boss, 2));
+        screenShake(scene, 10, 200);
+        if (scene.audioManager) scene.audioManager.playSound('hitPlayer');
     } else {
         screenShake(scene, 18, 320);
         playerDie(scene);

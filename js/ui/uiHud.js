@@ -50,7 +50,8 @@ function createUI(scene) {
 function updateUI(scene) {
     if (!scoreEl) return;
     const humansGroup = scene?.humans;
-    const activeBoss = scene?.bosses?.children?.entries?.find(entry => entry.active && entry.bossType !== 'mothershipCore');
+    const activeBoss = scene?.bosses?.children?.entries?.find(entry => entry.active && entry.bossType !== 'mothershipCore')
+        || scene?.battleships?.children?.entries?.find(entry => entry.active);
 
     const formatBossName = (name) => {
         if (!name) return 'Boss Target';
@@ -72,10 +73,15 @@ function updateUI(scene) {
             bossHpFillEl.style.width = `${Math.round(pct * 100)}%`;
         }
         if (bossHpLabelEl) {
-            bossHpLabelEl.innerText = `HP ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}`;
+            const phaseIndex = boss?.phaseIndex ?? 0;
+            const phaseCount = boss?.phaseCount ?? 1;
+            const shieldsRemaining = boss?.shieldsRemaining ?? 0;
+            const phaseText = phaseCount > 1 ? ` • Phase ${phaseIndex + 1}/${phaseCount}` : '';
+            const shieldText = shieldsRemaining > 0 ? ` • Shields ${shieldsRemaining}` : '';
+            bossHpLabelEl.innerText = `HP ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}${phaseText}${shieldText}`;
         }
         if (bossNameLabelEl) {
-            const name = gameState.currentBossName || boss?.bossType || 'Boss';
+            const name = gameState.currentBossName || boss?.bossType || boss?.battleshipType || 'Boss';
             bossNameLabelEl.innerText = formatBossName(name);
         }
     };
@@ -119,7 +125,12 @@ function updateUI(scene) {
             assaultCoreFillEl.style.width = `${Math.round(pct * 100)}%`;
         }
         if (assaultCoreLabelEl) {
-            assaultCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(baseHp))}/${Math.max(0, Math.ceil(baseMax))}`;
+            const phaseIndex = objective?.phaseIndex ?? 0;
+            const phaseCount = objective?.phaseCount ?? 1;
+            const shields = objective?.shieldsRemaining ?? 0;
+            const phaseText = phaseCount > 1 ? ` • Phase ${phaseIndex + 1}/${phaseCount}` : '';
+            const shieldText = shields > 0 ? ` • Shields ${shields}` : '';
+            assaultCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(baseHp))}/${Math.max(0, Math.ceil(baseMax))}${phaseText}${shieldText}`;
         }
         if (assaultShieldLabelEl) {
             const shields = objective?.shieldsRemaining ?? 0;
@@ -144,7 +155,9 @@ function updateUI(scene) {
         }
         if (mothershipPhaseLabelEl) {
             const phase = (objective?.phase ?? 0) + 1;
-            mothershipPhaseLabelEl.innerText = `Phase ${phase}`;
+            const shieldsRemaining = objective?.shieldsRemaining ?? 0;
+            const shieldText = shieldsRemaining > 0 ? ` • Shields ${shieldsRemaining}` : '';
+            mothershipPhaseLabelEl.innerText = `Phase ${phase}${shieldText}`;
         }
     } else {
         timerEl.style.display = 'none';

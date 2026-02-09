@@ -67,10 +67,12 @@ function updateMothershipEncounter(scene, delta) {
 
     objective.bossHp = boss.hp;
     objective.bossHpMax = boss.maxHP;
-    objective.phase = boss.corePhase || 0;
+    objective.phase = boss.phaseIndex || 0;
+    objective.shieldsRemaining = boss.shieldsRemaining || 0;
 
     objective.reinforcementTimer += delta;
-    const interval = objective.phase === 2 ? 2600 : objective.phase === 1 ? 3400 : 4200;
+    const baseInterval = 4200;
+    const interval = getBossReinforcementInterval(boss, baseInterval);
     if (objective.reinforcementTimer >= interval) {
         objective.reinforcementTimer = 0;
         const reinforcements = ['shield', 'spawner', 'seeker', 'kamikaze', 'bomber'];

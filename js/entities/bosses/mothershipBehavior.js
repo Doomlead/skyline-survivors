@@ -9,14 +9,14 @@ function updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.setPosition(anchorX, anchorY);
     boss.setVelocity(0, 0);
 
-    const hpRatio = boss.maxHp > 0 ? boss.hp / boss.maxHp : 1;
-    const phase = hpRatio < 0.33 ? 2 : hpRatio < 0.66 ? 1 : 0;
+    const phase = boss.phaseIndex || 0;
     boss.corePhase = phase;
 
-    const shotInterval = phase === 2 ? 900 : phase === 1 ? 1200 : 1600;
+    const baseInterval = getBossShotConfig('mothershipCore').interval;
+    const shotInterval = getBossPhaseInterval(boss, baseInterval);
     if (time > boss.lastShot + shotInterval) {
         const shotConfig = getBossShotConfig('mothershipCore');
-        const ringCount = phase === 2 ? 10 : phase === 1 ? 8 : 6;
+        const ringCount = getBossPhaseSources(boss, 6);
         for (let i = 0; i < ringCount; i++) {
             const angle = (i / ringCount) * Math.PI * 2;
             const sourceX = boss.x + Math.cos(angle) * 50;
@@ -42,6 +42,8 @@ function updateMothershipBosses(scene, time, delta) {
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
 
+        updateBossPhaseState(scene, boss, time);
         updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier);
+        updateBossShieldNodes(scene, boss, timeSlowMultiplier);
     });
 }
