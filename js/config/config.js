@@ -176,7 +176,29 @@ const gameState = {
         bossHp: 0,
         bossHpMax: 0,
         reinforcementTimer: 0,
-        phase: 0
+        phase: 0,
+        phaseTransitionTimer: 0,
+        phaseTransitionDelay: 1500,
+        transitionActive: false,
+        transitionTimer: 0,
+        transitionDuration: 1200,
+        transitionFadeMs: 300,
+        exteriorSpawnTimer: 0,
+        exteriorTurretFireTimer: 0,
+        exteriorReinforcementTimer: 0,
+        subObjectiveProgress: {
+            exteriorHardpointsDestroyed: 0,
+            interiorObjectivesCleared: 0,
+            coreShieldStage: 0
+        },
+        subObjectiveTargets: {
+            exteriorHardpointsTotal: 0,
+            interiorObjectivesTotal: 0,
+            coreShieldStages: 0
+        },
+        exteriorHardpointsRemaining: 0,
+        interiorObjectivesRemaining: 0,
+        coreShieldStage: 0
     },
     rebuildObjective: {
         active: false,
@@ -373,7 +395,29 @@ function resetGameState() {
         bossHp: 0,
         bossHpMax: 0,
         reinforcementTimer: 0,
-        phase: 0
+        phase: 0,
+        phaseTransitionTimer: 0,
+        phaseTransitionDelay: 1500,
+        transitionActive: false,
+        transitionTimer: 0,
+        transitionDuration: 1200,
+        transitionFadeMs: 300,
+        exteriorSpawnTimer: 0,
+        exteriorTurretFireTimer: 0,
+        exteriorReinforcementTimer: 0,
+        subObjectiveProgress: {
+            exteriorHardpointsDestroyed: 0,
+            interiorObjectivesCleared: 0,
+            coreShieldStage: 0
+        },
+        subObjectiveTargets: {
+            exteriorHardpointsTotal: 0,
+            interiorObjectivesTotal: 0,
+            coreShieldStages: 0
+        },
+        exteriorHardpointsRemaining: 0,
+        interiorObjectivesRemaining: 0,
+        coreShieldStage: 0
     };
     gameState.rebuildObjective = {
         active: false,

@@ -143,8 +143,10 @@ function updateUI(scene) {
             mothershipCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}`;
         }
         if (mothershipPhaseLabelEl) {
-            const phase = (objective?.phase ?? 0) + 1;
-            mothershipPhaseLabelEl.innerText = `Phase ${phase}`;
+            const phase = objective?.phase ?? 0;
+            const phaseLabels = ['Exterior', 'Interior', 'Core'];
+            const label = phaseLabels[phase] || phaseLabels[0];
+            mothershipPhaseLabelEl.innerText = `Phase: ${label}`;
         }
     } else {
         timerEl.style.display = 'none';

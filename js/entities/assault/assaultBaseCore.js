@@ -106,6 +106,49 @@ function setupAssaultObjective(scene) {
 }
 
 function hitAssaultTarget(projectile, target) {
+    const mothershipObjective = gameState.mothershipObjective;
+    const isMothershipEncounter = gameState.mode === 'mothership' && mothershipObjective?.active;
+    const isMothershipExterior = isMothershipEncounter && target?.mothershipRole === 'exterior';
+    const isMothershipInterior = isMothershipEncounter && target?.mothershipRole === 'interior';
+    if (isMothershipExterior || isMothershipInterior) {
+        if (!target.active) {
+            if (projectile && projectile.active) projectile.destroy();
+            return;
+        }
+        if (projectile && projectile.empDisableDuration && target.assaultRole === 'turret') {
+            target.empDisabledUntil = this.time.now + projectile.empDisableDuration;
+            createExplosion(this, target.x, target.y, 0x38bdf8);
+        }
+        target.hp -= projectile.damage || 1;
+        if (target.hp <= 0) {
+            if (isMothershipExterior) {
+                mothershipObjective.exteriorHardpointsRemaining = Math.max(
+                    0,
+                    (mothershipObjective.exteriorHardpointsRemaining ?? 0) - 1
+                );
+            } else if (isMothershipInterior) {
+                mothershipObjective.interiorObjectivesRemaining = Math.max(
+                    0,
+                    (mothershipObjective.interiorObjectivesRemaining ?? 0) - 1
+                );
+            }
+            createExplosion(this, target.x, target.y, 0xff6b35);
+            target.destroy();
+            if (isMothershipExterior && mothershipObjective.exteriorHardpointsRemaining === 0) {
+                showRebuildObjectiveBanner(this, 'EXTERIOR DEFENSE GRID DOWN', '#22d3ee');
+                screenShake(this, 10, 300);
+            }
+            if (isMothershipInterior && mothershipObjective.interiorObjectivesRemaining === 0) {
+                showRebuildObjectiveBanner(this, 'INTERIOR POWER GRID DISABLED', '#a855f7');
+                screenShake(this, 10, 280);
+            }
+        }
+        if (projectile && projectile.active && !projectile.isPiercing) {
+            projectile.destroy();
+        }
+        return;
+    }
+
     const objective = gameState.assaultObjective;
     if (!objective || !objective.active || !target.active) {
         if (projectile && projectile.active) projectile.destroy();

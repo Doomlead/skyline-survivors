@@ -183,3 +183,13 @@ function destroyParallax() {
     }
     backgroundGeneratorInstance = null;
 }
+
+function swapBackgroundStyle(scene, style) {
+    if (!scene) return;
+    destroyParallax();
+    createBackground(scene, style);
+    const player = getActivePlayer(scene);
+    if (player) {
+        initParallaxTracking(player.x, player.y);
+    }
+}

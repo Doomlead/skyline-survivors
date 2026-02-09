@@ -24,6 +24,21 @@ function updatePlayer(scene, time, delta) {
     } = scene;
     if (!aegis || !leftKey || !rightKey || !upKey || !downKey) return;
 
+    if (gameState.mothershipObjective?.transitionActive) {
+        if (aegisState.active && scene.aegis) {
+            aegisState.vx = 0;
+            aegisState.vy = 0;
+            scene.aegis.body.setVelocity(0, 0);
+        }
+        if (pilotState.active && scene.pilot) {
+            pilotState.vx = 0;
+            pilotState.vy = 0;
+            scene.pilot.body.setVelocity(0, 0);
+        }
+        syncActivePlayer(scene);
+        return;
+    }
+
     const vInput = window.virtualInput || { left: false, right: false, up: false, down: false, fire: false };
     const left = leftKey.isDown || vInput.left;
     const right = rightKey.isDown || vInput.right;

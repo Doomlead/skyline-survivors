@@ -47,6 +47,7 @@ function ejectPilot(scene) {
 function enterAegis(scene) {
     if (!scene.aegis || !scene.pilot || !pilotState.active) return;
     if (aegisState.destroyed) return;
+    if (gameState.mode === 'mothership' && (gameState.mothershipObjective?.phase ?? 0) < 2) return;
     const dist = Phaser.Math.Distance.Between(scene.pilot.x, scene.pilot.y, scene.aegis.x, scene.aegis.y);
     if (dist > 60) return;
     pilotState.active = false;

@@ -230,10 +230,10 @@
 - Operative depth (classes exist; patrol behavior exists; fire-team coordination still needs polish).
 - Strategic layer urgency (Threatened/Occupied exists; critical urgency exists; further prosperity feedback polish still missing).
 - Bulwark form (functional, but no siege/structure bonus or UI feedback).
+- Multi-phase mothership mission structure (exterior → interior → core beats exist; core shield stages and encounter tuning still pending).
 
 **Not Aligned**
 - Assault rewards and mystery drops.
-- Multi-phase mothership mission structure (exterior → interior → core).
 
 ### Major Milestones Achieved
 - Ship/foot transition with pilot ejection and hangar rebuild.
@@ -246,18 +246,18 @@
 ### Critical Missing Features for Design Document Compliance
 1. **Bulwark Assault Synergy:** Higher structural damage or siege bonuses.
 2. **Assault Loot Rewards & Mystery Drops:** Base destruction rewards and random jackpots.
-3. **Multi-phase Mothership Mission:** Exterior → interior → core progression with phase-gated objectives.
+3. **Mothership Mission Polish:** Core shield stages, encounter tuning, and final presentation beats.
 
 ### Immediate Next Steps (Recommended Order)
 **Priority 1: Bulwark Assault Synergy + Assault Rewards (2-3 Days)**
 - Add structural damage bonus for Bulwark mode.
 - Add assault base loot drops and mystery jackpots.
 
-**Priority 2: Expand Mothership Final Boss Mission (4-6 days)**
-- Build Phase 1 exterior assault + phase transition setup.
-- Implement Phase 2 interior encounter space (on-foot focus) with objective gating.
-- Upgrade Phase 3 core boss to multi-step shield/HP phases (current fight is HP-based, single arena).
-- Add phase-gated UI beats and cinematic transition (dock/boarding).
+**Priority 2: Expand Mothership Final Boss Mission (3-5 days)**
+- Tune Phase 1 exterior assault pacing and hardpoint layouts (baseline pass complete; continue iteration).
+- Refine Phase 2 interior objectives (on-foot focus) with enemy mix + spawn cadence (baseline pass complete; continue iteration).
+- Upgrade Phase 3 core boss to multi-step shield/HP stages (current fight is HP-based, single arena).
+- Polish phase-gated UI/FX beats and cinematic transitions (dock/boarding).
 
 **Priority 3: Feedback + UI Polish (2 Days)**
 - Stronger UI/FX for operative scaling, rebuild sacrifice, and squad power-ups.
@@ -269,7 +269,7 @@
 ### MVP Completion:
 - **Current Progress:** ~74% complete (adjusted after code audit)
 - **Remaining Critical Work:**
-  - Mothership Boss Mission (multi-phase upgrade): 4-6 days
+  - Mothership Boss Mission (phase polish + core shields): 3-5 days
   - Bulwark Assault Synergy + Assault Rewards: 2-3 days
   - Assault failure/retreat polish: 1-2 days
   - UI/FX Feedback Polish (including prosperity loss feedback): 2 days
@@ -304,5 +304,5 @@
 
 ### What We Should Work on Next
 1. **Bulwark Assault Synergy + Assault Rewards** to differentiate assault missions and pay off the Bulwark mode fantasy.
-2. **Mothership multi-phase upgrade (Exterior → Interior → Core)**. This is the single largest compliance gap and the primary MVP blocker.
+2. **Mothership mission polish (core shields + phase tuning)**. This remains a primary MVP blocker until the core encounter is fully staged.
 3. **Assault mission retreat/redo loop polish** to clarify failure flow and reduce dead-end friction.
