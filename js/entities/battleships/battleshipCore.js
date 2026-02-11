@@ -247,42 +247,68 @@ function hitBattleship(projectile, battleship) {
     const scene = projectile.scene;
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
+    const now = scene.time?.now || 0;
 
     const incomingDamage = projectile.damage || 1;
-    const shieldResult = typeof applyShieldStageDamage === 'function'
-        ? applyShieldStageDamage(battleship, incomingDamage, scene.time?.now || 0)
-        : { appliedToShield: false, shieldBroken: false };
+    const result = typeof applyShieldStageDamage === 'function'
+        ? applyShieldStageDamage(battleship, incomingDamage, now)
+        : { blocked: false, appliedToShield: false, appliedToHp: true, shieldBroken: false, damageApplied: incomingDamage };
 
-    if (shieldResult.immune) {
-        createFloatingText(scene, battleship.x, battleship.y - 50, 'IMMUNE', '#a3a3a3');
+    if (result.blocked) {
+        createExplosion(scene, projectile.x, projectile.y, 0x888888);
         if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
         return;
     }
 
-    if (shieldResult.appliedToShield) {
-        if (shieldResult.shieldBroken) {
-            createExplosion(scene, battleship.x, battleship.y, 0x67e8f9, 1.0);
-            scene.cameras.main.shake(80, 0.004);
-        } else {
-            createExplosion(scene, projectile.x, projectile.y, 0x67e8f9, 0.3);
-        }
-    } else {
-        battleship.hp -= incomingDamage;
-        battleship.setTint(0xff0000);
-        scene.time.delayedCall(50, () => {
+    if (result.appliedToShield) {
+        scene.tweens.add({
+            targets: battleship,
+            alpha: 0.7,
+            duration: 80,
+            yoyo: true,
+            ease: 'Linear'
+        });
+        battleship.setTint(0x38bdf8);
+        scene.time.delayedCall(80, () => {
             if (battleship && battleship.active) battleship.clearTint();
         });
+        if (audioManager) audioManager.playSound('hitEnemy');
+
+        if (result.shieldBroken) {
+            createExplosion(scene, battleship.x, battleship.y, 0x67e8f9);
+            createExplosion(scene, battleship.x + 15, battleship.y - 15, 0x22d3ee);
+            const state = getShieldPhaseState(battleship);
+            showRebuildObjectiveBanner(
+                scene,
+                state?.allShieldsCleared
+                    ? 'BATTLESHIP SHIELDS DOWN — HULL EXPOSED'
+                    : 'BATTLESHIP SHIELD LAYER BROKEN — DAMAGE WINDOW',
+                state?.allShieldsCleared ? '#ff6b6b' : '#67e8f9'
+            );
+            screenShake(scene, 8, 150);
+        }
+
+        if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+        return;
     }
 
-    scene.tweens.add({
-        targets: battleship,
-        alpha: 0.6,
-        duration: 100,
-        yoyo: true,
-        ease: 'Linear'
-    });
+    if (result.appliedToHp) {
+        battleship.hp -= result.damageApplied;
+        scene.tweens.add({
+            targets: battleship,
+            alpha: 0.6,
+            duration: 100,
+            yoyo: true,
+            ease: 'Linear'
+        });
+        if (audioManager) audioManager.playSound('hitEnemy');
+    }
 
-    if (audioManager) audioManager.playSound('hitEnemy');
+    if (projectile.empDisableDuration) {
+        battleship.empDisabledUntil = now + projectile.empDisableDuration;
+        createExplosion(scene, battleship.x, battleship.y, 0x38bdf8);
+    }
+
     if (projectile.projectileType === 'homing' && particleManager) {
         particleManager.bulletExplosion(battleship.x, battleship.y);
     }
@@ -292,30 +318,30 @@ function hitBattleship(projectile, battleship) {
     }
 
     if (battleship.hp <= 0) destroyBattleship(scene, battleship);
-    if (projectile && projectile.active && !projectile.isPiercing) {
-        projectile.destroy();
-    }
+    if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
 }
 
 function playerHitBattleship(playerSprite, battleship) {
     const scene = battleship.scene;
     const audioManager = scene.audioManager;
-
     const now = scene.time?.now || 0;
+
     const collisionDamage = playerState.powerUps.invincibility > 0 ? 2 : 1;
-    const shieldResult = typeof applyShieldStageDamage === 'function'
+    const result = typeof applyShieldStageDamage === 'function'
         ? applyShieldStageDamage(battleship, collisionDamage, now)
-        : { appliedToShield: false };
+        : { appliedToHp: true, damageApplied: collisionDamage, shieldBroken: false };
 
     if (playerState.powerUps.invincibility > 0) {
-        if (!shieldResult.appliedToShield) battleship.hp -= 2;
+        if (result.appliedToHp) battleship.hp -= result.damageApplied;
+        if (result.shieldBroken) createExplosion(scene, battleship.x, battleship.y, 0x67e8f9);
         if (battleship.hp <= 0) destroyBattleship(scene, battleship);
         return;
     }
 
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
-        if (!shieldResult.appliedToShield) battleship.hp -= 1;
+        if (result.appliedToHp) battleship.hp -= result.damageApplied;
+        if (result.shieldBroken) createExplosion(scene, battleship.x, battleship.y, 0x67e8f9);
         if (battleship.hp <= 0) destroyBattleship(scene, battleship);
         screenShake(scene, 12, 200);
         if (audioManager) audioManager.playSound('hitPlayer');

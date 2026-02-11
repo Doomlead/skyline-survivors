@@ -473,6 +473,9 @@ function updateEnemies(scene, time, delta) {
         }
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
+        if (enemy.isMiniBoss && typeof updateMiniBossShieldPhase === 'function') {
+            updateMiniBossShieldPhase(scene, enemy);
+        }
 
         switch (enemy.enemyType) {
             case 'lander':

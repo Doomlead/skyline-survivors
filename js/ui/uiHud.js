@@ -73,7 +73,7 @@ function updateUI(scene) {
             bossHpFillEl.style.width = `${Math.round(pct * 100)}%`;
         }
         const now = scene?.time?.now || 0;
-        const phaseHud = typeof getPhaseHudStatus === 'function' ? getPhaseHudStatus(boss) : null;
+        const phaseHud = typeof getPhaseHudStatus === 'function' ? getPhaseHudStatus(boss, now) : null;
         if (bossHpLabelEl) {
             const gate = phaseHud?.gateText ? ` · ${phaseHud.gateText}` : '';
             bossHpLabelEl.innerText = `HP ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}${gate}`;
@@ -128,13 +128,11 @@ function updateUI(scene) {
             assaultCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(baseHp))}/${Math.max(0, Math.ceil(baseMax))}`;
         }
         if (assaultShieldLabelEl) {
-            const shields = objective?.shieldsRemaining ?? 0;
-            const stage = objective?.shieldStage || 1;
-            const total = objective?.shieldStageTotal || 1;
-            const now = scene?.time?.now || 0;
-            const windowLeft = Math.max(0, ((objective?.damageWindowUntil || 0) - now));
-            const windowTag = windowLeft > 0 ? ` · Window ${Math.ceil(windowLeft / 1000)}s` : '';
-            assaultShieldLabelEl.innerText = `Stage ${stage}/${total} · Shields: ${shields}${windowTag}`;
+            const extShields = objective?.extShieldsRemaining ?? objective?.shieldsRemaining ?? 0;
+            const phase = objective?.phaseLabel ? ` · ${objective.phaseLabel}` : '';
+            const gate = objective?.gateLabel ? ` · ${objective.gateLabel}` : '';
+            assaultShieldLabelEl.innerText = `Generators: ${extShields}${phase}${gate}`;
+            if (objective?.gateColor) assaultShieldLabelEl.style.color = objective.gateColor;
         }
     } else if (gameState.mode === 'mothership') {
         timerEl.style.display = 'none';

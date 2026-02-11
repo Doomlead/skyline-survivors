@@ -13,29 +13,40 @@ function spawnAssaultDefenders(scene, baseX) {
     }
 }
 
+function updateAssaultCoreShieldPhase(scene) {
+    const objective = gameState.assaultObjective;
+    if (!objective || !objective.active) return;
+
+    const base = scene.assaultBase;
+    if (!base || !base.active) return;
+
+    const now = scene.time?.now || 0;
+    if (typeof tickShieldPhaseState === 'function') tickShieldPhaseState(base, now);
+
+    if (typeof getPhaseHudStatus === 'function') {
+        const hud = getPhaseHudStatus(base, now);
+        objective.phaseLabel = hud.phaseText;
+        objective.gateLabel = hud.gateText;
+        objective.gateColor = hud.gateColor;
+        objective.coreVulnerable = hud.isVulnerable;
+        objective.shieldBarPercent = hud.shieldBarPercent;
+    }
+}
+
 function updateAssaultObjective(scene, delta) {
     const objective = gameState.assaultObjective;
     if (!objective || !objective.active) return;
+
     objective.spawnTimer += delta;
     objective.turretFireTimer += delta;
     objective.reinforcementTimer += delta;
     objective.shieldHitCooldown = Math.max(0, objective.shieldHitCooldown - delta);
-    const now = scene.time?.now || 0;
-    if (objective.damageWindowUntil > 0 && now > objective.damageWindowUntil && objective.shieldStage < (objective.shieldStageTotal || 1)) {
-        objective.damageWindowUntil = 0;
-        objective.intermissionUntil = now + (ASSAULT_BASE_CONFIG.intermissionMs || 0);
-    }
-    if (objective.damageWindowUntil === 0
-        && now > (objective.intermissionUntil || 0)
-        && objective.shieldsRemaining <= 0
-        && objective.shieldStage < (objective.shieldStageTotal || 1)
-        && typeof spawnAssaultShieldGenerators === 'function') {
-        objective.shieldStage += 1;
-        spawnAssaultShieldGenerators(scene, objective);
-        showRebuildObjectiveBanner(scene, `Shield stage ${objective.shieldStage}/${objective.shieldStageTotal} online`, '#f97316');
-    }
 
-    const phaseFactor = Math.max(0.55, 1 - ((objective.shieldStage || 1) - 1) * 0.15);
+    updateAssaultCoreShieldPhase(scene);
+
+    const basePhase = scene.assaultBase ? getEncounterPhase(scene.assaultBase) : 0;
+    const phaseFactor = Math.max(0.55, 1 - basePhase * 0.15);
+
     if (objective.spawnTimer >= ASSAULT_BASE_CONFIG.spawnInterval * phaseFactor) {
         objective.spawnTimer = 0;
         const assaultMix = ['mutant', 'shield', 'spawner', 'kamikaze', 'seeker', 'turret'];

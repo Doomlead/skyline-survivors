@@ -83,6 +83,29 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     if (type !== 'turret' && type !== 'sniper') {
         createEnemyTrail(scene, enemy);
     }
+
+    if (typeof shouldPromoteToMiniBoss === 'function'
+        && typeof promoteToMiniBoss === 'function'
+        && shouldPromoteToMiniBoss(gameState.wave || 1, type)) {
+        if (promoteToMiniBoss(enemy, type)) {
+            const warningText = scene.add.text(enemy.x, enemy.y - 30, '⚠ MINI-BOSS', {
+                fontSize: '14px',
+                fontFamily: 'Orbitron',
+                color: '#ff8800',
+                stroke: '#000000',
+                strokeThickness: 2
+            }).setOrigin(0.5).setDepth(FG_DEPTH_BASE + 15);
+
+            scene.tweens.add({
+                targets: warningText,
+                y: warningText.y - 30,
+                alpha: 0,
+                duration: 1500,
+                onComplete: () => warningText.destroy()
+            });
+        }
+    }
+
     return enemy;
 }
 
@@ -323,17 +346,51 @@ function shootAtPlayer(scene, enemy) {
 
 // Handles projectile/enemy overlap: apply damage, trigger effects, and remove.
 function hitEnemy(projectile, enemy) {
-    const { audioManager, particleManager } = this;
-    enemy.hp -= projectile.damage || 1;
-    if (audioManager) audioManager.playSound('hitEnemy');
+    const scene = this;
+    const { audioManager, particleManager } = scene;
+
+    if (enemy?.isMiniBoss && typeof applyShieldStageDamage === 'function') {
+        const result = applyShieldStageDamage(enemy, projectile.damage || 1, scene.time?.now || 0);
+
+        if (result.blocked) {
+            createExplosion(scene, projectile.x, projectile.y, 0x888888);
+            if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+            return;
+        }
+
+        if (result.appliedToShield) {
+            scene.tweens.add({ targets: enemy, alpha: 0.7, duration: 70, yoyo: true, ease: 'Linear' });
+            enemy.setTint(0x38bdf8);
+            scene.time.delayedCall(70, () => {
+                if (enemy && enemy.active) enemy.setTint(0xff8800);
+            });
+            if (result.shieldBroken) {
+                createExplosion(scene, enemy.x, enemy.y, 0x67e8f9);
+                screenShake(scene, 6, 100);
+            }
+            if (audioManager) audioManager.playSound('hitEnemy');
+            if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+            return;
+        }
+
+        if (result.appliedToHp) {
+            enemy.hp -= result.damageApplied;
+            scene.tweens.add({ targets: enemy, alpha: 0.6, duration: 100, yoyo: true, ease: 'Linear' });
+            if (audioManager) audioManager.playSound('hitEnemy');
+        }
+    } else {
+        enemy.hp -= projectile.damage || 1;
+        if (audioManager) audioManager.playSound('hitEnemy');
+    }
+
     if (projectile.projectileType === 'homing' && particleManager) {
         particleManager.bulletExplosion(enemy.x, enemy.y);
     }
     if (projectile.projectileType === 'homing' && projectile.homingTier === 3 && !projectile.hasClustered) {
         projectile.hasClustered = true;
-        spawnClusterMissiles(this, projectile, enemy);
+        spawnClusterMissiles(scene, projectile, enemy);
     }
-    if (enemy.hp <= 0) destroyEnemy(this, enemy);
+    if (enemy.hp <= 0) destroyEnemy(scene, enemy);
     if (projectile && projectile.active && !projectile.isPiercing) {
         projectile.destroy();
     }
@@ -420,7 +477,10 @@ function destroyEnemy(scene, enemy) {
     }
     createEnhancedDeathEffect(scene, enemy.x, enemy.y, enemy.enemyType);
     registerComboEvent(1);
-    const score = getCombatScaledReward(getEnemyScore(enemy.enemyType));
+    const baseScore = getCombatScaledReward(getEnemyScore(enemy.enemyType));
+    const score = enemy.isMiniBoss
+        ? Math.round(baseScore * (enemy.miniBossConfig?.scoreMultiplier || 3))
+        : baseScore;
     gameState.score += score;
 
     if (enemy.enemyType === 'pod') {

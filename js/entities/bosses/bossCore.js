@@ -259,44 +259,69 @@ function hitBoss(projectile, boss) {
     const scene = projectile.scene;
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
+    const now = scene.time?.now || 0;
 
-    const rawDamage = projectile.damage || 1;
-    const scaledDamage = applyBossDamage(boss, rawDamage);
-    const shieldResult = typeof applyShieldStageDamage === 'function'
-        ? applyShieldStageDamage(boss, scaledDamage, scene.time?.now || 0)
-        : { appliedToShield: false, shieldBroken: false };
+    const scaledDamage = applyBossDamage(boss, projectile.damage);
+    const result = typeof applyShieldStageDamage === 'function'
+        ? applyShieldStageDamage(boss, scaledDamage, now)
+        : { blocked: false, appliedToShield: false, appliedToHp: true, shieldBroken: false, damageApplied: scaledDamage };
 
-    if (shieldResult.immune) {
-        createFloatingText(scene, boss.x, boss.y - 50, 'IMMUNE', '#a3a3a3');
+    if (result.blocked) {
+        createExplosion(scene, projectile.x, projectile.y, 0x888888);
         if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
         return;
     }
 
-    if (shieldResult.appliedToShield) {
-        if (shieldResult.shieldBroken) {
-            createExplosion(scene, boss.x, boss.y, 0x38bdf8, 1.0);
-            scene.cameras.main.shake(100, 0.005);
-            showRebuildObjectiveBanner(scene, `${boss.bossType.toUpperCase()} SHIELD DOWN! ATTACK CORE!`, '#ff4444');
-        } else {
-            createExplosion(scene, projectile.x, projectile.y, 0x38bdf8, 0.3);
-        }
-    } else {
-        boss.hp -= scaledDamage;
-        boss.setTint(0xff0000);
-        scene.time.delayedCall(50, () => {
+    if (result.appliedToShield) {
+        scene.tweens.add({
+            targets: boss,
+            alpha: 0.7,
+            duration: 80,
+            yoyo: true,
+            ease: 'Linear'
+        });
+        boss.setTint(0x38bdf8);
+        scene.time.delayedCall(80, () => {
             if (boss && boss.active) boss.clearTint();
         });
+        if (audioManager) audioManager.playSound('hitEnemy');
+
+        if (result.shieldBroken) {
+            createExplosion(scene, boss.x, boss.y, 0x38bdf8);
+            createExplosion(scene, boss.x - 20, boss.y + 10, 0x22d3ee);
+            createExplosion(scene, boss.x + 20, boss.y - 10, 0x22d3ee);
+            const state = getShieldPhaseState(boss);
+            if (state?.allShieldsCleared) {
+                showRebuildObjectiveBanner(scene, `${(boss.bossType || 'BOSS').toUpperCase()} — ALL SHIELDS DOWN — CORE EXPOSED`, '#ff4444');
+            } else {
+                showRebuildObjectiveBanner(scene, `${(boss.bossType || 'BOSS').toUpperCase()} SHIELD STAGE BROKEN — DAMAGE WINDOW OPEN`, '#38bdf8');
+            }
+            screenShake(scene, 12, 200);
+        }
+
+        if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+        return;
     }
 
-    scene.tweens.add({
-        targets: boss,
-        alpha: 0.6,
-        duration: 100,
-        yoyo: true,
-        ease: 'Linear'
-    });
+    if (result.appliedToHp) {
+        boss.hp -= result.damageApplied;
+        scene.tweens.add({
+            targets: boss,
+            alpha: 0.6,
+            duration: 100,
+            yoyo: true,
+            ease: 'Linear'
+        });
+        const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
+        if (reduction > 0) {
+            boss.setTint(0xffaa00);
+            scene.time.delayedCall(50, () => {
+                if (boss && boss.active) boss.clearTint();
+            });
+        }
+        if (audioManager) audioManager.playSound('hitEnemy');
+    }
 
-    if (audioManager) audioManager.playSound('hitEnemy');
     if (projectile.projectileType === 'homing' && particleManager) {
         particleManager.bulletExplosion(boss.x, boss.y);
     }
@@ -305,31 +330,37 @@ function hitBoss(projectile, boss) {
         spawnClusterMissiles(scene, projectile, boss);
     }
 
-    if (boss.hp <= 0) destroyBoss(scene, boss);
-    if (projectile && projectile.active && !projectile.isPiercing) {
-        projectile.destroy();
+    if (projectile.empDisableDuration) {
+        boss.empDisabledUntil = now + projectile.empDisableDuration;
+        createExplosion(scene, boss.x, boss.y, 0x38bdf8);
     }
+
+    if (boss.hp <= 0) destroyBoss(scene, boss);
+    if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
 }
 
 function playerHitBoss(playerSprite, boss) {
     const scene = boss.scene;
     const audioManager = scene.audioManager;
-
     const now = scene.time?.now || 0;
+
     const impactDamage = playerState.powerUps.invincibility > 0 ? 3 : 2;
-    const shieldResult = typeof applyShieldStageDamage === 'function'
-        ? applyShieldStageDamage(boss, applyBossDamage(boss, impactDamage), now)
-        : { appliedToShield: false };
+    const scaledImpact = applyBossDamage(boss, impactDamage);
+    const result = typeof applyShieldStageDamage === 'function'
+        ? applyShieldStageDamage(boss, scaledImpact, now)
+        : { appliedToHp: true, damageApplied: scaledImpact, shieldBroken: false };
 
     if (playerState.powerUps.invincibility > 0) {
-        if (!shieldResult.appliedToShield) boss.hp -= applyBossDamage(boss, 3);
+        if (result.appliedToHp) boss.hp -= result.damageApplied;
+        if (result.shieldBroken) createExplosion(scene, boss.x, boss.y, 0x38bdf8);
         if (boss.hp <= 0) destroyBoss(scene, boss);
         return;
     }
 
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
-        if (!shieldResult.appliedToShield) boss.hp -= applyBossDamage(boss, 2);
+        if (result.appliedToHp) boss.hp -= result.damageApplied;
+        if (result.shieldBroken) createExplosion(scene, boss.x, boss.y, 0x38bdf8);
         if (boss.hp <= 0) destroyBoss(scene, boss);
         screenShake(scene, 10, 200);
         if (audioManager) audioManager.playSound('hitPlayer');
