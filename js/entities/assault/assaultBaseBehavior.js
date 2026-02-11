@@ -20,13 +20,29 @@ function updateAssaultObjective(scene, delta) {
     objective.turretFireTimer += delta;
     objective.reinforcementTimer += delta;
     objective.shieldHitCooldown = Math.max(0, objective.shieldHitCooldown - delta);
-    if (objective.spawnTimer >= ASSAULT_BASE_CONFIG.spawnInterval) {
+    const now = scene.time?.now || 0;
+    if (objective.damageWindowUntil > 0 && now > objective.damageWindowUntil && objective.shieldStage < (objective.shieldStageTotal || 1)) {
+        objective.damageWindowUntil = 0;
+        objective.intermissionUntil = now + (ASSAULT_BASE_CONFIG.intermissionMs || 0);
+    }
+    if (objective.damageWindowUntil === 0
+        && now > (objective.intermissionUntil || 0)
+        && objective.shieldsRemaining <= 0
+        && objective.shieldStage < (objective.shieldStageTotal || 1)
+        && typeof spawnAssaultShieldGenerators === 'function') {
+        objective.shieldStage += 1;
+        spawnAssaultShieldGenerators(scene, objective);
+        showRebuildObjectiveBanner(scene, `Shield stage ${objective.shieldStage}/${objective.shieldStageTotal} online`, '#f97316');
+    }
+
+    const phaseFactor = Math.max(0.55, 1 - ((objective.shieldStage || 1) - 1) * 0.15);
+    if (objective.spawnTimer >= ASSAULT_BASE_CONFIG.spawnInterval * phaseFactor) {
         objective.spawnTimer = 0;
         const assaultMix = ['mutant', 'shield', 'spawner', 'kamikaze', 'seeker', 'turret'];
         spawnRandomEnemy(scene, assaultMix);
     }
 
-    if (objective.reinforcementTimer >= ASSAULT_BASE_CONFIG.reinforcementInterval) {
+    if (objective.reinforcementTimer >= ASSAULT_BASE_CONFIG.reinforcementInterval * phaseFactor) {
         objective.reinforcementTimer = 0;
         const currentCount = scene.garrisonDefenders?.countActive(true) || 0;
         if (currentCount < ASSAULT_BASE_CONFIG.reinforcementCap) {
@@ -44,7 +60,7 @@ function updateAssaultObjective(scene, delta) {
         }
     }
 
-    if (objective.turretFireTimer >= ASSAULT_BASE_CONFIG.turretFireInterval) {
+    if (objective.turretFireTimer >= ASSAULT_BASE_CONFIG.turretFireInterval * phaseFactor) {
         objective.turretFireTimer = 0;
         if (scene.assaultTargets) {
             scene.assaultTargets.children.entries.forEach((target) => {

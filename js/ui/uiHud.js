@@ -50,7 +50,8 @@ function createUI(scene) {
 function updateUI(scene) {
     if (!scoreEl) return;
     const humansGroup = scene?.humans;
-    const activeBoss = scene?.bosses?.children?.entries?.find(entry => entry.active && entry.bossType !== 'mothershipCore');
+    const activeBoss = scene?.bosses?.children?.entries?.find(entry => entry.active && entry.bossType !== 'mothershipCore')
+        || scene?.battleships?.children?.entries?.find(entry => entry.active);
 
     const formatBossName = (name) => {
         if (!name) return 'Boss Target';
@@ -71,12 +72,17 @@ function updateUI(scene) {
             const pct = bossMax > 0 ? Math.max(0, Math.min(1, bossHp / bossMax)) : 0;
             bossHpFillEl.style.width = `${Math.round(pct * 100)}%`;
         }
+        const now = scene?.time?.now || 0;
+        const phaseHud = typeof getPhaseHudStatus === 'function' ? getPhaseHudStatus(boss) : null;
         if (bossHpLabelEl) {
-            bossHpLabelEl.innerText = `HP ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}`;
+            const gate = phaseHud?.gateText ? ` · ${phaseHud.gateText}` : '';
+            bossHpLabelEl.innerText = `HP ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}${gate}`;
+            if (phaseHud?.gateColor) bossHpLabelEl.style.color = phaseHud.gateColor;
         }
         if (bossNameLabelEl) {
-            const name = gameState.currentBossName || boss?.bossType || 'Boss';
-            bossNameLabelEl.innerText = formatBossName(name);
+            const name = gameState.currentBossName || boss?.bossType || boss?.battleshipType || 'Boss';
+            const phaseText = phaseHud?.phaseText ? ` · ${phaseHud.phaseText}` : '';
+            bossNameLabelEl.innerText = `${formatBossName(name)}${phaseText}`;
         }
     };
 
@@ -123,7 +129,12 @@ function updateUI(scene) {
         }
         if (assaultShieldLabelEl) {
             const shields = objective?.shieldsRemaining ?? 0;
-            assaultShieldLabelEl.innerText = `Shields: ${shields}`;
+            const stage = objective?.shieldStage || 1;
+            const total = objective?.shieldStageTotal || 1;
+            const now = scene?.time?.now || 0;
+            const windowLeft = Math.max(0, ((objective?.damageWindowUntil || 0) - now));
+            const windowTag = windowLeft > 0 ? ` · Window ${Math.ceil(windowLeft / 1000)}s` : '';
+            assaultShieldLabelEl.innerText = `Stage ${stage}/${total} · Shields: ${shields}${windowTag}`;
         }
     } else if (gameState.mode === 'mothership') {
         timerEl.style.display = 'none';
@@ -143,8 +154,10 @@ function updateUI(scene) {
             mothershipCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}`;
         }
         if (mothershipPhaseLabelEl) {
-            const phase = (objective?.phase ?? 0) + 1;
-            mothershipPhaseLabelEl.innerText = `Phase ${phase}`;
+            const phase = objective?.phaseLabel || `Phase ${(objective?.phase ?? 0) + 1}`;
+            const gate = objective?.gateLabel ? ` · ${objective.gateLabel}` : '';
+            mothershipPhaseLabelEl.innerText = `${phase}${gate}`;
+            if (objective?.gateColor) mothershipPhaseLabelEl.style.color = objective.gateColor;
         }
     } else {
         timerEl.style.display = 'none';

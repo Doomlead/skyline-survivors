@@ -109,6 +109,16 @@ function spawnBoss(scene, type, x, y) {
     boss.hp = getBossHP(type);
     boss.maxHP = boss.hp;
     boss.lastShot = 0;
+    if (typeof initializeShieldPhaseState === 'function') {
+        const stageCount = type === 'mothershipCore' ? 3 : 2;
+        initializeShieldPhaseState(boss, {
+            shieldStages: stageCount,
+            shieldBaseHp: Math.ceil(boss.maxHP * (type === 'mothershipCore' ? 0.18 : 0.2)),
+            damageWindowMs: type === 'mothershipCore' ? 4200 : 3200,
+            intermissionMs: type === 'mothershipCore' ? 1800 : 1500,
+            label: 'Phase'
+        });
+    }
     
     // Special properties per boss
     if (type === 'megaLander') boss.orbitAngle = 0;
@@ -249,10 +259,35 @@ function hitBoss(projectile, boss) {
     const scene = projectile.scene;
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
-    const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
-    boss.hp -= applyBossDamage(boss, projectile.damage);
 
-    // Visual hit feedback
+    const rawDamage = projectile.damage || 1;
+    const scaledDamage = applyBossDamage(boss, rawDamage);
+    const shieldResult = typeof applyShieldStageDamage === 'function'
+        ? applyShieldStageDamage(boss, scaledDamage, scene.time?.now || 0)
+        : { appliedToShield: false, shieldBroken: false };
+
+    if (shieldResult.immune) {
+        createFloatingText(scene, boss.x, boss.y - 50, 'IMMUNE', '#a3a3a3');
+        if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+        return;
+    }
+
+    if (shieldResult.appliedToShield) {
+        if (shieldResult.shieldBroken) {
+            createExplosion(scene, boss.x, boss.y, 0x38bdf8, 1.0);
+            scene.cameras.main.shake(100, 0.005);
+            showRebuildObjectiveBanner(scene, `${boss.bossType.toUpperCase()} SHIELD DOWN! ATTACK CORE!`, '#ff4444');
+        } else {
+            createExplosion(scene, projectile.x, projectile.y, 0x38bdf8, 0.3);
+        }
+    } else {
+        boss.hp -= scaledDamage;
+        boss.setTint(0xff0000);
+        scene.time.delayedCall(50, () => {
+            if (boss && boss.active) boss.clearTint();
+        });
+    }
+
     scene.tweens.add({
         targets: boss,
         alpha: 0.6,
@@ -260,12 +295,6 @@ function hitBoss(projectile, boss) {
         yoyo: true,
         ease: 'Linear'
     });
-    if (reduction > 0) {
-        boss.setTint(0xffaa00);
-        scene.time.delayedCall(50, () => {
-            if (boss && boss.active) boss.clearTint();
-        });
-    }
 
     if (audioManager) audioManager.playSound('hitEnemy');
     if (projectile.projectileType === 'homing' && particleManager) {
@@ -275,6 +304,7 @@ function hitBoss(projectile, boss) {
         projectile.hasClustered = true;
         spawnClusterMissiles(scene, projectile, boss);
     }
+
     if (boss.hp <= 0) destroyBoss(scene, boss);
     if (projectile && projectile.active && !projectile.isPiercing) {
         projectile.destroy();
@@ -285,15 +315,21 @@ function playerHitBoss(playerSprite, boss) {
     const scene = boss.scene;
     const audioManager = scene.audioManager;
 
+    const now = scene.time?.now || 0;
+    const impactDamage = playerState.powerUps.invincibility > 0 ? 3 : 2;
+    const shieldResult = typeof applyShieldStageDamage === 'function'
+        ? applyShieldStageDamage(boss, applyBossDamage(boss, impactDamage), now)
+        : { appliedToShield: false };
+
     if (playerState.powerUps.invincibility > 0) {
-        boss.hp -= applyBossDamage(boss, 3);
+        if (!shieldResult.appliedToShield) boss.hp -= applyBossDamage(boss, 3);
         if (boss.hp <= 0) destroyBoss(scene, boss);
         return;
     }
 
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
-        boss.hp -= applyBossDamage(boss, 2);
+        if (!shieldResult.appliedToShield) boss.hp -= applyBossDamage(boss, 2);
         if (boss.hp <= 0) destroyBoss(scene, boss);
         screenShake(scene, 10, 200);
         if (audioManager) audioManager.playSound('hitPlayer');

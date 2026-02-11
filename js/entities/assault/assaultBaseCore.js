@@ -13,7 +13,10 @@ const ASSAULT_BASE_CONFIG = {
     turretFireInterval: 1300,
     reinforcementInterval: 6800,
     reinforcementBatch: 2,
-    reinforcementCap: 10
+    reinforcementCap: 10,
+    shieldStages: 3,
+    damageWindowMs: 4200,
+    intermissionMs: 1600
 };
 
 const ASSAULT_BASE_TEXTURES = [
@@ -59,6 +62,21 @@ function isAssaultShieldBlocking(scene) {
     return blocking;
 }
 
+
+function spawnAssaultShieldGenerators(scene, objective) {
+    const baseX = objective?.baseX || CONFIG.worldWidth * 0.5;
+    const base = scene.assaultBase;
+    const baseY = base?.y || (CONFIG.worldHeight * 0.6);
+    const shieldOffset = 120;
+    objective.shieldsRemaining = ASSAULT_BASE_CONFIG.shieldGeneratorCount;
+    for (let i = 0; i < ASSAULT_BASE_CONFIG.shieldGeneratorCount; i++) {
+        const direction = i % 2 === 0 ? -1 : 1;
+        const shieldX = wrapValue(baseX + direction * shieldOffset, CONFIG.worldWidth);
+        const shieldY = baseY - 10;
+        createAssaultComponent(scene, shieldX, shieldY, 'assaultShieldGen', 'shield', ASSAULT_BASE_CONFIG.shieldGeneratorHp);
+    }
+}
+
 function setupAssaultObjective(scene) {
     if (!scene || !scene.assaultTargets) return;
     const objective = gameState.assaultObjective;
@@ -84,14 +102,11 @@ function setupAssaultObjective(scene) {
     scene.assaultBase = base;
     objective.baseX = baseX;
 
-    objective.shieldsRemaining = ASSAULT_BASE_CONFIG.shieldGeneratorCount;
-    const shieldOffset = 120;
-    for (let i = 0; i < ASSAULT_BASE_CONFIG.shieldGeneratorCount; i++) {
-        const direction = i % 2 === 0 ? -1 : 1;
-        const shieldX = wrapValue(baseX + direction * shieldOffset, CONFIG.worldWidth);
-        const shieldY = baseY - 10;
-        createAssaultComponent(scene, shieldX, shieldY, 'assaultShieldGen', 'shield', ASSAULT_BASE_CONFIG.shieldGeneratorHp);
-    }
+    objective.shieldStageTotal = ASSAULT_BASE_CONFIG.shieldStages;
+    objective.shieldStage = 1;
+    objective.damageWindowUntil = 0;
+    objective.intermissionUntil = 0;
+    spawnAssaultShieldGenerators(scene, objective);
 
     const turretSpread = 200;
     for (let i = 0; i < ASSAULT_BASE_CONFIG.turretCount; i++) {
@@ -112,48 +127,59 @@ function hitAssaultTarget(projectile, target) {
         return;
     }
 
+    const scene = projectile.scene;
+    const now = scene.time?.now || 0;
+
     if (projectile && projectile.empDisableDuration && (target.assaultRole === 'turret' || target.assaultRole === 'shield')) {
-        target.empDisabledUntil = this.time.now + projectile.empDisableDuration;
-        createExplosion(this, target.x, target.y, 0x38bdf8);
+        target.empDisabledUntil = now + projectile.empDisableDuration;
+        createExplosion(scene, target.x, target.y, 0x38bdf8);
     }
 
-    if (target.assaultRole === 'core' && isAssaultShieldBlocking(this)) {
-        if (objective.shieldHitCooldown <= 0) {
-            createExplosion(this, target.x, target.y - 6, 0x38bdf8);
-            objective.shieldHitCooldown = 350;
-        }
-        if (projectile && projectile.active) projectile.destroy();
-        return;
-    }
-
-    target.hp -= projectile.damage || 1;
     if (target.assaultRole === 'core') {
-        objective.baseHp = Math.max(0, target.hp);
-    }
-
-    if (target.hp <= 0) {
-        if (target.assaultRole === 'shield') {
-            objective.shieldsRemaining = Math.max(0, objective.shieldsRemaining - 1);
-            createExplosion(this, target.x, target.y, 0x22d3ee);
-            if (objective.shieldsRemaining === 0) {
-                showRebuildObjectiveBanner(this, 'Shield generators down - core exposed', '#22d3ee');
-            }
-            target.destroy();
-        } else if (target.assaultRole === 'turret') {
-            createExplosion(this, target.x, target.y, 0xf97316);
-            target.destroy();
+        if (objective.damageWindowUntil > 0 && now < objective.damageWindowUntil) {
+            target.hp -= projectile.damage || 1;
+            objective.baseHp = Math.max(0, target.hp);
+            target.setTint(0xff0000);
+            scene.time.delayedCall(50, () => {
+                if (target && target.active) target.clearTint();
+            });
         } else {
-            objective.active = false;
-            objective.baseHp = 0;
-            createExplosion(this, target.x, target.y, 0xff6b35);
-            target.destroy();
-            this.assaultBase = null;
-            const baseReward = getMissionScaledReward(5000);
-            gameState.score += baseReward;
-            winGame(this);
+            if (objective.shieldHitCooldown <= 0) {
+                createFloatingText(scene, target.x, target.y - 40, 'SHIELD ACTIVE', '#38bdf8');
+                createExplosion(scene, target.x, target.y - 6, 0x38bdf8, 0.5);
+                objective.shieldHitCooldown = 500;
+            }
+        }
+    } else {
+        target.hp -= projectile.damage || 1;
+        if (target.hp <= 0) {
+            if (target.assaultRole === 'shield') {
+                objective.shieldsRemaining = Math.max(0, (objective.shieldsRemaining || 0) - 1);
+                createExplosion(scene, target.x, target.y, 0x22d3ee);
+
+                if (objective.shieldsRemaining <= 0) {
+                    const windowDuration = ASSAULT_BASE_CONFIG.damageWindowMs;
+                    objective.damageWindowUntil = now + windowDuration;
+                    showRebuildObjectiveBanner(scene, `SHIELDS DOWN - CORE VULNERABLE (${Math.round(windowDuration / 1000)}s)`, '#ff4444');
+                }
+                target.destroy();
+            } else if (target.assaultRole === 'turret') {
+                createExplosion(scene, target.x, target.y, 0xf97316);
+                target.destroy();
+            }
         }
     }
-    if (projectile && projectile.active && !projectile.isPiercing) {
-        projectile.destroy();
+
+    if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+
+    if (objective.baseHp <= 0 && objective.active) {
+        objective.active = false;
+        objective.baseHp = 0;
+        createExplosion(scene, target.x, target.y, 0xff6b35);
+        if (target && target.active && target.assaultRole === 'core') target.destroy();
+        scene.assaultBase = null;
+        const baseReward = getMissionScaledReward(5000);
+        gameState.score += baseReward;
+        winGame(scene);
     }
 }

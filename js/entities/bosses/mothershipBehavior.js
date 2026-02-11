@@ -2,18 +2,20 @@
 // Mothership AI Behaviors and Update Functions
 // ------------------------
 
-function updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     const anchorX = boss.anchorX ?? boss.x;
     const anchorY = boss.anchorY ?? boss.y;
     boss.setPosition(anchorX, anchorY);
     boss.setVelocity(0, 0);
 
-    const hpRatio = boss.maxHp > 0 ? boss.hp / boss.maxHp : 1;
-    const phase = hpRatio < 0.33 ? 2 : hpRatio < 0.66 ? 1 : 0;
+    if (typeof tickShieldPhaseState === 'function') tickShieldPhaseState(boss, time, delta);
+    const phase = typeof getEncounterPhase === 'function' ? getEncounterPhase(boss) : (boss.corePhase || 0);
     boss.corePhase = phase;
 
-    const shotInterval = phase === 2 ? 900 : phase === 1 ? 1200 : 1600;
+    const shotInterval = typeof getPhasedInterval === 'function'
+        ? getPhasedInterval(boss, 1600, 260, 700)
+        : (phase === 2 ? 900 : phase === 1 ? 1200 : 1600);
     if (time > boss.lastShot + shotInterval) {
         const shotConfig = getBossShotConfig('mothershipCore');
         const ringCount = phase === 2 ? 10 : phase === 1 ? 8 : 6;
@@ -42,6 +44,6 @@ function updateMothershipBosses(scene, time, delta) {
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
 
-        updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier);
+        updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultiplier);
     });
 }

@@ -2,6 +2,11 @@
 // Battleship AI Behaviors and Update Functions
 // ------------------------
 
+function getBattleshipPhaseShotInterval(battleship, baseInterval) {
+    if (typeof getPhasedInterval !== 'function') return baseInterval;
+    return getPhasedInterval(battleship, baseInterval, 150, 260);
+}
+
 function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -19,7 +24,7 @@ function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultipl
     );
 
     const shotConfig = getBattleshipShotConfig('raider');
-    if (time > battleship.lastShot + shotConfig.interval) {
+    if (time > battleship.lastShot + getBattleshipPhaseShotInterval(battleship, shotConfig.interval)) {
         const spread = 0.18;
         const leftAngle = angle - spread;
         const rightAngle = angle + spread;
@@ -70,7 +75,7 @@ function updateCarrierBattleshipBehavior(scene, battleship, time, delta, timeSlo
     }
 
     const shotConfig = getBattleshipShotConfig('carrier');
-    if (time > battleship.lastShot + shotConfig.interval) {
+    if (time > battleship.lastShot + getBattleshipPhaseShotInterval(battleship, shotConfig.interval)) {
         const angle = Phaser.Math.Angle.Between(battleship.x, battleship.y, player.x, player.y);
         shootFromBattleshipSource(scene, battleship.x, battleship.y, battleship, shotConfig, angle);
         battleship.lastShot = time;
@@ -92,7 +97,7 @@ function updateNovaBattleshipBehavior(scene, battleship, time, timeSlowMultiplie
     battleship.y = targetY;
 
     const shotConfig = getBattleshipShotConfig('nova');
-    if (time > battleship.lastShot + shotConfig.interval) {
+    if (time > battleship.lastShot + getBattleshipPhaseShotInterval(battleship, shotConfig.interval)) {
         for (let i = 0; i < 6; i++) {
             const angle = (i / 6) * Math.PI * 2 + battleship.orbitAngle;
             const sourceX = battleship.x + Math.cos(angle) * 22;
@@ -125,7 +130,7 @@ function updateSiegeBattleshipBehavior(scene, battleship, time, timeSlowMultipli
     battleship.y += Math.sin(battleship.siegePhase) * 0.5;
 
     const shotConfig = getBattleshipShotConfig('siege');
-    if (time > battleship.lastShot + shotConfig.interval) {
+    if (time > battleship.lastShot + getBattleshipPhaseShotInterval(battleship, shotConfig.interval)) {
         const fireAngle = angleToPlayer + battleship.siegeOffset * 0.05;
         const barrelX = battleship.x + Math.cos(fireAngle) * 26;
         const barrelY = battleship.y + Math.sin(fireAngle) * 26;
@@ -151,7 +156,7 @@ function updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMu
     );
 
     const shotConfig = getBattleshipShotConfig('dreadnought');
-    if (time > battleship.lastShot + shotConfig.interval) {
+    if (time > battleship.lastShot + getBattleshipPhaseShotInterval(battleship, shotConfig.interval)) {
         const offsets = [-0.35, -0.15, 0.15, 0.35];
         offsets.forEach(offset => {
             const fireAngle = angle + offset;
@@ -186,6 +191,9 @@ function updateBattleships(scene, time, delta) {
         }
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
+        if (typeof tickShieldPhaseState === 'function') {
+            tickShieldPhaseState(battleship, time, delta);
+        }
 
         switch (battleship.battleshipType) {
             case 'raider':

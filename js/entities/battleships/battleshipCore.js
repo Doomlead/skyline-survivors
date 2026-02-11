@@ -186,6 +186,15 @@ function spawnBattleship(scene, type, x, y) {
     battleship.hp = getBattleshipHP(type);
     battleship.maxHP = battleship.hp;
     battleship.lastShot = 0;
+    if (typeof initializeShieldPhaseState === 'function') {
+        initializeShieldPhaseState(battleship, {
+            shieldStages: 2,
+            shieldBaseHp: Math.ceil(battleship.maxHP * 0.24),
+            damageWindowMs: 3000,
+            intermissionMs: 1300,
+            label: 'Phase'
+        });
+    }
 
     battleship.setScale(getBattleshipScale(type));
 
@@ -239,7 +248,31 @@ function hitBattleship(projectile, battleship) {
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
 
-    battleship.hp -= projectile.damage || 1;
+    const incomingDamage = projectile.damage || 1;
+    const shieldResult = typeof applyShieldStageDamage === 'function'
+        ? applyShieldStageDamage(battleship, incomingDamage, scene.time?.now || 0)
+        : { appliedToShield: false, shieldBroken: false };
+
+    if (shieldResult.immune) {
+        createFloatingText(scene, battleship.x, battleship.y - 50, 'IMMUNE', '#a3a3a3');
+        if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+        return;
+    }
+
+    if (shieldResult.appliedToShield) {
+        if (shieldResult.shieldBroken) {
+            createExplosion(scene, battleship.x, battleship.y, 0x67e8f9, 1.0);
+            scene.cameras.main.shake(80, 0.004);
+        } else {
+            createExplosion(scene, projectile.x, projectile.y, 0x67e8f9, 0.3);
+        }
+    } else {
+        battleship.hp -= incomingDamage;
+        battleship.setTint(0xff0000);
+        scene.time.delayedCall(50, () => {
+            if (battleship && battleship.active) battleship.clearTint();
+        });
+    }
 
     scene.tweens.add({
         targets: battleship,
@@ -268,15 +301,21 @@ function playerHitBattleship(playerSprite, battleship) {
     const scene = battleship.scene;
     const audioManager = scene.audioManager;
 
+    const now = scene.time?.now || 0;
+    const collisionDamage = playerState.powerUps.invincibility > 0 ? 2 : 1;
+    const shieldResult = typeof applyShieldStageDamage === 'function'
+        ? applyShieldStageDamage(battleship, collisionDamage, now)
+        : { appliedToShield: false };
+
     if (playerState.powerUps.invincibility > 0) {
-        battleship.hp -= 2;
+        if (!shieldResult.appliedToShield) battleship.hp -= 2;
         if (battleship.hp <= 0) destroyBattleship(scene, battleship);
         return;
     }
 
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
-        battleship.hp -= 1;
+        if (!shieldResult.appliedToShield) battleship.hp -= 1;
         if (battleship.hp <= 0) destroyBattleship(scene, battleship);
         screenShake(scene, 12, 200);
         if (audioManager) audioManager.playSound('hitPlayer');
