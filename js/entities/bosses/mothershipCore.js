@@ -32,6 +32,8 @@ function setupMothershipEncounter(scene) {
     objective.bossKey = 'mothershipCore';
     objective.reinforcementTimer = 0;
     objective.phase = 0;
+    objective.shieldsRemaining = 0;
+    objective.damageWindowMs = 0;
 
     const breachPosition = getMothershipBreachPosition(scene);
     const spawnX = breachPosition.x;
@@ -50,6 +52,7 @@ function setupMothershipEncounter(scene) {
         }
         objective.bossHp = boss.hp;
         objective.bossHpMax = boss.maxHP;
+        objective.shieldsRemaining = boss.phaseState?.shieldHp || 0;
     }
 
     showRebuildObjectiveBanner(scene, 'FINAL ASSAULT: DESTROY THE MOTHERSHIP CORE', '#38bdf8');
@@ -67,7 +70,11 @@ function updateMothershipEncounter(scene, delta) {
 
     objective.bossHp = boss.hp;
     objective.bossHpMax = boss.maxHP;
-    objective.phase = boss.corePhase || 0;
+    objective.phase = typeof getEncounterPhase === 'function' ? getEncounterPhase(boss) : (boss.corePhase || 0);
+    objective.shieldsRemaining = boss.phaseState?.shieldHp || 0;
+    const hud = typeof getPhaseHudStatus === 'function' ? getPhaseHudStatus(boss, scene.time?.now || 0) : null;
+    objective.phaseLabel = hud?.phaseText || `Phase ${(objective.phase || 0) + 1}`;
+    objective.gateLabel = hud?.gateText || '';
 
     objective.reinforcementTimer += delta;
     const interval = objective.phase === 2 ? 2600 : objective.phase === 1 ? 3400 : 4200;

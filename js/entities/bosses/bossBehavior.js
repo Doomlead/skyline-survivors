@@ -62,6 +62,12 @@ function fireBossBulletPattern(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+
+function getBossPhaseShotInterval(boss, baseInterval) {
+    if (typeof getPhasedInterval !== 'function') return baseInterval;
+    return getPhasedInterval(boss, baseInterval, 170, 260);
+}
+
 function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
     // Circular orbit pattern around screen center
     if (!boss.orbitAngle) boss.orbitAngle = 0;
@@ -75,7 +81,7 @@ function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.y = centerY + Math.sin(boss.orbitAngle) * orbitRadius * 0.6;
     
     // Shoot from 4 tentacles
-    if (time > boss.lastShot + 1200) {
+    if (time > boss.lastShot + getBossPhaseShotInterval(boss, 1200)) {
         const shotConfig = getBossShotConfig('megaLander');
         for (let i = 0; i < 4; i++) {
             const angle = (i / 4) * Math.PI * 2;
@@ -101,7 +107,7 @@ function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
     );
     
     // 3 arm shooting - spread pattern
-    if (time > boss.lastShot + 1400) {
+    if (time > boss.lastShot + getBossPhaseShotInterval(boss, 1400)) {
         const shotConfig = getBossShotConfig('titanMutant');
         for (let i = 0; i < 3; i++) {
             const armAngle = angle + (i - 1) * 0.4;
@@ -129,7 +135,7 @@ function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) {
     }
     
     // 6 hexagonal gun ports fire
-    if (time > boss.lastShot + 1000) {
+    if (time > boss.lastShot + getBossPhaseShotInterval(boss, 1000)) {
         const shotConfig = getBossShotConfig('hiveDrone');
         for (let i = 0; i < 6; i++) {
             const portAngle = (i / 6) * Math.PI * 2;
@@ -201,7 +207,7 @@ function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.setVelocityX(30 * timeSlowMultiplier);
     
     // 4 spawn ports radial fire
-    if (time > boss.lastShot + 1500) {
+    if (time > boss.lastShot + getBossPhaseShotInterval(boss, 1500)) {
         const shotConfig = getBossShotConfig('colossalPod');
         for (let i = 0; i < 4; i++) {
             const angle = (i / 4) * Math.PI * 2;
@@ -230,7 +236,7 @@ function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
     );
     
     // 5 thrusters fire in quick sequence
-    if (time > boss.lastShot + 900) {
+    if (time > boss.lastShot + getBossPhaseShotInterval(boss, 900)) {
         const shotConfig = getBossShotConfig('leviathanBaiter');
         for (let i = 0; i < 5; i++) {
             const thrusterAngle = (i / 5) * Math.PI * 2;
@@ -255,7 +261,7 @@ function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.rotation += 0.1 * timeSlowMultiplier;
     
     // 4 explosive appendages burst fire
-    if (time > boss.lastShot + 800) {
+    if (time > boss.lastShot + getBossPhaseShotInterval(boss, 800)) {
         const shotConfig = getBossShotConfig('apexKamikaze');
         for (let i = 0; i < 4; i++) {
             const appendageAngle = (i / 4) * Math.PI * 2 + (time * 0.005);
@@ -281,7 +287,7 @@ function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
     }
     
     // 8 barrel rotating pattern
-    if (time > boss.lastShot + 1100) {
+    if (time > boss.lastShot + getBossPhaseShotInterval(boss, 1100)) {
         let directions;
         
         if (boss.barrelMode === 0) {
@@ -340,7 +346,7 @@ function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.y = centerY + Math.sin(boss.orbitAngle) * orbitRadius * 0.8;
     
     // 6 energy nodes fire slow, powerful beams
-    if (time > boss.lastShot + 1800) {
+    if (time > boss.lastShot + getBossPhaseShotInterval(boss, 1800)) {
         const shotConfig = getBossShotConfig('overlordShield');
         for (let i = 0; i < 6; i++) {
             const nodeAngle = (i / 6) * Math.PI * 2;
@@ -375,6 +381,10 @@ function updateBosses(scene, time, delta) {
         }
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
+        if (typeof tickShieldPhaseState === 'function') {
+            tickShieldPhaseState(boss, time);
+            boss.corePhase = typeof getEncounterPhase === 'function' ? getEncounterPhase(boss) : 0;
+        }
 
         switch (boss.bossType) {
             case 'megaLander':

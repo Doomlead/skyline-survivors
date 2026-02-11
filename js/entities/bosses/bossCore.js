@@ -109,6 +109,16 @@ function spawnBoss(scene, type, x, y) {
     boss.hp = getBossHP(type);
     boss.maxHP = boss.hp;
     boss.lastShot = 0;
+    if (typeof initializeShieldPhaseState === 'function') {
+        const stageCount = type === 'mothershipCore' ? 3 : 2;
+        initializeShieldPhaseState(boss, {
+            shieldStages: stageCount,
+            shieldBaseHp: Math.ceil(boss.maxHP * (type === 'mothershipCore' ? 0.18 : 0.2)),
+            damageWindowMs: type === 'mothershipCore' ? 4200 : 3200,
+            intermissionMs: type === 'mothershipCore' ? 1800 : 1500,
+            label: 'Phase'
+        });
+    }
     
     // Special properties per boss
     if (type === 'megaLander') boss.orbitAngle = 0;
@@ -250,7 +260,15 @@ function hitBoss(projectile, boss) {
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
     const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
-    boss.hp -= applyBossDamage(boss, projectile.damage);
+    const now = scene.time?.now || 0;
+    const scaledDamage = applyBossDamage(boss, projectile.damage);
+    const shieldResult = typeof applyShieldStageDamage === 'function'
+        ? applyShieldStageDamage(boss, scaledDamage, now)
+        : { appliedToShield: false, shieldBroken: false, phaseAdvanced: false };
+
+    if (!shieldResult.appliedToShield) {
+        boss.hp -= scaledDamage;
+    }
 
     // Visual hit feedback
     scene.tweens.add({
@@ -268,6 +286,10 @@ function hitBoss(projectile, boss) {
     }
 
     if (audioManager) audioManager.playSound('hitEnemy');
+    if (shieldResult.shieldBroken) {
+        createExplosion(scene, boss.x, boss.y, 0x38bdf8);
+        showRebuildObjectiveBanner(scene, `${boss.bossType.toUpperCase()} SHIELD STAGE BROKEN`, '#38bdf8');
+    }
     if (projectile.projectileType === 'homing' && particleManager) {
         particleManager.bulletExplosion(boss.x, boss.y);
     }
@@ -285,15 +307,21 @@ function playerHitBoss(playerSprite, boss) {
     const scene = boss.scene;
     const audioManager = scene.audioManager;
 
+    const now = scene.time?.now || 0;
+    const impactDamage = playerState.powerUps.invincibility > 0 ? 3 : 2;
+    const shieldResult = typeof applyShieldStageDamage === 'function'
+        ? applyShieldStageDamage(boss, applyBossDamage(boss, impactDamage), now)
+        : { appliedToShield: false };
+
     if (playerState.powerUps.invincibility > 0) {
-        boss.hp -= applyBossDamage(boss, 3);
+        if (!shieldResult.appliedToShield) boss.hp -= applyBossDamage(boss, 3);
         if (boss.hp <= 0) destroyBoss(scene, boss);
         return;
     }
 
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
-        boss.hp -= applyBossDamage(boss, 2);
+        if (!shieldResult.appliedToShield) boss.hp -= applyBossDamage(boss, 2);
         if (boss.hp <= 0) destroyBoss(scene, boss);
         screenShake(scene, 10, 200);
         if (audioManager) audioManager.playSound('hitPlayer');

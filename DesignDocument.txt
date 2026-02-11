@@ -203,3 +203,33 @@ If the Aegis is destroyed, the game does not end. The pilot ejects, and the genr
 *   **Operative Depth:** Added 3 distinct classes (Infantry, Gunner, Saboteur) and AI behaviors (Defensive Perimeter).
 *   **Weapon Synergy:** Tier 3 ship overflow upgrades ground troops.
 *   **Second Chance Mechanic:** On-Foot Command turns the pilot into a Squad Leader, using "Bullet Hell" squad tactics and "Sacrifice" mechanics to rebuild the Aegis.
+---
+
+## 10. Phase-Gated Boss Flow (v2.1 Update)
+
+### 10.1 Unified Shield/HP Phase Architecture
+All major encounters now follow a shared cadence:
+1. **Shield Stage Gate** (core HP protected)
+2. **Burst Damage Window** (short core vulnerability)
+3. **Intermission / Shield Re-prime** (if stage chain remains)
+
+This applies to:
+- Core Bosses
+- Mini-boss battleships
+- Assault mission base cores
+- Mothership core encounter
+
+### 10.2 Behavior Driven by Encounter Phase (Not HP Ratio)
+Boss and battleship attack timing now references the phase controller state rather than raw HP %, enabling deterministic progression beats for tuning and readability.
+
+### 10.3 HUD/Status Alignment
+Encounter HUD labels now report:
+- Current phase index (e.g., Phase 2/3)
+- Shield gate state (shield HP or exposed core)
+- Active damage-window countdown when relevant
+
+### 10.4 Design Intent
+The new system reinforces:
+- Better fight rhythm and recovery windows
+- Stronger mission readability and anticipation
+- Consistent final-boss language across all mission archetypes

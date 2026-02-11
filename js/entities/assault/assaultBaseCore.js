@@ -13,7 +13,10 @@ const ASSAULT_BASE_CONFIG = {
     turretFireInterval: 1300,
     reinforcementInterval: 6800,
     reinforcementBatch: 2,
-    reinforcementCap: 10
+    reinforcementCap: 10,
+    shieldStages: 3,
+    damageWindowMs: 4200,
+    intermissionMs: 1600
 };
 
 const ASSAULT_BASE_TEXTURES = [
@@ -59,6 +62,21 @@ function isAssaultShieldBlocking(scene) {
     return blocking;
 }
 
+
+function spawnAssaultShieldGenerators(scene, objective) {
+    const baseX = objective?.baseX || CONFIG.worldWidth * 0.5;
+    const base = scene.assaultBase;
+    const baseY = base?.y || (CONFIG.worldHeight * 0.6);
+    const shieldOffset = 120;
+    objective.shieldsRemaining = ASSAULT_BASE_CONFIG.shieldGeneratorCount;
+    for (let i = 0; i < ASSAULT_BASE_CONFIG.shieldGeneratorCount; i++) {
+        const direction = i % 2 === 0 ? -1 : 1;
+        const shieldX = wrapValue(baseX + direction * shieldOffset, CONFIG.worldWidth);
+        const shieldY = baseY - 10;
+        createAssaultComponent(scene, shieldX, shieldY, 'assaultShieldGen', 'shield', ASSAULT_BASE_CONFIG.shieldGeneratorHp);
+    }
+}
+
 function setupAssaultObjective(scene) {
     if (!scene || !scene.assaultTargets) return;
     const objective = gameState.assaultObjective;
@@ -84,14 +102,11 @@ function setupAssaultObjective(scene) {
     scene.assaultBase = base;
     objective.baseX = baseX;
 
-    objective.shieldsRemaining = ASSAULT_BASE_CONFIG.shieldGeneratorCount;
-    const shieldOffset = 120;
-    for (let i = 0; i < ASSAULT_BASE_CONFIG.shieldGeneratorCount; i++) {
-        const direction = i % 2 === 0 ? -1 : 1;
-        const shieldX = wrapValue(baseX + direction * shieldOffset, CONFIG.worldWidth);
-        const shieldY = baseY - 10;
-        createAssaultComponent(scene, shieldX, shieldY, 'assaultShieldGen', 'shield', ASSAULT_BASE_CONFIG.shieldGeneratorHp);
-    }
+    objective.shieldStageTotal = ASSAULT_BASE_CONFIG.shieldStages;
+    objective.shieldStage = 1;
+    objective.damageWindowUntil = 0;
+    objective.intermissionUntil = 0;
+    spawnAssaultShieldGenerators(scene, objective);
 
     const turretSpread = 200;
     for (let i = 0; i < ASSAULT_BASE_CONFIG.turretCount; i++) {
@@ -117,6 +132,14 @@ function hitAssaultTarget(projectile, target) {
         createExplosion(this, target.x, target.y, 0x38bdf8);
     }
 
+    const now = this.time?.now || 0;
+    if (target.assaultRole === 'core'
+        && objective.shieldStage < (objective.shieldStageTotal || 1)
+        && (objective.damageWindowUntil <= 0 || now > objective.damageWindowUntil)) {
+        if (projectile && projectile.active) projectile.destroy();
+        return;
+    }
+
     if (target.assaultRole === 'core' && isAssaultShieldBlocking(this)) {
         if (objective.shieldHitCooldown <= 0) {
             createExplosion(this, target.x, target.y - 6, 0x38bdf8);
@@ -136,7 +159,8 @@ function hitAssaultTarget(projectile, target) {
             objective.shieldsRemaining = Math.max(0, objective.shieldsRemaining - 1);
             createExplosion(this, target.x, target.y, 0x22d3ee);
             if (objective.shieldsRemaining === 0) {
-                showRebuildObjectiveBanner(this, 'Shield generators down - core exposed', '#22d3ee');
+                objective.damageWindowUntil = now + ASSAULT_BASE_CONFIG.damageWindowMs;
+                showRebuildObjectiveBanner(this, `Shield stage ${objective.shieldStage}/${objective.shieldStageTotal} down - damage window open`, '#22d3ee');
             }
             target.destroy();
         } else if (target.assaultRole === 'turret') {

@@ -306,3 +306,23 @@
 1. **Bulwark Assault Synergy + Assault Rewards** to differentiate assault missions and pay off the Bulwark mode fantasy.
 2. **Mothership multi-phase upgrade (Exterior → Interior → Core)**. This is the single largest compliance gap and the primary MVP blocker.
 3. **Assault mission retreat/redo loop polish** to clarify failure flow and reduce dead-end friction.
+
+---
+
+## Post-Implementation Audit (Phase System Rollout)
+
+### Newly Completed
+- Unified shield-stage + burst-window flow implemented across core bosses, battleships, assault bases, and mothership core.
+- Boss/battleship behavior pacing now references phase progression state instead of HP-ratio checks.
+- HUD/status reporting aligned to phase-aware flow (phase index, shield gate, damage window cues).
+
+### Updated Priority Queue
+1. **Priority 1 – Balancing Pass (2-3 days)**
+   - Tune shield HP, window durations, and intermission timings per boss archetype.
+   - Validate solo vs. operative-heavy pacing.
+2. **Priority 2 – Assault Rewards + Bulwark Synergy (2-3 days)**
+   - Add structural damage bonus + reward drops/jackpots for assault completion.
+3. **Priority 3 – Mothership Exterior→Interior Mission Expansion (4-6 days)**
+   - Extend current phase-aware core into full multi-space final mission chain.
+4. **Priority 4 – UX Polish (2 days)**
+   - Add stronger phase-transition FX/audio callouts and readability polish.
