@@ -2,14 +2,14 @@
 // Mothership AI Behaviors and Update Functions
 // ------------------------
 
-function updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     const anchorX = boss.anchorX ?? boss.x;
     const anchorY = boss.anchorY ?? boss.y;
     boss.setPosition(anchorX, anchorY);
     boss.setVelocity(0, 0);
 
-    if (typeof tickShieldPhaseState === 'function') tickShieldPhaseState(boss, time);
+    if (typeof tickShieldPhaseState === 'function') tickShieldPhaseState(boss, time, delta);
     const phase = typeof getEncounterPhase === 'function' ? getEncounterPhase(boss) : (boss.corePhase || 0);
     boss.corePhase = phase;
 
@@ -44,6 +44,6 @@ function updateMothershipBosses(scene, time, delta) {
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
 
-        updateMothershipCoreBehavior(scene, boss, time, timeSlowMultiplier);
+        updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultiplier);
     });
 }

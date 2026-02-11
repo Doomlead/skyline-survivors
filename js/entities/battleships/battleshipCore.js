@@ -248,14 +248,30 @@ function hitBattleship(projectile, battleship) {
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
 
-    const now = scene.time?.now || 0;
     const incomingDamage = projectile.damage || 1;
     const shieldResult = typeof applyShieldStageDamage === 'function'
-        ? applyShieldStageDamage(battleship, incomingDamage, now)
+        ? applyShieldStageDamage(battleship, incomingDamage, scene.time?.now || 0)
         : { appliedToShield: false, shieldBroken: false };
 
-    if (!shieldResult.appliedToShield) {
+    if (shieldResult.immune) {
+        createFloatingText(scene, battleship.x, battleship.y - 50, 'IMMUNE', '#a3a3a3');
+        if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+        return;
+    }
+
+    if (shieldResult.appliedToShield) {
+        if (shieldResult.shieldBroken) {
+            createExplosion(scene, battleship.x, battleship.y, 0x67e8f9, 1.0);
+            scene.cameras.main.shake(80, 0.004);
+        } else {
+            createExplosion(scene, projectile.x, projectile.y, 0x67e8f9, 0.3);
+        }
+    } else {
         battleship.hp -= incomingDamage;
+        battleship.setTint(0xff0000);
+        scene.time.delayedCall(50, () => {
+            if (battleship && battleship.active) battleship.clearTint();
+        });
     }
 
     scene.tweens.add({
@@ -267,9 +283,6 @@ function hitBattleship(projectile, battleship) {
     });
 
     if (audioManager) audioManager.playSound('hitEnemy');
-    if (shieldResult.shieldBroken) {
-        createExplosion(scene, battleship.x, battleship.y, 0x67e8f9);
-    }
     if (projectile.projectileType === 'homing' && particleManager) {
         particleManager.bulletExplosion(battleship.x, battleship.y);
     }

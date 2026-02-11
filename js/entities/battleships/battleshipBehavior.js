@@ -192,7 +192,7 @@ function updateBattleships(scene, time, delta) {
 
         const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
         if (typeof tickShieldPhaseState === 'function') {
-            tickShieldPhaseState(battleship, time);
+            tickShieldPhaseState(battleship, time, delta);
         }
 
         switch (battleship.battleshipType) {

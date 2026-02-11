@@ -183,7 +183,8 @@ const gameState = {
         phase: 0,
         shieldsRemaining: 0,
         phaseLabel: '',
-        gateLabel: ''
+        gateLabel: '',
+        gateColor: '#ffffff'
     },
     rebuildObjective: {
         active: false,
@@ -387,7 +388,8 @@ function resetGameState() {
         phase: 0,
         shieldsRemaining: 0,
         phaseLabel: '',
-        gateLabel: ''
+        gateLabel: '',
+        gateColor: '#ffffff'
     };
     gameState.rebuildObjective = {
         active: false,

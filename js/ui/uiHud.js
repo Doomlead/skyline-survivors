@@ -73,10 +73,11 @@ function updateUI(scene) {
             bossHpFillEl.style.width = `${Math.round(pct * 100)}%`;
         }
         const now = scene?.time?.now || 0;
-        const phaseHud = typeof getPhaseHudStatus === 'function' ? getPhaseHudStatus(boss, now) : null;
+        const phaseHud = typeof getPhaseHudStatus === 'function' ? getPhaseHudStatus(boss) : null;
         if (bossHpLabelEl) {
             const gate = phaseHud?.gateText ? ` · ${phaseHud.gateText}` : '';
             bossHpLabelEl.innerText = `HP ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}${gate}`;
+            if (phaseHud?.gateColor) bossHpLabelEl.style.color = phaseHud.gateColor;
         }
         if (bossNameLabelEl) {
             const name = gameState.currentBossName || boss?.bossType || boss?.battleshipType || 'Boss';
@@ -156,6 +157,7 @@ function updateUI(scene) {
             const phase = objective?.phaseLabel || `Phase ${(objective?.phase ?? 0) + 1}`;
             const gate = objective?.gateLabel ? ` · ${objective.gateLabel}` : '';
             mothershipPhaseLabelEl.innerText = `${phase}${gate}`;
+            if (objective?.gateColor) mothershipPhaseLabelEl.style.color = objective.gateColor;
         }
     } else {
         timerEl.style.display = 'none';

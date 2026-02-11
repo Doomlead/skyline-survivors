@@ -75,6 +75,7 @@ function updateMothershipEncounter(scene, delta) {
     const hud = typeof getPhaseHudStatus === 'function' ? getPhaseHudStatus(boss, scene.time?.now || 0) : null;
     objective.phaseLabel = hud?.phaseText || `Phase ${(objective.phase || 0) + 1}`;
     objective.gateLabel = hud?.gateText || '';
+    objective.gateColor = hud?.gateColor || '#ffffff';
 
     objective.reinforcementTimer += delta;
     const interval = objective.phase === 2 ? 2600 : objective.phase === 1 ? 3400 : 4200;
