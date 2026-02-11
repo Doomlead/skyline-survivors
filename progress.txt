@@ -249,12 +249,19 @@
 4. **Challenge Mode Layer:** “Last Stand” and “Assault Only” surfaced as selectable, replayable modes.
 
 ### Immediate Next Steps (Recommended Order)
-1. **Ship a complete assault reward loop (2-3 days)**  
+1. **Expand mothership to a 3-stage mission (4-6 days)**  
+   - Build Phase 1 exterior assault + phase transition setup.
+   - Implement Phase 2 interior encounter space (on-foot focus) with objective gating.
+   - Upgrade Phase 3 core boss to multi-step shield/HP phases (current fight is HP-based, single arena).
+   - Add phase-gated UI beats and cinematic transition (dock/boarding).
+
+
+2. **Ship a complete assault reward loop (2-3 days)**  
    - Add guaranteed base-core loot table, mystery-drop jackpot roll, and HUD reward callouts.
-2. **Implement Bulwark siege pass (1-2 days)**  
+
+3. **Implement Bulwark siege pass (1-2 days)**  
    - Apply structural damage multipliers vs. assault objectives; add UI feedback when siege bonus is active.
-3. **Expand mothership to a 3-stage mission (4-6 days)**  
-   - Stage routing (exterior → interior → core), phase-gated transitions, and mission-state persistence.
+
 4. **Formalize challenge modes (2-3 days)**  
    - Add menu entry points + basic scoring/seed handling for Last Stand and Assault Only.
 
