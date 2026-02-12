@@ -116,13 +116,15 @@ var MOTHERSHIP_INT_LAYERS = {
         key: 'ms_int_back',
         speedX: 0.2,
         depth: 4,
-        generator: 'generateCorridorBack'
+        generator: 'generateCeilingLayer',
+        widthMultiplier: 1,
     },
     infrastructure: {
         key: 'ms_int_infra',
         speedX: 0.5,
         depth: 5,
-        generator: 'generateInfrastructure'
+        generator: 'generateTerrainLayer',
+        widthMultiplier: 1,
     }
 };
 
