@@ -261,6 +261,50 @@ function createUtilityGraphics(scene) {
     baseTurretGraphics.destroy();
 
     // ========================
+    // MOTHERSHIP INTERIOR TARGETS
+    // ========================
+    const conduitGraphics = scene.add.graphics();
+    const conduitWidth = 34;
+    const conduitHeight = 44;
+    conduitGraphics.fillStyle(0x111827, 1);
+    conduitGraphics.fillRoundedRect(2, 4, conduitWidth - 4, conduitHeight - 6, 6);
+    conduitGraphics.fillStyle(0x1d4ed8, 0.95);
+    conduitGraphics.fillRect(12, 8, 10, conduitHeight - 14);
+    conduitGraphics.fillStyle(0x67e8f9, 0.85);
+    conduitGraphics.fillCircle(conduitWidth / 2, conduitHeight - 8, 6);
+    conduitGraphics.lineStyle(2, 0x93c5fd, 0.95);
+    conduitGraphics.strokeRoundedRect(2, 4, conduitWidth - 4, conduitHeight - 6, 6);
+    conduitGraphics.generateTexture('interiorConduit', conduitWidth, conduitHeight);
+    conduitGraphics.destroy();
+
+    const securityNodeGraphics = scene.add.graphics();
+    const nodeSize = 42;
+    securityNodeGraphics.fillStyle(0x1f2937, 1);
+    securityNodeGraphics.fillCircle(nodeSize / 2, nodeSize / 2, 18);
+    securityNodeGraphics.fillStyle(0xf97316, 0.95);
+    securityNodeGraphics.fillCircle(nodeSize / 2, nodeSize / 2, 10);
+    securityNodeGraphics.lineStyle(3, 0xfb923c, 0.9);
+    securityNodeGraphics.strokeCircle(nodeSize / 2, nodeSize / 2, 15);
+    securityNodeGraphics.lineStyle(2, 0x9ca3af, 0.9);
+    securityNodeGraphics.strokeCircle(nodeSize / 2, nodeSize / 2, 19);
+    securityNodeGraphics.generateTexture('interiorSecurityNode', nodeSize, nodeSize);
+    securityNodeGraphics.destroy();
+
+    const coreChamberGraphics = scene.add.graphics();
+    const chamberWidth = 74;
+    const chamberHeight = 62;
+    coreChamberGraphics.fillStyle(0x111827, 1);
+    coreChamberGraphics.fillRoundedRect(2, 2, chamberWidth - 4, chamberHeight - 4, 10);
+    coreChamberGraphics.fillStyle(0x7f1d1d, 0.95);
+    coreChamberGraphics.fillEllipse(chamberWidth / 2, chamberHeight / 2, 44, 34);
+    coreChamberGraphics.fillStyle(0xfca5a5, 0.9);
+    coreChamberGraphics.fillCircle(chamberWidth / 2, chamberHeight / 2, 10);
+    coreChamberGraphics.lineStyle(3, 0xf87171, 0.95);
+    coreChamberGraphics.strokeEllipse(chamberWidth / 2, chamberHeight / 2, 48, 38);
+    coreChamberGraphics.generateTexture('interiorCoreChamber', chamberWidth, chamberHeight);
+    coreChamberGraphics.destroy();
+
+    // ========================
     // PARTICLES & STARS
     // ========================
     const particleGraphics = scene.add.graphics();

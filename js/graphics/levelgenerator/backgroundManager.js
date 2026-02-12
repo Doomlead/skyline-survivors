@@ -8,6 +8,7 @@
 
 var backgroundGeneratorInstance = null;
 var parallaxManagerInstance = null;
+var activeBackgroundStyle = null;
 
 // Update BACKGROUND_STYLE_GENERATORS in backgroundManager.js
 var BACKGROUND_STYLE_GENERATORS = {
@@ -55,6 +56,7 @@ function createBackground(scene, style) {
     };
 
     var styleToUse = resolveBackgroundStyle(style);
+    activeBackgroundStyle = styleToUse;
     setActiveBackgroundLayers(styleToUse);
     var GeneratorClass = BACKGROUND_STYLE_GENERATORS[styleToUse];
 
@@ -66,6 +68,18 @@ function createBackground(scene, style) {
     parallaxManagerInstance.createLayers();
 
     scene.groundLevel = generatorConfig.worldHeight - 80;
+}
+
+function switchBackgroundStyle(scene, style) {
+    if (!scene) return;
+    var nextStyle = resolveBackgroundStyle(style);
+    if (nextStyle === activeBackgroundStyle && parallaxManagerInstance) return;
+
+    destroyParallax();
+    createBackground(scene, nextStyle);
+
+    var camera = scene.cameras && scene.cameras.main;
+    initParallaxTracking(camera ? camera.scrollX : 0, camera ? camera.scrollY : 0);
 }
 
 function initParallaxTracking(playerX, playerY) {
@@ -182,4 +196,5 @@ function destroyParallax() {
         parallaxManagerInstance = null;
     }
     backgroundGeneratorInstance = null;
+    activeBackgroundStyle = null;
 }

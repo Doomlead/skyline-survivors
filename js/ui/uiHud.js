@@ -141,8 +141,11 @@ function updateUI(scene) {
         waveEl.style.display = 'block';
         if (assaultHudEl) assaultHudEl.classList.add('hidden');
         if (bossHudEl) bossHudEl.classList.add('hidden');
-        waveEl.innerText = 'FINAL ASSAULT: MOTHERSHIP CORE';
         const objective = gameState.mothershipObjective;
+        const stageLabel = objective?.stage === 'interior_assault'
+            ? 'FINAL ASSAULT: MOTHERSHIP INTERIOR'
+            : 'FINAL ASSAULT: MOTHERSHIP CORE';
+        waveEl.innerText = stageLabel;
         const bossHp = objective?.bossHp ?? 0;
         const bossMax = objective?.bossHpMax ?? 0;
         if (mothershipHudEl) mothershipHudEl.classList.remove('hidden');
@@ -151,7 +154,11 @@ function updateUI(scene) {
             mothershipCoreFillEl.style.width = `${Math.round(pct * 100)}%`;
         }
         if (mothershipCoreLabelEl) {
-            mothershipCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}`;
+            if (objective?.stage === 'interior_assault' && objective?.coreChamberOpen) {
+                mothershipCoreLabelEl.innerText = `Core Chamber ${Math.max(0, Math.ceil(objective?.coreChamberHp || 0))}/${Math.max(0, Math.ceil(objective?.coreChamberHpMax || 0))}`;
+            } else {
+                mothershipCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(bossHp))}/${Math.max(0, Math.ceil(bossMax))}`;
+            }
         }
         if (mothershipPhaseLabelEl) {
             const phase = objective?.phaseLabel || `Phase ${(objective?.phase ?? 0) + 1}`;

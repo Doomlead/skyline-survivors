@@ -176,6 +176,7 @@ const gameState = {
     },
     mothershipObjective: {
         active: false,
+        stage: 'exterior_core',
         bossKey: null,
         bossHp: 0,
         bossHpMax: 0,
@@ -184,7 +185,15 @@ const gameState = {
         shieldsRemaining: 0,
         phaseLabel: '',
         gateLabel: '',
-        gateColor: '#ffffff'
+        gateColor: '#ffffff',
+        shipLocked: false,
+        interiorTargetsRemaining: 0,
+        interiorConduitsRemaining: 0,
+        interiorSecurityNodesRemaining: 0,
+        coreChamberOpen: false,
+        coreChamberActive: false,
+        coreChamberHp: 0,
+        coreChamberHpMax: 0
     },
     rebuildObjective: {
         active: false,
@@ -381,6 +390,7 @@ function resetGameState() {
     };
     gameState.mothershipObjective = {
         active: false,
+        stage: 'exterior_core',
         bossKey: null,
         bossHp: 0,
         bossHpMax: 0,
@@ -389,7 +399,15 @@ function resetGameState() {
         shieldsRemaining: 0,
         phaseLabel: '',
         gateLabel: '',
-        gateColor: '#ffffff'
+        gateColor: '#ffffff',
+        shipLocked: false,
+        interiorTargetsRemaining: 0,
+        interiorConduitsRemaining: 0,
+        interiorSecurityNodesRemaining: 0,
+        coreChamberOpen: false,
+        coreChamberActive: false,
+        coreChamberHp: 0,
+        coreChamberHpMax: 0
     };
     gameState.rebuildObjective = {
         active: false,

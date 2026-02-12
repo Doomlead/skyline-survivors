@@ -233,3 +233,29 @@ The new system reinforces:
 - Better fight rhythm and recovery windows
 - Stronger mission readability and anticipation
 - Consistent final-boss language across all mission archetypes
+
+---
+
+## 11. Mothership Interior Boarding Update (v2.2)
+
+### 11.1 Exterior → Interior Transition
+- The mothership finale is now split into sequential phases instead of ending immediately when the exterior core boss dies.
+- On exterior-core defeat, the encounter transitions into an interior boarding assault phase.
+
+### 11.2 Interior Space Identity
+- Background transitions from `mothership_exterior` to `mothership_interior` at phase handoff.
+- Parallax layers are recreated at transition so the interior space has distinct visual readability.
+
+### 11.3 On-Foot Lock and Squad Continuity
+- Phase 2 enforces pilot-first combat by ejecting/locking out the ship.
+- Ship re-entry/rebuild remains blocked until interior objectives are completed.
+- Squad leader aura/follow behavior remains active to preserve on-foot command fantasy.
+
+### 11.4 Objective Gating
+- Interior objectives now include destructible **power conduits** and **security nodes** tuned for on-foot clearing.
+- Destroying all interior targets unlocks the **core chamber** objective.
+- Destroying the core chamber completes the mothership mission.
+
+### 11.5 Remaining Finale Work
+- Add stronger cinematic/audio beats for phase transitions.
+- Consider optional Phase 3 escalation variant if we want a longer finale tail after core chamber unlock.

@@ -121,6 +121,16 @@ function setupAssaultObjective(scene) {
 }
 
 function hitAssaultTarget(projectile, target) {
+    const mothershipObjective = gameState.mothershipObjective;
+    if (target?.assaultRole && typeof target.assaultRole === 'string' && target.assaultRole.indexOf('interior_') === 0) {
+        if (mothershipObjective?.active && mothershipObjective.stage === 'interior_assault' && typeof hitMothershipInteriorTarget === 'function') {
+            hitMothershipInteriorTarget(projectile, target);
+        } else if (projectile && projectile.active && !projectile.isPiercing) {
+            projectile.destroy();
+        }
+        return;
+    }
+
     const objective = gameState.assaultObjective;
     if (!objective || !objective.active || !target.active) {
         if (projectile && projectile.active) projectile.destroy();

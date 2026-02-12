@@ -204,13 +204,13 @@
 
 ## MVP Completion
 
-- **Status:** ~79% complete (core mission loop is stable and phase-gated encounter architecture is now live across bosses, battleships, assault core, and mothership core).
-- **Primary Blockers:** Full multi-space mothership finale (exterior → interior → core), Bulwark assault/siege payoff, and assault-specific loot/jackpot reward loop.
+- **Status:** ~83% complete (core mission loop is stable; mothership now includes exterior core -> interior boarding with objective gating and core-chamber unlock).
+- **Primary Blockers:** Bulwark assault/siege payoff, assault-specific loot/jackpot reward loop, and cinematic/audio escalation polish for the mothership finale.
 
 ## Gap Analysis & Next Steps (Codebase Audit Refresh)
 
 ### Overall Completion Statistics
-- **MVP Completion:** ~79%
+- **MVP Completion:** ~83%
 - **Design Document Alignment:** ~73%
 - **Major Milestones Achieved:** District state campaign loop, threatened→critical near-miss timer + clutch bonus, rescue cargo inertia + hangar deployment, operative class behaviors (including saboteur EMP), on-foot rebuild + squad aura/body-block sacrifice, supply-drop shop/hot-start pipeline, and unified shield-phase boss architecture.
 
@@ -226,7 +226,7 @@
 
 **Partially Aligned**
 - Bulwark fantasy exists mechanically, but assault-specific siege advantage and clear mission payoff are still weak.
-- Mothership exists as a final core encounter, but not yet a full exterior→interior→core mission chain.
+- Mothership now supports exterior→interior transition and on-foot objective gating; cinematic transition/audio payoff is still light.
 - Environment/audio pillars are present, but adaptive audio layering and weather/destruction depth are still limited.
 
 **Not Aligned (Major Remaining Gaps)**
@@ -243,24 +243,20 @@
 - Unified phase-gated boss framework with HUD phase/gate readability.
 
 ### Critical Missing Features for Design Document Compliance
-1. **Mothership Mission Expansion:** Exterior breach + interior assault + final core chain with transitions.
-2. **Bulwark Assault Synergy:** Structural/siege damage bonus and explicit assault utility feedback.
-3. **Assault Rewards & Mystery Drops:** Base-section loot reveal, jackpots, and better assault completion payout identity.
+1. **Bulwark Assault Synergy:** Structural/siege damage bonus and explicit assault utility feedback.
+2. **Assault Rewards & Mystery Drops:** Base-section loot reveal, jackpots, and better assault completion payout identity.
+3. **Mothership Finale Polish:** Cinematic transition beats, stronger audio stingers, and optional longer tail phase.
 4. **Challenge Mode Layer:** “Last Stand” and “Assault Only” surfaced as selectable, replayable modes.
 
 ### Immediate Next Steps (Recommended Order)
-1. **Expand mothership to a 3-stage mission (4-6 days)**  
-   - Build Phase 1 exterior assault + phase transition setup.
-   - Implement Phase 2 interior encounter space (on-foot focus) with objective gating.
-   - Upgrade Phase 3 core boss to multi-step shield/HP phases (current fight is HP-based, single arena).
-   - Add phase-gated UI beats and cinematic transition (dock/boarding).
-
-
-2. **Ship a complete assault reward loop (2-3 days)**  
+1. **Ship a complete assault reward loop (2-3 days)**  
    - Add guaranteed base-core loot table, mystery-drop jackpot roll, and HUD reward callouts.
 
-3. **Implement Bulwark siege pass (1-2 days)**  
+2. **Implement Bulwark siege pass (1-2 days)**  
    - Apply structural damage multipliers vs. assault objectives; add UI feedback when siege bonus is active.
+
+3. **Mothership finale polish pass (1-2 days)**
+   - Add cinematic transition and stronger phase audio stingers for the interior handoff + core chamber unlock.
 
 4. **Formalize challenge modes (2-3 days)**  
    - Add menu entry points + basic scoring/seed handling for Last Stand and Assault Only.
@@ -268,13 +264,13 @@
 ### Estimated Remaining Work
 
 ### MVP Completion
-- **Current Progress:** ~79%
+- **Current Progress:** ~83%
 - **Remaining Critical Work:**
-  - Mothership multi-space final mission chain: 4-6 days
   - Assault rewards + mystery/jackpot loop: 2-3 days
   - Bulwark siege synergy + UI feedback: 1-2 days
+  - Mothership cinematic/audio polish pass: 1-2 days
   - Assault/challenge mode surfacing + polish: 2-3 days
-- **Total to MVP target:** ~9-14 days
+- **Total to MVP target:** ~6-10 days
 
 ### Full Design Document
 - **High Priority Remaining:** ~27%
@@ -298,10 +294,10 @@
 
 ### What We Should Work on Next (Recommendation)
 **Recommendation: do Assault Rewards + Bulwark Siege in the same sprint first.**  
-Reason: these are the highest-impact gaps that immediately improve assault mission identity, reduce mode overlap with defense missions, and unblock tuning data before the larger mothership mission expansion.
+Reason: with interior boarding now implemented, the biggest gameplay identity gaps are assault reward economy and bulwark siege differentiation.
 
 **Proposed next sprint sequence:**
 1. Assault reward pipeline (loot tables, mystery/jackpots, reward UX).
 2. Bulwark structural bonus + on-screen confirmation cues.
-3. Short tuning pass on assault pacing after rewards/siege changes land.
-4. Then start mothership exterior→interior scaffolding with transition hooks already validated by phase-system HUD patterns.
+3. Mothership polish pass (cinematic transition/audio stingers + HUD flourish).
+4. Challenge mode surfacing after combat economy tuning stabilizes.
