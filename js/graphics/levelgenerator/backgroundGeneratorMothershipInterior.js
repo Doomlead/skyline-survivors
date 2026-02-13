@@ -48,8 +48,8 @@ var BackgroundGeneratorMothershipInterior = (function() {
     };
 
     BackgroundGeneratorMothershipInterior.prototype.generateLayerTexture = function(layerName, layerConfig) {
-        var worldWidth = Math.max(this.config.worldWidth || 0, this.config.width || 0);
-        var worldHeight = Math.max(this.config.worldHeight || 0, this.config.height || 0);
+        var worldWidth = this.config.worldWidth;
+        var worldHeight = this.config.worldHeight;
 
         var textureWidth = worldWidth;
         if (layerConfig.widthMultiplier && layerConfig.widthMultiplier < 1) {
@@ -72,15 +72,11 @@ var BackgroundGeneratorMothershipInterior = (function() {
             console.warn('[BackgroundGeneratorMothershipInterior] Generator "' + layerConfig.generator + '" not found');
         }
 
-        if (this.scene.textures.exists(layerConfig.key)) {
-            this.scene.textures.remove(layerConfig.key);
-        }
-
         graphics.generateTexture(layerConfig.key, textureWidth, worldHeight);
         graphics.destroy();
 
         this.generatedTextures.set(layerName, layerConfig.key);
-        console.log('[BackgroundGeneratorMothershipInterior] Generated: ' + layerConfig.key);
+        console.log('[BackgroundGeneratorMothershipInterior] Generated: ' + layerConfig.key + ' (' + textureWidth + 'x' + worldHeight + ')');
 
         return layerConfig.key;
     };
@@ -90,8 +86,8 @@ var BackgroundGeneratorMothershipInterior = (function() {
     // ═══════════════════════════════════════════════════════════════════════
 
     BackgroundGeneratorMothershipInterior.prototype.generateCorridorBack = function(graphics, random, dims) {
-        var textureWidth = dims.width;
-        var worldHeight = dims.height;
+        var textureWidth = dims ? dims.width : this.config.worldWidth;
+        var worldHeight = dims ? dims.height : this.config.worldHeight;
 
         // Deep corridor background - dark alien metal with distant lights
         graphics.fillStyle(0x0d0818, 1);
@@ -140,8 +136,8 @@ var BackgroundGeneratorMothershipInterior = (function() {
     };
 
     BackgroundGeneratorMothershipInterior.prototype.generateInfrastructure = function(graphics, random, dims) {
-        var textureWidth = dims.width;
-        var worldHeight = dims.height;
+        var textureWidth = dims ? dims.width : this.config.worldWidth;
+        var worldHeight = dims ? dims.height : this.config.worldHeight;
         var groundY = worldHeight - 100;
 
         // Floor - industrial grating with biomechanical elements
