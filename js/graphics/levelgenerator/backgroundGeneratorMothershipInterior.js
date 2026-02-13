@@ -48,8 +48,8 @@ var BackgroundGeneratorMothershipInterior = (function() {
     };
 
     BackgroundGeneratorMothershipInterior.prototype.generateLayerTexture = function(layerName, layerConfig) {
-        var worldWidth = this.config.worldWidth;
-        var worldHeight = this.config.worldHeight;
+        var worldWidth = Math.max(this.config.worldWidth || 0, this.config.width || 0);
+        var worldHeight = Math.max(this.config.worldHeight || 0, this.config.height || 0);
 
         var textureWidth = worldWidth;
         if (layerConfig.widthMultiplier && layerConfig.widthMultiplier < 1) {
@@ -70,6 +70,10 @@ var BackgroundGeneratorMothershipInterior = (function() {
             this[layerConfig.generator](graphics, rng, dims);
         } else {
             console.warn('[BackgroundGeneratorMothershipInterior] Generator "' + layerConfig.generator + '" not found');
+        }
+
+        if (this.scene.textures.exists(layerConfig.key)) {
+            this.scene.textures.remove(layerConfig.key);
         }
 
         graphics.generateTexture(layerConfig.key, textureWidth, worldHeight);
