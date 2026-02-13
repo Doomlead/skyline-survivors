@@ -8,15 +8,18 @@ class ParallaxManager {
         this.config = config;
         this.layers = [];
         this._prevPlayerX = 0;
-        this._prevPlayerY = 0; // NEW: Track previous Y
+        this._prevPlayerY = 0;
         this._accumScrollX = 0;
-        this._accumScrollY = 0; // NEW: Accumulate Y scroll
+        this._accumScrollY = 0;
     }
 
     createLayers() {
         const { worldWidth, worldHeight } = this.config;
-        const camWidth = this.config.width;
-        const camHeight = this.config.height;
+        
+        // Use the ACTUAL current camera/canvas dimensions, not the config snapshot
+        const cam = this.scene.cameras ? this.scene.cameras.main : null;
+        const camWidth = cam ? cam.width : (this.config.width || 800);
+        const camHeight = cam ? cam.height : (this.config.height || 500);
 
         for (const layerName of LAYER_ORDER) {
             const layerConfig = BACKGROUND_LAYERS[layerName];
@@ -29,6 +32,7 @@ class ParallaxManager {
             const frame = texture.getSourceImage();
             const texHeight = frame.height;
 
+            // Use current camera dimensions for the TileSprite size
             const tileSprite = this.scene.add.tileSprite(0, 0, camWidth, texHeight, layerConfig.key);
 
             tileSprite.setOrigin(0, 0);
@@ -45,19 +49,23 @@ class ParallaxManager {
                 name: layerName,
             });
         }
+        
+        // Update config to reflect what we actually used
+        this.config.width = camWidth;
+        this.config.height = camHeight;
     }
 
     initTracking(playerX, playerY) {
         this._prevPlayerX = playerX;
         this._accumScrollX = 0;
-        this._prevPlayerY = playerY || 0; // NEW: Init Y
-        this._accumScrollY = 0;           // NEW: Init Y
+        this._prevPlayerY = playerY || 0;
+        this._accumScrollY = 0;
     }
 
     update(playerX, playerY) {
         const worldWidth = this.config.worldWidth;
         
-        // --- Horizontal Logic (Existing) ---
+        // --- Horizontal Logic ---
         let dx = playerX - this._prevPlayerX;
         const halfWorld = worldWidth * 0.5;
         if (dx > halfWorld) {
@@ -69,16 +77,13 @@ class ParallaxManager {
         this._accumScrollX += dx;
         this._prevPlayerX = playerX;
 
-        // --- Vertical Logic (NEW) ---
-        // We assume no vertical wrapping in this game world, so simple delta works
+        // --- Vertical Logic ---
         const nextScrollY = playerY !== undefined ? playerY : this._prevPlayerY;
         this._accumScrollY = Math.max(0, nextScrollY);
         this._prevPlayerY = nextScrollY;
 
-
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
-            // Set speedY to 1.0 so background locks perfectly to vertical camera movement
             layer.sprite.tilePositionY = this._accumScrollY / (layer.scaleY || 1);
         }
     }

@@ -46,11 +46,16 @@ function resolveBackgroundStyle(style) {
 }
 
 function createBackground(scene, style) {
+    // Use the ACTUAL current camera dimensions, not just CONFIG
+    var cam = scene.cameras ? scene.cameras.main : null;
+    var actualWidth = cam ? cam.width : CONFIG.width;
+    var actualHeight = cam ? cam.height : CONFIG.height;
+    
     var generatorConfig = {
         worldWidth: CONFIG.worldWidth,
-        worldHeight: CONFIG.worldHeight,
-        width: CONFIG.width,
-        height: CONFIG.height,
+        worldHeight: actualHeight,  // Use actual current height
+        width: actualWidth,         // Use actual current width
+        height: actualHeight,       // Use actual current height
         backgroundSeed: CONFIG.backgroundSeed || 1337,
     };
 
@@ -58,7 +63,7 @@ function createBackground(scene, style) {
     setActiveBackgroundLayers(styleToUse);
     var GeneratorClass = BACKGROUND_STYLE_GENERATORS[styleToUse];
 
-    console.log('[BackgroundManager] Creating ' + styleToUse.toUpperCase() + ' background');
+    console.log('[BackgroundManager] Creating ' + styleToUse.toUpperCase() + ' background (' + actualWidth + 'x' + actualHeight + ')');
     backgroundGeneratorInstance = new GeneratorClass(scene, generatorConfig);
     backgroundGeneratorInstance.generateAllTextures();
 
@@ -66,6 +71,13 @@ function createBackground(scene, style) {
     parallaxManagerInstance.createLayers();
 
     scene.groundLevel = generatorConfig.worldHeight - 80;
+    
+    // Force an immediate resize to ensure layers match current viewport
+    // This handles cases where the viewport changed between config creation and layer creation
+    if (cam && (cam.width !== actualWidth || cam.height !== actualHeight)) {
+        console.log('[BackgroundManager] Post-creation resize to match camera: ' + cam.width + 'x' + cam.height);
+        parallaxManagerInstance.resize(cam.width, cam.height);
+    }
 }
 
 function initParallaxTracking(playerX, playerY) {
