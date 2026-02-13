@@ -1,6 +1,6 @@
-// ------------------------
-// File: js/core/game.js
-// ------------------------
+// 
+// js/core/game.js
+// 
 
 // Flag to track if GameScene has been properly initialized
 let gameSceneInitialized = false;

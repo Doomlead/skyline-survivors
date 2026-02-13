@@ -1,6 +1,6 @@
-// ------------------------
+// js\entities\assault\assaultBaseCore.js
 // Assault Base Core - Objective Setup and Damage Handling
-// ------------------------
+// 
 
 const ASSAULT_BASE_CONFIG = {
     baseHp: 70,
@@ -121,6 +121,12 @@ function setupAssaultObjective(scene) {
 }
 
 function hitAssaultTarget(projectile, target) {
+    // Route interior targets to the interior handler
+    if (target.interiorTarget && typeof hitInteriorTarget === 'function') {
+        hitInteriorTarget(projectile, target);
+        return;
+    }
+
     const objective = gameState.assaultObjective;
     if (!objective || !objective.active || !target.active) {
         if (projectile && projectile.active) projectile.destroy();

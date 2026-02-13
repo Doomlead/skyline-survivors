@@ -1,6 +1,6 @@
-// ═══════════════════════════════════════════════════════════════════════════
-// backgroundManager.js - Parallax setup and lifecycle
-// ═══════════════════════════════════════════════════════════════════════════
+// 
+// js\graphics\levelgenerator\backgroundManager.js - Parallax setup and lifecycle
+//
 
 // ------------------------
 // Module-level instances and Global Functions

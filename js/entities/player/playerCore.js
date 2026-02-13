@@ -44,9 +44,22 @@ function ejectPilot(scene) {
     syncActivePlayer(scene);
 }
 
+function isShipEntryBlocked() {
+    // Block ship re-entry during mothership interior Phase 2
+    const objective = gameState.mothershipObjective;
+    if (objective && objective.interiorPhase && objective.shipLocked) {
+        return true;
+    }
+    return false;
+}
+
 function enterAegis(scene) {
     if (!scene.aegis || !scene.pilot || !pilotState.active) return;
     if (aegisState.destroyed) return;
+
+    // Prevent re-entry during Phase 2 interior
+    if (isShipEntryBlocked()) return;
+
     const dist = Phaser.Math.Distance.Between(scene.pilot.x, scene.pilot.y, scene.aegis.x, scene.aegis.y);
     if (dist > 60) return;
     pilotState.active = false;
@@ -79,7 +92,11 @@ function playerDie(scene) {
     }
     screenShake(scene, 20, 500);
 
-    if (isAegisActive) {
+    // During Phase 2 interior, pilot death costs a life but respawns on foot
+    const objective = gameState.mothershipObjective;
+    const inInterior = objective && objective.interiorPhase && objective.shipLocked;
+
+    if (isAegisActive && !inInterior) {
         aegisState.destroyed = true;
         if (scene.aegis) {
             scene.aegis.setActive(false).setVisible(false);
@@ -105,6 +122,7 @@ function playerDie(scene) {
         return;
     }
 
+    // Pilot death (on foot) or interior phase death
     gameState.lives--;
     if (gameState.lives <= 0) {
         gameOver(scene);
@@ -112,51 +130,79 @@ function playerDie(scene) {
         scene._isRespawning = true;
         player.setActive(false).setVisible(false);
         player.body.enable = false;
-        pilotState.active = false;
-        aegisState.active = true;
 
-        const p = playerState.powerUps;
-        const weaponKeys = ['laser','drone','shield','missile','overdrive','coverage','rapid','multiShot','piercing','speed','magnet','double','timeSlow'];
-        const activeWeapons = weaponKeys.filter(k => p[k] && p[k] > 0);
-        const toRemove = Math.ceil(activeWeapons.length / 2);
-        Phaser.Utils.Array.Shuffle(activeWeapons);
-        for (let i = 0; i < toRemove; i++) {
-            const key = activeWeapons[i];
-            if (key) {
-                p[key] = 0;
-                if (playerState.powerUpDecay && playerState.powerUpDecay[key] !== undefined) {
-                    playerState.powerUpDecay[key] = 0;
+        if (inInterior) {
+            // Respawn as pilot on foot in interior
+            scene.time.delayedCall(1000, () => {
+                const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+                pilotState.active = true;
+                pilotState.grounded = false;
+                pilotState.vx = 0;
+                pilotState.vy = 0;
+                aegisState.active = false;
+                aegisState.destroyed = true;
+
+                scene.pilot.setPosition(200, groundLevel - 30);
+                scene.pilot.setActive(true).setVisible(true);
+                scene.pilot.body.enable = true;
+
+                if (scene.aegis) {
+                    scene.aegis.setActive(false).setVisible(false);
+                    scene.aegis.body.enable = false;
+                }
+
+                playerState.powerUps.invincibility = 2500;
+                syncActivePlayer(scene);
+                scene._isRespawning = false;
+            });
+        } else {
+            // Standard respawn in Aegis
+            pilotState.active = false;
+            aegisState.active = true;
+
+            const p = playerState.powerUps;
+            const weaponKeys = ['laser','drone','shield','missile','overdrive','coverage','rapid','multiShot','piercing','speed','magnet','double','timeSlow'];
+            const activeWeapons = weaponKeys.filter(k => p[k] && p[k] > 0);
+            const toRemove = Math.ceil(activeWeapons.length / 2);
+            Phaser.Utils.Array.Shuffle(activeWeapons);
+            for (let i = 0; i < toRemove; i++) {
+                const key = activeWeapons[i];
+                if (key) {
+                    p[key] = 0;
+                    if (playerState.powerUpDecay && playerState.powerUpDecay[key] !== undefined) {
+                        playerState.powerUpDecay[key] = 0;
+                    }
                 }
             }
-        }
-        if (playerState.powerUpDecay) {
-            if (!p.coverage) playerState.powerUpDecay.coverage = 0;
-            if (!p.missile) playerState.powerUpDecay.missile = 0;
-        }
-        if (playerState.primaryWeapon === 'laser' && p.laser <= 0 && p.multiShot > 0) {
-            playerState.primaryWeapon = 'multiShot';
-        } else if (playerState.primaryWeapon === 'multiShot' && p.multiShot <= 0 && p.laser > 0) {
-            playerState.primaryWeapon = 'laser';
-        }
-        p.invincibility = 0;
-        if (!p.overdrive && !p.rapid) playerState.fireRate = 200;
-        drones.clear(true);
-        if (player.shieldSprite) {
-            player.shieldSprite.destroy();
-            player.shieldSprite = null;
-        }
+            if (playerState.powerUpDecay) {
+                if (!p.coverage) playerState.powerUpDecay.coverage = 0;
+                if (!p.missile) playerState.powerUpDecay.missile = 0;
+            }
+            if (playerState.primaryWeapon === 'laser' && p.laser <= 0 && p.multiShot > 0) {
+                playerState.primaryWeapon = 'multiShot';
+            } else if (playerState.primaryWeapon === 'multiShot' && p.multiShot <= 0 && p.laser > 0) {
+                playerState.primaryWeapon = 'laser';
+            }
+            p.invincibility = 0;
+            if (!p.overdrive && !p.rapid) playerState.fireRate = 200;
+            drones.clear(true);
+            if (player.shieldSprite) {
+                player.shieldSprite.destroy();
+                player.shieldSprite = null;
+            }
 
-        scene.time.delayedCall(1000, () => {
-            setAegisMode(scene, 'interceptor');
-            aegisState.destroyed = false;
-            scene.aegis.x = 100;
-            scene.aegis.y = 300;
-            scene.aegis.setActive(true).setVisible(true);
-            scene.aegis.body.enable = true;
-            scene.pilot.setActive(false).setVisible(false);
-            scene.pilot.body.enable = false;
-            playerState.powerUps.invincibility = 2000;
-            scene._isRespawning = false;
-        });
+            scene.time.delayedCall(1000, () => {
+                setAegisMode(scene, 'interceptor');
+                aegisState.destroyed = false;
+                scene.aegis.x = 100;
+                scene.aegis.y = 300;
+                scene.aegis.setActive(true).setVisible(true);
+                scene.aegis.body.enable = true;
+                scene.pilot.setActive(false).setVisible(false);
+                scene.pilot.body.enable = false;
+                playerState.powerUps.invincibility = 2000;
+                scene._isRespawning = false;
+            });
+        }
     }
 }

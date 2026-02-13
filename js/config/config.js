@@ -1,6 +1,6 @@
-// ------------------------
-// file: js/config/config.js
-// ------------------------
+//
+// js/config/config.js
+//
 
 const SCENE_KEYS = {
     title: 'TitleScene',
@@ -117,6 +117,20 @@ function getDecayDurationMs(path, tier) {
 
 loadUserSettings();
 
+// Phase 2 interior objective configuration
+const MOTHERSHIP_INTERIOR_CONFIG = {
+    powerConduitCount: 4,
+    securityNodeCount: 3,
+    powerConduitHp: 12,
+    securityNodeHp: 8,
+    reinforcementInterval: 5000,
+    reinforcementBatch: 2,
+    coreChamberHp: 40,
+    transitionDelayMs: 2500,
+    oxygenDrainRate: 0, // future use
+    interiorEnemyTypes: ['seeker', 'kamikaze', 'shield', 'bomber']
+};
+
 // Game state
 const gameState = {
     score: 0,
@@ -184,7 +198,21 @@ const gameState = {
         shieldsRemaining: 0,
         phaseLabel: '',
         gateLabel: '',
-        gateColor: '#ffffff'
+        gateColor: '#ffffff',
+        // Phase 2 interior fields
+        interiorPhase: false,
+        interiorStarted: false,
+        powerConduitsRemaining: 0,
+        powerConduitsTotal: 0,
+        securityNodesRemaining: 0,
+        securityNodesTotal: 0,
+        coreChamberOpen: false,
+        coreChamberHp: 0,
+        coreChamberHpMax: 0,
+        coreChamberActive: false,
+        interiorReinforcementTimer: 0,
+        shipLocked: true,
+        transitionTimer: 0
     },
     rebuildObjective: {
         active: false,
@@ -389,7 +417,20 @@ function resetGameState() {
         shieldsRemaining: 0,
         phaseLabel: '',
         gateLabel: '',
-        gateColor: '#ffffff'
+        gateColor: '#ffffff',
+        interiorPhase: false,
+        interiorStarted: false,
+        powerConduitsRemaining: 0,
+        powerConduitsTotal: 0,
+        securityNodesRemaining: 0,
+        securityNodesTotal: 0,
+        coreChamberOpen: false,
+        coreChamberHp: 0,
+        coreChamberHpMax: 0,
+        coreChamberActive: false,
+        interiorReinforcementTimer: 0,
+        shipLocked: true,
+        transitionTimer: 0
     };
     gameState.rebuildObjective = {
         active: false,
