@@ -113,8 +113,10 @@ function playerDie(scene) {
         scene._isRespawning = true;
         player.setActive(false).setVisible(false);
         player.body.enable = false;
+
+        const mothershipShipLocked = Boolean(gameState.mothershipObjective?.shipLocked);
         pilotState.active = false;
-        aegisState.active = true;
+        aegisState.active = !mothershipShipLocked;
 
         const p = playerState.powerUps;
         const weaponKeys = ['laser','drone','shield','missile','overdrive','coverage','rapid','multiShot','piercing','speed','magnet','double','timeSlow'];
@@ -148,14 +150,40 @@ function playerDie(scene) {
         }
 
         scene.time.delayedCall(1000, () => {
-            setAegisMode(scene, 'interceptor');
-            aegisState.destroyed = false;
-            scene.aegis.x = 100;
-            scene.aegis.y = 300;
-            scene.aegis.setActive(true).setVisible(true);
-            scene.aegis.body.enable = true;
-            scene.pilot.setActive(false).setVisible(false);
-            scene.pilot.body.enable = false;
+            if (mothershipShipLocked) {
+                const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+                const spawnX = 200;
+                const terrainVariation = Math.sin(spawnX / 200) * 30;
+                const spawnY = Math.max(40, groundLevel - terrainVariation - 12);
+
+                aegisState.active = false;
+                aegisState.destroyed = true;
+                scene.aegis.setActive(false).setVisible(false);
+                scene.aegis.body.enable = false;
+
+                pilotState.active = true;
+                pilotState.grounded = false;
+                pilotState.vx = 0;
+                pilotState.vy = 0;
+                scene.pilot.setPosition(spawnX, spawnY);
+                scene.pilot.setActive(true).setVisible(true);
+                scene.pilot.setAlpha(1);
+                scene.pilot.clearTint();
+                scene.pilot.body.enable = true;
+            } else {
+                setAegisMode(scene, 'interceptor');
+                aegisState.destroyed = false;
+                scene.aegis.x = 100;
+                scene.aegis.y = 300;
+                scene.aegis.setActive(true).setVisible(true);
+                scene.aegis.setAlpha(1);
+                scene.aegis.clearTint();
+                scene.aegis.body.enable = true;
+                scene.pilot.setActive(false).setVisible(false);
+                scene.pilot.body.enable = false;
+            }
+
+            syncActivePlayer(scene);
             playerState.powerUps.invincibility = 2000;
             scene._isRespawning = false;
         });

@@ -253,6 +253,7 @@ function forceOnFoot(scene) {
     }
 
     // Mark Aegis as destroyed/locked for Phase 2
+    aegisState.active = false;
     aegisState.destroyed = true;
     objective.shipLocked = true;
 
@@ -266,6 +267,8 @@ function forceOnFoot(scene) {
     if (scene.pilot) {
         pilotState.active = true;
         scene.pilot.setActive(true).setVisible(true);
+        scene.pilot.setAlpha(1);
+        scene.pilot.clearTint();
         scene.pilot.body.enable = true;
 
         // Position pilot at left side of the interior
@@ -487,7 +490,7 @@ function fireInteriorTurret(scene, turret) {
     const vx = Math.cos(angle) * speed;
     const vy = Math.sin(angle) * speed;
 
-    const proj = scene.enemyProjectiles.create(turret.x, turret.y, 'enemyBullet');
+    const proj = scene.enemyProjectiles.create(turret.x, turret.y, 'enemyProjectile');
     if (!proj) return;
     proj.setDepth(FG_DEPTH_BASE + 1);
     proj.body.setAllowGravity(false);
