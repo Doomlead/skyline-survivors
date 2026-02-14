@@ -217,19 +217,23 @@ const BOSS_TYPES = [
     'mothershipCore'
 ];
 
+// Returns scaled max HP for a boss type using base values and global multiplier.
 function getBossHP(type) {
     const baseHP = BOSS_HP_VALUES[type] || 20;
     return baseHP * BOSS_HP_MULTIPLIER;
 }
 
+// Returns score reward granted when this boss type is defeated.
 function getBossScore(type) {
     return BOSS_SCORE_VALUES[type] || 500;
 }
 
+// Returns visual scale multiplier used when spawning this boss type.
 function getBossScale(type) {
     return BOSS_SCALE_VALUES[type] || 3.5;
 }
 
+// Returns the projectile firing profile for a boss type, with megaLander as fallback.
 function getBossShotConfig(type) {
     return BOSS_SHOT_CONFIGS[type] || BOSS_SHOT_CONFIGS.megaLander;
 }

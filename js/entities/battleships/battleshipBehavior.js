@@ -2,11 +2,13 @@
 // Battleship AI Behaviors and Update Functions
 // ------------------------
 
+// Computes battleship firing interval scaling with current encounter phase.
 function getBattleshipPhaseShotInterval(battleship, baseInterval) {
     if (typeof getPhasedInterval !== 'function') return baseInterval;
     return getPhasedInterval(battleship, baseInterval, 150, 260);
 }
 
+// Updates movement and attack behavior for Raider-class battleships.
 function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -50,6 +52,7 @@ function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultipl
     }
 }
 
+// Updates movement and attack behavior for Carrier-class battleships.
 function updateCarrierBattleshipBehavior(scene, battleship, time, delta, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -82,6 +85,7 @@ function updateCarrierBattleshipBehavior(scene, battleship, time, delta, timeSlo
     }
 }
 
+// Updates movement and attack behavior for Nova-class battleships.
 function updateNovaBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -108,6 +112,7 @@ function updateNovaBattleshipBehavior(scene, battleship, time, timeSlowMultiplie
     }
 }
 
+// Updates movement and attack behavior for Siege-class battleships.
 function updateSiegeBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -139,6 +144,7 @@ function updateSiegeBattleshipBehavior(scene, battleship, time, timeSlowMultipli
     }
 }
 
+// Updates movement and attack behavior for Dreadnought-class battleships.
 function updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -168,6 +174,8 @@ function updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMu
     }
 }
 
+// Iterates and updates all active battleship entities in the scene.
+// Per-frame dispatcher that updates every active battleship entity.
 function updateBattleships(scene, time, delta) {
     const { battleships } = scene;
     if (!battleships) return;

@@ -2,6 +2,7 @@
 // Boss AI Behaviors and Update Functions
 // ------------------------
 
+// Fires the configured bullet pattern for a boss type from its available shot sources.
 function fireBossBulletPattern(scene, boss, time, timeSlowMultiplier) {
     const { enemyProjectiles } = scene;
     if (!enemyProjectiles) return;
@@ -63,11 +64,13 @@ function fireBossBulletPattern(scene, boss, time, timeSlowMultiplier) {
 }
 
 
+// Computes a boss firing interval adjusted by shield/encounter phase pacing.
 function getBossPhaseShotInterval(boss, baseInterval) {
     if (typeof getPhasedInterval !== 'function') return baseInterval;
     return getPhasedInterval(boss, baseInterval, 170, 260);
 }
 
+// Updates movement and attack behavior for the Mega Lander boss archetype.
 function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
     // Circular orbit pattern around screen center
     if (!boss.orbitAngle) boss.orbitAngle = 0;
@@ -93,6 +96,7 @@ function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+// Updates movement and attack behavior for the Titan Mutant boss archetype.
 function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
     // Aggressive pursuit with erratic wobble
     const player = getActivePlayer(scene);
@@ -119,6 +123,7 @@ function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+// Updates movement and attack behavior for the Hive Drone boss archetype.
 function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) {
     // Hovering patrol with slow vertical bob
     if (!boss.hoverY) boss.hoverY = boss.y;
@@ -147,6 +152,7 @@ function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+// Updates movement and attack behavior for the Behemoth Bomber boss archetype.
 function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultiplier) {
     const enemyProjectiles = scene.enemyProjectiles;
     if (!enemyProjectiles) return;
@@ -195,6 +201,7 @@ function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultipli
     }
 }
 
+// Updates movement and attack behavior for the Colossal Pod boss archetype.
 function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
     // Slow sinuous movement
     if (!boss.podPattern) boss.podPattern = 0;
@@ -219,6 +226,7 @@ function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+// Updates movement and attack behavior for the Leviathan Baiter boss archetype.
 function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
     // Serpentine weaving pattern
     const player = getActivePlayer(scene);
@@ -248,6 +256,7 @@ function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+// Updates movement and attack behavior for the Apex Kamikaze boss archetype.
 function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
     // Aggressive suicide charge
     const player = getActivePlayer(scene);
@@ -273,6 +282,7 @@ function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+// Updates movement and attack behavior for the Fortress Turret boss archetype.
 function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
     const enemyProjectiles = scene.enemyProjectiles;
     const audioManager = scene.audioManager;
@@ -333,6 +343,7 @@ function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+// Updates movement and attack behavior for the Overlord Shield boss archetype.
 function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) {
     // Slow, deliberate orbital movement
     if (!boss.orbitAngle) boss.orbitAngle = 0;
@@ -358,6 +369,7 @@ function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+// Per-frame dispatcher that updates every active standard boss entity.
 function updateBosses(scene, time, delta) {
     const topLimit = 20;
     const { bosses } = scene;

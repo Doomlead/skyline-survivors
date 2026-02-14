@@ -2,6 +2,7 @@
 // Assault Base Behavior - Spawns and Attacks
 // ------------------------
 
+// Spawns supporting defenders around the assault base objective location.
 function spawnAssaultDefenders(scene, baseX) {
     const defenderTypes = GARRISON_DEFENDER_TYPES || ['rifle'];
     for (let i = 0; i < ASSAULT_BASE_CONFIG.defenderCount; i++) {
@@ -13,6 +14,7 @@ function spawnAssaultDefenders(scene, baseX) {
     }
 }
 
+// Updates assault objective timers, defenses, and vulnerability windows each frame.
 function updateAssaultObjective(scene, delta) {
     const objective = gameState.assaultObjective;
     if (!objective || !objective.active) return;

@@ -2,6 +2,7 @@
 // Mothership AI Behaviors and Update Functions
 // ------------------------
 
+// Updates movement and attack behavior for the mothership core boss variant.
 function updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     const anchorX = boss.anchorX ?? boss.x;
@@ -35,6 +36,7 @@ function updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultipli
     }
 }
 
+// Per-frame updater for active mothership-class bosses and their special logic.
 function updateMothershipBosses(scene, time, delta) {
     const { bosses } = scene;
     if (!bosses) return;

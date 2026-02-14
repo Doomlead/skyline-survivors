@@ -27,6 +27,7 @@ const ASSAULT_BASE_TEXTURES = [
     'assaultBaseDreadnought'
 ];
 
+// Selects the assault base sprite variant based on objective progression/state.
 function getAssaultBaseTextureKey(objective) {
     if (objective?.baseVariant && ASSAULT_BASE_TEXTURES.includes(objective.baseVariant)) {
         return objective.baseVariant;
@@ -34,6 +35,7 @@ function getAssaultBaseTextureKey(objective) {
     return Phaser.Utils.Array.GetRandom(ASSAULT_BASE_TEXTURES);
 }
 
+// Creates a base component entity (core/shield/turret/etc.) with role metadata and HP.
 function createAssaultComponent(scene, x, y, texture, role, hp) {
     const component = scene.assaultTargets.create(x, y, texture);
     component.setDepth(FG_DEPTH_BASE + 2);
@@ -47,6 +49,7 @@ function createAssaultComponent(scene, x, y, texture, role, hp) {
     return component;
 }
 
+// Returns whether any active shield generators are currently blocking core damage.
 function isAssaultShieldBlocking(scene) {
     const objective = gameState.assaultObjective;
     if (!objective || objective.shieldsRemaining <= 0) return false;
@@ -63,6 +66,7 @@ function isAssaultShieldBlocking(scene) {
 }
 
 
+// Spawns shield generator components around the assault base and resets shield counts.
 function spawnAssaultShieldGenerators(scene, objective) {
     const baseX = objective?.baseX || CONFIG.worldWidth * 0.5;
     const base = scene.assaultBase;
@@ -77,6 +81,7 @@ function spawnAssaultShieldGenerators(scene, objective) {
     }
 }
 
+// Initializes assault objective state and spawns core, shields, turrets, and defenders.
 function setupAssaultObjective(scene) {
     if (!scene || !scene.assaultTargets) return;
     const objective = gameState.assaultObjective;
@@ -120,6 +125,7 @@ function setupAssaultObjective(scene) {
     spawnAssaultDefenders(scene, baseX);
 }
 
+// Handles projectile collision with assault objective targets, windows, and mission completion.
 function hitAssaultTarget(projectile, target) {
     // Route interior targets to the interior handler
     if (target.interiorTarget && typeof hitInteriorTarget === 'function') {
