@@ -1,5 +1,5 @@
 // ------------------------
-// Shared Shield/HP Phase System (Upgraded)
+// File: js/entities/phases/shieldPhaseSystem.js
 // ------------------------
 
 function initializeShieldPhaseState(entity, options = {}) {

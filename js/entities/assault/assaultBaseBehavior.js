@@ -1,6 +1,9 @@
 // ------------------------
-// Assault Base Behavior - Spawns and Attacks
+// File: js/entities/assault/assaultBaseBehavior.js
 // ------------------------
+
+// No changes needed - this file doesn't handle boss AI, it handles the
+// assault mission objective spawning/reinforcement timers.
 
 function spawnAssaultDefenders(scene, baseX) {
     const defenderTypes = GARRISON_DEFENDER_TYPES || ['rifle'];

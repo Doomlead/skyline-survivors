@@ -1,10 +1,10 @@
 // ------------------------
-// Boss Spawning, Combat, and Core Management
+// File: js/entities/bosses/bossCore.js
 // ------------------------
 
 function createBossTrail(scene, boss) {
     if (!scene || !boss) return;
-    if (boss.bossType === 'fortressTurret' || boss.bossType === 'mothershipCore') return; // Stationary bosses have no trail
+    if (boss.bossType === 'fortressTurret' || boss.bossType === 'mothershipCore') return;
 
     const cfg = BOSS_TRAIL_CONFIGS[boss.bossType] || BOSS_TRAIL_CONFIGS.megaLander;
     const emitter = scene.add.particles(0, 0, 'particle', {
@@ -85,7 +85,7 @@ function getSafeBossSpawnPosition(scene, desiredX, desiredY, bossType) {
 function applyBossDamage(boss, rawDamage) {
     const damage = rawDamage || 1;
     const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
-    return Math.max(0, damage * (1 - reduction));
+    return Math.max(0.1, damage * (1 - reduction));
 }
 
 function spawnBoss(scene, type, x, y) {
@@ -99,48 +99,53 @@ function spawnBoss(scene, type, x, y) {
     const maxY = groundLevel - terrainVariation - minClearance;
     const spawnY = Phaser.Math.Clamp(safeSpawn.y, topLimit, Math.max(topLimit + 20, maxY));
     const spawnX = safeSpawn.x;
-    
+
     const boss = bosses.create(spawnX, spawnY, type);
     boss.setDepth(FG_DEPTH_BASE + 5);
-    
+
     const scale = getBossScale(type);
     boss.setScale(scale);
     boss.bossType = type;
     boss.hp = getBossHP(type);
     boss.maxHP = boss.hp;
-    boss.lastShot = 0;
+    boss.corePhase = 0;
+
+    // Initialize attack state with a grace period so boss doesn't shoot frame 1
+    initBossAttackState(boss);
+    boss.attackState.nextAttackTime = (scene.time?.now || 0) + 1500; // 1.5s grace period on spawn
+
+    // Initialize shield phase system
     if (typeof initializeShieldPhaseState === 'function') {
         const stageCount = type === 'mothershipCore' ? 3 : 2;
         initializeShieldPhaseState(boss, {
             shieldStages: stageCount,
-            shieldBaseHp: Math.ceil(boss.maxHP * (type === 'mothershipCore' ? 0.18 : 0.2)),
-            damageWindowMs: type === 'mothershipCore' ? 4200 : 3200,
-            intermissionMs: type === 'mothershipCore' ? 1800 : 1500,
+            shieldBaseHp: Math.ceil(boss.maxHP * (type === 'mothershipCore' ? 0.20 : 0.25)),
+            damageWindowMs: type === 'mothershipCore' ? 5000 : 4000,
+            intermissionMs: type === 'mothershipCore' ? 2000 : 1500,
             label: 'Phase'
         });
     }
-    
-    // Special properties per boss
+
+    // Special properties per boss type (movement only)
     if (type === 'megaLander') boss.orbitAngle = 0;
-    if (type === 'titanMutant') boss.wobbleAngle = 0;
-    if (type === 'hiveDrone') boss.hoverY = spawnY;
-    if (type === 'behemothBomber') { boss.bomberDirection = 1; boss.lastBombDrop = 0; }
-    if (type === 'colossalPod') boss.podPattern = 0;
+    if (type === 'hiveDrone') { boss.hoverBaseY = spawnY; boss.patrolDir = 1; }
+    if (type === 'behemothBomber') { boss.bomberDirection = Math.random() < 0.5 ? -1 : 1; }
+    if (type === 'colossalPod') { boss.podPattern = 0; boss.driftDir = 1; }
     if (type === 'leviathanBaiter') boss.serpentinePhase = 0;
-    if (type === 'apexKamikaze') boss.rotation = 0;
-    if (type === 'fortressTurret') { boss.isPlanted = false; boss.barrelMode = 0; }
+    if (type === 'apexKamikaze') { boss.chargeState = 'circle'; boss.chargeTimer = 0; boss.circleAngle = Math.random() * Math.PI * 2; }
+    if (type === 'fortressTurret') { boss.isPlanted = false; }
     if (type === 'overlordShield') boss.orbitAngle = 0;
     if (type === 'mothershipCore' && typeof initializeMothershipCore === 'function') {
         initializeMothershipCore(boss);
     }
-    
-    // Initial velocity for most bosses
+
+    // Initial velocity
     let speed = 0;
     if (type !== 'fortressTurret' && type !== 'mothershipCore') {
         speed = 40;
     }
     boss.setVelocity((Math.random() - 0.5) * speed, (Math.random() - 0.5) * speed);
-    
+
     createSpawnEffect(scene, spawnX, spawnY, 'boss');
     if (audioManager) audioManager.playSound('enemySpawn');
 
@@ -208,13 +213,12 @@ function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngl
     const proj = enemyProjectiles.create(sourceX, sourceY, shotConfig.projectileType);
     proj.setDepth(FG_DEPTH_BASE + 4);
     proj.setScale(1.5);
-    
-    // Calculate actual fire direction
+
     let angle = fireAngle;
-    if (!angle) {
+    if (angle === undefined || angle === null) {
         angle = Phaser.Math.Angle.Between(sourceX, sourceY, player.x, player.y);
     }
-    
+
     proj.setVelocity(
         Math.cos(angle) * shotConfig.speed,
         Math.sin(angle) * shotConfig.speed
@@ -222,8 +226,7 @@ function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngl
     proj.rotation = angle;
     proj.enemyType = boss.bossType;
     proj.damage = shotConfig.damage;
-    
-    // Add particle effects for heavy projectiles
+
     if (shotConfig.damage > 1.5) {
         const emitter = scene.add.particles(0, 0, 'particle', {
             follow: proj,
@@ -262,8 +265,9 @@ function hitBoss(projectile, boss) {
 
     const rawDamage = projectile.damage || 1;
     const scaledDamage = applyBossDamage(boss, rawDamage);
+    const now = scene.time?.now || 0;
     const shieldResult = typeof applyShieldStageDamage === 'function'
-        ? applyShieldStageDamage(boss, scaledDamage, scene.time?.now || 0)
+        ? applyShieldStageDamage(boss, scaledDamage, now)
         : { appliedToShield: false, shieldBroken: false };
 
     if (shieldResult.immune) {
@@ -272,26 +276,44 @@ function hitBoss(projectile, boss) {
         return;
     }
 
+    if (shieldResult.capped) {
+        createFloatingText(scene, boss.x, boss.y - 50, 'RESISTING', '#ffaa00');
+        if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+        return;
+    }
+
     if (shieldResult.appliedToShield) {
         if (shieldResult.shieldBroken) {
             createExplosion(scene, boss.x, boss.y, 0x38bdf8, 1.0);
             scene.cameras.main.shake(100, 0.005);
-            showRebuildObjectiveBanner(scene, `${boss.bossType.toUpperCase()} SHIELD DOWN! ATTACK CORE!`, '#ff4444');
+            showRebuildObjectiveBanner(scene, `${boss.bossType.toUpperCase()} SHIELD DOWN! ATTACK NOW!`, '#ff4444');
         } else {
             createExplosion(scene, projectile.x, projectile.y, 0x38bdf8, 0.3);
+            // Show shield HP as feedback
+            const state = boss.phaseState;
+            if (state && Math.random() < 0.3) {
+                createFloatingText(scene, projectile.x, projectile.y - 20,
+                    `${Math.ceil(state.shieldHp)}`, '#38bdf8');
+            }
         }
     } else {
         boss.hp -= scaledDamage;
         boss.setTint(0xff0000);
-        scene.time.delayedCall(50, () => {
+        scene.time.delayedCall(60, () => {
             if (boss && boss.active) boss.clearTint();
         });
+
+        // Show damage numbers occasionally
+        if (Math.random() < 0.25) {
+            createFloatingText(scene, projectile.x, projectile.y - 15,
+                `-${scaledDamage.toFixed(1)}`, '#ff6666');
+        }
     }
 
     scene.tweens.add({
         targets: boss,
         alpha: 0.6,
-        duration: 100,
+        duration: 80,
         yoyo: true,
         ease: 'Linear'
     });
@@ -342,32 +364,29 @@ function playerHitBoss(playerSprite, boss) {
 function destroyBoss(scene, boss) {
     const { bosses, enemies } = scene;
     if (!bosses) return;
-    // Massive death effect
+
     screenShake(scene, 25, 500);
-    
+
     for (let i = 0; i < 3; i++) {
         setTimeout(() => {
             createEnhancedDeathEffect(scene, boss.x, boss.y, boss.bossType);
         }, i * 150);
     }
 
-    // Special boss death effects
+    // Boss-specific death effects
     switch (boss.bossType) {
         case 'megaLander':
-            // Tentacles snap back
             for (let i = 0; i < 4; i++) {
                 createExplosion(scene, boss.x + Math.cos(i * Math.PI / 2) * 40, boss.y + Math.sin(i * Math.PI / 2) * 40, 0xff4444);
             }
             break;
         case 'titanMutant':
-            // Arms fall
             for (let i = 0; i < 3; i++) {
                 const armX = boss.x + (i - 1) * 40;
                 createExplosion(scene, armX, boss.y + 40, 0xffaa66);
             }
             break;
         case 'behemothBomber':
-            // Chain reaction of bombs
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => {
                     createExplosion(scene, boss.x + Math.random() * 80 - 40, boss.y + Math.random() * 60 - 30, 0xff5533);
@@ -375,7 +394,6 @@ function destroyBoss(scene, boss) {
             }
             break;
         case 'overlordShield':
-            // Shield burst outward
             for (let i = 0; i < 8; i++) {
                 const angle = (i / 8) * Math.PI * 2;
                 createExplosion(scene, boss.x + Math.cos(angle) * 60, boss.y + Math.sin(angle) * 60, 0x00ffff);
@@ -386,11 +404,11 @@ function destroyBoss(scene, boss) {
     registerComboEvent(3);
     const score = getBossScore(boss.bossType);
     const scaledReward = getCombatScaledReward(score) * 2;
-    gameState.score += scaledReward;  // Double score for bosses
+    gameState.score += scaledReward;
 
     const scorePopup = scene.add.text(
         boss.x, boss.y - 40,
-        '★ BOSS DOWN ★\n+' + (scaledReward),
+        '★ BOSS DOWN ★\n+' + scaledReward,
         {
             fontSize: '24px',
             fontFamily: 'Orbitron',
@@ -400,7 +418,7 @@ function destroyBoss(scene, boss) {
             align: 'center'
         }
     ).setOrigin(0.5).setDepth(FG_DEPTH_BASE + 10);
-    
+
     scene.tweens.add({
         targets: scorePopup,
         y: scorePopup.y - 60,
@@ -409,7 +427,6 @@ function destroyBoss(scene, boss) {
         onComplete: () => scorePopup.destroy()
     });
 
-    // Guaranteed powerup drop
     spawnPowerUp(scene, boss.x, boss.y);
     spawnPowerUp(scene, boss.x, boss.y);
 
@@ -433,7 +450,6 @@ function destroyBoss(scene, boss) {
             gameState.currentBossName = '';
         }
 
-        // Check if boss wave complete
         if (gameState.mode === 'classic'
             && bosses.countActive(true) === 0
             && enemies.countActive(true) === 0) {
@@ -446,7 +462,7 @@ function completeBossWave(scene) {
     const audioManager = scene.audioManager;
     const completedWave = gameState.wave;
     const bossReward = getMissionScaledReward(3000);
-    gameState.score += bossReward;  // Large bonus for beating boss
+    gameState.score += bossReward;
     if (audioManager) audioManager.playSound('waveComplete');
 
     const bossWaveText = scene.add.text(
@@ -492,14 +508,12 @@ function completeBossWave(scene) {
 
 function hitBossProjectile(playerSprite, projectile) {
     const audioManager = this.audioManager;
-    // Find if this projectile came from a boss
-    const sourceType = projectile.enemyType;
-    
+
     if (playerState.powerUps.invincibility > 0) {
         projectile.destroy();
         return;
     }
-    
+
     if (playerState.powerUps.shield > 0) {
         playerState.powerUps.shield = 0;
         projectile.destroy();

@@ -1,5 +1,5 @@
 // ------------------------
-// Battleship Spawning, Combat, and Core Management
+// File: js/entities/battleShip/battleshipCore.js
 // ------------------------
 
 const BATTLESHIP_TYPES = ['raider', 'carrier', 'nova', 'siege', 'dreadnought'];
@@ -55,14 +55,14 @@ const BATTLESHIP_TRAIL_CONFIGS = {
     }
 };
 
-const BATTLESHIP_HP_MULTIPLIER = 3;
+const BATTLESHIP_HP_MULTIPLIER = 4;
 
 const BATTLESHIP_HP_VALUES = {
-    raider: 16,
-    carrier: 22,
-    nova: 20,
-    siege: 24,
-    dreadnought: 30
+    raider: 20,
+    carrier: 28,
+    nova: 25,
+    siege: 30,
+    dreadnought: 38
 };
 
 const BATTLESHIP_SCORE_VALUES = {
@@ -81,37 +81,13 @@ const BATTLESHIP_SCALE_VALUES = {
     dreadnought: 2.9
 };
 
+// Legacy configs kept for any external references
 const BATTLESHIP_SHOT_CONFIGS = {
-    raider: {
-        projectileType: 'enemyProjectile_baiter',
-        speed: 420,
-        damage: 1.1,
-        interval: 800
-    },
-    carrier: {
-        projectileType: 'enemyProjectile_drone',
-        speed: 300,
-        damage: 1.4,
-        interval: 1400
-    },
-    nova: {
-        projectileType: 'enemyProjectile_pod',
-        speed: 260,
-        damage: 1.2,
-        interval: 1300
-    },
-    siege: {
-        projectileType: 'enemyProjectile_piercing',
-        speed: 360,
-        damage: 2.2,
-        interval: 1700
-    },
-    dreadnought: {
-        projectileType: 'enemyProjectile',
-        speed: 320,
-        damage: 1.8,
-        interval: 1200
-    }
+    raider: { projectileType: 'enemyProjectile_baiter', speed: 420, damage: 1.1, interval: 800 },
+    carrier: { projectileType: 'enemyProjectile_drone', speed: 300, damage: 1.4, interval: 1400 },
+    nova: { projectileType: 'enemyProjectile_pod', speed: 260, damage: 1.2, interval: 1300 },
+    siege: { projectileType: 'enemyProjectile_piercing', speed: 360, damage: 2.2, interval: 1700 },
+    dreadnought: { projectileType: 'enemyProjectile', speed: 320, damage: 1.8, interval: 1200 },
 };
 
 function getRandomBattleshipType() {
@@ -185,12 +161,17 @@ function spawnBattleship(scene, type, x, y) {
     battleship.battleshipType = type;
     battleship.hp = getBattleshipHP(type);
     battleship.maxHP = battleship.hp;
-    battleship.lastShot = 0;
+    battleship.corePhase = 0;
+
+    // Initialize attack state with grace period
+    initBossAttackState(battleship);
+    battleship.attackState.nextAttackTime = (scene.time?.now || 0) + 1200;
+
     if (typeof initializeShieldPhaseState === 'function') {
         initializeShieldPhaseState(battleship, {
             shieldStages: 2,
             shieldBaseHp: Math.ceil(battleship.maxHP * 0.24),
-            damageWindowMs: 3000,
+            damageWindowMs: 3500,
             intermissionMs: 1300,
             label: 'Phase'
         });
@@ -200,7 +181,7 @@ function spawnBattleship(scene, type, x, y) {
 
     if (type === 'carrier') {
         battleship.launchTimer = 0;
-        battleship.launchInterval = 2800;
+        battleship.launchInterval = 3200;
         battleship.minionsSpawned = 0;
         battleship.maxMinions = 6;
     }
@@ -215,6 +196,7 @@ function spawnBattleship(scene, type, x, y) {
     return battleship;
 }
 
+// Legacy function kept for compatibility but no longer used by battleship behaviors
 function shootFromBattleshipSource(scene, sourceX, sourceY, battleship, shotConfig, fireAngle) {
     const { enemyProjectiles, audioManager } = scene;
     const player = getActivePlayer(scene);
@@ -225,7 +207,7 @@ function shootFromBattleshipSource(scene, sourceX, sourceY, battleship, shotConf
     proj.setScale(1.4);
 
     let angle = fireAngle;
-    if (!angle) {
+    if (angle === undefined || angle === null) {
         angle = Phaser.Math.Angle.Between(sourceX, sourceY, player.x, player.y);
     }
 
@@ -249,8 +231,9 @@ function hitBattleship(projectile, battleship) {
     const particleManager = scene.particleManager;
 
     const incomingDamage = projectile.damage || 1;
+    const now = scene.time?.now || 0;
     const shieldResult = typeof applyShieldStageDamage === 'function'
-        ? applyShieldStageDamage(battleship, incomingDamage, scene.time?.now || 0)
+        ? applyShieldStageDamage(battleship, incomingDamage, now)
         : { appliedToShield: false, shieldBroken: false };
 
     if (shieldResult.immune) {
@@ -259,10 +242,17 @@ function hitBattleship(projectile, battleship) {
         return;
     }
 
+    if (shieldResult.capped) {
+        createFloatingText(scene, battleship.x, battleship.y - 50, 'RESISTING', '#ffaa00');
+        if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+        return;
+    }
+
     if (shieldResult.appliedToShield) {
         if (shieldResult.shieldBroken) {
             createExplosion(scene, battleship.x, battleship.y, 0x67e8f9, 1.0);
             scene.cameras.main.shake(80, 0.004);
+            showRebuildObjectiveBanner(scene, 'SHIELD DOWN! ATTACK NOW!', '#ff4444');
         } else {
             createExplosion(scene, projectile.x, projectile.y, 0x67e8f9, 0.3);
         }

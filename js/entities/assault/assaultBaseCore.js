@@ -1,6 +1,9 @@
-// js\entities\assault\assaultBaseCore.js
-// Assault Base Core - Objective Setup and Damage Handling
-// 
+// ------------------------
+// File: js/entities/assault/assaultBaseCore.js
+// ------------------------
+
+// This file is unchanged - it handles the assault mission structure,
+// not boss movement/attack AI.
 
 const ASSAULT_BASE_CONFIG = {
     baseHp: 70,
@@ -62,7 +65,6 @@ function isAssaultShieldBlocking(scene) {
     return blocking;
 }
 
-
 function spawnAssaultShieldGenerators(scene, objective) {
     const baseX = objective?.baseX || CONFIG.worldWidth * 0.5;
     const base = scene.assaultBase;
@@ -121,9 +123,13 @@ function setupAssaultObjective(scene) {
 }
 
 function hitAssaultTarget(projectile, target) {
-    // Route interior targets to the interior handler
-    if (target.interiorTarget && typeof hitInteriorTarget === 'function') {
-        hitInteriorTarget(projectile, target);
+    const mothershipObjective = gameState.mothershipObjective;
+    if (target?.assaultRole && typeof target.assaultRole === 'string' && target.assaultRole.indexOf('interior_') === 0) {
+        if (mothershipObjective?.active && mothershipObjective.stage === 'interior_assault' && typeof hitMothershipInteriorTarget === 'function') {
+            hitMothershipInteriorTarget(projectile, target);
+        } else if (projectile && projectile.active && !projectile.isPiercing) {
+            projectile.destroy();
+        }
         return;
     }
 
