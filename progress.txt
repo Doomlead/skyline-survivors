@@ -204,104 +204,104 @@
 
 ## MVP Completion
 
-- **Status:** ~79% complete (core mission loop is stable and phase-gated encounter architecture is now live across bosses, battleships, assault core, and mothership core).
-- **Primary Blockers:** Full multi-space mothership finale (exterior → interior → core), Bulwark assault/siege payoff, and assault-specific loot/jackpot reward loop.
+- **Status:** ~84% complete (core campaign, rescue/deploy loop, and phase-gated encounters are production-ready; major remaining work is assault reward identity + mode expansion).
+- **Primary Blockers:** Assault-specific reward/jackpot loop, Bulwark siege payoff in assault spaces, and formal challenge-mode surfacing.
 
 ## Gap Analysis & Next Steps (Codebase Audit Refresh)
 
 ### Overall Completion Statistics
-- **MVP Completion:** ~79%
-- **Design Document Alignment:** ~73%
-- **Major Milestones Achieved:** District state campaign loop, threatened→critical near-miss timer + clutch bonus, rescue cargo inertia + hangar deployment, operative class behaviors (including saboteur EMP), on-foot rebuild + squad aura/body-block sacrifice, supply-drop shop/hot-start pipeline, and unified shield-phase boss architecture.
+- **MVP Completion:** ~84%
+- **Design Document Alignment:** ~80%
+- **Major Milestones Achieved:** District-state campaign with threatened→critical→occupied flow, prosperity loss-aversion loop, rescue cargo inertia + hangar deployment, operative class suite (Infantry/Gunner/Medic/Saboteur), on-foot rebuild + squad sacrifice behaviors, supply-drop shop with hot-start application, unified shield-phase architecture, and a multi-step mothership finale (exterior boss -> interior breach objectives -> core chamber kill).
 
 ### Design Document Alignment
 **Aligned / Implemented**
-- District strategic states (Friendly/Threatened/Occupied), with consequence flow and urgency pressure.
-- 30s critical “near-miss” window and clutch-defense bonus.
-- Rescue-to-deploy loop (human pickup, cargo inertia, hangar drop-off into operatives).
-- Interceptor/Bulwark mode switching and on-foot rebuild sequence.
-- Operative class system with saboteur assault utility and tier-overflow squad buffs.
-- Supply Drop gacha + mission-start hot-start application.
-- Encounter phase system (shield gate → burst window → re-prime) used by major combat objectives.
+- Strategic district states with consequence pressure and prosperity reset when districts fall.
+- 30-second critical near-miss window plus clutch-defense bonus multipliers.
+- Rescue-to-deploy loop (human capture, cargo inertia, hangar conversion into combat operatives).
+- Interceptor/Bulwark switching plus on-foot command/rebuild flow.
+- Operative class behaviors including saboteur EMP utility and overflow-based squad buffs.
+- Supply Drop gacha flow with pending inventory + mission-start hot-start effects.
+- Unified shield-gate encounter cadence across bosses, battleships, assault core, and mothership core.
+- Mothership mission now includes exterior engagement, interior objective breach, and final reactor/core chamber destruction.
 
 **Partially Aligned**
-- Bulwark fantasy exists mechanically, but assault-specific siege advantage and clear mission payoff are still weak.
-- Mothership exists as a final core encounter, but not yet a full exterior→interior→core mission chain.
-- Environment/audio pillars are present, but adaptive audio layering and weather/destruction depth are still limited.
+- Bulwark fantasy is strong in control feel, but still lacks explicit siege/structure damage identity during assault missions.
+- Environment/audio pillars exist (biomes, core SFX/music), but adaptive layering, weather, and destruction-reactive world feedback remain limited.
+- Fire-team autonomy exists, but airborne defensive perimeter and cross-squad coordination depth is still modest.
 
-**Not Aligned (Major Remaining Gaps)**
-- Assault loot rewards + mystery/jackpot drop economy.
-- Challenge modes (“Last Stand”, “Assault Only” variants as formal modes/leaderboards).
-- Dynamic weather and stronger world-state visual destruction feedback.
+**Not Yet Aligned (Major Remaining Gaps)**
+- Assault loot rewards + mystery/jackpot drop economy on base destruction.
+- Challenge modes as first-class surfaced options ("Last Stand" and "Assault Only") with scoring flow.
+- Dynamic weather and deeper environmental destruction readability.
 
 ### Major Milestones Achieved
-- Strategic district map with prosperity pressure and occupied-state penalties.
-- Combat mission routing for defense, assault, and mothership flows.
-- Hangar-centric rebuild loop with pilot ejection recovery gameplay.
-- Operative class behavior suite (Infantry/Gunner/Medic/Saboteur) and sacrifice protection logic.
-- Supply drop storefront, unboxing sequence, pending inventory, and hot-start integration.
-- Unified phase-gated boss framework with HUD phase/gate readability.
+- System-map campaign loop with urgency escalation and occupied-state penalties.
+- Defense/assault mission routing and directive generation from district state.
+- Hangar-centric rebuild loop with pilot ejection survival gameplay.
+- Operative deployment + class behavior package with sacrifice/body-block logic.
+- Supply-drop economy, unboxing UX, pending inventory, and hot-start integration.
+- Phase-gated encounter architecture integrated in boss, battleship, assault core, and mothership encounters.
+- Multi-stage mothership finale implemented with interior transition, objective gating, and reactor kill win condition.
 
 ### Critical Missing Features for Design Document Compliance
-1. **Mothership Mission Expansion:** Exterior breach + interior assault + final core chain with transitions.
-2. **Bulwark Assault Synergy:** Structural/siege damage bonus and explicit assault utility feedback.
-3. **Assault Rewards & Mystery Drops:** Base-section loot reveal, jackpots, and better assault completion payout identity.
-4. **Challenge Mode Layer:** “Last Stand” and “Assault Only” surfaced as selectable, replayable modes.
+1. **Assault Rewards & Mystery Drops:** Add guaranteed base-destruction loot tables, jackpot outcomes, and reward-callout UX.
+2. **Bulwark Assault Synergy:** Add explicit structural/siege damage modifiers and feedback when Bulwark is optimally used.
+3. **Challenge Mode Layer:** Surface "Last Stand" and "Assault Only" as selectable modes with score persistence.
+4. **World Reactivity Layer:** Introduce weather variation and stronger destruction-state feedback across districts.
 
 ### Immediate Next Steps (Recommended Order)
-1. **Expand mothership to a 3-stage mission (4-6 days)**  
-   - Build Phase 1 exterior assault + phase transition setup.
-   - Implement Phase 2 interior encounter space (on-foot focus) with objective gating.
-   - Upgrade Phase 3 core boss to multi-step shield/HP phases (current fight is HP-based, single arena).
-   - Add phase-gated UI beats and cinematic transition (dock/boarding).
+1. **Ship assault reward identity (2-3 days)**  
+   - Base-core completion loot table + mystery jackpot roll.
+   - Post-mission summary + in-mission reward banners for assault-specific payout clarity.
 
+2. **Implement Bulwark siege pass (1-2 days)**  
+   - Structural damage multipliers against assault objectives.
+   - HUD/FX indicators when Bulwark siege bonus is active.
 
-2. **Ship a complete assault reward loop (2-3 days)**  
-   - Add guaranteed base-core loot table, mystery-drop jackpot roll, and HUD reward callouts.
+3. **Surface challenge modes (2-3 days)**  
+   - Menu entry points for Last Stand + Assault Only.
+   - Lightweight score tracking flow and repeatable mode setup.
 
-3. **Implement Bulwark siege pass (1-2 days)**  
-   - Apply structural damage multipliers vs. assault objectives; add UI feedback when siege bonus is active.
-
-4. **Formalize challenge modes (2-3 days)**  
-   - Add menu entry points + basic scoring/seed handling for Last Stand and Assault Only.
+4. **Add world-reactivity slice (3-4 days)**  
+   - Weather toggles per mission seed + baseline visibility variation.
+   - First-pass destruction-state visuals for assaulted/occupied districts.
 
 ### Estimated Remaining Work
 
 ### MVP Completion
-- **Current Progress:** ~79%
+- **Current Progress:** ~84%
 - **Remaining Critical Work:**
-  - Mothership multi-space final mission chain: 4-6 days
-  - Assault rewards + mystery/jackpot loop: 2-3 days
-  - Bulwark siege synergy + UI feedback: 1-2 days
-  - Assault/challenge mode surfacing + polish: 2-3 days
-- **Total to MVP target:** ~9-14 days
+  - Assault rewards + jackpot loop: 2-3 days
+  - Bulwark siege synergy + HUD feedback: 1-2 days
+  - Challenge mode surfacing + score flow: 2-3 days
+- **Total to MVP target:** ~5-8 days
 
 ### Full Design Document
-- **High Priority Remaining:** ~27%
-  - Final mission structure completion
+- **High Priority Remaining:** ~20%
   - Assault reward economy and Bulwark assault identity
-  - Challenge mode implementation
-- **Medium Priority Remaining:** ~50%
-  - Environment reactivity (weather/destruction feedback)
-  - Advanced audio layering + cinematic event polish
-  - Expanded strategic campaign presentation
-- **Low Priority Remaining:** ~80%
+  - Challenge mode implementation and campaign-mode framing
+- **Medium Priority Remaining:** ~45%
+  - Weather/destruction reactivity systems
+  - Expanded adaptive audio and cinematic urgency polish
+  - Advanced fire-team coordination depth
+- **Low Priority Remaining:** ~75%
   - Additional mode variants and leaderboard depth
-  - District theme permutations and late-game content extensions
+  - Expanded district archetypes and long-tail content extensions
 
 ### Post-MVP Polish (Optional)
-- Dynamic weather/time-of-day transitions per district.
-- More pronounced destruction states for district backdrops and assault spaces.
-- Adaptive music layering tied to encounter phase/urgency bands.
-- Expanded audiovisual beats for deployment, clutch defense, and mission completion.
-- Additional long-tail challenge mutators and leaderboard segmentation.
+- Adaptive music layers keyed to urgency bands and boss phase transitions.
+- Cinematic district-state transition stingers (critical fall, recovery, liberation).
+- Richer deployment feedback (radio chatter variants, class-specific spawn VO/SFX).
+- Advanced challenge mutators and leaderboard segmentation.
+- Broader biome-specific hazard sets for replay variety.
 
 ### What We Should Work on Next (Recommendation)
-**Recommendation: do Assault Rewards + Bulwark Siege in the same sprint first.**  
-Reason: these are the highest-impact gaps that immediately improve assault mission identity, reduce mode overlap with defense missions, and unblock tuning data before the larger mothership mission expansion.
+**Recommendation: prioritize Assault Rewards first, then immediately pair with Bulwark Siege tuning in the same sprint.**  
+Reason: assault missions already have objective structure and phase cadence, but currently lack a unique payoff loop. Reward identity + siege payoff will produce the biggest perceived feature gain with the smallest implementation risk, and it sets up better telemetry for balancing challenge modes afterward.
 
-**Proposed next sprint sequence:**
-1. Assault reward pipeline (loot tables, mystery/jackpots, reward UX).
-2. Bulwark structural bonus + on-screen confirmation cues.
-3. Short tuning pass on assault pacing after rewards/siege changes land.
-4. Then start mothership exterior→interior scaffolding with transition hooks already validated by phase-system HUD patterns.
+**Suggested implementation sequence for the next sprint:**
+1. Implement assault base-completion loot/jackpot pipeline.
+2. Add Bulwark-vs-structure bonus + clear UI confirmation.
+3. Run a short balance pass on assault pacing/reward economy.
+4. Promote Last Stand / Assault Only as formal menu modes once the assault loop feels distinct.
