@@ -3,6 +3,7 @@
 // ------------------------
 
 class AudioManager {
+    // Creates and configures the audio manager using persisted user settings.
     constructor(scene) {
         this.scene = scene;
         this.sounds = {};
@@ -17,6 +18,7 @@ class AudioManager {
         this.initSounds();
     }
 
+    // Adds one-time input listeners so browsers allow Web Audio playback after user interaction.
     setupUnlockHandlers() {
         const unlock = async () => {
             if (this.audioContext && this.audioContext.state === 'suspended') {
@@ -36,6 +38,7 @@ class AudioManager {
         });
     }
 
+    // Registers all sound definitions used by gameplay, UI, and music systems.
     initSounds() {
         this.sounds.bgMusic = {
             type: 'file',
@@ -77,6 +80,7 @@ class AudioManager {
         this.sounds.gameOver = { type: 'synth', frequencies: [1200, 800, 400], duration: 0.8, waveform: 'sine', pitch: 'down' };
     }
 
+    // Plays a named sound effect if audio is enabled and the sound exists.
     playSound(soundName, options = {}) {
         if (this.isMuted || !this.sounds[soundName]) return;
         const sound = this.sounds[soundName];
@@ -89,6 +93,7 @@ class AudioManager {
         }
     }
 
+    // Generates and plays a tone-based (oscillator) sound with optional envelopes and pitch changes.
     playSynthSound(sound, volume, options = {}) {
         const now = this.audioContext.currentTime;
         const duration = sound.duration || 0.2;
@@ -142,6 +147,7 @@ class AudioManager {
         }
     }
 
+    // Generates and plays filtered white noise for impact-style effects.
     playNoiseSound(sound, volume, options = {}) {
         const now = this.audioContext.currentTime;
         const duration = sound.duration || 0.3;
@@ -172,6 +178,7 @@ class AudioManager {
         source.stop(now + duration);
     }
 
+    // Lazily fetches and decodes the background music file, caching the decoded buffer.
     async loadMusicBuffer() {
         if (this.sounds.bgMusic.buffer) return this.sounds.bgMusic.buffer;
 
@@ -193,6 +200,7 @@ class AudioManager {
         return this.musicBufferPromise;
     }
 
+    // Starts looping ambient background music if it is not muted and not already playing.
     async playAmbientMusic() {
         if (this.isMuted || this.musicSource) return;
 
@@ -224,6 +232,7 @@ class AudioManager {
         }
     }
 
+    // Stops current music playback and disconnects any music audio nodes.
     stopMusic() {
         if (this.musicSource) {
             this.musicSource.stop();
@@ -236,6 +245,7 @@ class AudioManager {
         }
     }
 
+    // Toggles global mute state, persists the setting, and updates music playback.
     toggleMute() {
         this.isMuted = !this.isMuted;
         userSettings.muted = this.isMuted;
@@ -245,6 +255,7 @@ class AudioManager {
         return this.isMuted;
     }
 
+    // Sets and persists normalized music volume, updating active music gain immediately.
     setMusicVolume(value) {
         this.musicVolume = Math.max(0, Math.min(1, value));
         userSettings.musicVolume = this.musicVolume;
@@ -254,12 +265,14 @@ class AudioManager {
         }
     }
 
+    // Sets and persists normalized sound-effects volume.
     setSFXVolume(value) {
         this.sfxVolume = Math.max(0, Math.min(1, value));
         userSettings.sfxVolume = this.sfxVolume;
         persistUserSettings();
     }
 
+    // Releases active audio resources managed by this instance.
     dispose() {
         this.stopMusic();
     }

@@ -77,10 +77,12 @@ const GARRISON_DEFENDER_CONFIGS = {
 
 const GARRISON_DEFENDER_TYPES = Object.keys(GARRISON_DEFENDER_CONFIGS);
 
+// Returns the stat/projectile configuration for a garrison defender type.
 function getGarrisonDefenderConfig(type) {
     return GARRISON_DEFENDER_CONFIGS[type] || GARRISON_DEFENDER_CONFIGS.rifle;
 }
 
+// Spawns and initializes a garrison defender with clamped spawn position and default state.
 function spawnGarrisonDefender(scene, type, x, y) {
     const { garrisonDefenders, audioManager } = scene;
     if (!garrisonDefenders) return null;
@@ -117,6 +119,7 @@ function spawnGarrisonDefender(scene, type, x, y) {
     return defender;
 }
 
+// Fires a defender projectile toward the player (or forced angle) using class shot settings.
 function garrisonShootAtPlayer(scene, defender, forcedAngle = null, overrideType = null) {
     const { enemyProjectiles, audioManager } = scene;
     const player = getActivePlayer(scene);
@@ -140,6 +143,7 @@ function garrisonShootAtPlayer(scene, defender, forcedAngle = null, overrideType
     });
 }
 
+// Handles player projectile impact on defenders, including damage, FX, and destruction checks.
 function hitGarrisonDefender(projectile, defender) {
     const { audioManager, particleManager } = this;
     defender.hp -= projectile.damage || 1;
@@ -151,6 +155,7 @@ function hitGarrisonDefender(projectile, defender) {
     }
 }
 
+// Destroys a defender, awards scaled score/combo rewards, and handles death effects/drop chance.
 function destroyGarrisonDefender(scene, defender) {
     const { garrisonDefenders, particleManager, audioManager } = scene;
     if (!garrisonDefenders || !defender || defender.isBeingDestroyed) return;
@@ -190,11 +195,13 @@ function destroyGarrisonDefender(scene, defender) {
     defender.destroy();
 }
 
+// Returns score value for defeating the specified garrison defender type.
 function getGarrisonDefenderScore(type) {
     const config = getGarrisonDefenderConfig(type);
     return config.score || 200;
 }
 
+// Handles player collision with a defender, applying shield/invincibility or player death flow.
 function playerHitGarrisonDefender(playerSprite, defender) {
     const audioManager = this.audioManager;
     if (playerState.powerUps.invincibility > 0) {

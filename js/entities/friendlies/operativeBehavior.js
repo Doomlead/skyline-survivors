@@ -94,6 +94,7 @@ const COMRADE_BUFF_CONFIG = {
     minFireRateMultiplier: 0.6
 };
 
+// Selects an operative class based on configured squad composition weights.
 function pickOperativeType() {
     const total = OPERATIVE_RARITY_WEIGHTS.reduce((sum, entry) => sum + entry.weight, 0);
     const roll = Math.random() * total;
@@ -105,6 +106,7 @@ function pickOperativeType() {
     return 'infantry';
 }
 
+// Spawns and initializes one friendly operative with class stats, visuals, and behavior state.
 function spawnOperative(scene, type, x, y) {
     const { friendlies, audioManager } = scene;
     if (!friendlies) return null;
@@ -140,6 +142,7 @@ function spawnOperative(scene, type, x, y) {
     return operative;
 }
 
+// Spawns a temporary medic pickup that restores player survivability when collected.
 function spawnMedicPickup(scene, x, y) {
     const { powerUps } = scene;
     if (!powerUps) return null;
@@ -166,6 +169,7 @@ function spawnMedicPickup(scene, x, y) {
     return pickup;
 }
 
+// Returns a dynamic formation offset so squadmates spread around their home anchor.
 function getOperativeFormationOffset(index, squadSize, time) {
     if (!squadSize) return { x: 0, y: 0 };
     const ringIndex = index % Math.max(1, Math.ceil(squadSize / 6));
@@ -178,6 +182,7 @@ function getOperativeFormationOffset(index, squadSize, time) {
     };
 }
 
+// Computes range/fire-rate modifier from active squad aura proximity and state.
 function getAuraMultiplier(operative, player, auraActive) {
     if (!auraActive || !player) return 1.0;
     const dx = typeof wrappedDistance === 'function'
@@ -189,6 +194,7 @@ function getAuraMultiplier(operative, player, auraActive) {
     return 1.0;
 }
 
+// Returns current comrade-upgrade buff modifiers used by operative combat behaviors.
 function getComradeBuffs() {
     const level = Math.max(0, playerState.comradeBuffs?.level || 0);
     const fireRateMultiplier = Math.max(
@@ -203,6 +209,7 @@ function getComradeBuffs() {
     };
 }
 
+// Computes wrapped-world distance between an origin entity and a potential target.
 function getTargetDistance(origin, target) {
     if (!origin || !target) return Infinity;
     const dx = typeof wrappedDistance === 'function'
@@ -212,6 +219,7 @@ function getTargetDistance(origin, target) {
     return Math.hypot(dx, dy);
 }
 
+// Picks the best current target for an operative, preferring immediate threats near the squad/player.
 function findSquadTarget(scene, operative, player) {
     if (!player) return findNearestEnemy(scene, operative).target;
     const { target: nearestToPlayer, distance } = findNearestEnemy(scene, player);
@@ -221,6 +229,7 @@ function findSquadTarget(scene, operative, player) {
     return findNearestEnemy(scene, operative).target;
 }
 
+// Returns the active hangar landing zone used for pilot rebuild-defense behavior, if present.
 function getRebuildLandingZone(scene) {
     const { friendlies } = scene;
     if (!friendlies || !friendlies.children) return null;
@@ -233,6 +242,7 @@ function getRebuildLandingZone(scene) {
     return null;
 }
 
+// Returns whether the on-foot pilot is currently inside the rebuild landing zone bounds.
 function isPilotInRebuildZone(scene, landingZone) {
     if (!landingZone || !pilotState.active || aegisState.active) return false;
     if (typeof isPlayerOnLandingZone === 'function') {
@@ -248,6 +258,7 @@ function isPilotInRebuildZone(scene, landingZone) {
     return Math.abs(dx) <= xRange && Math.abs(dy) <= yRange;
 }
 
+// Predicts and returns the projectile most likely to impact a protected position soonest.
 function findThreateningProjectile(scene, targetX, targetY, radius, maxTime) {
     const { enemyProjectiles } = scene;
     if (!enemyProjectiles || !enemyProjectiles.children) return null;
@@ -279,6 +290,7 @@ function findThreateningProjectile(scene, targetX, targetY, radius, maxTime) {
     return best;
 }
 
+// Applies or clears defensive tint feedback on operatives based on protection state.
 function applyOperativeDefenseVisual(operative, isDefending) {
     if (isDefending) {
         operative.setTint(SQUAD_AURA_CONFIG.bodyBlockTint);
@@ -287,6 +299,7 @@ function applyOperativeDefenseVisual(operative, isDefending) {
     }
 }
 
+// Transitions operative state with optional callout audio while respecting cooldown limits.
 function setOperativeState(scene, operative, nextState, time) {
     if (operative.currentState === nextState) return;
     operative.currentState = nextState;
@@ -298,6 +311,7 @@ function setOperativeState(scene, operative, nextState, time) {
     scene.lastOperativeCallout = time;
 }
 
+// Returns the nearest active hostile (enemy/boss/battleship) to the provided origin.
 function findNearestEnemy(scene, origin) {
     const { enemies, bosses, battleships } = scene;
     const candidates = [];
@@ -323,6 +337,7 @@ function findNearestEnemy(scene, origin) {
     return { target: nearest, distance: nearestDist };
 }
 
+// Returns the nearest relevant assault objective target to the operative origin.
 function findNearestAssaultTarget(scene, origin) {
     const { assaultTargets } = scene;
     if (!assaultTargets) return { target: null, distance: Infinity };
@@ -346,6 +361,7 @@ function findNearestAssaultTarget(scene, origin) {
     return { target: nearest, distance: nearestDist };
 }
 
+// Updates infantry operative patrol and firing behavior for the current frame.
 function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG.infantry;
     const buffs = getComradeBuffs();
@@ -376,6 +392,7 @@ function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, pla
     }
 }
 
+// Updates gunner operative positioning and sustained-fire behavior for the frame.
 function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG.gunner;
     const buffs = getComradeBuffs();
@@ -417,6 +434,7 @@ function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, playe
     }
 }
 
+// Updates medic operative support logic, including healing/pickup deployment behavior.
 function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) {
     const config = OPERATIVE_CLASS_CONFIG.medic;
     const player = getActivePlayer(scene);
@@ -447,6 +465,7 @@ function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) {
     }
 }
 
+// Updates saboteur operative approach and burst-damage behavior against priority targets.
 function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG.saboteur;
     const buffs = getComradeBuffs();
@@ -502,6 +521,7 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, pla
     }
 }
 
+// Dispatches class-specific offensive behavior for an operative based on its type.
 function handleOperativeFire(scene, operative, time, player, auraActive) {
     const config = OPERATIVE_CLASS_CONFIG[operative.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
     const buffs = getComradeBuffs();
@@ -588,6 +608,7 @@ function handleOperativeFire(scene, operative, time, player, auraActive) {
     }
 }
 
+// Smoothly relocates an operative’s home anchor to maintain squad cohesion with player movement.
 function updateOperativeHomeAnchor(scene, operative, timeSlowMultiplier, delta) {
     const config = OPERATIVE_CLASS_CONFIG[operative.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
     const player = getActivePlayer(scene);
@@ -606,6 +627,7 @@ function updateOperativeHomeAnchor(scene, operative, timeSlowMultiplier, delta) 
     }
 }
 
+// Main per-frame update loop for all active operatives, states, movement, and combat actions.
 function updateOperatives(scene, time, delta) {
     const { friendlies } = scene;
     if (!friendlies) return;

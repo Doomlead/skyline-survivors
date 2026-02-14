@@ -419,23 +419,28 @@ const BOSS_TYPES = [
     'mothershipCore'
 ];
 
+// Returns scaled hit points for a boss type using base values and the global boss HP multiplier.
 function getBossHP(type) {
     const baseHP = BOSS_HP_VALUES[type] || 20;
     return baseHP * BOSS_HP_MULTIPLIER;
 }
 
+// Returns the score reward granted for defeating the specified boss type.
 function getBossScore(type) {
     return BOSS_SCORE_VALUES[type] || 500;
 }
 
+// Returns the visual scale factor used when spawning the specified boss type.
 function getBossScale(type) {
     return BOSS_SCALE_VALUES[type] || 3.5;
 }
 
+// Returns the legacy projectile pattern config for compatibility with older boss firing logic.
 function getBossShotConfig(type) {
     return BOSS_SHOT_CONFIGS[type] || BOSS_SHOT_CONFIGS.megaLander;
 }
 
+// Returns the phase-based attack sequence definition used by modern boss behavior.
 function getBossAttackPattern(type) {
     return BOSS_ATTACK_PATTERNS[type] || BOSS_ATTACK_PATTERNS.megaLander;
 }

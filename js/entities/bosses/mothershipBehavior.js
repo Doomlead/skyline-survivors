@@ -2,6 +2,7 @@
 // File: js/entities/bosses/mothershipBehavior.js
 // ------------------------
 
+// Updates mothership core movement/phase behavior and delegates firing logic each frame.
 function updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     const anchorX = boss.anchorX ?? boss.x;
@@ -21,6 +22,7 @@ function updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultipli
     updateBossAttackPattern(scene, boss, time, timeSlowMultiplier);
 }
 
+// Per-frame update dispatcher for active mothership-specific boss entities.
 function updateMothershipBosses(scene, time, delta) {
     const { bosses } = scene;
     if (!bosses) return;

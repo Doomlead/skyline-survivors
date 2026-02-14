@@ -90,27 +90,33 @@ const BATTLESHIP_SHOT_CONFIGS = {
     dreadnought: { projectileType: 'enemyProjectile', speed: 320, damage: 1.8, interval: 1200 },
 };
 
+// Returns a random battleship archetype key for encounter selection.
 function getRandomBattleshipType() {
     return Phaser.Utils.Array.GetRandom(BATTLESHIP_TYPES);
 }
 
+// Returns base HP for a battleship type with a safe default fallback.
 function getBattleshipHP(type) {
     const baseHP = BATTLESHIP_HP_VALUES[type] || 18;
     return Math.round(baseHP * BATTLESHIP_HP_MULTIPLIER);
 }
 
+// Returns score reward for defeating the specified battleship type.
 function getBattleshipScore(type) {
     return BATTLESHIP_SCORE_VALUES[type] || 300;
 }
 
+// Returns visual scale value applied to a spawned battleship type.
 function getBattleshipScale(type) {
     return BATTLESHIP_SCALE_VALUES[type] || 2.4;
 }
 
+// Returns legacy shot configuration for compatibility with shared firing helpers.
 function getBattleshipShotConfig(type) {
     return BATTLESHIP_SHOT_CONFIGS[type] || BATTLESHIP_SHOT_CONFIGS.raider;
 }
 
+// Creates and attaches the configured particle trail emitter for a battleship.
 function createBattleshipTrail(scene, battleship) {
     if (!scene || !battleship) return;
 
@@ -143,6 +149,7 @@ function createBattleshipTrail(scene, battleship) {
     });
 }
 
+// Spawns and initializes a battleship entity, stats, visuals, and behavior state.
 function spawnBattleship(scene, type, x, y) {
     const { battleships, audioManager } = scene;
     if (!battleships) return null;
@@ -197,6 +204,7 @@ function spawnBattleship(scene, type, x, y) {
 }
 
 // Legacy function kept for compatibility but no longer used by battleship behaviors
+// Fires one projectile from a battleship source point using supplied shot parameters.
 function shootFromBattleshipSource(scene, sourceX, sourceY, battleship, shotConfig, fireAngle) {
     const { enemyProjectiles, audioManager } = scene;
     const player = getActivePlayer(scene);
@@ -225,6 +233,7 @@ function shootFromBattleshipSource(scene, sourceX, sourceY, battleship, shotConf
     });
 }
 
+// Handles player projectile hits on battleships, including phase gates and destruction checks.
 function hitBattleship(projectile, battleship) {
     const scene = projectile.scene;
     const audioManager = scene.audioManager;
@@ -287,6 +296,7 @@ function hitBattleship(projectile, battleship) {
     }
 }
 
+// Handles player collision with a battleship and resolves shield/invulnerability/death outcomes.
 function playerHitBattleship(playerSprite, battleship) {
     const scene = battleship.scene;
     const audioManager = scene.audioManager;
@@ -315,6 +325,7 @@ function playerHitBattleship(playerSprite, battleship) {
     }
 }
 
+// Starts a battleship encounter with warnings, state flags, and spawn placement.
 function startBattleshipEncounter(scene, triggerInfo = {}) {
     if (gameState.battleshipActive) return null;
 
@@ -358,6 +369,7 @@ function startBattleshipEncounter(scene, triggerInfo = {}) {
     return spawnBattleship(scene, battleshipType, spawnX, spawnY);
 }
 
+// Handles post-battleship wave rewards and transitions to next wave/win condition.
 function completeBattleshipWave(scene) {
     const audioManager = scene.audioManager;
     const completedWave = gameState.wave;
@@ -404,6 +416,7 @@ function completeBattleshipWave(scene) {
     });
 }
 
+// Destroys a battleship, awards rewards/effects, and clears encounter state when finished.
 function destroyBattleship(scene, battleship) {
     const { battleships } = scene;
     if (!battleships) return;

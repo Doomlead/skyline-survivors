@@ -2,6 +2,7 @@
 // File: js/core/utility.js
 // ------------------------
 
+// Wraps a sprite horizontally so it stays within the cyclic world width.
 function wrapWorldBounds(sprite) {
     const worldWidth = CONFIG.worldWidth;
     let wrappedX = sprite.x % worldWidth;
@@ -9,6 +10,7 @@ function wrapWorldBounds(sprite) {
     if (wrappedX !== sprite.x) sprite.x = wrappedX;
 }
 
+// Spawns an explosion VFX burst and plays explosion SFX at the provided world position.
 function createExplosion(scene, x, y, color = 0xffff00) {
     const audioManager = scene?.audioManager;
     if (audioManager) audioManager.playSound('explosion');
@@ -31,6 +33,7 @@ function createExplosion(scene, x, y, color = 0xffff00) {
     }
 }
 
+// Plays the enemy spawn visual effect with type-specific tinting and flash-reduction support.
 function createSpawnEffect(scene, x, y, enemyType) {
     const colors = {
         'lander': 0xff4444,
@@ -78,6 +81,7 @@ function createSpawnEffect(scene, x, y, enemyType) {
     });
 }
 
+// Applies a brief camera shake impulse and tweened settle-back for impact feedback.
 function screenShake(scene, intensity = 10, duration = 200) {
     if (!scene.cameras || !scene.cameras.main) return;
     const camera = scene.cameras.main;
@@ -96,6 +100,7 @@ function screenShake(scene, intensity = 10, duration = 200) {
     });
 }
 
+// Creates collection feedback effects for power-ups and shakes camera for high-impact pickups.
 function createPowerUpCollectionEffect(scene, x, y, powerUpType) {
     const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const flash = scene.add.circle(x, y, 30, 0xffffff, reduceFlashes ? 0.4 : 0.8);
@@ -131,6 +136,7 @@ function createPowerUpCollectionEffect(scene, x, y, powerUpType) {
     }
 }
 
+// Plays a distinct upgrade burst effect when a comrade receives an upgrade.
 function createComradeUpgradeEffect(scene, x, y) {
     const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const ringColor = 0x60a5fa;
@@ -163,6 +169,7 @@ function createComradeUpgradeEffect(scene, x, y) {
     screenShake(scene, shakeIntensity, 140);
 }
 
+// Renders a multi-ring death burst effect tuned by enemy type and accessibility settings.
 function createEnhancedDeathEffect(scene, x, y, enemyType) {
     const deathColors = {
         'lander': 0xff4444,
@@ -208,6 +215,7 @@ function createEnhancedDeathEffect(scene, x, y, enemyType) {
     });
 }
 
+// Calculates responsive game viewport dimensions based on available layout space and device constraints.
 function getResponsiveScale() {
     const isMobile = window.innerWidth <= 900;
     const isLandscape = window.innerWidth > window.innerHeight;
@@ -245,6 +253,7 @@ function getResponsiveScale() {
     };
 }
 
+// Converts world coordinates into current screen-space coordinates using camera scroll offsets.
 function getScreenPosition(scene, worldX, worldY) {
     const cam = scene.cameras.main;
     return {
@@ -253,6 +262,7 @@ function getScreenPosition(scene, worldX, worldY) {
     };
 }
 
+// Starts or restarts gameplay in the selected mode, applying mission payload and scene transitions.
 function startGame(mode = 'classic') {
     const missionPayload = window.missionPlanner ? missionPlanner.prepareLaunchPayload(mode) : null;
     const effectiveMode = missionPayload?.mode || mode;
@@ -303,6 +313,7 @@ function startGame(mode = 'classic') {
 
 window.startGame = startGame;
 
+// Applies mission directive multipliers and contextual state from the district planner payload.
 function applyMissionPayload(missionPayload) {
     if (!missionPayload) {
         gameState.missionContext = null;
@@ -326,15 +337,18 @@ function applyMissionPayload(missionPayload) {
     }
 }
 
+// Returns a reward value scaled by the current mission reward multiplier.
 function getMissionScaledReward(base) {
     return Math.round(base * (gameState.rewardMultiplier || 1));
 }
 
+// Returns a reward value scaled by both mission and live combo multipliers.
 function getCombatScaledReward(base) {
     const comboMultiplier = gameState.comboMultiplier || 1;
     return Math.round(getMissionScaledReward(base) * comboMultiplier);
 }
 
+// Resets combo stacks, timer, multiplier, and flow status to baseline values.
 function resetComboMeter() {
     gameState.comboStacks = 0;
     gameState.comboTimer = 0;
@@ -342,12 +356,14 @@ function resetComboMeter() {
     gameState.comboFlowActive = false;
 }
 
+// Recomputes combo multiplier from current stack count and combo configuration thresholds.
 function refreshComboMultiplier() {
     const steps = Math.floor((gameState.comboStacks || 0) / COMBO_CONFIG.stepSize);
     const bonus = Math.min(COMBO_CONFIG.maxBonus, steps * COMBO_CONFIG.stepBonus);
     gameState.comboMultiplier = 1 + bonus;
 }
 
+// Adds combo stacks, refreshes decay timer, and updates combo multiplier/max-stack tracking.
 function registerComboEvent(stacks = 1) {
     const nextStacks = Math.min(COMBO_CONFIG.maxStacks, (gameState.comboStacks || 0) + stacks);
     gameState.comboStacks = nextStacks;
@@ -356,6 +372,7 @@ function registerComboEvent(stacks = 1) {
     refreshComboMultiplier();
 }
 
+// Selects the current best movement objective (boss/base/nearest enemy) for combo-flow evaluation.
 function getComboObjective(scene, player) {
     if (!scene || !player) return null;
     if (gameState.mode === 'assault' && gameState.assaultObjective?.baseX) {
@@ -386,6 +403,7 @@ function getComboObjective(scene, player) {
     return best ? { x: best.x, y: best.y } : null;
 }
 
+// Determines whether the player is moving toward the active combo objective target.
 function isMovingTowardObjective(scene, player) {
     if (!scene || !player || !player.body) return false;
     const target = getComboObjective(scene, player);
@@ -400,6 +418,7 @@ function isMovingTowardObjective(scene, player) {
     return Math.sign(dx) === Math.sign(velocity.x || 0);
 }
 
+// Updates combo flow/timer decay and resets combo state when momentum is lost long enough.
 function updateComboState(scene, delta) {
     if (!gameState.comboStacks) {
         gameState.comboFlowActive = false;
@@ -415,6 +434,7 @@ function updateComboState(scene, delta) {
     }
 }
 
+// Routes the player to title/menu scenes and updates overlays based on briefing state.
 function enterMainMenu() {
     const sawBriefing = localStorage.getItem('sawBriefing') === 'true';
 
@@ -446,6 +466,7 @@ function enterMainMenu() {
     }
 }
 
+// Opens the menu overlay and pauses gameplay when settings are opened mid-run.
 function openSettingsMenu() {
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'flex';
@@ -460,6 +481,7 @@ function openSettingsMenu() {
     }
 }
 
+// Switches from gameplay/menu into district map layout and manages scene lifecycle transitions.
 function enterDistrictMap(options = false) {
     const fromVictory = typeof options === 'object' ? !!options.fromVictory : false;
     
@@ -502,12 +524,14 @@ function enterDistrictMap(options = false) {
     }
 }
 
+// Convenience helper to hide menus and enter the district build/map scene.
 function openBuildView() {
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
     enterDistrictMap();
 }
 
+// Returns from district build view back to gameplay layout and resumes the main scene when possible.
 function closeBuildView() {
     // Switch back to game layout
     if (window.DistrictLayoutManager) {
@@ -536,6 +560,7 @@ function closeBuildView() {
     if (toggleBtn) toggleBtn.classList.remove('hidden');
 }
 
+// Launches the currently selected district mission or falls back to starting the planned mode.
 function launchSelectedMission() {
     const buildScene = game?.scene?.getScene ? game.scene.getScene(SCENE_KEYS.build) : null;
     if (buildScene && buildScene.scene && buildScene.scene.isActive()) {

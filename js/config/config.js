@@ -63,6 +63,7 @@ const userSettings = {
     keyBindings: { ...DEFAULT_KEY_BINDINGS }
 };
 
+// Validates and normalizes persisted key bindings against supported Phaser keyboard key codes.
 function sanitizeKeyBindings(bindings) {
     const sanitized = { ...DEFAULT_KEY_BINDINGS };
     if (!bindings || typeof bindings !== 'object') return sanitized;
@@ -78,6 +79,7 @@ function sanitizeKeyBindings(bindings) {
     return sanitized;
 }
 
+// Loads persisted user settings from local storage and safely applies valid values.
 function loadUserSettings() {
     if (typeof localStorage === 'undefined') return;
     const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
@@ -97,15 +99,18 @@ function loadUserSettings() {
     }
 }
 
+// Persists the current user settings object to local storage.
 function persistUserSettings() {
     if (typeof localStorage === 'undefined') return;
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(userSettings));
 }
 
+// Reports whether reduced-flash accessibility mode is enabled in user settings.
 function isFlashReductionEnabled() {
     return !!userSettings.reduceFlashes;
 }
 
+// Computes power-up decay duration for a path/tier, including assault-mode duration scaling.
 function getDecayDurationMs(path, tier) {
     if (!path || !tier || tier <= 0) return 0;
     const pathConfig = POWERUP_DECAY_CONFIG.paths?.[path];
@@ -302,6 +307,7 @@ window.virtualInput = {
 };
 
 // Reset game state function
+// Resets run-time game, player, and objective state back to fresh-run defaults.
 function resetGameState() {
     gameState.score = 0;
     gameState.humans = 15;

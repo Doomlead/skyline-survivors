@@ -5,6 +5,7 @@
 // No changes needed - this file doesn't handle boss AI, it handles the
 // assault mission objective spawning/reinforcement timers.
 
+// Spawns the initial garrison defender squad around the assault base position.
 function spawnAssaultDefenders(scene, baseX) {
     const defenderTypes = GARRISON_DEFENDER_TYPES || ['rifle'];
     for (let i = 0; i < ASSAULT_BASE_CONFIG.defenderCount; i++) {
@@ -16,6 +17,7 @@ function spawnAssaultDefenders(scene, baseX) {
     }
 }
 
+// Advances assault objective timers for spawning, reinforcements, shields, and turret fire.
 function updateAssaultObjective(scene, delta) {
     const objective = gameState.assaultObjective;
     if (!objective || !objective.active) return;

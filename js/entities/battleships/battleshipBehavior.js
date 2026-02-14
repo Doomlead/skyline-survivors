@@ -130,10 +130,12 @@ const BATTLESHIP_ATTACK_PATTERNS = {
     },
 };
 
+// Returns the phase-based attack pattern definition for a battleship type.
 function getBattleshipAttackPattern(type) {
     return BATTLESHIP_ATTACK_PATTERNS[type] || BATTLESHIP_ATTACK_PATTERNS.raider;
 }
 
+// Advances battleship attack state and executes the next configured attack move when ready.
 function updateBattleshipAttackPattern(scene, battleship, time, timeSlowMultiplier) {
     if (!battleship.attackState) {
         initBossAttackState(battleship);
@@ -164,6 +166,7 @@ function updateBattleshipAttackPattern(scene, battleship, time, timeSlowMultipli
 
 // ===== BATTLESHIP MOVEMENT BEHAVIORS =====
 
+// Updates Raider movement profile and delegates its unified attack-pattern firing.
 function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -185,6 +188,7 @@ function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultipl
     );
 }
 
+// Updates Carrier drift/spawn behavior and executes phase-based attack moves.
 function updateCarrierBattleshipBehavior(scene, battleship, time, delta, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -211,6 +215,7 @@ function updateCarrierBattleshipBehavior(scene, battleship, time, delta, timeSlo
     }
 }
 
+// Updates Nova battleship motion cadence and triggers its attack pattern cycle.
 function updateNovaBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -231,6 +236,7 @@ function updateNovaBattleshipBehavior(scene, battleship, time, timeSlowMultiplie
     );
 }
 
+// Updates Siege battleship positioning and heavy fire-pattern timing.
 function updateSiegeBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -252,6 +258,7 @@ function updateSiegeBattleshipBehavior(scene, battleship, time, timeSlowMultipli
     battleship.y += Math.sin(battleship.siegePhase) * 0.4;
 }
 
+// Updates Dreadnought pressure movement and multi-phase attack sequencing.
 function updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -273,6 +280,7 @@ function updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMu
     );
 }
 
+// Main per-frame battleship update loop dispatching type-specific behavior handlers.
 function updateBattleships(scene, time, delta) {
     const { battleships } = scene;
     if (!battleships) return;

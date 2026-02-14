@@ -2,6 +2,7 @@
 // file: js/entities/player/playerHumans.js
 // ------------------------
 
+// Spawns a rescueable human NPC at a wrapped world position with baseline behavior state.
 function spawnHuman(scene, x) {
     const { humans } = scene;
     if (!humans) return;
@@ -17,6 +18,7 @@ function spawnHuman(scene, x) {
     human.abductor = null;
 }
 
+// Handles human rescue pickup, scoring/cargo updates, and rescue feedback effects.
 function rescueHuman(playerSprite, human) {
     const audioManager = this.audioManager;
     const isFalling = Boolean(human.body && human.body.gravity && human.body.gravity.y > 0);
@@ -51,6 +53,7 @@ function rescueHuman(playerSprite, human) {
     if (Math.random() < 0.24) spawnPowerUp(this, human.x, human.y);
 }
 
+// Updates human wandering/falling behavior and removes invalid human entities each frame.
 function updateHumans(scene) {
     const { humans } = scene;
     if (!humans) return;

@@ -69,6 +69,7 @@ const DEFAULT_META_STATE = {
 
 let metaState = null;
 
+// Loads and initializes persistent meta-progression state from local storage.
 function loadMetaProgression() {
     if (metaState) return metaState;
 
@@ -92,6 +93,7 @@ function loadMetaProgression() {
     return metaState;
 }
 
+// Saves the current meta-progression state to local storage when available.
 function persistMetaProgression() {
     if (typeof localStorage === 'undefined' || !metaState) return;
     try {
@@ -101,6 +103,7 @@ function persistMetaProgression() {
     }
 }
 
+// Returns a defensive copy of meta-progression state for external consumers.
 function getMetaState() {
     const state = loadMetaProgression();
     return {
@@ -111,6 +114,7 @@ function getMetaState() {
     };
 }
 
+// Adds (or subtracts) credits with clamping and returns the updated credit total.
 function addCredits(amount) {
     const state = loadMetaProgression();
     const delta = Number.isFinite(amount) ? amount : 0;
@@ -119,6 +123,7 @@ function addCredits(amount) {
     return state.credits;
 }
 
+// Attempts to spend credits and returns whether the transaction succeeded.
 function spendCredits(cost) {
     const state = loadMetaProgression();
     const amount = Number.isFinite(cost) ? cost : 0;
@@ -129,6 +134,7 @@ function spendCredits(cost) {
     return true;
 }
 
+// Computes end-of-run credit rewards from score, rescues, directives, and mission success.
 function calculateRunCredits(outcome) {
     const baseScore = Math.max(50, Math.round((outcome.score || 0) / 750));
     const rescueBonus = Math.round((outcome.humansRescued || 0) * 6);
@@ -143,6 +149,7 @@ function calculateRunCredits(outcome) {
     return Math.max(25, Math.round((baseScore + rescueBonus + successBonus + urgencyBonus + clutchBonus) * rewardScale));
 }
 
+// Records run results, grants calculated credits, updates history, and clears pending drops.
 function recordRunOutcome(outcome) {
     const state = loadMetaProgression();
     const earned = calculateRunCredits(outcome || {});
@@ -164,6 +171,7 @@ function recordRunOutcome(outcome) {
     return runEntry;
 }
 
+// Builds supply-drop shop entries and marks which options are currently affordable.
 function getShopInventory() {
     const state = loadMetaProgression();
     return Object.keys(LOOT_TABLES).map(key => {
@@ -177,6 +185,7 @@ function getShopInventory() {
 }
 
 // Weighted random selection
+// Selects a random item from the requested loot tier pool.
 function selectRandomItem(tier) {
     const items = POWERUP_TIERS[tier];
     if (!items || items.length === 0) return null;
@@ -184,6 +193,7 @@ function selectRandomItem(tier) {
 }
 
 // Roll loot from a supply drop
+// Rolls one supply drop result using drop configuration, item counts, and tier weights.
 function rollSupplyDrop(dropType) {
     const config = LOOT_TABLES[dropType];
     if (!config) return { success: false, reason: 'invalid_drop_type' };
@@ -223,6 +233,7 @@ function rollSupplyDrop(dropType) {
     };
 }
 
+// Purchases a supply drop, stores pending rewards, and appends a loot-history entry.
 function purchaseSupplyDrop(dropType) {
     const state = loadMetaProgression();
     const dropConfig = LOOT_TABLES[dropType];
@@ -257,11 +268,13 @@ function purchaseSupplyDrop(dropType) {
     return lootResult;
 }
 
+// Returns the currently queued supply drop rewards to apply on mission start.
 function getPendingDrop() {
     const state = loadMetaProgression();
     return state.pendingDrop;
 }
 
+// Applies pending drop rewards to game/player state and returns a summary of applied bonuses.
 function applySupplyDropEffects(gameState, playerState) {
     const state = loadMetaProgression();
     const pending = state.pendingDrop;
@@ -340,17 +353,20 @@ function applySupplyDropEffects(gameState, playerState) {
     };
 }
 
+// Clears queued supply-drop rewards after they are consumed or dismissed.
 function clearPendingDrop() {
     const state = loadMetaProgression();
     state.pendingDrop = null;
     persistMetaProgression();
 }
 
+// Returns the most recently recorded run summary from meta progression.
 function getLastRunSummary() {
     const state = loadMetaProgression();
     return state.lastRun;
 }
 
+// Returns recent loot drop history entries for UI display.
 function getLootHistory() {
     const state = loadMetaProgression();
     return state.lootHistory || [];

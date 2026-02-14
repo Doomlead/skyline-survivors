@@ -2,6 +2,7 @@
 // Power-up system - All 16 power-up types
 // ------------------------
 
+// Spawns a randomized power-up pickup at a world position with drop-rate weighting.
 function spawnPowerUp(scene, x, y) {
     const { powerUps } = scene;
     if (!powerUps) return;
@@ -27,6 +28,7 @@ function spawnPowerUp(scene, x, y) {
     });
 }
 
+// Refreshes the decay timer for a tracked upgrade path/tier when power-up state changes.
 function refreshDecayTimer(path, tier) {
     const duration = getDecayDurationMs(path, tier);
     if (!duration) {
@@ -36,11 +38,13 @@ function refreshDecayTimer(path, tier) {
     playerState.powerUpDecay[path] = duration;
 }
 
+// Triggers UI flash feedback indicating an upgrade path is entering/under decay pressure.
 function triggerDecayFlash(path) {
     if (!playerState.decayFlash) return;
     playerState.decayFlash[path] = 400;
 }
 
+// Ensures primary weapon selection remains valid after power-up tier/availability changes.
 function normalizePrimaryWeapon() {
     const p = playerState.powerUps;
     if (playerState.primaryWeapon === 'laser' && p.laser <= 0 && p.multiShot > 0) {
@@ -52,6 +56,7 @@ function normalizePrimaryWeapon() {
     }
 }
 
+// Updates active world power-up pickup sprites, movement, and lifetime handling each frame.
 function updatePowerUps(scene) {
     const { powerUps, player } = scene;
     if (!powerUps || !player) return;
@@ -71,6 +76,7 @@ function updatePowerUps(scene) {
 }
 
 
+// Applies a collected power-up effect to player state, score/audio feedback, and cleanup.
 function collectPowerUp(playerSprite, powerUp) {
     gameState.score += getMissionScaledReward(200);
     const audioManager = this.audioManager;
@@ -204,6 +210,7 @@ function collectPowerUp(playerSprite, powerUp) {
     powerUp.destroy();
 }
 
+// Returns whether excess power-up progression should convert into comrade upgrade overflow.
 function shouldOverflowToComrades(powerUpType, powerUps) {
     const tiers = {
         laser: 2,
@@ -219,6 +226,7 @@ function shouldOverflowToComrades(powerUpType, powerUps) {
     return currentTier >= tiers[powerUpType];
 }
 
+// Converts overflowed power-up gains into comrade progression and associated feedback effects.
 function applyComradeOverflowUpgrade(scene, powerUp) {
     const currentLevel = playerState.comradeBuffs?.level || 0;
     const nextLevel = Math.min(currentLevel + 1, 12);
@@ -244,6 +252,7 @@ function applyComradeOverflowUpgrade(scene, powerUp) {
     }
 }
 
+// Pulls nearby pickups toward the player while magnet effects are active.
 function updatePowerUpMagnet(scene) {
     const { powerUps } = scene;
     const player = getActivePlayer(scene);
@@ -261,6 +270,7 @@ function updatePowerUpMagnet(scene) {
 }
 
 
+// Ticks active timed power-up durations and clears expired temporary buffs.
 function updatePowerUpTimers(scene, delta) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -313,6 +323,7 @@ function updatePowerUpTimers(scene, delta) {
     updatePowerUpDecayTimers(delta);
 }
 
+// Ticks decay timers for degradable upgrades and downgrades tiers when timers expire.
 function updatePowerUpDecayTimers(delta) {
     const p = playerState.powerUps;
     const decay = playerState.powerUpDecay;

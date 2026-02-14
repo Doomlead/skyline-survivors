@@ -14,12 +14,14 @@ const LANDING_ZONE_CONFIG = {
     baseAlpha: 0.85
 };
 
+// Returns true when the current mode supports defense-hangar spawning and extraction logistics.
 function isDefenseMission() {
     return gameState.mode !== 'assault'
         && gameState.mode !== 'mothership'
         && gameState.mode !== 'survival';
 }
 
+// Spawns the defense hangar and its landing zone, then registers them in friendly entities.
 function spawnDefenseHangar(scene) {
     if (!scene || !scene.friendlies || !isDefenseMission()) return null;
 
@@ -67,6 +69,7 @@ function spawnDefenseHangar(scene) {
     return hangar;
 }
 
+// Ensures a defense hangar exists for eligible missions and initializes related objective hooks.
 function setupDefenseHangar(scene) {
     if (scene.hangar && scene.hangar.active) return scene.hangar;
     return spawnDefenseHangar(scene);
