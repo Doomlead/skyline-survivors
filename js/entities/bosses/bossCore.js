@@ -2,6 +2,7 @@
 // File: js/entities/bosses/bossCore.js
 // ------------------------
 
+// Creates and attaches the configured particle trail emitter for a spawned boss.
 function createBossTrail(scene, boss) {
     if (!scene || !boss) return;
     if (boss.bossType === 'fortressTurret' || boss.bossType === 'mothershipCore') return;
@@ -35,6 +36,7 @@ function createBossTrail(scene, boss) {
     });
 }
 
+// Builds and shuffles the boss encounter queue used by classic/survival progression.
 function initializeBossQueue() {
     const pool = BOSS_TYPES.filter(type => type !== 'mothershipCore');
     const queue = [];
@@ -48,6 +50,7 @@ function initializeBossQueue() {
     gameState.bossesDefeated = 0;
 }
 
+// Finds a collision-safe boss spawn position away from player and nearby entities.
 function getSafeBossSpawnPosition(scene, desiredX, desiredY, bossType) {
     const player = getActivePlayer(scene);
     if (!player) return { x: desiredX, y: desiredY };
@@ -82,12 +85,14 @@ function getSafeBossSpawnPosition(scene, desiredX, desiredY, bossType) {
     return bestCandidate;
 }
 
+// Applies boss damage reduction rules and returns effective damage dealt.
 function applyBossDamage(boss, rawDamage) {
     const damage = rawDamage || 1;
     const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
     return Math.max(0.1, damage * (1 - reduction));
 }
 
+// Spawns and initializes a boss entity, metadata, visuals, and behavior state.
 function spawnBoss(scene, type, x, y) {
     const { bosses, audioManager } = scene;
     if (!bosses) return null;
@@ -153,6 +158,7 @@ function spawnBoss(scene, type, x, y) {
     return boss;
 }
 
+// Dequeues and returns the next boss type, repopulating queue when needed.
 function getNextBossType() {
     if (!gameState.bossQueue) {
         initializeBossQueue();
@@ -160,6 +166,7 @@ function getNextBossType() {
     return gameState.bossQueue.shift();
 }
 
+// Starts a boss encounter for the current mode, including selection, spawn, and UI state.
 function startBossEncounter(scene, triggerInfo = {}) {
     if (gameState.bossActive) return null;
 
@@ -206,6 +213,7 @@ function startBossEncounter(scene, triggerInfo = {}) {
     return spawnBoss(scene, bossType, spawnX, spawnY);
 }
 
+// Fires one projectile volley from a specific boss source point using provided shot config.
 function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngle) {
     const { enemyProjectiles, audioManager } = scene;
     const player = getActivePlayer(scene);
@@ -258,6 +266,7 @@ function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngl
     });
 }
 
+// Handles player-projectile impact on bosses, including damage, phase gates, and death checks.
 function hitBoss(projectile, boss) {
     const scene = projectile.scene;
     const audioManager = scene.audioManager;
@@ -333,6 +342,7 @@ function hitBoss(projectile, boss) {
     }
 }
 
+// Handles player collision with a boss and applies contact damage/invulnerability effects.
 function playerHitBoss(playerSprite, boss) {
     const scene = boss.scene;
     const audioManager = scene.audioManager;
@@ -361,6 +371,7 @@ function playerHitBoss(playerSprite, boss) {
     }
 }
 
+// Destroys boss entities, awards rewards, updates progression flags, and cleans encounter state.
 function destroyBoss(scene, boss) {
     const { bosses, enemies } = scene;
     if (!bosses) return;
@@ -458,6 +469,7 @@ function destroyBoss(scene, boss) {
     });
 }
 
+// Finalizes post-boss wave flow and transitions to next mission/wave state.
 function completeBossWave(scene) {
     const audioManager = scene.audioManager;
     const completedWave = gameState.wave;
@@ -506,6 +518,7 @@ function completeBossWave(scene) {
     });
 }
 
+// Handles player collision with boss-fired projectiles and applies projectile damage.
 function hitBossProjectile(playerSprite, projectile) {
     const audioManager = this.audioManager;
 
@@ -526,6 +539,7 @@ function hitBossProjectile(playerSprite, projectile) {
     }
 }
 
+// Triggers scheduled survival-mode boss encounters based on elapsed survival progression.
 function checkSurvivalBosses(scene) {
     if (gameState.mode !== 'survival' || gameState.bossActive) return;
 

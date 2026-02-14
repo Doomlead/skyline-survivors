@@ -2,6 +2,7 @@
 // file: js/entities/player/playerWeapons.js
 // ------------------------
 
+// Fires the current player weapon loadout, including primary, coverage, and missile behaviors.
 function fireWeapon(scene, angleOverride = null) {
     const { projectiles, drones } = scene;
     const player = getActivePlayer(scene);
@@ -75,6 +76,7 @@ function fireWeapon(scene, angleOverride = null) {
     });
 }
 
+// Returns projectile speed/damage/type tuning derived from laser tier and piercing state.
 function getLaserConfig(laserTier, hasPiercing) {
     const basePiercing = hasPiercing > 0 || laserTier >= 1;
     switch (laserTier) {
@@ -88,10 +90,12 @@ function getLaserConfig(laserTier, hasPiercing) {
     }
 }
 
+// Returns side/rear coverage firing configuration derived from current coverage power-up tier.
 function getCoverageConfig() {
     return { type: 'normal', piercing: false };
 }
 
+// Returns primary weapon shot-pattern offsets based on active laser/multi-shot tiers.
 function getPrimaryShotPattern(laserTier, multiShotTier) {
     if (laserTier > 0) {
         return getShotPattern(0);
@@ -99,10 +103,12 @@ function getPrimaryShotPattern(laserTier, multiShotTier) {
     return getShotPattern(multiShotTier || 0);
 }
 
+// Returns directional offsets used for side/rear coverage firing patterns.
 function getCoverageShotPattern() {
     return getShotPattern(0);
 }
 
+// Computes projectile spawn origin offset from player position along a firing angle.
 function getFireOrigin(player, angle, distance = 25) {
     return {
         fireX: player.x + Math.cos(angle) * distance,
@@ -110,6 +116,7 @@ function getFireOrigin(player, angle, distance = 25) {
     };
 }
 
+// Returns missile shot pattern offsets for the specified missile tier.
 function getShotPattern(tier) {
     switch (tier) {
         case 1:
@@ -124,6 +131,7 @@ function getShotPattern(tier) {
     }
 }
 
+// Spawns a full projectile pattern from one origin using shared projectile creation rules.
 function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, laserConfig, shotPattern) {
     if (shotPattern.mode === 'twin') {
         shotPattern.offsets.forEach(offset => {
@@ -157,6 +165,7 @@ function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, lase
     });
 }
 
+// Selects nearest valid hostile targets for cluster-missile retargeting.
 function getClusterTargets(scene, originX, originY, count, excludeTarget = null) {
     const candidates = [];
     if (scene.enemies) candidates.push(...scene.enemies.children.entries);
@@ -175,6 +184,7 @@ function getClusterTargets(scene, originX, originY, count, excludeTarget = null)
         .map(entry => entry.target);
 }
 
+// Spawns secondary cluster missiles from a parent projectile toward nearby targets.
 function spawnClusterMissiles(scene, projectile, excludeTarget = null) {
     if (!scene || !projectile) return;
     const clusterCount = 3;
@@ -218,6 +228,7 @@ function spawnClusterMissiles(scene, projectile, excludeTarget = null) {
     });
 }
 
+// Creates and initializes a player projectile with type-specific behavior metadata.
 function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, options = {}) {
     const { projectiles } = scene;
     if (!projectiles) return;
@@ -315,6 +326,7 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     return proj;
 }
 
+// Updates player/enemy projectile movement modifiers, wrapping, lifetimes, and special behaviors.
 function updateProjectiles(scene) {
     const { projectiles, enemyProjectiles, enemies, garrisonDefenders, player, particleManager } = scene;
     if (!projectiles || !enemyProjectiles || !player) return;

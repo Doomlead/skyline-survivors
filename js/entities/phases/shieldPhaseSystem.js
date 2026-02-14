@@ -2,6 +2,7 @@
 // File: js/entities/phases/shieldPhaseSystem.js
 // ------------------------
 
+// Initializes shield-phase state machine values for a multi-phase encounter entity.
 function initializeShieldPhaseState(entity, options = {}) {
     if (!entity) return;
 
@@ -23,21 +24,25 @@ function initializeShieldPhaseState(entity, options = {}) {
     };
 }
 
+// Returns current shield-phase state object for an entity, if initialized.
 function getShieldPhaseState(entity) {
     return entity?.phaseState || null;
 }
 
+// Returns whether direct HP damage is currently allowed by the entity's phase mode.
 function canDamagePhaseHp(entity) {
     const state = getShieldPhaseState(entity);
     if (!state) return true;
     return state.mode === 'VULNERABLE' || state.mode === 'EXPOSED';
 }
 
+// Returns a phase-adjusted timing interval that scales with encounter progression.
 function getPhasedInterval(entity, baseInterval, stepDown = 140, minInterval = 280) {
     const phase = getEncounterPhase(entity);
     return Math.max(minInterval, baseInterval - phase * stepDown);
 }
 
+// Spawns temporary floating text feedback at a world position.
 function createFloatingText(scene, x, y, message, color = '#ffffff') {
     if (!scene || !scene.add || !scene.tweens) return;
     const parsedColor = typeof color === 'number'
@@ -60,6 +65,7 @@ function createFloatingText(scene, x, y, message, color = '#ffffff') {
     });
 }
 
+// Advances the shield-phase state machine timers and handles mode transitions.
 function tickShieldPhaseState(entity, time = 0, delta = 0) {
     const state = entity?.phaseState;
     if (!state || !state.active) return;
@@ -104,6 +110,7 @@ function tickShieldPhaseState(entity, time = 0, delta = 0) {
     }
 }
 
+// Applies incoming damage to shield phase layers and reports shield/phase transition results.
 function applyShieldStageDamage(entity, damage, now = 0) {
     const state = entity?.phaseState;
     if (!state) return { appliedToShield: false, shieldBroken: false, phaseAdvanced: false };
@@ -140,6 +147,7 @@ function applyShieldStageDamage(entity, damage, now = 0) {
     return { appliedToShield: false, shieldBroken: false, phaseAdvanced: false };
 }
 
+// Builds HUD-ready phase/shield status text, color, and progress values.
 function getPhaseHudStatus(entity) {
     const state = entity?.phaseState;
     if (!state) return { phaseText: '', gateText: '', gateColor: '#ffffff', percent: 1, windowRemainingMs: 0 };
@@ -177,6 +185,7 @@ function getPhaseHudStatus(entity) {
     };
 }
 
+// Returns normalized encounter phase index for use by behavior/attack scaling systems.
 function getEncounterPhase(entity) {
     if (!entity?.phaseState) return 0;
     return Math.min(2, entity.phaseState.phasesCleared || 0);

@@ -7,6 +7,7 @@
 // Each boss has a pattern sequence it cycles through. This is the ONLY
 // place boss projectiles are created (except bomb drops which are special).
 
+// Initializes per-boss attack-cycle state used by the unified pattern system.
 function initBossAttackState(boss) {
     boss.attackState = {
         sequenceIndex: 0,
@@ -19,6 +20,7 @@ function initBossAttackState(boss) {
     };
 }
 
+// Returns the active attack sequence array for the boss's current core phase.
 function getCurrentAttackSequence(boss) {
     const pattern = getBossAttackPattern(boss.bossType);
     if (!pattern) return null;
@@ -27,6 +29,7 @@ function getCurrentAttackSequence(boss) {
     return phaseData?.sequence || null;
 }
 
+// Executes one attack move definition and spawns/configures projectiles for that move type.
 function fireAttackMove(scene, boss, move, pattern, timeSlowMultiplier) {
     const { enemyProjectiles, audioManager } = scene;
     if (!enemyProjectiles) return;
@@ -149,6 +152,7 @@ function fireAttackMove(scene, boss, move, pattern, timeSlowMultiplier) {
     if (audioManager) audioManager.playSound('enemyShoot');
 }
 
+// Advances the boss attack-state timer and fires the next move when its cooldown elapses.
 function updateBossAttackPattern(scene, boss, time, timeSlowMultiplier) {
     if (!boss.attackState) initBossAttackState(boss);
 
@@ -174,6 +178,7 @@ function updateBossAttackPattern(scene, boss, time, timeSlowMultiplier) {
 // ===== MOVEMENT BEHAVIORS =====
 // These ONLY handle movement. No shooting.
 
+// Updates movement/aim cadence for Mega Lander and drives its phase-based attack pattern.
 function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
     if (!boss.orbitAngle) boss.orbitAngle = 0;
     const phase = boss.corePhase || 0;
@@ -189,6 +194,7 @@ function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.setVelocity(0, 0);
 }
 
+// Updates Titan Mutant pursuit/strafe behavior and triggers its attack pattern updates.
 function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -208,6 +214,7 @@ function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
     );
 }
 
+// Updates Hive Drone swarm-style motion and attack timing for the current phase.
 function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) {
     if (!boss.hoverBaseY) boss.hoverBaseY = boss.y;
     const phase = boss.corePhase || 0;
@@ -229,6 +236,7 @@ function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.y = boss.hoverBaseY + Math.sin(time * bobSpeed) * bobAmount;
 }
 
+// Updates Behemoth Bomber traversal/bombing behavior and phase attack execution.
 function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultiplier) {
     const phase = boss.corePhase || 0;
     if (!boss.bomberDirection) boss.bomberDirection = Math.random() < 0.5 ? -1 : 1;
@@ -249,6 +257,7 @@ function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultipli
     else boss.setVelocityY(Math.sin(time * 0.003) * 10);
 }
 
+// Updates Colossal Pod movement pacing and coordinates its configured attack sequence.
 function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
     const phase = boss.corePhase || 0;
     if (!boss.podPattern) boss.podPattern = 0;
@@ -267,6 +276,7 @@ function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.setVelocityX((25 + phase * 5) * boss.driftDir * timeSlowMultiplier);
 }
 
+// Updates Leviathan Baiter chase dynamics and runs its active phase attack pattern.
 function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -289,6 +299,7 @@ function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
     );
 }
 
+// Updates Apex Kamikaze charge behavior, collision pressure, and attack-sequence firing.
 function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -341,6 +352,7 @@ function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
+// Updates Fortress Turret stationary targeting logic and rotates through phase attacks.
 function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
     // Stationary boss
     if (!boss.isPlanted) {
@@ -354,6 +366,7 @@ function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.rotation += (0.005 + phase * 0.003) * timeSlowMultiplier;
 }
 
+// Updates Overlord Shield defensive movement/targeting and executes its attack pattern.
 function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) {
     const phase = boss.corePhase || 0;
     if (!boss.orbitAngle) boss.orbitAngle = 0;
@@ -371,6 +384,7 @@ function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) {
 
 // ===== MAIN BOSS UPDATE =====
 
+// Main per-frame boss update loop that dispatches behavior handlers for active bosses.
 function updateBosses(scene, time, delta) {
     const topLimit = 20;
     const { bosses } = scene;
@@ -442,11 +456,13 @@ function updateBosses(scene, time, delta) {
 }
 
 // Legacy function kept as no-op since attack patterns are now unified
+// Legacy compatibility shim that routes old bullet-pattern calls to the new attack system.
 function fireBossBulletPattern(scene, boss, time, timeSlowMultiplier) {
     // Intentionally empty - handled by updateBossAttackPattern
 }
 
 // Legacy helper kept for compatibility
+// Returns a phase-adjusted fallback shot interval for legacy behavior code paths.
 function getBossPhaseShotInterval(boss, baseInterval) {
     if (typeof getPhasedInterval !== 'function') return baseInterval;
     return getPhasedInterval(boss, baseInterval, 170, 260);

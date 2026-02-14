@@ -2,6 +2,7 @@
 // file: js/entities/player/playerSupport.js
 // ------------------------
 
+// Activates a smart bomb, clearing nearby threats and consuming one bomb charge.
 function useSmartBomb(scene) {
     const { enemies, enemyProjectiles, audioManager } = scene;
     if (!enemies || !enemyProjectiles) return;
@@ -31,6 +32,7 @@ function useSmartBomb(scene) {
     });
 }
 
+// Performs a hyperspace jump to a random safe position with audiovisual feedback.
 function useHyperspace(scene) {
     const { particleManager, audioManager } = scene;
     const player = getActivePlayer(scene);
@@ -45,6 +47,7 @@ function useHyperspace(scene) {
     if (audioManager) audioManager.playSound('hyperspace');
 }
 
+// Updates active player drone orbiting/targeting behavior and drone firing cadence.
 function updateDrones(scene, time) {
     const { drones } = scene;
     const player = getActivePlayer(scene);

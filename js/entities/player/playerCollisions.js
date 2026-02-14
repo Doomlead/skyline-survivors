@@ -2,6 +2,7 @@
 // file: js/entities/player/playerCollisions.js
 // ------------------------
 
+// Resolves direct player-to-enemy collisions, accounting for invincibility/shield and death handling.
 function playerHitEnemy(playerSprite, enemy) {
     const audioManager = this.audioManager;
     if (playerState.powerUps.invincibility > 0) {
@@ -19,6 +20,7 @@ function playerHitEnemy(playerSprite, enemy) {
     }
 }
 
+// Resolves player hits from enemy projectiles, applying shield/invincibility or death outcomes.
 function playerHitProjectile(playerSprite, projectile) {
     const audioManager = this.audioManager;
     if (playerState.powerUps.invincibility > 0) {
@@ -37,6 +39,7 @@ function playerHitProjectile(playerSprite, projectile) {
     }
 }
 
+// Handles drone collision with enemies by consuming the drone and triggering impact effects.
 function droneHitEnemy(drone, enemy) {
     if (!drone || !drone.active) return;
     createExplosion(this, drone.x, drone.y, 0x22d3ee);
@@ -44,6 +47,7 @@ function droneHitEnemy(drone, enemy) {
     playerState.powerUps.drone = Math.max((playerState.powerUps.drone || 0) - 1, 0);
 }
 
+// Handles drone interception of projectiles, destroying both projectile and drone.
 function droneHitProjectile(drone, projectile) {
     if (!drone || !drone.active) return;
     if (projectile && projectile.active) {
@@ -54,6 +58,7 @@ function droneHitProjectile(drone, projectile) {
     playerState.powerUps.drone = Math.max((playerState.powerUps.drone || 0) - 1, 0);
 }
 
+// Handles body-blocking operative projectile interceptions with stun/damage and possible operative death.
 function operativeHitProjectile(operative, projectile) {
     const scene = this;
     if (!operative || !operative.active || !projectile || !projectile.active) return;

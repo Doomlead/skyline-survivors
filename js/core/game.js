@@ -8,6 +8,7 @@ let gameSceneInitialized = false;
 // Store canonical positions separately from render positions
 // This is the key to making wrap-around work properly
 
+// Initializes a new run by spawning humans/enemies and setting up mode-specific objectives and UI.
 function initializeGame(scene) {
     for (let i = 0; i < gameState.humans; i++) {
         spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
@@ -33,6 +34,7 @@ function initializeGame(scene) {
     updateUI(scene);
 }
 
+// Binds gameplay actions to the current user-configured keyboard mappings on the active scene.
 function applyKeyBindings(scene) {
     const bindings = userSettings.keyBindings || DEFAULT_KEY_BINDINGS;
     const keyCodes = Phaser.Input.Keyboard.KeyCodes;
@@ -76,10 +78,12 @@ function applyKeyBindings(scene) {
     scene.switchPrimaryKey = boundKeys.switchPrimary;
 }
 
+// Preloads runtime-generated graphics assets used by the main game scene.
 function preload() {
     createGraphics(this);
 }
 
+// Displays a temporary on-screen banner for rebuild objective status updates.
 function showRebuildObjectiveBanner(scene, message, color = '#66ccff') {
     if (!scene) return;
     const banner = scene.add.text(
@@ -105,6 +109,7 @@ function showRebuildObjectiveBanner(scene, message, color = '#66ccff') {
     });
 }
 
+// Displays a temporary banner summarizing applied supply-drop bonuses at mission start.
 function showSupplyDropBanner(scene, message, color = '#38bdf8') {
     if (!scene || !message) return;
     const scale = typeof getOverlayScale === 'function' ? getOverlayScale(scene) : 1;
@@ -132,6 +137,7 @@ function showSupplyDropBanner(scene, message, color = '#38bdf8') {
     });
 }
 
+// Creates the hangar rebuild objective HUD text container if it has not been created yet.
 function initHangarRebuildUi(scene) {
     if (!scene || scene.hangarRebuildUi) return;
     const rebuildText = scene.add.text(0, 0, '', {
@@ -149,6 +155,7 @@ function initHangarRebuildUi(scene) {
     };
 }
 
+// Updates visibility and content of hangar rebuild HUD instructions based on current objective state.
 function updateHangarRebuildUi(scene) {
     if (!scene || !scene.hangarRebuildUi) return;
     const ui = scene.hangarRebuildUi;
@@ -187,6 +194,7 @@ function updateHangarRebuildUi(scene) {
     ui.text.setVisible(true);
 }
 
+// Spawns and configures the extraction dropship encounter for rebuild objectives.
 function spawnExtractionDropship(scene, objective) {
     const spawnOffset = Math.random() < 0.5 ? -260 : 260;
     const spawnX = wrapValue(objective.extractionX + spawnOffset, CONFIG.worldWidth);
@@ -203,6 +211,7 @@ function spawnExtractionDropship(scene, objective) {
     return dropShip;
 }
 
+// Respawns the AEGIS at the extraction point and transfers control from pilot back to ship.
 function rebuildAegisAtExtraction(scene, objective) {
     if (!scene.aegis || !scene.pilot) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
@@ -228,12 +237,14 @@ function rebuildAegisAtExtraction(scene, objective) {
     showRebuildObjectiveBanner(scene, 'Aegis rebuilt - return to battle', '#66ff88');
 }
 
+// Adds recovered alien tech progress toward station-branch rebuild objectives.
 function addAlienTechToRebuildObjective(amount = 1) {
     const objective = gameState.rebuildObjective;
     if (!objective || !objective.active || objective.branch !== 'station') return;
     objective.collectedAlienTech += amount;
 }
 
+// Advances rebuild objective stages, encounter flow, and completion timing each frame.
 function updateRebuildObjective(scene, delta) {
     const objective = gameState.rebuildObjective;
     if (!objective || !objective.active) return;
@@ -265,6 +276,7 @@ function updateRebuildObjective(scene, delta) {
 }
 
 
+// Creates the main gameplay scene, entities, systems, collisions, and startup state.
 function create() {
     if (window.DistrictLayoutManager) {
         DistrictLayoutManager.switchToGameLayout();
@@ -425,6 +437,7 @@ function create() {
     }
 }
 
+// Runs the main per-frame gameplay loop including simulation, camera, spawning, and UI updates.
 function update(time, delta) {
     const { particleManager } = this;
     const player = getActivePlayer(this);

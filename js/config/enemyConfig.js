@@ -205,14 +205,17 @@ const ENEMY_TYPES = [
     'shielder', 'bouncer', 'sniper', 'swarmLeader', 'regenerator'
 ];
 
+// Returns base hit points for a standard enemy type.
 function getEnemyHP(type) {
     return ENEMY_HP_VALUES[type] || 1;
 }
 
+// Returns score awarded when the specified enemy type is destroyed.
 function getEnemyScore(type) {
     return ENEMY_SCORE_VALUES[type] || 100;
 }
 
+// Returns display scale for an enemy type, falling back to the default scale profile.
 function getEnemyScale(type) {
     return ENEMY_SCALE_VALUES[type] || ENEMY_SCALE_VALUES.default;
 }

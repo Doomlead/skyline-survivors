@@ -2,15 +2,18 @@
 // file: js/entities/player/playerCore.js
 // ------------------------
 
+// Returns the currently active controllable avatar (AEGIS when active, otherwise pilot).
 function getActivePlayer(scene) {
     return aegisState.active ? scene.aegis : scene.pilot;
 }
 
+// Synchronizes scene.player reference with whichever avatar is currently active.
 function syncActivePlayer(scene) {
     scene.player = getActivePlayer(scene);
     return scene.player;
 }
 
+// Switches AEGIS mode/state and updates sprite/physics profile for the selected mode.
 function setAegisMode(scene, mode) {
     aegisState.mode = mode;
     const texture = mode === 'bulwark' ? 'aegis_bulwark' : 'aegis_interceptor';
@@ -24,6 +27,7 @@ function setAegisMode(scene, mode) {
     }
 }
 
+// Transfers control from AEGIS to pilot and positions the pilot for on-foot gameplay.
 function ejectPilot(scene) {
     if (!scene.aegis || !scene.pilot || !aegisState.active) return;
     aegisState.active = false;
@@ -44,6 +48,7 @@ function ejectPilot(scene) {
     syncActivePlayer(scene);
 }
 
+// Re-enters AEGIS from pilot state when conditions allow, restoring ship control.
 function enterAegis(scene) {
     if (!scene.aegis || !scene.pilot || !pilotState.active) return;
     if (gameState.mothershipObjective?.shipLocked) return;
@@ -65,6 +70,7 @@ function enterAegis(scene) {
     syncActivePlayer(scene);
 }
 
+// Handles player death flow including lives/state updates, respawn, and game-over transition.
 function playerDie(scene) {
     const { particleManager, audioManager, drones } = scene;
     const player = getActivePlayer(scene);

@@ -2,6 +2,7 @@
 // file: js/entities/player/playerControls.js
 // ------------------------
 
+// Main per-frame player input/movement/combat update for AEGIS and pilot control states.
 function updatePlayer(scene, time, delta) {
     const {
         aegis,
@@ -240,6 +241,7 @@ function updatePlayer(scene, time, delta) {
     }
 }
 
+// Computes pilot aim direction from movement inputs and grounded state.
 function getPilotAimAngle(left, right, up, down, grounded) {
     let aimX = 0;
     let aimY = 0;
@@ -257,6 +259,7 @@ function getPilotAimAngle(left, right, up, down, grounded) {
     return Math.atan2(aimY, aimX);
 }
 
+// Computes bulwark firing angle from directional inputs with fallback to facing direction.
 function getBulwarkAimAngle(left, right, up, down) {
     const aimX = (left ? -1 : 0) + (right ? 1 : 0);
     const aimY = (up ? -1 : 0) + (down ? 1 : 0);

@@ -33,6 +33,7 @@ document.addEventListener('fullscreenchange', () => {
 let lastResizeWidth = 0;
 let lastResizeHeight = 0;
 
+// Resizes the Phaser canvas for district, fullscreen, or standard layouts while avoiding redundant work.
 function applyResponsiveResize(options = {}) {
     const { force = false } = options;
     
@@ -124,6 +125,7 @@ function applyResponsiveResize(options = {}) {
 // Touch controls wiring
 // ------------------------
 
+// Wires touch-button pointer events into shared virtual input flags and bomb activation behavior.
 (function setupTouchControls() {
     const buttons = document.querySelectorAll('#touch-controls .tc-btn');
     function setFlag(btn, isDown) {

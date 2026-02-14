@@ -2,6 +2,7 @@
 // Garrison Defender AI Behaviors and Update Functions
 // ------------------------
 
+// Updates rifle defender patrol sway and standard firing cadence.
 function updateGarrisonRifleBehavior(scene, defender, time, timeSlowMultiplier) {
     if (!defender.homeX) {
         defender.homeX = defender.x;
@@ -18,6 +19,7 @@ function updateGarrisonRifleBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
+// Updates shield defender support movement, ally healing pulses, and suppressive fire.
 function updateGarrisonShieldBehavior(scene, defender, time, timeSlowMultiplier) {
     const allies = scene.garrisonDefenders;
     if (!allies) return;
@@ -59,6 +61,7 @@ function updateGarrisonShieldBehavior(scene, defender, time, timeSlowMultiplier)
     }
 }
 
+// Updates heavy defender spacing from player and fires tri-shot spreads on cooldown.
 function updateGarrisonHeavyBehavior(scene, defender, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -82,6 +85,7 @@ function updateGarrisonHeavyBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
+// Updates sniper repositioning state and long-cooldown precision shots.
 function updateGarrisonSniperBehavior(scene, defender, time, delta, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -102,6 +106,7 @@ function updateGarrisonSniperBehavior(scene, defender, time, delta, timeSlowMult
     }
 }
 
+// Updates medic target selection, ally healing behavior, and backup offense.
 function updateGarrisonMedicBehavior(scene, defender, time, timeSlowMultiplier) {
     const allies = scene.garrisonDefenders;
     if (!allies) return;
@@ -142,6 +147,7 @@ function updateGarrisonMedicBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
+// Updates engineer hover/wobble patrol and periodic fire support.
 function updateGarrisonEngineerBehavior(scene, defender, time, timeSlowMultiplier) {
     if (!defender.homeX) {
         defender.homeX = defender.x;
@@ -157,6 +163,7 @@ function updateGarrisonEngineerBehavior(scene, defender, time, timeSlowMultiplie
     }
 }
 
+// Updates jetpack defender aerial strafing and fast projectile attack timing.
 function updateGarrisonJetpackBehavior(scene, defender, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -174,6 +181,7 @@ function updateGarrisonJetpackBehavior(scene, defender, time, timeSlowMultiplier
     }
 }
 
+// Updates drone defender orbit/chase behavior and rapid-fire pressure.
 function updateGarrisonDroneBehavior(scene, defender, time, timeSlowMultiplier) {
     if (!defender.orbitAngle) defender.orbitAngle = Math.random() * Math.PI * 2;
     if (!defender.homeX) {
@@ -191,6 +199,7 @@ function updateGarrisonDroneBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
+// Updates walker defender grounded advance behavior and heavy shot cadence.
 function updateGarrisonWalkerBehavior(scene, defender, time, timeSlowMultiplier) {
     if (!defender.walkDirection) defender.walkDirection = Math.random() < 0.5 ? -1 : 1;
     defender.setVelocityX(70 * defender.walkDirection * timeSlowMultiplier);
@@ -205,6 +214,7 @@ function updateGarrisonWalkerBehavior(scene, defender, time, timeSlowMultiplier)
     }
 }
 
+// Updates hound defender aggressive pursuit and close-range firing rhythm.
 function updateGarrisonHoundBehavior(scene, defender, time, timeSlowMultiplier) {
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -220,6 +230,7 @@ function updateGarrisonHoundBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
+// Main per-frame update loop that dispatches behavior logic for each active garrison defender.
 function updateGarrisonDefenders(scene, time, delta) {
     const { garrisonDefenders } = scene;
     if (!garrisonDefenders) return;

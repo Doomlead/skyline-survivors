@@ -3,6 +3,7 @@
 // Includes Phase 1 (exterior boss) and Phase 2 (interior on-foot assault)
 // 
 
+// Initializes phase/state metadata unique to the mothership core boss encounter.
 function initializeMothershipCore(boss) {
     if (!boss) return;
     boss.corePhase = 0;
@@ -16,6 +17,7 @@ function initializeMothershipCore(boss) {
     }
 }
 
+// Returns the world position used for mothership breach/transition cinematics.
 function getMothershipBreachPosition(scene) {
     const worldWidth = CONFIG.worldWidth;
     const groundLevel = scene?.groundLevel ?? CONFIG.worldHeight - 80;
@@ -24,6 +26,7 @@ function getMothershipBreachPosition(scene) {
     return { x: breachX, y: breachY };
 }
 
+// Configures and starts the mothership exterior encounter and objective tracking.
 function setupMothershipEncounter(scene) {
     if (!scene) return;
     const objective = gameState.mothershipObjective;
@@ -74,6 +77,7 @@ function setupMothershipEncounter(scene) {
     showRebuildObjectiveBanner(scene, 'FINAL ASSAULT: DESTROY THE MOTHERSHIP CORE', '#38bdf8');
 }
 
+// Advances mothership objective state machine across exterior and interior phases.
 function updateMothershipEncounter(scene, delta) {
     const objective = gameState.mothershipObjective;
     if (!objective?.active) return;
@@ -118,6 +122,7 @@ function updateMothershipEncounter(scene, delta) {
 // PHASE 2 - INTERIOR ENCOUNTER
 // ═══════════════════════════════════════════════════════════════════════
 
+// Handles exterior core defeat flow and begins the interior transition sequence.
 function handleMothershipCoreDefeat(scene) {
     const objective = gameState.mothershipObjective;
     if (!objective) {
@@ -149,6 +154,7 @@ function handleMothershipCoreDefeat(scene) {
     });
 }
 
+// Transitions gameplay into interior phase: clears exterior, swaps bg, and spawns objectives.
 function beginMothershipInterior(scene) {
     const objective = gameState.mothershipObjective;
     if (!objective) return;
@@ -175,6 +181,7 @@ function beginMothershipInterior(scene) {
     showRebuildObjectiveBanner(scene, 'INTERIOR BREACH\nDestroy all power conduits and security nodes', '#ff00ff');
 }
 
+// Removes exterior enemies/projectiles/objects before entering mothership interior phase.
 function clearExteriorEntities(scene) {
     // Destroy all active enemies
     if (scene.enemies) {
@@ -228,6 +235,7 @@ function clearExteriorEntities(scene) {
     }
 }
 
+// Rebuilds parallax/background layers for mothership interior presentation.
 function swapToInteriorBackground(scene) {
     // Destroy existing parallax layers
     destroyParallax();
@@ -244,6 +252,7 @@ function swapToInteriorBackground(scene) {
     console.log('[MothershipCore] Background swapped to mothership_interior');
 }
 
+// Forces player into pilot-only state and locks AEGIS for interior phase gameplay.
 function forceOnFoot(scene) {
     const objective = gameState.mothershipObjective;
 
@@ -291,6 +300,7 @@ function forceOnFoot(scene) {
     }
 }
 
+// Spawns interior conduits/security nodes and seeds initial defender waves.
 function spawnInteriorObjectives(scene) {
     const objective = gameState.mothershipObjective;
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
@@ -343,6 +353,7 @@ function spawnInteriorObjectives(scene) {
     spawnInteriorDefenders(scene, 4);
 }
 
+// Creates one interior objective target entity with role-specific metadata and stats.
 function createInteriorComponent(scene, x, y, texture, role, hp) {
     const component = scene.assaultTargets.create(x, y, texture);
     component.setDepth(FG_DEPTH_BASE + 3);
@@ -357,6 +368,7 @@ function createInteriorComponent(scene, x, y, texture, role, hp) {
     return component;
 }
 
+// Spawns a batch of interior defender enemies near the current camera region.
 function spawnInteriorDefenders(scene, count) {
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
     const camX = scene.cameras.main ? scene.cameras.main.scrollX : 0;
@@ -372,6 +384,7 @@ function spawnInteriorDefenders(scene, count) {
     }
 }
 
+// Spawns the interior reactor core chamber once prerequisite interior targets are cleared.
 function spawnCoreChamber(scene) {
     const objective = gameState.mothershipObjective;
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
@@ -401,6 +414,7 @@ function spawnCoreChamber(scene) {
     spawnInteriorDefenders(scene, 3);
 }
 
+// Updates interior objective UI, reinforcement cadence, and interior turret firing.
 function updateMothershipInterior(scene, delta) {
     const objective = gameState.mothershipObjective;
     if (!objective || !objective.interiorPhase) return;
@@ -480,6 +494,7 @@ function updateMothershipInterior(scene, delta) {
     }
 }
 
+// Fires one aimed projectile from an interior target turret toward the active player.
 function fireInteriorTurret(scene, turret) {
     if (!scene || !turret || !turret.active) return;
     const player = getActivePlayer(scene);
@@ -510,6 +525,7 @@ function fireInteriorTurret(scene, turret) {
     });
 }
 
+// Handles damage/destruction logic for interior targets and win condition on core kill.
 function hitInteriorTarget(projectile, target) {
     const objective = gameState.mothershipObjective;
     if (!objective || !objective.interiorPhase || !target.active || !target.interiorTarget) {

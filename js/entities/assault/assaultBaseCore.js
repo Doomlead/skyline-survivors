@@ -30,6 +30,7 @@ const ASSAULT_BASE_TEXTURES = [
     'assaultBaseDreadnought'
 ];
 
+// Returns the assault base texture variant key based on objective state or random selection.
 function getAssaultBaseTextureKey(objective) {
     if (objective?.baseVariant && ASSAULT_BASE_TEXTURES.includes(objective.baseVariant)) {
         return objective.baseVariant;
@@ -37,6 +38,7 @@ function getAssaultBaseTextureKey(objective) {
     return Phaser.Utils.Array.GetRandom(ASSAULT_BASE_TEXTURES);
 }
 
+// Creates a static assault objective component (base/turret/shield) with role metadata and HP.
 function createAssaultComponent(scene, x, y, texture, role, hp) {
     const component = scene.assaultTargets.create(x, y, texture);
     component.setDepth(FG_DEPTH_BASE + 2);
@@ -50,6 +52,7 @@ function createAssaultComponent(scene, x, y, texture, role, hp) {
     return component;
 }
 
+// Returns whether active assault shields are currently blocking direct base damage.
 function isAssaultShieldBlocking(scene) {
     const objective = gameState.assaultObjective;
     if (!objective || objective.shieldsRemaining <= 0) return false;
@@ -65,6 +68,7 @@ function isAssaultShieldBlocking(scene) {
     return blocking;
 }
 
+// Spawns shield generator components for the current assault objective shield stage.
 function spawnAssaultShieldGenerators(scene, objective) {
     const baseX = objective?.baseX || CONFIG.worldWidth * 0.5;
     const base = scene.assaultBase;
@@ -79,6 +83,7 @@ function spawnAssaultShieldGenerators(scene, objective) {
     }
 }
 
+// Initializes and spawns the full assault mission objective structure and defender forces.
 function setupAssaultObjective(scene) {
     if (!scene || !scene.assaultTargets) return;
     const objective = gameState.assaultObjective;
@@ -122,6 +127,7 @@ function setupAssaultObjective(scene) {
     spawnAssaultDefenders(scene, baseX);
 }
 
+// Handles projectile damage against assault targets, including shields, turret/base deaths, and scoring.
 function hitAssaultTarget(projectile, target) {
     const mothershipObjective = gameState.mothershipObjective;
     if (target?.assaultRole && typeof target.assaultRole === 'string' && target.assaultRole.indexOf('interior_') === 0) {

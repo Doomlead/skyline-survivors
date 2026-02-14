@@ -4,6 +4,7 @@
 // ------------------------
 
 // Ghost sprites for entities that need to appear on both sides of the wrap boundary
+// Returns the per-scene ghost-sprite registry used for wrap-around visual duplication.
 function getGhostSprites(scene) {
     if (!scene.ghostSprites) {
         scene.ghostSprites = new Map();
@@ -11,6 +12,7 @@ function getGhostSprites(scene) {
     return scene.ghostSprites;
 }
 
+// Normalizes an x-coordinate into the wrapped world range [0, worldWidth).
 function wrapValue(x, worldWidth) {
     x = x % worldWidth;
     if (x < 0) x += worldWidth;
@@ -18,6 +20,7 @@ function wrapValue(x, worldWidth) {
 }
 
 // Calculate shortest distance between two points in a wrapped world
+// Computes the shortest signed horizontal distance between two x values in a wrapped world.
 function wrappedDistance(x1, x2, worldWidth) {
     const direct = x2 - x1;
     const wrapped = direct > 0 ? direct - worldWidth : direct + worldWidth;
@@ -25,6 +28,7 @@ function wrappedDistance(x1, x2, worldWidth) {
 }
 
 // Get the render X position for an entity relative to camera
+// Computes the nearest render-space x-position for an entity relative to camera center with wrap logic.
 function getRenderX(entityX, cameraX, worldWidth) {
     // entityX should be canonical (0 to worldWidth)
     // cameraX is the camera scrollX
@@ -46,6 +50,7 @@ function getRenderX(entityX, cameraX, worldWidth) {
 }
 
 // Create or update a ghost sprite for an entity near the boundary
+// Creates or updates an entity ghost sprite so objects remain visible across world boundaries.
 function updateGhostSprite(scene, entity, ghostX) {
     const ghostSprites = getGhostSprites(scene);
     let ghost = ghostSprites.get(entity);
@@ -77,6 +82,7 @@ function updateGhostSprite(scene, entity, ghostX) {
     }
 }
 
+// Destroys and unregisters a ghost sprite associated with the provided source entity.
 function removeGhostSprite(scene, entity) {
     const ghostSprites = getGhostSprites(scene);
     const ghost = ghostSprites.get(entity);
@@ -87,6 +93,7 @@ function removeGhostSprite(scene, entity) {
 }
 
 // Main function to handle entity visibility across wrap boundaries
+// Canonicalizes entity x-positions and maintains ghost sprites for cross-boundary visibility.
 function updateEntityWrapping(scene) {
     const {
         player,
@@ -196,6 +203,7 @@ function updateEntityWrapping(scene) {
 }
 
 // Clean up all ghost sprites
+// Destroys all ghost sprites tracked for a scene during teardown or reset.
 function destroyAllGhosts(scene) {
     const ghostSprites = getGhostSprites(scene);
     ghostSprites.forEach((ghost) => {

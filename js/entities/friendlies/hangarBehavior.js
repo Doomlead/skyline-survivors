@@ -13,6 +13,7 @@ const HANGAR_REBUILD_CONFIG = {
     pulseRange: 0.2
 };
 
+// Returns whether the active player is inside the cargo drop-off zone above a hangar.
 function isPlayerOverHangar(scene, hangar) {
     const player = getActivePlayer(scene);
     if (!player || !hangar) return false;
@@ -25,6 +26,7 @@ function isPlayerOverHangar(scene, hangar) {
         && Math.abs(dy) <= HANGAR_DROP_OFF_CONFIG.yRange;
 }
 
+// Converts carried cargo into deployed operatives, score, effects, and combo progress at a hangar.
 function dropOffCargo(scene, hangar) {
     const { audioManager } = scene;
     const cargoCount = window.ShipController?.cargo ?? 0;
@@ -68,6 +70,7 @@ function dropOffCargo(scene, hangar) {
     }
 }
 
+// Returns whether the active player is standing within a hangar landing-zone footprint.
 function isPlayerOnLandingZone(scene, landingZone) {
     const player = getActivePlayer(scene);
     if (!player || !landingZone) return false;
@@ -81,6 +84,7 @@ function isPlayerOnLandingZone(scene, landingZone) {
     return Math.abs(dx) <= xRange && Math.abs(dy) <= yRange;
 }
 
+// Advances hangar-based AEGIS rebuild progress while the pilot stays on the landing zone.
 function handleHangarRebuild(scene, hangar, delta) {
     const objective = gameState.rebuildObjective;
     if (gameState.mothershipObjective?.shipLocked) return;
@@ -108,6 +112,7 @@ function handleHangarRebuild(scene, hangar, delta) {
     objective.shipReturned = true;
 }
 
+// Updates hangar visuals and processes cargo drop-off plus rebuild interactions each frame.
 function updateHangars(scene, time, delta) {
     const { friendlies } = scene;
     if (!friendlies || !friendlies.children) return;
