@@ -2,7 +2,7 @@
 // Enemy Graphics - Original (Drone, Bomber)
 // ------------------------
 
-function createDroneGraphics(scene) {
+function createDroneGraphics(scene) { // Create drone graphics.
     // ========================
     // DRONE - Patrol Orb
     // ========================
@@ -94,7 +94,7 @@ function createDroneGraphics(scene) {
     droneGraphics.destroy();
 }
 
-function createBomberGraphics(scene) {
+function createBomberGraphics(scene) { // Create bomber graphics.
     // ========================
     // BOMBER - Heavy Ordnance Dropper
     // ========================

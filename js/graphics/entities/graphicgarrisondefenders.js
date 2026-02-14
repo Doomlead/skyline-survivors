@@ -2,7 +2,7 @@
 // Garrison Defender Graphics - Assault Base Defenders
 // ------------------------
 
-function createGarrisonDefenderGraphics(scene) {
+function createGarrisonDefenderGraphics(scene) { // Create garrison defender graphics.
     // ========================
     // GARRISON RIFLE TROOPER
     // ========================

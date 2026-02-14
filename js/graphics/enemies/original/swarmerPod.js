@@ -2,7 +2,7 @@
 // Enemy Graphics - Original (Swarmer, Pod)
 // ------------------------
 
-function createSwarmerGraphics(scene) {
+function createSwarmerGraphics(scene) { // Create swarmer graphics.
     // ========================
     // SWARMER - Small Fast Attacker
     // ========================
@@ -92,7 +92,7 @@ function createSwarmerGraphics(scene) {
     swarmerGraphics.destroy();
 }
 
-function createPodGraphics(scene) {
+function createPodGraphics(scene) { // Create pod graphics.
     // ========================
     // POD - Swarmer Container
     // ========================

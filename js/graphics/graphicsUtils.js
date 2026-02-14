@@ -1,4 +1,4 @@
-function createHumanGraphics(scene) {
+function createHumanGraphics(scene) { // Create human graphics.
     // ========================
     // HUMAN (8x12 Pixel Art Style)
     // ========================
@@ -35,7 +35,7 @@ function createHumanGraphics(scene) {
     humanGraphics.destroy();
 }
 
-function createPowerUpGraphics(scene) {
+function createPowerUpGraphics(scene) { // Create power up graphics.
     const powerUpColors = {
         laser:      0x16537e,
         drone:      0xf5578e,
@@ -93,7 +93,7 @@ function createPowerUpGraphics(scene) {
     }
 }
 
-function createUtilityGraphics(scene) {
+function createUtilityGraphics(scene) { // Create utility graphics.
     // ========================
     // FORCE DRONE (Helper Bot)
     // ========================

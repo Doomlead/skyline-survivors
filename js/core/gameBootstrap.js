@@ -33,7 +33,7 @@ document.addEventListener('fullscreenchange', () => {
 let lastResizeWidth = 0;
 let lastResizeHeight = 0;
 
-function applyResponsiveResize(options = {}) {
+function applyResponsiveResize(options = {}) { // Apply responsive resize.
     const { force = false } = options;
     
     // 1. Safety check
@@ -126,7 +126,7 @@ function applyResponsiveResize(options = {}) {
 
 (function setupTouchControls() {
     const buttons = document.querySelectorAll('#touch-controls .tc-btn');
-    function setFlag(btn, isDown) {
+    function setFlag(btn, isDown) { // Set flag.
         const dir = btn.getAttribute('data-dir');
         const action = btn.getAttribute('data-action');
         if (dir) {

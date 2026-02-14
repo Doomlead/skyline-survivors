@@ -2,7 +2,7 @@
 // file js/ui/uiRadar.js Radar rendering
 // ------------------------
 
-function updateRadar(scene) {
+function updateRadar(scene) { // Update radar.
     if (!radarCtx || !scene) return;
     const { enemies, garrisonDefenders, humans, bosses } = scene;
     const player = getActivePlayer(scene);

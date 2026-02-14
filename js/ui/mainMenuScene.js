@@ -3,11 +3,11 @@
 // ------------------------
 
 class MainMenuScene extends Phaser.Scene {
-    constructor() {
+    constructor() { // Constructor.
         super({ key: SCENE_KEYS.menu, active: false });
     }
 
-    create() {
+    create() { // Create.
         const { width, height } = this.scale;
         this.cameras.main.setBackgroundColor('#050912');
 
@@ -22,7 +22,7 @@ class MainMenuScene extends Phaser.Scene {
         });
     }
 
-    createBackdrop(width, height) {
+    createBackdrop(width, height) { // Create backdrop.
         const g = this.add.graphics();
         g.lineStyle(1, 0x0f1f3a, 0.35);
         for (let x = 0; x < width; x += 50) {
@@ -36,7 +36,7 @@ class MainMenuScene extends Phaser.Scene {
         glow.setBlendMode(Phaser.BlendModes.ADD);
     }
 
-    createTitle(width) {
+    createTitle(width) { // Create title.
         const title = this.add.text(width / 2, 80, 'Skyline Survivors', {
             fontFamily: 'Orbitron',
             fontSize: '28px',
@@ -53,7 +53,7 @@ class MainMenuScene extends Phaser.Scene {
         }).setOrigin(0.5);
     }
 
-    createIntroPanel(width, height) {
+    createIntroPanel(width, height) { // Create intro panel.
         const frame = this.add.rectangle(width / 2, height / 2, width * 0.7, height * 0.5, 0x0b1220, 0.8);
         frame.setStrokeStyle(3, 0x1b4f8f, 0.7);
 
@@ -85,7 +85,7 @@ class MainMenuScene extends Phaser.Scene {
         });
     }
 
-    createMenuButton(x, y, label, strokeColor, handler) {
+    createMenuButton(x, y, label, strokeColor, handler) { // Create menu button.
         const button = this.add.rectangle(x, y, 220, 40, 0x0f172a, 0.9)
             .setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(strokeColor).color, 0.8)
             .setInteractive({ useHandCursor: true })

@@ -2,7 +2,7 @@
 // file js/ui/uiHud.js UI HUD handling
 // ------------------------
 
-function createUI(scene) {
+function createUI(scene) { // Create ui.
     scoreEl = document.getElementById('score-el');
     cargoEl = document.getElementById('cargo-el');
     operativesEl = document.getElementById('operatives-el');
@@ -47,19 +47,19 @@ function createUI(scene) {
     }
 }
 
-function updateUI(scene) {
+function updateUI(scene) { // Update ui.
     if (!scoreEl) return;
     const humansGroup = scene?.humans;
     const activeBoss = scene?.bosses?.children?.entries?.find(entry => entry.active && entry.bossType !== 'mothershipCore')
         || scene?.battleships?.children?.entries?.find(entry => entry.active);
 
-    const formatBossName = (name) => {
+    const formatBossName = (name) => { // Format boss name.
         if (!name) return 'Boss Target';
         const spaced = name.replace(/([A-Z])/g, ' $1').replace(/[_-]+/g, ' ');
         return spaced.replace(/\s+/g, ' ').trim().replace(/\b\w/g, char => char.toUpperCase());
     };
 
-    const updateBossHud = (boss) => {
+    const updateBossHud = (boss) => { // Update boss hud.
         if (!bossHudEl) return;
         if (!boss) {
             bossHudEl.classList.add('hidden');

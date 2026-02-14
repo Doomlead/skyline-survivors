@@ -14,13 +14,13 @@ const LANDING_ZONE_CONFIG = {
     baseAlpha: 0.85
 };
 
-function isDefenseMission() {
+function isDefenseMission() { // Is defense mission.
     return gameState.mode !== 'assault'
         && gameState.mode !== 'mothership'
         && gameState.mode !== 'survival';
 }
 
-function spawnDefenseHangar(scene) {
+function spawnDefenseHangar(scene) { // Spawn defense hangar.
     if (!scene || !scene.friendlies || !isDefenseMission()) return null;
 
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
@@ -67,7 +67,7 @@ function spawnDefenseHangar(scene) {
     return hangar;
 }
 
-function setupDefenseHangar(scene) {
+function setupDefenseHangar(scene) { // Setup defense hangar.
     if (scene.hangar && scene.hangar.active) return scene.hangar;
     return spawnDefenseHangar(scene);
 }

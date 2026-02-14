@@ -2,7 +2,7 @@
 // File: js/ui/accessibilityAudioControls.js
 // ------------------------
 
-function getActiveAudioManager() {
+function getActiveAudioManager() { // Get active audio manager.
     const scene = game?.scene?.getScene ? game.scene.getScene(SCENE_KEYS.game) : null;
     return scene?.audioManager || null;
 }
@@ -26,7 +26,7 @@ if (muteButton) {
 // Accessibility + volume wiring (main menu panel)
 // ------------------------
 
-function wireAccessibilityPanel() {
+function wireAccessibilityPanel() { // Wire accessibility panel.
     const musicSlider = document.getElementById('music-volume-slider');
     const sfxSlider = document.getElementById('sfx-volume-slider');
     const flashToggle = document.getElementById('reduce-flash-toggle');
@@ -35,7 +35,7 @@ function wireAccessibilityPanel() {
     const flashLabel = document.getElementById('reduce-flash-label');
 
     if (musicSlider && musicLabel) {
-        const applyMusic = (value) => {
+        const applyMusic = (value) => { // Apply music.
             musicLabel.textContent = `${Math.round(value * 100)}%`;
             const audioManager = getActiveAudioManager();
             if (audioManager) audioManager.setMusicVolume(value);
@@ -53,7 +53,7 @@ function wireAccessibilityPanel() {
     }
 
     if (sfxSlider && sfxLabel) {
-        const applySfx = (value) => {
+        const applySfx = (value) => { // Apply sfx.
             sfxLabel.textContent = `${Math.round(value * 100)}%`;
             const audioManager = getActiveAudioManager();
             if (audioManager) audioManager.setSFXVolume(value);

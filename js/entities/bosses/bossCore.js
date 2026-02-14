@@ -2,7 +2,7 @@
 // File: js/entities/bosses/bossCore.js
 // ------------------------
 
-function createBossTrail(scene, boss) {
+function createBossTrail(scene, boss) { // Create boss trail.
     if (!scene || !boss) return;
     if (boss.bossType === 'fortressTurret' || boss.bossType === 'mothershipCore') return;
 
@@ -35,7 +35,7 @@ function createBossTrail(scene, boss) {
     });
 }
 
-function initializeBossQueue() {
+function initializeBossQueue() { // Initialize boss queue.
     const pool = BOSS_TYPES.filter(type => type !== 'mothershipCore');
     const queue = [];
 
@@ -48,7 +48,7 @@ function initializeBossQueue() {
     gameState.bossesDefeated = 0;
 }
 
-function getSafeBossSpawnPosition(scene, desiredX, desiredY, bossType) {
+function getSafeBossSpawnPosition(scene, desiredX, desiredY, bossType) { // Get safe boss spawn position.
     const player = getActivePlayer(scene);
     if (!player) return { x: desiredX, y: desiredY };
 
@@ -82,13 +82,13 @@ function getSafeBossSpawnPosition(scene, desiredX, desiredY, bossType) {
     return bestCandidate;
 }
 
-function applyBossDamage(boss, rawDamage) {
+function applyBossDamage(boss, rawDamage) { // Apply boss damage.
     const damage = rawDamage || 1;
     const reduction = typeof BOSS_DAMAGE_REDUCTION === 'number' ? BOSS_DAMAGE_REDUCTION : 0;
     return Math.max(0.1, damage * (1 - reduction));
 }
 
-function spawnBoss(scene, type, x, y) {
+function spawnBoss(scene, type, x, y) { // Spawn boss.
     const { bosses, audioManager } = scene;
     if (!bosses) return null;
     const safeSpawn = getSafeBossSpawnPosition(scene, x, y, type);
@@ -153,14 +153,14 @@ function spawnBoss(scene, type, x, y) {
     return boss;
 }
 
-function getNextBossType() {
+function getNextBossType() { // Get next boss type.
     if (!gameState.bossQueue) {
         initializeBossQueue();
     }
     return gameState.bossQueue.shift();
 }
 
-function startBossEncounter(scene, triggerInfo = {}) {
+function startBossEncounter(scene, triggerInfo = {}) { // Start boss encounter.
     if (gameState.bossActive) return null;
 
     const bossType = getNextBossType();
@@ -206,7 +206,7 @@ function startBossEncounter(scene, triggerInfo = {}) {
     return spawnBoss(scene, bossType, spawnX, spawnY);
 }
 
-function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngle) {
+function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngle) { // Shoot from boss source.
     const { enemyProjectiles, audioManager } = scene;
     const player = getActivePlayer(scene);
     if (!player || !enemyProjectiles) return;
@@ -258,7 +258,7 @@ function shootFromBossSource(scene, sourceX, sourceY, boss, shotConfig, fireAngl
     });
 }
 
-function hitBoss(projectile, boss) {
+function hitBoss(projectile, boss) { // Hit boss.
     const scene = projectile.scene;
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
@@ -333,7 +333,7 @@ function hitBoss(projectile, boss) {
     }
 }
 
-function playerHitBoss(playerSprite, boss) {
+function playerHitBoss(playerSprite, boss) { // Player hit boss.
     const scene = boss.scene;
     const audioManager = scene.audioManager;
 
@@ -361,7 +361,7 @@ function playerHitBoss(playerSprite, boss) {
     }
 }
 
-function destroyBoss(scene, boss) {
+function destroyBoss(scene, boss) { // Destroy boss.
     const { bosses, enemies } = scene;
     if (!bosses) return;
 
@@ -458,7 +458,7 @@ function destroyBoss(scene, boss) {
     });
 }
 
-function completeBossWave(scene) {
+function completeBossWave(scene) { // Complete boss wave.
     const audioManager = scene.audioManager;
     const completedWave = gameState.wave;
     const bossReward = getMissionScaledReward(3000);
@@ -506,7 +506,7 @@ function completeBossWave(scene) {
     });
 }
 
-function hitBossProjectile(playerSprite, projectile) {
+function hitBossProjectile(playerSprite, projectile) { // Hit boss projectile.
     const audioManager = this.audioManager;
 
     if (playerState.powerUps.invincibility > 0) {
@@ -526,7 +526,7 @@ function hitBossProjectile(playerSprite, projectile) {
     }
 }
 
-function checkSurvivalBosses(scene) {
+function checkSurvivalBosses(scene) { // Check survival bosses.
     if (gameState.mode !== 'survival' || gameState.bossActive) return;
 
     const elapsed = gameState.totalSurvivalDuration - gameState.timeRemaining;

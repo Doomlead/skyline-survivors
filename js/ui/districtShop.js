@@ -7,7 +7,7 @@ const DistrictShop = (function() {
     let elements = null;
     let initialized = false;
 
-    function cacheElements() {
+    function cacheElements() { // Cache elements.
         elements = {
             panel: document.getElementById('district-shop-panel'),
             dropOptions: document.getElementById('district-shop-drops'),
@@ -17,7 +17,7 @@ const DistrictShop = (function() {
         return elements;
     }
 
-    function init() {
+    function init() { // Init.
         if (initialized) return;
         cacheElements();
         if (!elements.panel) return;
@@ -25,7 +25,7 @@ const DistrictShop = (function() {
         refresh();
     }
 
-    function refresh() {
+    function refresh() { // Refresh.
         if (!initialized) {
             init();
             if (!initialized) return;
@@ -35,7 +35,7 @@ const DistrictShop = (function() {
         renderLootHistory();
     }
 
-    function renderSupplyDrops() {
+    function renderSupplyDrops() { // Render supply drops.
         const container = elements.dropOptions;
         if (!container) return;
         container.innerHTML = '';
@@ -94,7 +94,7 @@ const DistrictShop = (function() {
         });
     }
 
-    function renderPendingDrop() {
+    function renderPendingDrop() { // Render pending drop.
         const container = elements.pendingItems;
         if (!container) return;
         container.innerHTML = '';
@@ -158,7 +158,7 @@ const DistrictShop = (function() {
         container.appendChild(warning);
     }
 
-    function renderLootHistory() {
+    function renderLootHistory() { // Render loot history.
         const container = elements.historyPanel;
         if (!container) return;
         container.innerHTML = '';
@@ -204,7 +204,7 @@ const DistrictShop = (function() {
         });
     }
 
-    function getTierColor(tier, alpha = 1) {
+    function getTierColor(tier, alpha = 1) { // Get tier color.
         const colors = {
             tier1: `rgba(148, 163, 184, ${alpha})`, // Gray
             tier2: `rgba(34, 211, 238, ${alpha})`,  // Cyan
@@ -213,7 +213,7 @@ const DistrictShop = (function() {
         return colors[tier] || colors.tier1;
     }
 
-    function buildEmptyRow(message) {
+    function buildEmptyRow(message) { // Build empty row.
         const row = document.createElement('div');
         row.className = 'district-shop-row';
 
@@ -229,7 +229,7 @@ const DistrictShop = (function() {
         return row;
     }
 
-    function purchaseDrop(dropType) {
+    function purchaseDrop(dropType) { // Purchase drop.
         if (!window.metaProgression?.purchaseSupplyDrop) return;
         
         const result = window.metaProgression.purchaseSupplyDrop(dropType);

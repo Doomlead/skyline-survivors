@@ -7,7 +7,7 @@
 // Each boss has a pattern sequence it cycles through. This is the ONLY
 // place boss projectiles are created (except bomb drops which are special).
 
-function initBossAttackState(boss) {
+function initBossAttackState(boss) { // Init boss attack state.
     boss.attackState = {
         sequenceIndex: 0,
         nextAttackTime: 0,
@@ -19,7 +19,7 @@ function initBossAttackState(boss) {
     };
 }
 
-function getCurrentAttackSequence(boss) {
+function getCurrentAttackSequence(boss) { // Get current attack sequence.
     const pattern = getBossAttackPattern(boss.bossType);
     if (!pattern) return null;
     const phase = boss.corePhase || 0;
@@ -27,7 +27,7 @@ function getCurrentAttackSequence(boss) {
     return phaseData?.sequence || null;
 }
 
-function fireAttackMove(scene, boss, move, pattern, timeSlowMultiplier) {
+function fireAttackMove(scene, boss, move, pattern, timeSlowMultiplier) { // Fire attack move.
     const { enemyProjectiles, audioManager } = scene;
     if (!enemyProjectiles) return;
 
@@ -149,7 +149,7 @@ function fireAttackMove(scene, boss, move, pattern, timeSlowMultiplier) {
     if (audioManager) audioManager.playSound('enemyShoot');
 }
 
-function updateBossAttackPattern(scene, boss, time, timeSlowMultiplier) {
+function updateBossAttackPattern(scene, boss, time, timeSlowMultiplier) { // Update boss attack pattern.
     if (!boss.attackState) initBossAttackState(boss);
 
     const state = boss.attackState;
@@ -174,7 +174,7 @@ function updateBossAttackPattern(scene, boss, time, timeSlowMultiplier) {
 // ===== MOVEMENT BEHAVIORS =====
 // These ONLY handle movement. No shooting.
 
-function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) { // Update mega lander behavior.
     if (!boss.orbitAngle) boss.orbitAngle = 0;
     const phase = boss.corePhase || 0;
     const orbitSpeed = (0.005 + phase * 0.003) * timeSlowMultiplier;
@@ -189,7 +189,7 @@ function updateMegaLanderBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.setVelocity(0, 0);
 }
 
-function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) { // Update titan mutant behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
     const phase = boss.corePhase || 0;
@@ -208,7 +208,7 @@ function updateTitanMutantBehavior(scene, boss, time, timeSlowMultiplier) {
     );
 }
 
-function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) { // Update hive drone behavior.
     if (!boss.hoverBaseY) boss.hoverBaseY = boss.y;
     const phase = boss.corePhase || 0;
 
@@ -229,7 +229,7 @@ function updateHiveDroneBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.y = boss.hoverBaseY + Math.sin(time * bobSpeed) * bobAmount;
 }
 
-function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultiplier) {
+function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultiplier) { // Update behemoth bomber behavior.
     const phase = boss.corePhase || 0;
     if (!boss.bomberDirection) boss.bomberDirection = Math.random() < 0.5 ? -1 : 1;
 
@@ -249,7 +249,7 @@ function updateBehemothBomberBehavior(scene, boss, time, delta, timeSlowMultipli
     else boss.setVelocityY(Math.sin(time * 0.003) * 10);
 }
 
-function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) { // Update colossal pod behavior.
     const phase = boss.corePhase || 0;
     if (!boss.podPattern) boss.podPattern = 0;
     boss.podPattern += (0.012 + phase * 0.003) * timeSlowMultiplier;
@@ -267,7 +267,7 @@ function updateColossalPodBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.setVelocityX((25 + phase * 5) * boss.driftDir * timeSlowMultiplier);
 }
 
-function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) { // Update leviathan baiter behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
     const phase = boss.corePhase || 0;
@@ -289,7 +289,7 @@ function updateLeviathanBaiterBehavior(scene, boss, time, timeSlowMultiplier) {
     );
 }
 
-function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) { // Update apex kamikaze behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
     const phase = boss.corePhase || 0;
@@ -341,7 +341,7 @@ function updateApexKamikazeBehavior(scene, boss, time, timeSlowMultiplier) {
     }
 }
 
-function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) { // Update fortress turret behavior.
     // Stationary boss
     if (!boss.isPlanted) {
         boss.isPlanted = true;
@@ -354,7 +354,7 @@ function updateFortressTurretBehavior(scene, boss, time, timeSlowMultiplier) {
     boss.rotation += (0.005 + phase * 0.003) * timeSlowMultiplier;
 }
 
-function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) {
+function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) { // Update overlord shield behavior.
     const phase = boss.corePhase || 0;
     if (!boss.orbitAngle) boss.orbitAngle = 0;
     boss.orbitAngle += (0.003 + phase * 0.001) * timeSlowMultiplier;
@@ -371,7 +371,7 @@ function updateOverlordShieldBehavior(scene, boss, time, timeSlowMultiplier) {
 
 // ===== MAIN BOSS UPDATE =====
 
-function updateBosses(scene, time, delta) {
+function updateBosses(scene, time, delta) { // Update bosses.
     const topLimit = 20;
     const { bosses } = scene;
     if (!bosses) return;

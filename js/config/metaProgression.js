@@ -69,7 +69,7 @@ const DEFAULT_META_STATE = {
 
 let metaState = null;
 
-function loadMetaProgression() {
+function loadMetaProgression() { // Load meta progression.
     if (metaState) return metaState;
 
     metaState = { ...DEFAULT_META_STATE };
@@ -92,7 +92,7 @@ function loadMetaProgression() {
     return metaState;
 }
 
-function persistMetaProgression() {
+function persistMetaProgression() { // Persist meta progression.
     if (typeof localStorage === 'undefined' || !metaState) return;
     try {
         localStorage.setItem(META_STORAGE_KEY, JSON.stringify(metaState));
@@ -101,7 +101,7 @@ function persistMetaProgression() {
     }
 }
 
-function getMetaState() {
+function getMetaState() { // Get meta state.
     const state = loadMetaProgression();
     return {
         ...state,
@@ -111,7 +111,7 @@ function getMetaState() {
     };
 }
 
-function addCredits(amount) {
+function addCredits(amount) { // Add credits.
     const state = loadMetaProgression();
     const delta = Number.isFinite(amount) ? amount : 0;
     state.credits = Math.max(0, Math.round((state.credits || 0) + delta));
@@ -119,7 +119,7 @@ function addCredits(amount) {
     return state.credits;
 }
 
-function spendCredits(cost) {
+function spendCredits(cost) { // Spend credits.
     const state = loadMetaProgression();
     const amount = Number.isFinite(cost) ? cost : 0;
     if (amount <= 0) return true;
@@ -129,7 +129,7 @@ function spendCredits(cost) {
     return true;
 }
 
-function calculateRunCredits(outcome) {
+function calculateRunCredits(outcome) { // Calculate run credits.
     const baseScore = Math.max(50, Math.round((outcome.score || 0) / 750));
     const rescueBonus = Math.round((outcome.humansRescued || 0) * 6);
     const urgencyBonus = outcome.directives?.urgency === 'critical'
@@ -143,7 +143,7 @@ function calculateRunCredits(outcome) {
     return Math.max(25, Math.round((baseScore + rescueBonus + successBonus + urgencyBonus + clutchBonus) * rewardScale));
 }
 
-function recordRunOutcome(outcome) {
+function recordRunOutcome(outcome) { // Record run outcome.
     const state = loadMetaProgression();
     const earned = calculateRunCredits(outcome || {});
     addCredits(earned);
@@ -164,7 +164,7 @@ function recordRunOutcome(outcome) {
     return runEntry;
 }
 
-function getShopInventory() {
+function getShopInventory() { // Get shop inventory.
     const state = loadMetaProgression();
     return Object.keys(LOOT_TABLES).map(key => {
         const drop = LOOT_TABLES[key];
@@ -223,7 +223,7 @@ function rollSupplyDrop(dropType) {
     };
 }
 
-function purchaseSupplyDrop(dropType) {
+function purchaseSupplyDrop(dropType) { // Purchase supply drop.
     const state = loadMetaProgression();
     const dropConfig = LOOT_TABLES[dropType];
     
@@ -257,12 +257,12 @@ function purchaseSupplyDrop(dropType) {
     return lootResult;
 }
 
-function getPendingDrop() {
+function getPendingDrop() { // Get pending drop.
     const state = loadMetaProgression();
     return state.pendingDrop;
 }
 
-function applySupplyDropEffects(gameState, playerState) {
+function applySupplyDropEffects(gameState, playerState) { // Apply supply drop effects.
     const state = loadMetaProgression();
     const pending = state.pendingDrop;
     
@@ -340,18 +340,18 @@ function applySupplyDropEffects(gameState, playerState) {
     };
 }
 
-function clearPendingDrop() {
+function clearPendingDrop() { // Clear pending drop.
     const state = loadMetaProgression();
     state.pendingDrop = null;
     persistMetaProgression();
 }
 
-function getLastRunSummary() {
+function getLastRunSummary() { // Get last run summary.
     const state = loadMetaProgression();
     return state.lastRun;
 }
 
-function getLootHistory() {
+function getLootHistory() { // Get loot history.
     const state = loadMetaProgression();
     return state.lootHistory || [];
 }

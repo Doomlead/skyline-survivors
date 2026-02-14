@@ -2,7 +2,7 @@
 // Garrison Defender AI Behaviors and Update Functions
 // ------------------------
 
-function updateGarrisonRifleBehavior(scene, defender, time, timeSlowMultiplier) {
+function updateGarrisonRifleBehavior(scene, defender, time, timeSlowMultiplier) { // Update garrison rifle behavior.
     if (!defender.homeX) {
         defender.homeX = defender.x;
         defender.homeY = defender.y;
@@ -18,7 +18,7 @@ function updateGarrisonRifleBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
-function updateGarrisonShieldBehavior(scene, defender, time, timeSlowMultiplier) {
+function updateGarrisonShieldBehavior(scene, defender, time, timeSlowMultiplier) { // Update garrison shield behavior.
     const allies = scene.garrisonDefenders;
     if (!allies) return;
 
@@ -59,7 +59,7 @@ function updateGarrisonShieldBehavior(scene, defender, time, timeSlowMultiplier)
     }
 }
 
-function updateGarrisonHeavyBehavior(scene, defender, time, timeSlowMultiplier) {
+function updateGarrisonHeavyBehavior(scene, defender, time, timeSlowMultiplier) { // Update garrison heavy behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -82,7 +82,7 @@ function updateGarrisonHeavyBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
-function updateGarrisonSniperBehavior(scene, defender, time, delta, timeSlowMultiplier) {
+function updateGarrisonSniperBehavior(scene, defender, time, delta, timeSlowMultiplier) { // Update garrison sniper behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -102,7 +102,7 @@ function updateGarrisonSniperBehavior(scene, defender, time, delta, timeSlowMult
     }
 }
 
-function updateGarrisonMedicBehavior(scene, defender, time, timeSlowMultiplier) {
+function updateGarrisonMedicBehavior(scene, defender, time, timeSlowMultiplier) { // Update garrison medic behavior.
     const allies = scene.garrisonDefenders;
     if (!allies) return;
 
@@ -142,7 +142,7 @@ function updateGarrisonMedicBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
-function updateGarrisonEngineerBehavior(scene, defender, time, timeSlowMultiplier) {
+function updateGarrisonEngineerBehavior(scene, defender, time, timeSlowMultiplier) { // Update garrison engineer behavior.
     if (!defender.homeX) {
         defender.homeX = defender.x;
         defender.homeY = defender.y;
@@ -157,7 +157,7 @@ function updateGarrisonEngineerBehavior(scene, defender, time, timeSlowMultiplie
     }
 }
 
-function updateGarrisonJetpackBehavior(scene, defender, time, timeSlowMultiplier) {
+function updateGarrisonJetpackBehavior(scene, defender, time, timeSlowMultiplier) { // Update garrison jetpack behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -174,7 +174,7 @@ function updateGarrisonJetpackBehavior(scene, defender, time, timeSlowMultiplier
     }
 }
 
-function updateGarrisonDroneBehavior(scene, defender, time, timeSlowMultiplier) {
+function updateGarrisonDroneBehavior(scene, defender, time, timeSlowMultiplier) { // Update garrison drone behavior.
     if (!defender.orbitAngle) defender.orbitAngle = Math.random() * Math.PI * 2;
     if (!defender.homeX) {
         defender.homeX = defender.x;
@@ -191,7 +191,7 @@ function updateGarrisonDroneBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
-function updateGarrisonWalkerBehavior(scene, defender, time, timeSlowMultiplier) {
+function updateGarrisonWalkerBehavior(scene, defender, time, timeSlowMultiplier) { // Update garrison walker behavior.
     if (!defender.walkDirection) defender.walkDirection = Math.random() < 0.5 ? -1 : 1;
     defender.setVelocityX(70 * defender.walkDirection * timeSlowMultiplier);
 
@@ -205,7 +205,7 @@ function updateGarrisonWalkerBehavior(scene, defender, time, timeSlowMultiplier)
     }
 }
 
-function updateGarrisonHoundBehavior(scene, defender, time, timeSlowMultiplier) {
+function updateGarrisonHoundBehavior(scene, defender, time, timeSlowMultiplier) { // Update garrison hound behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -220,7 +220,7 @@ function updateGarrisonHoundBehavior(scene, defender, time, timeSlowMultiplier) 
     }
 }
 
-function updateGarrisonDefenders(scene, time, delta) {
+function updateGarrisonDefenders(scene, time, delta) { // Update garrison defenders.
     const { garrisonDefenders } = scene;
     if (!garrisonDefenders) return;
 

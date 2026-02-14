@@ -37,7 +37,7 @@ test('destroying a lander frees its targeted human if not yet abducted', () => {
     };
     targetHuman.abductor = enemy;
 
-    const makeTextStub = () => ({
+    const makeTextStub = () => ({ // Make text stub.
         y: 0,
         setOrigin() { return this; },
         setDepth() { return this; },

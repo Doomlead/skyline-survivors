@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGeneratorMothershipExterior = (function() {
-    function BackgroundGeneratorMothershipExterior(scene, config) {
+    function BackgroundGeneratorMothershipExterior(scene, config) { // Background generator mothership exterior.
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();

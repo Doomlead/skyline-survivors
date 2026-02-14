@@ -2,7 +2,7 @@
 // file: js/entities/player/playerWeapons.js
 // ------------------------
 
-function fireWeapon(scene, angleOverride = null) {
+function fireWeapon(scene, angleOverride = null) { // Fire weapon.
     const { projectiles, drones } = scene;
     const player = getActivePlayer(scene);
     if (!player || !projectiles || !drones) return;
@@ -75,7 +75,7 @@ function fireWeapon(scene, angleOverride = null) {
     });
 }
 
-function getLaserConfig(laserTier, hasPiercing) {
+function getLaserConfig(laserTier, hasPiercing) { // Get laser config.
     const basePiercing = hasPiercing > 0 || laserTier >= 1;
     switch (laserTier) {
         case 1:
@@ -88,29 +88,29 @@ function getLaserConfig(laserTier, hasPiercing) {
     }
 }
 
-function getCoverageConfig() {
+function getCoverageConfig() { // Get coverage config.
     return { type: 'normal', piercing: false };
 }
 
-function getPrimaryShotPattern(laserTier, multiShotTier) {
+function getPrimaryShotPattern(laserTier, multiShotTier) { // Get primary shot pattern.
     if (laserTier > 0) {
         return getShotPattern(0);
     }
     return getShotPattern(multiShotTier || 0);
 }
 
-function getCoverageShotPattern() {
+function getCoverageShotPattern() { // Get coverage shot pattern.
     return getShotPattern(0);
 }
 
-function getFireOrigin(player, angle, distance = 25) {
+function getFireOrigin(player, angle, distance = 25) { // Get fire origin.
     return {
         fireX: player.x + Math.cos(angle) * distance,
         fireY: player.y + Math.sin(angle) * distance
     };
 }
 
-function getShotPattern(tier) {
+function getShotPattern(tier) { // Get shot pattern.
     switch (tier) {
         case 1:
             return { mode: 'twin', offsets: [-8, 8] };
@@ -124,7 +124,7 @@ function getShotPattern(tier) {
     }
 }
 
-function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, laserConfig, shotPattern) {
+function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, laserConfig, shotPattern) { // Fire shot pattern.
     if (shotPattern.mode === 'twin') {
         shotPattern.offsets.forEach(offset => {
             const offsetX = Math.cos(baseAngle + Math.PI / 2) * offset;
@@ -157,7 +157,7 @@ function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, lase
     });
 }
 
-function getClusterTargets(scene, originX, originY, count, excludeTarget = null) {
+function getClusterTargets(scene, originX, originY, count, excludeTarget = null) { // Get cluster targets.
     const candidates = [];
     if (scene.enemies) candidates.push(...scene.enemies.children.entries);
     if (scene.garrisonDefenders) candidates.push(...scene.garrisonDefenders.children.entries);
@@ -175,7 +175,7 @@ function getClusterTargets(scene, originX, originY, count, excludeTarget = null)
         .map(entry => entry.target);
 }
 
-function spawnClusterMissiles(scene, projectile, excludeTarget = null) {
+function spawnClusterMissiles(scene, projectile, excludeTarget = null) { // Spawn cluster missiles.
     if (!scene || !projectile) return;
     const clusterCount = 3;
     const originX = projectile.x;
@@ -218,7 +218,7 @@ function spawnClusterMissiles(scene, projectile, excludeTarget = null) {
     });
 }
 
-function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, options = {}) {
+function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, options = {}) { // Create projectile.
     const { projectiles } = scene;
     if (!projectiles) return;
     let proj;
@@ -315,11 +315,11 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     return proj;
 }
 
-function updateProjectiles(scene) {
+function updateProjectiles(scene) { // Update projectiles.
     const { projectiles, enemyProjectiles, enemies, garrisonDefenders, player, particleManager } = scene;
     if (!projectiles || !enemyProjectiles || !player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
-    const destroyIfGrounded = (proj) => {
+    const destroyIfGrounded = (proj) => { // Destroy if grounded.
         const terrainVariation = Math.sin(proj.x / 200) * 30;
         const groundY = groundLevel - terrainVariation - 15;
         if (proj.y >= groundY) {

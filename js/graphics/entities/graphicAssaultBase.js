@@ -3,7 +3,7 @@
 // Aligned with Battleship visual style
 // ------------------------
 
-function createAssaultBaseGraphics(scene) {
+function createAssaultBaseGraphics(scene) { // Create assault base graphics.
     createRaiderAssaultBase(scene);
     createCarrierAssaultBase(scene);
     createNovaAssaultBase(scene);
@@ -11,7 +11,7 @@ function createAssaultBaseGraphics(scene) {
     createDreadnoughtAssaultBase(scene);
 }
 
-function createRaiderAssaultBase(scene) {
+function createRaiderAssaultBase(scene) { // Create raider assault base.
     const baseGraphics = scene.add.graphics();
     const bw = 180;
     const bh = 88;
@@ -56,7 +56,7 @@ function createRaiderAssaultBase(scene) {
     baseGraphics.destroy();
 }
 
-function createCarrierAssaultBase(scene) {
+function createCarrierAssaultBase(scene) { // Create carrier assault base.
     const baseGraphics = scene.add.graphics();
     const bw = 180;
     const bh = 88;
@@ -95,7 +95,7 @@ function createCarrierAssaultBase(scene) {
     baseGraphics.destroy();
 }
 
-function createNovaAssaultBase(scene) {
+function createNovaAssaultBase(scene) { // Create nova assault base.
     const baseGraphics = scene.add.graphics();
     const bw = 180;
     const bh = 88;
@@ -130,7 +130,7 @@ function createNovaAssaultBase(scene) {
     baseGraphics.destroy();
 }
 
-function createSiegeAssaultBase(scene) {
+function createSiegeAssaultBase(scene) { // Create siege assault base.
     const baseGraphics = scene.add.graphics();
     const bw = 180;
     const bh = 88;
@@ -169,7 +169,7 @@ function createSiegeAssaultBase(scene) {
     baseGraphics.destroy();
 }
 
-function createDreadnoughtAssaultBase(scene) {
+function createDreadnoughtAssaultBase(scene) { // Create dreadnought assault base.
     const baseGraphics = scene.add.graphics();
     const bw = 180;
     const bh = 88;

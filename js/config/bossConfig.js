@@ -419,23 +419,23 @@ const BOSS_TYPES = [
     'mothershipCore'
 ];
 
-function getBossHP(type) {
+function getBossHP(type) { // Get boss hp.
     const baseHP = BOSS_HP_VALUES[type] || 20;
     return baseHP * BOSS_HP_MULTIPLIER;
 }
 
-function getBossScore(type) {
+function getBossScore(type) { // Get boss score.
     return BOSS_SCORE_VALUES[type] || 500;
 }
 
-function getBossScale(type) {
+function getBossScale(type) { // Get boss scale.
     return BOSS_SCALE_VALUES[type] || 3.5;
 }
 
-function getBossShotConfig(type) {
+function getBossShotConfig(type) { // Get boss shot config.
     return BOSS_SHOT_CONFIGS[type] || BOSS_SHOT_CONFIGS.megaLander;
 }
 
-function getBossAttackPattern(type) {
+function getBossAttackPattern(type) { // Get boss attack pattern.
     return BOSS_ATTACK_PATTERNS[type] || BOSS_ATTACK_PATTERNS.megaLander;
 }

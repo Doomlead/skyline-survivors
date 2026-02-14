@@ -1,5 +1,5 @@
 class BuildMissionUi {
-    constructor(scene) {
+    constructor(scene) { // Constructor.
         this.scene = scene;
         this.modeButtons = null;
         this.modeButtonRefs = [];
@@ -21,7 +21,7 @@ class BuildMissionUi {
         this.historyContainer = null;
     }
 
-    createOverlay(width) {
+    createOverlay(width) { // Create overlay.
         const header = this.scene.add.text(width / 2, 24, 'District + Supply Drop', {
             fontFamily: 'Orbitron',
             fontSize: '18px',
@@ -42,11 +42,11 @@ class BuildMissionUi {
         });
     }
 
-    createModeButtons(width, selectedMode) {
+    createModeButtons(width, selectedMode) { // Create mode buttons.
         this.modeButtons = this.scene.add.container(width * 0.42, 168);
         this.modeButtonRefs = [];
 
-        const createButton = (offsetX, label, color, mode) => {
+        const createButton = (offsetX, label, color, mode) => { // Create button.
             const rect = this.scene.add.rectangle(offsetX, 0, 150, 38, 0x0f172a, 0.85)
                 .setStrokeStyle(2, color, 0.7)
                 .setInteractive({ useHandCursor: true });
@@ -83,7 +83,7 @@ class BuildMissionUi {
         this.updateModeButtonStyles(selectedMode);
     }
 
-    createDetailBody(width, mapNodes) {
+    createDetailBody(width, mapNodes) { // Create detail body.
         const hasTimedNodes = (typeof missionPlanner !== 'undefined' && missionPlanner.hasMapTimerData()) && mapNodes.some(
             node => (node.state?.timer || 0) > 0);
         const overlayDescription = hasTimedNodes
@@ -99,7 +99,7 @@ class BuildMissionUi {
         });
     }
 
-    createMissionConsole(width, height, { onLaunch, onReroute }) {
+    createMissionConsole(width, height, { onLaunch, onReroute }) { // Create mission console.
         const panelWidth = width * 0.36;
         const panelHeight = height * 0.64;
         const panelX = width * 0.82;
@@ -151,7 +151,7 @@ class BuildMissionUi {
         }).setOrigin(0.5);
     }
 
-    createBuildShopPanel(width, height) {
+    createBuildShopPanel(width, height) { // Create build shop panel.
         const panelWidth = width * 0.46;
         const panelHeight = 280;
         const panelX = width * 0.78;
@@ -207,7 +207,7 @@ class BuildMissionUi {
         }).setOrigin(0.5);
     }
 
-    createSupplyDropButton(x, y, drop, panelWidth) {
+    createSupplyDropButton(x, y, drop, panelWidth) { // Create supply drop button.
         const rowWidth = panelWidth - 24;
         
         const bg = this.scene.add.rectangle(x, y, rowWidth, 42, 0x0f172a, 0.9);
@@ -252,7 +252,7 @@ class BuildMissionUi {
         return { id: drop.id, bg, name, desc, button };
     }
 
-    createMissionButton(x, y, label, strokeColor, handler) {
+    createMissionButton(x, y, label, strokeColor, handler) { // Create mission button.
         const button = this.scene.add.rectangle(x, y, 240, 38, 0x0f172a, 0.9)
             .setStrokeStyle(2, strokeColor, 0.8)
             .setInteractive({ useHandCursor: true })
@@ -276,7 +276,7 @@ class BuildMissionUi {
         return { button, text };
     }
 
-    updateModeButtonStyles(selectedMode) {
+    updateModeButtonStyles(selectedMode) { // Update mode button styles.
         if (!this.modeButtonRefs) return;
         this.modeButtonRefs.forEach(({ rect, text, mode, color }) => {
             const active = mode === selectedMode;
@@ -287,7 +287,7 @@ class BuildMissionUi {
         });
     }
 
-    setModeButtonsEnabled(enabled) {
+    setModeButtonsEnabled(enabled) { // Set mode buttons enabled.
         if (!this.modeButtonRefs) return;
         this.modeButtonRefs.forEach(({ rect, text }) => {
             rect.disableInteractive();
@@ -302,12 +302,12 @@ class BuildMissionUi {
         });
     }
 
-    updateDetail(title, body) {
+    updateDetail(title, body) { // Update detail.
         if (this.detailTitle) this.detailTitle.setText(title);
         if (this.detailBody) this.detailBody.setText(body);
     }
 
-    refreshNodeStatusText(mapNodes, selectedDistrict) {
+    refreshNodeStatusText(mapNodes, selectedDistrict) { // Refresh node status text.
         if (!this.nodeStatusText) return;
         const lines = mapNodes.map(node => {
             const statusLabel = node.state.status === 'occupied'
@@ -335,7 +335,7 @@ class BuildMissionUi {
         ].join('\n'));
     }
 
-    updateMissionUi(mission, selectedMode, selectedDistrict, mapNodes) {
+    updateMissionUi(mission, selectedMode, selectedDistrict, mapNodes) { // Update mission ui.
         if (!mission || !this.panelSummary) return;
 
         const assaultLocked = selectedDistrict?.state?.status === 'occupied';
@@ -369,7 +369,7 @@ class BuildMissionUi {
         this.updateModeButtonStyles(modeToUse);
     }
 
-    updateExternalLaunchButton(selectedDistrict, mission, selectedMode) {
+    updateExternalLaunchButton(selectedDistrict, mission, selectedMode) { // Update external launch button.
         const btn = document.getElementById('build-launch');
         if (!btn) return;
         const hasSelection = !!selectedDistrict;
@@ -385,7 +385,7 @@ class BuildMissionUi {
         btn.classList.toggle('cursor-not-allowed', !hasSelection);
     }
 
-    refreshBuildShopPanel() {
+    refreshBuildShopPanel() { // Refresh build shop panel.
         if (!this.shopPanel) return;
         const meta = window.metaProgression?.getMetaState?.() || { credits: 0 };
         const inventory = window.metaProgression?.getShopInventory?.() || [];
@@ -416,7 +416,7 @@ class BuildMissionUi {
         this.renderPendingItems(pending);
     }
 
-    renderPendingItems(pending) {
+    renderPendingItems(pending) { // Render pending items.
         if (!this.pendingItemsContainer) return;
         this.pendingItemsContainer.removeAll(true);
 
@@ -454,15 +454,15 @@ class BuildMissionUi {
         });
     }
 
-    getTierColor(tier) {
+    getTierColor(tier) { // Get tier color.
         return tier === 'tier3' ? '#a855f7' : tier === 'tier2' ? '#22d3ee' : '#94a3b8';
     }
 
-    getTierLabel(tier) {
+    getTierLabel(tier) { // Get tier label.
         return tier === 'tier3' ? 'RARE' : tier === 'tier2' ? 'COMBAT' : 'UTIL';
     }
 
-    highlightShopPanel() {
+    highlightShopPanel() { // Highlight shop panel.
         if (!this.shopPanel) return;
         this.scene.tweens.add({
             targets: this.shopPanel,
@@ -473,7 +473,7 @@ class BuildMissionUi {
         });
     }
 
-    purchaseDrop(dropId) {
+    purchaseDrop(dropId) { // Purchase drop.
         if (!window.metaProgression?.purchaseSupplyDrop) return;
         
         const result = window.metaProgression.purchaseSupplyDrop(dropId);

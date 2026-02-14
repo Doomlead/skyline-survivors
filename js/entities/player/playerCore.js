@@ -2,16 +2,16 @@
 // file: js/entities/player/playerCore.js
 // ------------------------
 
-function getActivePlayer(scene) {
+function getActivePlayer(scene) { // Get active player.
     return aegisState.active ? scene.aegis : scene.pilot;
 }
 
-function syncActivePlayer(scene) {
+function syncActivePlayer(scene) { // Sync active player.
     scene.player = getActivePlayer(scene);
     return scene.player;
 }
 
-function setAegisMode(scene, mode) {
+function setAegisMode(scene, mode) { // Set aegis mode.
     aegisState.mode = mode;
     const texture = mode === 'bulwark' ? 'aegis_bulwark' : 'aegis_interceptor';
     if (scene.aegis) {
@@ -24,7 +24,7 @@ function setAegisMode(scene, mode) {
     }
 }
 
-function ejectPilot(scene) {
+function ejectPilot(scene) { // Eject pilot.
     if (!scene.aegis || !scene.pilot || !aegisState.active) return;
     aegisState.active = false;
     pilotState.active = true;
@@ -44,7 +44,7 @@ function ejectPilot(scene) {
     syncActivePlayer(scene);
 }
 
-function enterAegis(scene) {
+function enterAegis(scene) { // Enter aegis.
     if (!scene.aegis || !scene.pilot || !pilotState.active) return;
     if (gameState.mothershipObjective?.shipLocked) return;
     if (aegisState.destroyed) return;
@@ -65,7 +65,7 @@ function enterAegis(scene) {
     syncActivePlayer(scene);
 }
 
-function playerDie(scene) {
+function playerDie(scene) { // Player die.
     const { particleManager, audioManager, drones } = scene;
     const player = getActivePlayer(scene);
     if (!player) return;

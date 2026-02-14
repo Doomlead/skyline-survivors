@@ -2,7 +2,7 @@
 // Enemy Graphics - New (Swarm Leader, Regenerator)
 // ------------------------
 
-function createSwarmLeaderGraphics(scene) {
+function createSwarmLeaderGraphics(scene) { // Create swarm leader graphics.
     // ========================
     // SWARM LEADER - Buffs Nearby Enemies
     // ========================
@@ -170,7 +170,7 @@ function createSwarmLeaderGraphics(scene) {
 
 }
 
-function createRegeneratorGraphics(scene) {
+function createRegeneratorGraphics(scene) { // Create regenerator graphics.
     // ========================
     // REGENERATOR - Self-healing Enemy
     // ========================

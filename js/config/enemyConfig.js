@@ -205,15 +205,15 @@ const ENEMY_TYPES = [
     'shielder', 'bouncer', 'sniper', 'swarmLeader', 'regenerator'
 ];
 
-function getEnemyHP(type) {
+function getEnemyHP(type) { // Get enemy hp.
     return ENEMY_HP_VALUES[type] || 1;
 }
 
-function getEnemyScore(type) {
+function getEnemyScore(type) { // Get enemy score.
     return ENEMY_SCORE_VALUES[type] || 100;
 }
 
-function getEnemyScale(type) {
+function getEnemyScale(type) { // Get enemy scale.
     return ENEMY_SCALE_VALUES[type] || ENEMY_SCALE_VALUES.default;
 }
 

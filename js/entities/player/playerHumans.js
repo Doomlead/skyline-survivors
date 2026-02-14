@@ -2,7 +2,7 @@
 // file: js/entities/player/playerHumans.js
 // ------------------------
 
-function spawnHuman(scene, x) {
+function spawnHuman(scene, x) { // Spawn human.
     const { humans } = scene;
     if (!humans) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
@@ -17,7 +17,7 @@ function spawnHuman(scene, x) {
     human.abductor = null;
 }
 
-function rescueHuman(playerSprite, human) {
+function rescueHuman(playerSprite, human) { // Rescue human.
     const audioManager = this.audioManager;
     const isFalling = Boolean(human.body && human.body.gravity && human.body.gravity.y > 0);
     if (!human.isAbducted && !isFalling) return;
@@ -51,7 +51,7 @@ function rescueHuman(playerSprite, human) {
     if (Math.random() < 0.24) spawnPowerUp(this, human.x, human.y);
 }
 
-function updateHumans(scene) {
+function updateHumans(scene) { // Update humans.
     const { humans } = scene;
     if (!humans) return;
     humans.children.entries.forEach(human => {

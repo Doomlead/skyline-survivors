@@ -2,7 +2,7 @@
 // Enemy Graphics - New (Kamikaze, Turret)
 // ------------------------
 
-function createKamikazeGraphics(scene) {
+function createKamikazeGraphics(scene) { // Create kamikaze graphics.
     // ========================
     // KAMIKAZE - Fast Suicide Bomber
     // ========================
@@ -194,7 +194,7 @@ function createKamikazeGraphics(scene) {
     kamikazeGraphics.destroy();
 }
 
-function createTurretGraphics(scene) {
+function createTurretGraphics(scene) { // Create turret graphics.
     // ========================
     // TURRET - Stationary Multi-directional Shooter
     // ========================

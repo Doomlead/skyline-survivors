@@ -2,7 +2,7 @@
 // Player Projectile Graphics - All Player Projectile Textures
 // ------------------------
 
-function createPlayerProjectileGraphics(scene) {
+function createPlayerProjectileGraphics(scene) { // Create player projectile graphics.
     
     // ========================
     // STANDARD PROJECTILE (Plasma Bolt)

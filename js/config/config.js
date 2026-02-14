@@ -63,7 +63,7 @@ const userSettings = {
     keyBindings: { ...DEFAULT_KEY_BINDINGS }
 };
 
-function sanitizeKeyBindings(bindings) {
+function sanitizeKeyBindings(bindings) { // Sanitize key bindings.
     const sanitized = { ...DEFAULT_KEY_BINDINGS };
     if (!bindings || typeof bindings !== 'object') return sanitized;
     Object.keys(DEFAULT_KEY_BINDINGS).forEach((action) => {
@@ -78,7 +78,7 @@ function sanitizeKeyBindings(bindings) {
     return sanitized;
 }
 
-function loadUserSettings() {
+function loadUserSettings() { // Load user settings.
     if (typeof localStorage === 'undefined') return;
     const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
     if (!stored) return;
@@ -97,16 +97,16 @@ function loadUserSettings() {
     }
 }
 
-function persistUserSettings() {
+function persistUserSettings() { // Persist user settings.
     if (typeof localStorage === 'undefined') return;
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(userSettings));
 }
 
-function isFlashReductionEnabled() {
+function isFlashReductionEnabled() { // Is flash reduction enabled.
     return !!userSettings.reduceFlashes;
 }
 
-function getDecayDurationMs(path, tier) {
+function getDecayDurationMs(path, tier) { // Get decay duration ms.
     if (!path || !tier || tier <= 0) return 0;
     const pathConfig = POWERUP_DECAY_CONFIG.paths?.[path];
     const baseDuration = pathConfig?.tiers?.[tier] || 0;

@@ -11,7 +11,7 @@ const GLOBE_LAYOUT = {
 };
 
 class BuildMapView {
-    constructor(scene) {
+    constructor(scene) { // Constructor.
         this.scene = scene;
         this.districts = [];
         this.mapNodes = [];
@@ -49,12 +49,12 @@ class BuildMapView {
         this._isBuilt = false;
     }
 
-    preload() { 
+    preload() {  // Preload.
         // Ensure we are clean before we start
         this.cleanup();
     }
 
-    build(width, height) {
+    build(width, height) { // Build.
         console.log('[BuildMapView.build] Called with dimensions:', { width, height, _isBuilt: this._isBuilt });
         
         // Clean up any existing objects to prevent duplicate logic/graphics
@@ -103,7 +103,7 @@ class BuildMapView {
         this._isBuilt = true;
     }
 
-    resize(width, height) {
+    resize(width, height) { // Resize.
         if (!this._isBuilt) return;
 
         this.calculateDimensions(width, height);
@@ -117,7 +117,7 @@ class BuildMapView {
         this.renderGlobe();
     }
 
-    cleanup() {
+    cleanup() { // Cleanup.
         this._isBuilt = false; // Stop updates immediately
 
         this.mapNodes.forEach(node => {
@@ -146,7 +146,7 @@ class BuildMapView {
         this.oceanGraphics = null;
     }
 	
-	calculateDimensions(width, height) {
+	calculateDimensions(width, height) { // Calculate dimensions.
         const layout = GLOBE_LAYOUT;
         
         const safeWidth = width || window.innerWidth;
@@ -171,7 +171,7 @@ class BuildMapView {
         console.log(`[BuildMapView] Resizing: ${safeWidth}x${safeHeight} -> Radius: ${this.globeRadius}`);
     }
 
-    createStars() {
+    createStars() { // Create stars.
         if (!this.scene.textures.exists('build-star')) {
             const g = this.scene.add.graphics();
             g.fillStyle(0xffffff, 1);
@@ -192,7 +192,7 @@ class BuildMapView {
         });
     }
 
-    createBackdrop(width, height) {
+    createBackdrop(width, height) { // Create backdrop.
         this.backdropGrid = this.scene.add.graphics();
         this.backdropGrid.lineStyle(1, 0x102a3f, 0.4);
         const spacing = 60;
@@ -207,13 +207,13 @@ class BuildMapView {
         this.backdropGlow.setBlendMode(Phaser.BlendModes.ADD);
     }
 
-    refreshBackdrop(width, height) {
+    refreshBackdrop(width, height) { // Refresh backdrop.
         if (this.backdropGrid) this.backdropGrid.destroy();
         if (this.backdropGlow) this.backdropGlow.destroy();
         this.createBackdrop(width, height);
     }
 
-    setupGlobeInput() {
+    setupGlobeInput() { // Setup globe input.
         this.scene.input.on('pointerdown', (pointer) => {
             const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.centerX, this.centerY);
             if (dist < this.globeRadius + 50) {
@@ -245,7 +245,7 @@ class BuildMapView {
         });
     }
 
-    project3D(lat, lon) {
+    project3D(lat, lon) { // Project3 d.
         const latRad = lat * Math.PI / 180;
         const lonRad = lon * Math.PI / 180;
 
@@ -273,7 +273,7 @@ class BuildMapView {
         };
     }
 
-    renderGlobe() {
+    renderGlobe() { // Render globe.
         if (!this.atmosphereGraphics) return;
 
         this.atmosphereGraphics.clear();
@@ -293,21 +293,21 @@ class BuildMapView {
         this.drawGlobeRim();
     }
 
-    drawAtmosphere() {
+    drawAtmosphere() { // Draw atmosphere.
         for (let i = 5; i > 0; i--) {
             this.atmosphereGraphics.lineStyle(3, 0x4ade80, 0.03 * i);
             this.atmosphereGraphics.strokeCircle(0, 0, this.globeRadius + i * 4);
         }
     }
 
-    drawOcean() {
+    drawOcean() { // Draw ocean.
         this.oceanGraphics.fillStyle(0x0a3d62, 1);
         this.oceanGraphics.fillCircle(0, 0, this.globeRadius);
         this.oceanGraphics.fillStyle(0x1a5276, 0.5);
         this.oceanGraphics.fillCircle(-this.globeRadius * 0.2, -this.globeRadius * 0.2, this.globeRadius * 0.7);
     }
 
-    drawGrid() {
+    drawGrid() { // Draw grid.
         this.gridGraphics.lineStyle(0.5, 0x3498db, 0.12);
         for (let lat = -80; lat <= 80; lat += 20) this.drawLatLine(lat);
         for (let lon = -180; lon < 180; lon += 20) this.drawLonLine(lon);
@@ -315,7 +315,7 @@ class BuildMapView {
         this.drawLatLine(0);
     }
 
-    drawLatLine(lat) {
+    drawLatLine(lat) { // Draw lat line.
         const points = [];
         for (let lon = -180; lon <= 180; lon += 5) {
             const p = this.project3D(lat, lon);
@@ -326,7 +326,7 @@ class BuildMapView {
         if (points.length > 1) this.strokePoints(points, this.gridGraphics);
     }
 
-    drawLonLine(lon) {
+    drawLonLine(lon) { // Draw lon line.
         const points = [];
         for (let lat = -90; lat <= 90; lat += 5) {
             const p = this.project3D(lat, lon);
@@ -337,7 +337,7 @@ class BuildMapView {
         if (points.length > 1) this.strokePoints(points, this.gridGraphics);
     }
 
-    strokePoints(points, graphics) {
+    strokePoints(points, graphics) { // Stroke points.
         if (points.length < 2) return;
         graphics.beginPath();
         graphics.moveTo(points[0].x, points[0].y);
@@ -345,7 +345,7 @@ class BuildMapView {
         graphics.strokePath();
     }
 
-    drawAllLand() {
+    drawAllLand() { // Draw all land.
         if (typeof WORLD_DATA === 'undefined') {
             console.warn('WORLD_DATA missing - cannot draw land');
             return;
@@ -363,7 +363,7 @@ class BuildMapView {
         }
     }
 
-    drawLandMass(projectedPoints, colors) {
+    drawLandMass(projectedPoints, colors) { // Draw land mass.
         const visiblePoints = projectedPoints.filter(p => p.visible);
         if (visiblePoints.length < 3) return;
 
@@ -400,12 +400,12 @@ class BuildMapView {
         }
     }
 
-    drawGlobeRim() {
+    drawGlobeRim() { // Draw globe rim.
         this.atmosphereGraphics.lineStyle(2, 0x0ea5e9, 0.6);
         this.atmosphereGraphics.strokeCircle(0, 0, this.globeRadius);
     }
 
-    initializeDistricts() {
+    initializeDistricts() { // Initialize districts.
         if (typeof missionPlanner === 'undefined') return;
         const sectorConfigs = missionPlanner.getDistrictConfigs();
         this.districts = [];
@@ -415,7 +415,7 @@ class BuildMapView {
         });
     }
 
-    createBattleshipMarkers() {
+    createBattleshipMarkers() { // Create battleship markers.
         if (typeof missionPlanner === 'undefined' || !this.planetContainer) return;
         this.battleshipMarkers.forEach(marker => marker.destroy());
         this.battleshipMarkers = [];
@@ -439,12 +439,12 @@ class BuildMapView {
         });
     }
 
-    getActiveBattleships() {
+    getActiveBattleships() { // Get active battleships.
         if (typeof missionPlanner === 'undefined') return [];
         return missionPlanner.getBattleships().filter(ship => ship.active !== false);
     }
 
-    getDistrictCenterCoords(config) {
+    getDistrictCenterCoords(config) { // Get district center coords.
         if (!config) return { lat: 0, lon: 0 };
         if (config.center) return config.center;
         if (config.polygon?.length) {
@@ -458,7 +458,7 @@ class BuildMapView {
         return { lat: 0, lon: 0 };
     }
 
-    drawDistricts() {
+    drawDistricts() { // Draw districts.
         if (!this.districts.length) return;
         this.districts.forEach(district => {
             const center = this.getDistrictCenterCoords(district.config);
@@ -496,7 +496,7 @@ class BuildMapView {
         this.setupDistrictInteraction();
     }
 
-    getDistrictStatusColor(state) {
+    getDistrictStatusColor(state) { // Get district status color.
         if (!state) return 0x22c55e;
         if (state.underAttack && state.status !== 'occupied') {
             return 0xfacc15;
@@ -514,7 +514,7 @@ class BuildMapView {
         }
     }
 
-    drawDistrictThreatPulse(district, projected, radius) {
+    drawDistrictThreatPulse(district, projected, radius) { // Draw district threat pulse.
         if (!district?.state || !['threatened', 'critical'].includes(district.state.status)) return;
         const maxTimer = district.config?.timer || 1;
         const isCritical = district.state.status === 'critical';
@@ -538,7 +538,7 @@ class BuildMapView {
         }
     }
 
-    drawProsperitySignals(district, projected, radius) {
+    drawProsperitySignals(district, projected, radius) { // Draw prosperity signals.
         if (!district?.state) return;
         const prosperityMultiplier = district.state.prosperityMultiplier || 1;
         const prosperityLevel = Math.max(0, district.state.prosperityLevel || 0);
@@ -562,7 +562,7 @@ class BuildMapView {
         }
     }
 
-    setupDistrictInteraction() {
+    setupDistrictInteraction() { // Setup district interaction.
         if (this._districtClickHandler) this.scene.input.off('pointerdown', this._districtClickHandler);
         this._districtClickHandler = (pointer) => {
             const localX = pointer.x - this.centerX;
@@ -579,7 +579,7 @@ class BuildMapView {
         this.scene.input.on('pointerdown', this._districtClickHandler);
     }
 
-    drawMarkers() {
+    drawMarkers() { // Draw markers.
         if (!this.selectedDistrict) return;
         const center = this.getDistrictCenterCoords(this.selectedDistrict.config);
         const projected = this.project3D(center.lat, center.lon);
@@ -594,7 +594,7 @@ class BuildMapView {
         this.markerGraphics.strokeCircle(projected.x, projected.y, 5);
     }
 
-    focusDistrict(district, skipTweens = false) {
+    focusDistrict(district, skipTweens = false) { // Focus district.
         if (this.selectedDistrict === district) return;
         this.selectedDistrict = district;
         this.onDistrictFocused?.(district);
@@ -622,7 +622,7 @@ class BuildMapView {
         this.autoRotate = false;
     }
 
-    createOrbitNodes() {
+    createOrbitNodes() { // Create orbit nodes.
         if (typeof missionPlanner === 'undefined') return;
 
         // Configuration relative to globe size
@@ -661,7 +661,7 @@ class BuildMapView {
         this.updateOrbitNodesPositions();
     }
 
-    updateOrbitNodesPositions() {
+    updateOrbitNodesPositions() { // Update orbit nodes positions.
         this.mapNodes.forEach(mapNode => {
             const config = mapNode.config;
             const radius = this.globeRadius * config.distScale; 
@@ -679,7 +679,7 @@ class BuildMapView {
         });
     }
 
-    flashConnector(connector) {
+    flashConnector(connector) { // Flash connector.
         this.scene.tweens.add({
             targets: connector,
             alpha: { from: 0.35, to: 1 },
@@ -689,7 +689,7 @@ class BuildMapView {
         });
     }
 
-    update(time, delta, mission) {
+    update(time, delta, mission) { // Update.
         // Critical safety check: Don't update if we aren't fully built
         if (!this._isBuilt || typeof missionPlanner === 'undefined') return mission;
         

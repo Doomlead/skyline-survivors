@@ -2,7 +2,7 @@
 // Enemy Graphics - Original (Lander, Mutant)
 // ------------------------
 
-function createLanderGraphics(scene) {
+function createLanderGraphics(scene) { // Create lander graphics.
     // ========================
     // LANDER - Classic UFO Abductor
     // ========================
@@ -106,7 +106,7 @@ function createLanderGraphics(scene) {
     landerGraphics.destroy();
 }
 
-function createMutantGraphics(scene) {
+function createMutantGraphics(scene) { // Create mutant graphics.
     // ========================
     // MUTANT - Transformed Human Alien
     // ========================

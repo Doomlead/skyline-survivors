@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGenerator = (function() {
-    function BackgroundGenerator(scene, config) {
+    function BackgroundGenerator(scene, config) { // Background generator.
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();

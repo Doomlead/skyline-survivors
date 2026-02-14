@@ -3,13 +3,13 @@
 // ------------------------
 
 class TitleScene extends Phaser.Scene {
-    constructor() {
+    constructor() { // Constructor.
         super({ key: SCENE_KEYS.title, active: true });
         this.typingEvent = null;
         this.isBriefingComplete = false;
     }
 
-    create() {
+    create() { // Create.
         const overlay = document.getElementById('title-overlay');
         if (!overlay) {
             this.scene.start(SCENE_KEYS.menu);
@@ -35,7 +35,7 @@ class TitleScene extends Phaser.Scene {
             authorizeBtn.disabled = true;
         }
 
-        const finishBriefing = () => {
+        const finishBriefing = () => { // Finish briefing.
             this.isBriefingComplete = true;
             if (cursorEl) {
                 cursorEl.style.opacity = '1';
@@ -45,7 +45,7 @@ class TitleScene extends Phaser.Scene {
             }
         };
 
-        const revealAllText = () => {
+        const revealAllText = () => { // Reveal all text.
             if (this.typingEvent) {
                 this.typingEvent.remove(false);
                 this.typingEvent = null;
@@ -113,7 +113,7 @@ class TitleScene extends Phaser.Scene {
         });
     }
 
-    buildBriefingText() {
+    buildBriefingText() { // Build briefing text.
         const summary = this.getDistrictSummary();
         const occupied = summary.occupied;
         const total = summary.total;
@@ -154,7 +154,7 @@ class TitleScene extends Phaser.Scene {
         ].join('\n');
     }
 
-    getDistrictSummary() {
+    getDistrictSummary() { // Get district summary.
         let total = 0;
         let occupied = 0;
 

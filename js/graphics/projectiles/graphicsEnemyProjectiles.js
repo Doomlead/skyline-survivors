@@ -2,7 +2,7 @@
 // Enemy Projectile Graphics - All Enemy Projectile Textures
 // ------------------------
 
-function createEnemyProjectileGraphics(scene) {
+function createEnemyProjectileGraphics(scene) { // Create enemy projectile graphics.
     // Helper constant for colors to ensure consistency
     const C_RED_GLOW = 0xff0000;
     const C_RED_DARK = 0x880000;

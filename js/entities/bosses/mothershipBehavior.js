@@ -2,7 +2,7 @@
 // File: js/entities/bosses/mothershipBehavior.js
 // ------------------------
 
-function updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultiplier) {
+function updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultiplier) { // Update mothership core behavior.
     const player = getActivePlayer(scene);
     const anchorX = boss.anchorX ?? boss.x;
     const anchorY = boss.anchorY ?? boss.y;
@@ -21,7 +21,7 @@ function updateMothershipCoreBehavior(scene, boss, time, delta, timeSlowMultipli
     updateBossAttackPattern(scene, boss, time, timeSlowMultiplier);
 }
 
-function updateMothershipBosses(scene, time, delta) {
+function updateMothershipBosses(scene, time, delta) { // Update mothership bosses.
     const { bosses } = scene;
     if (!bosses) return;
 

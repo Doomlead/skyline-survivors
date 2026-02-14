@@ -146,7 +146,7 @@ var BACKGROUND_LAYER_SETS = {
     }
 };
 
-function setActiveBackgroundLayers(styleKey) {
+function setActiveBackgroundLayers(styleKey) { // Set active background layers.
     var setKey = styleKey && BACKGROUND_LAYER_SETS[styleKey] ? styleKey : 'default';
     var selection = BACKGROUND_LAYER_SETS[setKey];
     BACKGROUND_LAYERS = selection.layers;

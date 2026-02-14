@@ -2,7 +2,7 @@
 // Player Graphics - Aegis
 // ------------------------
 
-function createPlayerGraphics(scene) {
+function createPlayerGraphics(scene) { // Create player graphics.
     // Shared Color Palette (Ensures consistency between modes)
     const PALETTE = {
         hull: 0xcccccc,        // Main body (Light Grey/White)

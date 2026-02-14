@@ -130,11 +130,11 @@ const BATTLESHIP_ATTACK_PATTERNS = {
     },
 };
 
-function getBattleshipAttackPattern(type) {
+function getBattleshipAttackPattern(type) { // Get battleship attack pattern.
     return BATTLESHIP_ATTACK_PATTERNS[type] || BATTLESHIP_ATTACK_PATTERNS.raider;
 }
 
-function updateBattleshipAttackPattern(scene, battleship, time, timeSlowMultiplier) {
+function updateBattleshipAttackPattern(scene, battleship, time, timeSlowMultiplier) { // Update battleship attack pattern.
     if (!battleship.attackState) {
         initBossAttackState(battleship);
         battleship.attackState.nextAttackTime = time + 1200;
@@ -164,7 +164,7 @@ function updateBattleshipAttackPattern(scene, battleship, time, timeSlowMultipli
 
 // ===== BATTLESHIP MOVEMENT BEHAVIORS =====
 
-function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
+function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) { // Update raider battleship behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -185,7 +185,7 @@ function updateRaiderBattleshipBehavior(scene, battleship, time, timeSlowMultipl
     );
 }
 
-function updateCarrierBattleshipBehavior(scene, battleship, time, delta, timeSlowMultiplier) {
+function updateCarrierBattleshipBehavior(scene, battleship, time, delta, timeSlowMultiplier) { // Update carrier battleship behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -211,7 +211,7 @@ function updateCarrierBattleshipBehavior(scene, battleship, time, delta, timeSlo
     }
 }
 
-function updateNovaBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
+function updateNovaBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) { // Update nova battleship behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -231,7 +231,7 @@ function updateNovaBattleshipBehavior(scene, battleship, time, timeSlowMultiplie
     );
 }
 
-function updateSiegeBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
+function updateSiegeBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) { // Update siege battleship behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -252,7 +252,7 @@ function updateSiegeBattleshipBehavior(scene, battleship, time, timeSlowMultipli
     battleship.y += Math.sin(battleship.siegePhase) * 0.4;
 }
 
-function updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) {
+function updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMultiplier) { // Update dreadnought battleship behavior.
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -273,7 +273,7 @@ function updateDreadnoughtBattleshipBehavior(scene, battleship, time, timeSlowMu
     );
 }
 
-function updateBattleships(scene, time, delta) {
+function updateBattleships(scene, time, delta) { // Update battleships.
     const { battleships } = scene;
     if (!battleships) return;
 

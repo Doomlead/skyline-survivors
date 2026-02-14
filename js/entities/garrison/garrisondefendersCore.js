@@ -77,11 +77,11 @@ const GARRISON_DEFENDER_CONFIGS = {
 
 const GARRISON_DEFENDER_TYPES = Object.keys(GARRISON_DEFENDER_CONFIGS);
 
-function getGarrisonDefenderConfig(type) {
+function getGarrisonDefenderConfig(type) { // Get garrison defender config.
     return GARRISON_DEFENDER_CONFIGS[type] || GARRISON_DEFENDER_CONFIGS.rifle;
 }
 
-function spawnGarrisonDefender(scene, type, x, y) {
+function spawnGarrisonDefender(scene, type, x, y) { // Spawn garrison defender.
     const { garrisonDefenders, audioManager } = scene;
     if (!garrisonDefenders) return null;
 
@@ -117,7 +117,7 @@ function spawnGarrisonDefender(scene, type, x, y) {
     return defender;
 }
 
-function garrisonShootAtPlayer(scene, defender, forcedAngle = null, overrideType = null) {
+function garrisonShootAtPlayer(scene, defender, forcedAngle = null, overrideType = null) { // Garrison shoot at player.
     const { enemyProjectiles, audioManager } = scene;
     const player = getActivePlayer(scene);
     if (!player || !enemyProjectiles || !defender) return;
@@ -140,7 +140,7 @@ function garrisonShootAtPlayer(scene, defender, forcedAngle = null, overrideType
     });
 }
 
-function hitGarrisonDefender(projectile, defender) {
+function hitGarrisonDefender(projectile, defender) { // Hit garrison defender.
     const { audioManager, particleManager } = this;
     defender.hp -= projectile.damage || 1;
     if (audioManager) audioManager.playSound('hitEnemy');
@@ -151,7 +151,7 @@ function hitGarrisonDefender(projectile, defender) {
     }
 }
 
-function destroyGarrisonDefender(scene, defender) {
+function destroyGarrisonDefender(scene, defender) { // Destroy garrison defender.
     const { garrisonDefenders, particleManager, audioManager } = scene;
     if (!garrisonDefenders || !defender || defender.isBeingDestroyed) return;
     defender.isBeingDestroyed = true;
@@ -190,12 +190,12 @@ function destroyGarrisonDefender(scene, defender) {
     defender.destroy();
 }
 
-function getGarrisonDefenderScore(type) {
+function getGarrisonDefenderScore(type) { // Get garrison defender score.
     const config = getGarrisonDefenderConfig(type);
     return config.score || 200;
 }
 
-function playerHitGarrisonDefender(playerSprite, defender) {
+function playerHitGarrisonDefender(playerSprite, defender) { // Player hit garrison defender.
     const audioManager = this.audioManager;
     if (playerState.powerUps.invincibility > 0) {
         destroyGarrisonDefender(this, defender);

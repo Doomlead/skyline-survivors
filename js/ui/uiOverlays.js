@@ -2,7 +2,7 @@
 // file js/ui/uiOverlays.js Game over/win overlays
 // ------------------------
 
-function gameOver(scene) {
+function gameOver(scene) { // Game over.
     const audioManager = scene.audioManager;
     gameState.gameOver = true;
     if (window.missionPlanner) missionPlanner.recordMissionOutcome(false);
@@ -21,13 +21,13 @@ function gameOver(scene) {
     showMissionDefeat(scene, metaResult);
 }
 
-function getOverlayScale(scene) {
+function getOverlayScale(scene) { // Get overlay scale.
     const cam = scene.cameras.main;
     const scale = cam && cam.height ? cam.height / 700 : 1;
     return Math.min(1, Math.max(0.7, scale));
 }
 
-function showMissionDefeat(scene, metaResult) {
+function showMissionDefeat(scene, metaResult) { // Show mission defeat.
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
     const centerY = cam.height / 2;
@@ -76,7 +76,7 @@ function showMissionDefeat(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
-    const handleReturn = () => {
+    const handleReturn = () => { // Handle return.
         resetGameState();
         if (window.enterDistrictMap) {
             enterDistrictMap({ fromVictory: true });
@@ -87,7 +87,7 @@ function showMissionDefeat(scene, metaResult) {
     returnButton.on('pointerdown', handleReturn);
 }
 
-function winGame(scene) {
+function winGame(scene) { // Win game.
     const audioManager = scene.audioManager;
     gameState.gameOver = true;
     if (window.missionPlanner) missionPlanner.recordMissionOutcome(true);
@@ -105,7 +105,7 @@ function winGame(scene) {
     showMissionVictory(scene, metaResult);
 }
 
-function showCampaignDefeat(scene, metaResult) {
+function showCampaignDefeat(scene, metaResult) { // Show campaign defeat.
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
     const centerY = cam.height / 2;
@@ -148,7 +148,7 @@ function showCampaignDefeat(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
-    const handleReturn = () => {
+    const handleReturn = () => { // Handle return.
         resetGameState();
         if (window.enterDistrictMap) {
             enterDistrictMap({ fromVictory: true });
@@ -159,7 +159,7 @@ function showCampaignDefeat(scene, metaResult) {
     returnButton.on('pointerdown', handleReturn);
 }
 
-function showMissionVictory(scene, metaResult) {
+function showMissionVictory(scene, metaResult) { // Show mission victory.
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
     const centerY = cam.height / 2;
@@ -208,7 +208,7 @@ function showMissionVictory(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
-    const handleReturn = () => {
+    const handleReturn = () => { // Handle return.
         resetGameState();
         if (window.enterDistrictMap) {
             enterDistrictMap({ fromVictory: true });
@@ -219,7 +219,7 @@ function showMissionVictory(scene, metaResult) {
     returnButton.on('pointerdown', handleReturn);
 }
 
-function showMissionVictory(scene, metaResult) {
+function showMissionVictory(scene, metaResult) { // Show mission victory.
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
     const centerY = cam.height / 2;
@@ -268,7 +268,7 @@ function showMissionVictory(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
-    const handleReturn = () => {
+    const handleReturn = () => { // Handle return.
         resetGameState();
         if (window.enterDistrictMap) {
             enterDistrictMap({ fromVictory: true });
@@ -279,7 +279,7 @@ function showMissionVictory(scene, metaResult) {
     returnButton.on('pointerdown', handleReturn);
 }
 
-function getCampaignVictoryStats() {
+function getCampaignVictoryStats() { // Get campaign victory stats.
     const allDistricts = window.missionPlanner?.getAllDistrictStates?.() || [];
     const districtsSaved = allDistricts.filter(entry => entry.state?.status === 'friendly').length;
     return {
@@ -290,7 +290,7 @@ function getCampaignVictoryStats() {
     };
 }
 
-function formatCampaignTime(ms = 0) {
+function formatCampaignTime(ms = 0) { // Format campaign time.
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -302,7 +302,7 @@ function formatCampaignTime(ms = 0) {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-function showCampaignVictory(scene, metaResult) {
+function showCampaignVictory(scene, metaResult) { // Show campaign victory.
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
     const centerY = cam.height / 2;
@@ -367,7 +367,7 @@ function showCampaignVictory(scene, metaResult) {
     menuButton.on('pointerdown', () => returnToMainMenu(scene));
 }
 
-function getCampaignVictoryStats() {
+function getCampaignVictoryStats() { // Get campaign victory stats.
     const allDistricts = window.missionPlanner?.getAllDistrictStates?.() || [];
     const districtsSaved = allDistricts.filter(entry => entry.state?.status === 'friendly').length;
     return {
@@ -378,7 +378,7 @@ function getCampaignVictoryStats() {
     };
 }
 
-function formatCampaignTime(ms = 0) {
+function formatCampaignTime(ms = 0) { // Format campaign time.
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -390,7 +390,7 @@ function formatCampaignTime(ms = 0) {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
-function recordMetaOutcome(success) {
+function recordMetaOutcome(success) { // Record meta outcome.
     if (!window.metaProgression || gameState.metaRewardsGranted) return null;
     const outcome = {
         success,

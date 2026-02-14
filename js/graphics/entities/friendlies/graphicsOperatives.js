@@ -2,7 +2,7 @@
 // Operative Graphics - Friendly Comrades
 // ------------------------
 
-function createOperativeGraphics(scene) {
+function createOperativeGraphics(scene) { // Create operative graphics.
     // ========================
     // OPERATIVE INFANTRY
     // ========================

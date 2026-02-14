@@ -90,28 +90,28 @@ const BATTLESHIP_SHOT_CONFIGS = {
     dreadnought: { projectileType: 'enemyProjectile', speed: 320, damage: 1.8, interval: 1200 },
 };
 
-function getRandomBattleshipType() {
+function getRandomBattleshipType() { // Get random battleship type.
     return Phaser.Utils.Array.GetRandom(BATTLESHIP_TYPES);
 }
 
-function getBattleshipHP(type) {
+function getBattleshipHP(type) { // Get battleship hp.
     const baseHP = BATTLESHIP_HP_VALUES[type] || 18;
     return Math.round(baseHP * BATTLESHIP_HP_MULTIPLIER);
 }
 
-function getBattleshipScore(type) {
+function getBattleshipScore(type) { // Get battleship score.
     return BATTLESHIP_SCORE_VALUES[type] || 300;
 }
 
-function getBattleshipScale(type) {
+function getBattleshipScale(type) { // Get battleship scale.
     return BATTLESHIP_SCALE_VALUES[type] || 2.4;
 }
 
-function getBattleshipShotConfig(type) {
+function getBattleshipShotConfig(type) { // Get battleship shot config.
     return BATTLESHIP_SHOT_CONFIGS[type] || BATTLESHIP_SHOT_CONFIGS.raider;
 }
 
-function createBattleshipTrail(scene, battleship) {
+function createBattleshipTrail(scene, battleship) { // Create battleship trail.
     if (!scene || !battleship) return;
 
     const cfg = BATTLESHIP_TRAIL_CONFIGS[battleship.battleshipType] || BATTLESHIP_TRAIL_CONFIGS.raider;
@@ -143,7 +143,7 @@ function createBattleshipTrail(scene, battleship) {
     });
 }
 
-function spawnBattleship(scene, type, x, y) {
+function spawnBattleship(scene, type, x, y) { // Spawn battleship.
     const { battleships, audioManager } = scene;
     if (!battleships) return null;
     const key = BATTLESHIP_TEXTURES[type] || BATTLESHIP_TEXTURES.raider;
@@ -225,7 +225,7 @@ function shootFromBattleshipSource(scene, sourceX, sourceY, battleship, shotConf
     });
 }
 
-function hitBattleship(projectile, battleship) {
+function hitBattleship(projectile, battleship) { // Hit battleship.
     const scene = projectile.scene;
     const audioManager = scene.audioManager;
     const particleManager = scene.particleManager;
@@ -287,7 +287,7 @@ function hitBattleship(projectile, battleship) {
     }
 }
 
-function playerHitBattleship(playerSprite, battleship) {
+function playerHitBattleship(playerSprite, battleship) { // Player hit battleship.
     const scene = battleship.scene;
     const audioManager = scene.audioManager;
 
@@ -315,7 +315,7 @@ function playerHitBattleship(playerSprite, battleship) {
     }
 }
 
-function startBattleshipEncounter(scene, triggerInfo = {}) {
+function startBattleshipEncounter(scene, triggerInfo = {}) { // Start battleship encounter.
     if (gameState.battleshipActive) return null;
 
     const battleshipType = getRandomBattleshipType();
@@ -358,7 +358,7 @@ function startBattleshipEncounter(scene, triggerInfo = {}) {
     return spawnBattleship(scene, battleshipType, spawnX, spawnY);
 }
 
-function completeBattleshipWave(scene) {
+function completeBattleshipWave(scene) { // Complete battleship wave.
     const audioManager = scene.audioManager;
     const completedWave = gameState.wave;
     const battleReward = getMissionScaledReward(3500);
@@ -404,7 +404,7 @@ function completeBattleshipWave(scene) {
     });
 }
 
-function destroyBattleship(scene, battleship) {
+function destroyBattleship(scene, battleship) { // Destroy battleship.
     const { battleships } = scene;
     if (!battleships) return;
 

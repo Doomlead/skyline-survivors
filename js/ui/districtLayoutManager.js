@@ -9,7 +9,7 @@ const DistrictLayoutManager = (function() {
     let selectedMode = 'classic';
     let assaultLocked = false;
     
-    function init() {
+    function init() { // Init.
         // Find the Phaser canvas once it's created
         const checkCanvas = setInterval(() => {
             phaserCanvas = document.querySelector('#game-container canvas, #district-game-container canvas');
@@ -21,7 +21,7 @@ const DistrictLayoutManager = (function() {
         }, 100);
     }
     
-    function switchToDistrictLayout() {
+    function switchToDistrictLayout() { // Switch to district layout.
         if (currentLayout === 'district') return;
         currentLayout = 'district';
 
@@ -58,7 +58,7 @@ const DistrictLayoutManager = (function() {
         if (buildToggle) buildToggle.style.display = 'none';
     }
 	
-    function switchToGameLayout() {
+    function switchToGameLayout() { // Switch to game layout.
         if (currentLayout === 'game') return;
         currentLayout = 'game';
         
@@ -103,7 +103,7 @@ const DistrictLayoutManager = (function() {
             // Force the game canvas back to its proper size
             // This ensures it doesn't stay at the district size
             if (window.game && window.game.scale) {
-                const resizeToGameLayout = () => {
+                const resizeToGameLayout = () => { // Resize to game layout.
                     const responsive = typeof getResponsiveScale === 'function'
                         ? getResponsiveScale()
                         : { width: CONFIG.width, height: CONFIG.height };
@@ -125,7 +125,7 @@ const DistrictLayoutManager = (function() {
         }
     }
     
-    function styleCanvasForDistrict(container) {
+    function styleCanvasForDistrict(container) { // Style canvas for district.
     if (!phaserCanvas) return;
     
     // Ensure the canvas fills the district panel
@@ -141,7 +141,7 @@ const DistrictLayoutManager = (function() {
     container.style.overflow = 'hidden';
 }
     
-    function removeDistrictStyling() {
+    function removeDistrictStyling() { // Remove district styling.
         if (!phaserCanvas) return;
         
         // Remove overrides so Phaser's scaling takes back control
@@ -155,7 +155,7 @@ const DistrictLayoutManager = (function() {
         phaserCanvas.style.boxShadow = '';
     }
     
-    function updateDistrictPanels() {
+    function updateDistrictPanels() { // Update district panels.
         updateElement('district-lives', gameState?.lives ?? 3);
         updateElement('district-bombs', gameState?.smartBombs ?? 3);
         updateElement('district-score', gameState?.score ?? 0);
@@ -176,7 +176,7 @@ const DistrictLayoutManager = (function() {
         updateModeButtons(selectedMode);
     }
     
-    function updateMissionPanel(mission, district) {
+    function updateMissionPanel(mission, district) { // Update mission panel.
         if (!mission) {
             updateElement('district-mission-city', 'No district selected');
             updateElement('district-mission-details', 'Click a district on the globe to begin');
@@ -232,7 +232,7 @@ const DistrictLayoutManager = (function() {
         }
     }
     
-    function updateDistrictStatus(district) {
+    function updateDistrictStatus(district) { // Update district status.
         const container = document.getElementById('district-node-status');
         if (!container) return;
         
@@ -262,7 +262,7 @@ const DistrictLayoutManager = (function() {
         `;
     }
     
-    function updateModeButtons(mode) {
+    function updateModeButtons(mode) { // Update mode buttons.
         selectedMode = mode;
         
         const waveBtn = document.getElementById('district-mode-wave');
@@ -279,7 +279,7 @@ const DistrictLayoutManager = (function() {
         }
     }
     
-    function selectMode(mode) {
+    function selectMode(mode) { // Select mode.
         if (assaultLocked && mode !== 'assault') {
             return;
         }
@@ -298,24 +298,24 @@ const DistrictLayoutManager = (function() {
         }
     }
 
-    function getModeLabel(mode) {
+    function getModeLabel(mode) { // Get mode label.
         return mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Defense';
     }
     
-    function getSelectedMode() {
+    function getSelectedMode() { // Get selected mode.
         return selectedMode;
     }
     
-    function getCurrentLayout() {
+    function getCurrentLayout() { // Get current layout.
         return currentLayout;
     }
     
-    function updateElement(id, value) {
+    function updateElement(id, value) { // Update element.
         const el = document.getElementById(id);
         if (el) el.textContent = value;
     }
     
-    function formatSeconds(seconds) {
+    function formatSeconds(seconds) { // Format seconds.
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
@@ -352,7 +352,7 @@ function selectDistrictMode(mode) {
     }
 }
 
-function launchFromDistrictMap() {
+function launchFromDistrictMap() { // Launch from district map.
     const mode = DistrictLayoutManager.getSelectedMode();
     
     if (window.game?.scene?.isActive?.(SCENE_KEYS.build)) {
@@ -368,11 +368,11 @@ function launchFromDistrictMap() {
     }
 }
 
-function returnToGameFromDistrict() {
+function returnToGameFromDistrict() { // Return to game from district.
     closeBuildView();
 }
 
-function closeSettingsToGame() {
+function closeSettingsToGame() { // Close settings to game.
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
     

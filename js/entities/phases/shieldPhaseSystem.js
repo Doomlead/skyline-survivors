@@ -2,7 +2,7 @@
 // File: js/entities/phases/shieldPhaseSystem.js
 // ------------------------
 
-function initializeShieldPhaseState(entity, options = {}) {
+function initializeShieldPhaseState(entity, options = {}) { // Initialize shield phase state.
     if (!entity) return;
 
     const shieldBaseHp = Math.max(1, options.shieldBaseHp || Math.ceil((entity.maxHP || entity.maxHp || 100) * 0.25));
@@ -23,22 +23,22 @@ function initializeShieldPhaseState(entity, options = {}) {
     };
 }
 
-function getShieldPhaseState(entity) {
+function getShieldPhaseState(entity) { // Get shield phase state.
     return entity?.phaseState || null;
 }
 
-function canDamagePhaseHp(entity) {
+function canDamagePhaseHp(entity) { // Can damage phase hp.
     const state = getShieldPhaseState(entity);
     if (!state) return true;
     return state.mode === 'VULNERABLE' || state.mode === 'EXPOSED';
 }
 
-function getPhasedInterval(entity, baseInterval, stepDown = 140, minInterval = 280) {
+function getPhasedInterval(entity, baseInterval, stepDown = 140, minInterval = 280) { // Get phased interval.
     const phase = getEncounterPhase(entity);
     return Math.max(minInterval, baseInterval - phase * stepDown);
 }
 
-function createFloatingText(scene, x, y, message, color = '#ffffff') {
+function createFloatingText(scene, x, y, message, color = '#ffffff') { // Create floating text.
     if (!scene || !scene.add || !scene.tweens) return;
     const parsedColor = typeof color === 'number'
         ? `#${color.toString(16).padStart(6, '0')}`
@@ -60,7 +60,7 @@ function createFloatingText(scene, x, y, message, color = '#ffffff') {
     });
 }
 
-function tickShieldPhaseState(entity, time = 0, delta = 0) {
+function tickShieldPhaseState(entity, time = 0, delta = 0) { // Tick shield phase state.
     const state = entity?.phaseState;
     if (!state || !state.active) return;
 
@@ -104,7 +104,7 @@ function tickShieldPhaseState(entity, time = 0, delta = 0) {
     }
 }
 
-function applyShieldStageDamage(entity, damage, now = 0) {
+function applyShieldStageDamage(entity, damage, now = 0) { // Apply shield stage damage.
     const state = entity?.phaseState;
     if (!state) return { appliedToShield: false, shieldBroken: false, phaseAdvanced: false };
 
@@ -140,7 +140,7 @@ function applyShieldStageDamage(entity, damage, now = 0) {
     return { appliedToShield: false, shieldBroken: false, phaseAdvanced: false };
 }
 
-function getPhaseHudStatus(entity) {
+function getPhaseHudStatus(entity) { // Get phase hud status.
     const state = entity?.phaseState;
     if (!state) return { phaseText: '', gateText: '', gateColor: '#ffffff', percent: 1, windowRemainingMs: 0 };
 
@@ -177,7 +177,7 @@ function getPhaseHudStatus(entity) {
     };
 }
 
-function getEncounterPhase(entity) {
+function getEncounterPhase(entity) { // Get encounter phase.
     if (!entity?.phaseState) return 0;
     return Math.min(2, entity.phaseState.phasesCleared || 0);
 }

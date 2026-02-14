@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGeneratorCyberpunk = (function() {
-    function BackgroundGeneratorCyberpunk(scene, config) {
+    function BackgroundGeneratorCyberpunk(scene, config) { // Background generator cyberpunk.
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();
@@ -218,7 +218,7 @@ var BackgroundGeneratorCyberpunk = (function() {
         graphics.moveTo(0, worldHeight);
 
         var buildingRng = this.createRNG(seed);
-        var buildingRandom = function() { return buildingRng(); };
+        var buildingRandom = function() { return buildingRng(); }; // Building random.
 
         for (var i = 0; i < skylineNoise.length; i++) {
             var x = i * noiseStep;

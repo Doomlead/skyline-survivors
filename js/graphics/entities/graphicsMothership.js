@@ -2,11 +2,11 @@
 // Mothership Graphics
 // ------------------------
 
-function createMothershipGraphics(scene) {
+function createMothershipGraphics(scene) { // Create mothership graphics.
     createMothershipCoreGraphics(scene);
 }
 
-function createMothershipCoreGraphics(scene) {
+function createMothershipCoreGraphics(scene) { // Create mothership core graphics.
     // ========================
     // MOTHERSHIP CORE - Stationary breach cannon node
     // ========================

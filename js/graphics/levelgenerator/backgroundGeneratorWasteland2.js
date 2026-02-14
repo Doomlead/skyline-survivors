@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGeneratorWasteland2 = (function() {
-    function BackgroundGeneratorWasteland2(scene, config) {
+    function BackgroundGeneratorWasteland2(scene, config) { // Background generator wasteland2.
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();
@@ -221,7 +221,7 @@ var BackgroundGeneratorWasteland2 = (function() {
         graphics.fillStyle(0x060608, 1);
         
         var copyRng = this.createRNG(seed);
-        var cRand = function() { return copyRng(); };
+        var cRand = function() { return copyRng(); }; // C rand.
         
         graphics.beginPath();
         graphics.moveTo(0, worldHeight);

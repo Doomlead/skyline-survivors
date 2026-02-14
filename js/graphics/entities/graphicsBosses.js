@@ -3,7 +3,7 @@
 // Detailed, Large, Multi-Component Designs
 // ------------------------
 
-function createBossGraphics(scene) {
+function createBossGraphics(scene) { // Create boss graphics.
     createMegaLanderGraphics(scene);
     createTitanMutantGraphics(scene);
     createHiveDroneGraphics(scene);
@@ -15,7 +15,7 @@ function createBossGraphics(scene) {
     createOverlordShieldGraphics(scene);
 }
 
-function createMegaLanderGraphics(scene) {
+function createMegaLanderGraphics(scene) { // Create mega lander graphics.
     // ========================
     // MEGA LANDER - Giant UFO with 4 Tentacles
     // ========================
@@ -77,7 +77,7 @@ function createMegaLanderGraphics(scene) {
     megaLanderGraphics.destroy();
 }
 
-function createTitanMutantGraphics(scene) {
+function createTitanMutantGraphics(scene) { // Create titan mutant graphics.
     // ========================
     // TITAN MUTANT - Massive Humanoid Alien
     // ========================
@@ -202,7 +202,7 @@ function createTitanMutantGraphics(scene) {
     titanGraphics.destroy();
 }
 
-function createHiveDroneGraphics(scene) {
+function createHiveDroneGraphics(scene) { // Create hive drone graphics.
     // ========================
     // HIVE DRONE - Hexagonal Weapon Platform
     // ========================
@@ -272,7 +272,7 @@ function createHiveDroneGraphics(scene) {
     hiveGraphics.destroy();
 }
 
-function createBehemothBomberGraphics(scene) {
+function createBehemothBomberGraphics(scene) { // Create behemoth bomber graphics.
     // ========================
     // BEHEMOTH BOMBER - Aerial Fortress
     // ========================
@@ -345,7 +345,7 @@ function createBehemothBomberGraphics(scene) {
     bomberGraphics.destroy();
 }
 
-function createColossalPodGraphics(scene) {
+function createColossalPodGraphics(scene) { // Create colossal pod graphics.
     // ========================
     // COLOSSAL POD - Giant Organic Spawn Container
     // ========================
@@ -400,7 +400,7 @@ function createColossalPodGraphics(scene) {
     podGraphics.destroy();
 }
 
-function createLeviathanBaiterGraphics(scene) {
+function createLeviathanBaiterGraphics(scene) { // Create leviathan baiter graphics.
     // ========================
     // LEVIATHAN BAITER - Serpentine Sea Monster
     // ========================
@@ -472,7 +472,7 @@ function createLeviathanBaiterGraphics(scene) {
     leviathanGraphics.destroy();
 }
 
-function createApexKamikazeGraphics(scene) {
+function createApexKamikazeGraphics(scene) { // Create apex kamikaze graphics.
     // ========================
     // APEX KAMIKAZE - Angry Suicide Missile
     // ========================
@@ -553,7 +553,7 @@ function createApexKamikazeGraphics(scene) {
     kamikazeGraphics.destroy();
 }
 
-function createFortressTurretGraphics(scene) {
+function createFortressTurretGraphics(scene) { // Create fortress turret graphics.
     // ========================
     // FORTRESS TURRET - Immovable Gun Platform
     // ========================
@@ -637,7 +637,7 @@ function createFortressTurretGraphics(scene) {
     turretGraphics.destroy();
 }
 
-function createOverlordShieldGraphics(scene) {
+function createOverlordShieldGraphics(scene) { // Create overlord shield graphics.
     // ========================
     // OVERLORD SHIELD - Energy Barrier Master
     // ========================

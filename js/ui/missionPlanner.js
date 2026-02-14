@@ -274,7 +274,7 @@
     let battleshipState = null;
     const mapState = { nodes: {}, hasTimerData: false };
 
-    function getDefaultDistrictState(config) {
+    function getDefaultDistrictState(config) { // Get default district state.
         const roll = Math.random();
         const status = roll < 0.4 ? 'friendly' : 'occupied';
         const state = {
@@ -292,14 +292,14 @@
         return state;
     }
 
-    function syncProsperityMetrics(entry) {
+    function syncProsperityMetrics(entry) { // Sync prosperity metrics.
         if (!entry) return;
         const level = Math.max(0, Math.floor(entry.prosperity || 0));
         entry.prosperityLevel = level;
         entry.prosperityMultiplier = 1 + level * PROSPERITY_CONFIG.bonusPerLevel;
     }
 
-    function applyProsperityGain(entry, seconds = 0) {
+    function applyProsperityGain(entry, seconds = 0) { // Apply prosperity gain.
         if (!entry || seconds <= 0) return false;
         const current = Number(entry.prosperity || 0);
         const next = Math.min(PROSPERITY_CONFIG.maxLevel, current + seconds * PROSPERITY_CONFIG.gainPerSecond);
@@ -309,7 +309,7 @@
         return true;
     }
 
-    function applyProsperityLoss(entry) {
+    function applyProsperityLoss(entry) { // Apply prosperity loss.
         if (!entry) return;
         const lost = Math.max(0, Math.round(entry.prosperity || 0));
         entry.lastProsperityLoss = lost;
@@ -318,7 +318,7 @@
         syncProsperityMetrics(entry);
     }
 
-    function safeLoadState() {
+    function safeLoadState() { // Safe load state.
         if (districtState) return districtState;
         let stored = null;
         if (typeof localStorage !== 'undefined') {
@@ -379,7 +379,7 @@
         return districtState;
     }
 
-    function persistState() {
+    function persistState() { // Persist state.
         if (typeof localStorage === 'undefined' || !districtState) return;
         try {
             const payload = { ...districtState, lastUpdated: Date.now() };
@@ -389,7 +389,7 @@
         }
     }
 
-    function resetCampaignState() {
+    function resetCampaignState() { // Reset campaign state.
         districtState = null;
         battleshipState = null;
         mission = null;
@@ -405,7 +405,7 @@
         safeLoadState();
     }
 
-    function randomCityMission() {
+    function randomCityMission() { // Random city mission.
         const districtConfig = Phaser.Utils.Array.GetRandom(DISTRICT_CONFIGS);
         const district = getDistrictState(districtConfig.id);
         const center = getDistrictCenter(districtConfig);
@@ -422,18 +422,18 @@
         };
     }
 
-    function ensureMission() {
+    function ensureMission() { // Ensure mission.
         if (!mission) {
             mission = randomCityMission();
         }
         return mission;
     }
 
-    function getMission() {
+    function getMission() { // Get mission.
         return ensureMission();
     }
 
-    function rerollCity() {
+    function rerollCity() { // Reroll city.
         const current = ensureMission();
         const newMission = randomCityMission();
         newMission.mode = current.mode;
@@ -441,7 +441,7 @@
         return mission;
     }
 
-    function setMode(mode) {
+    function setMode(mode) { // Set mode.
         const current = ensureMission();
         if (mode === 'mothership') {
             return selectMothershipMission();
@@ -452,11 +452,11 @@
         return mission;
     }
 
-    function getDistrictConfigById(id) {
+    function getDistrictConfigById(id) { // Get district config by id.
         return DISTRICT_CONFIGS.find(d => d.id === id);
     }
 
-    function getDistrictCenter(config) {
+    function getDistrictCenter(config) { // Get district center.
         if (!config) return { lat: 0, lon: 0 };
         if (config.center) return config.center;
         if (config.polygon?.length) {
@@ -470,11 +470,11 @@
         return { lat: 0, lon: 0 };
     }
 
-    function getActiveDistrictConfigs() {
+    function getActiveDistrictConfigs() { // Get active district configs.
         return DISTRICT_CONFIGS.filter(cfg => getDistrictState(cfg.id).status !== 'occupied');
     }
 
-    function pickRandomDistrictId(excludeId = null) {
+    function pickRandomDistrictId(excludeId = null) { // Pick random district id.
         const candidates = getActiveDistrictConfigs();
         const pool = candidates.length ? candidates : DISTRICT_CONFIGS;
         const options = excludeId ? pool.filter(cfg => cfg.id !== excludeId) : pool;
@@ -482,7 +482,7 @@
         return Phaser.Utils.Array.GetRandom(pickFrom).id;
     }
 
-    function ensureBattleshipState() {
+    function ensureBattleshipState() { // Ensure battleship state.
         if (battleshipState) return battleshipState;
         battleshipState = Array.from({ length: BATTLESHIP_CONFIG.count }).map((_, index) => {
             const fromId = pickRandomDistrictId();
@@ -501,11 +501,11 @@
         return battleshipState;
     }
 
-    function lerpValue(start, end, t) {
+    function lerpValue(start, end, t) { // Lerp value.
         return start + (end - start) * t;
     }
 
-    function tickBattleships(seconds = 0) {
+    function tickBattleships(seconds = 0) { // Tick battleships.
         if (seconds <= 0) return ensureBattleshipState();
         const state = safeLoadState();
         const ships = ensureBattleshipState();
@@ -588,11 +588,11 @@
         return ships;
     }
 
-    function getBattleships() {
+    function getBattleships() { // Get battleships.
         return ensureBattleshipState();
     }
 
-    function retireBattleshipsForDistrict(districtId) {
+    function retireBattleshipsForDistrict(districtId) { // Retire battleships for district.
         if (!districtId) return;
         const ships = ensureBattleshipState();
         ships.forEach(ship => {
@@ -604,7 +604,7 @@
         });
     }
 
-    function selectDistrict(name, longitudeOverride = null, providedState = null) {
+    function selectDistrict(name, longitudeOverride = null, providedState = null) { // Select district.
         const current = ensureMission();
         const config = DISTRICT_CONFIGS.find(d => d.name === name || d.id === name);
         const center = getDistrictCenter(config);
@@ -630,7 +630,7 @@
         return mission;
     }
 
-    function getDistrictState(id) {
+    function getDistrictState(id) { // Get district state.
         const state = safeLoadState();
         if (!state.districts[id]) {
             const cfg = getDistrictConfigById(id);
@@ -639,7 +639,7 @@
         return state.districts[id];
     }
 
-    function updateDistrictState(id, patch) {
+    function updateDistrictState(id, patch) { // Update district state.
         const state = safeLoadState();
         const existing = getDistrictState(id);
         state.districts[id] = { ...existing, ...patch };
@@ -648,17 +648,17 @@
         return state.districts[id];
     }
 
-    function getAllDistrictStates() {
+    function getAllDistrictStates() { // Get all district states.
         safeLoadState();
         return DISTRICT_CONFIGS.map(cfg => ({ config: cfg, state: getDistrictState(cfg.id) }));
     }
 
-    function areAllDistrictsFriendly() {
+    function areAllDistrictsFriendly() { // Are all districts friendly.
         const state = safeLoadState();
         return Object.values(state.districts).every(entry => entry.status === 'friendly');
     }
 
-    function buildMissionDirectives(config, state, modeOverride = null) {
+    function buildMissionDirectives(config, state, modeOverride = null) { // Build mission directives.
         if (!config || !state) return null;
         const urgency = state.status === 'occupied'
             ? 'occupied'
@@ -708,7 +708,7 @@
         };
     }
 
-    function buildMothershipDirectives() {
+    function buildMothershipDirectives() { // Build mothership directives.
         const threatMix = MOTHERSHIP_CONFIG.threatMix.map(type => ({ type, weight: 2 }));
         return {
             districtId: MOTHERSHIP_CONFIG.id,
@@ -728,7 +728,7 @@
         };
     }
 
-    function tickDistricts(seconds = 0) {
+    function tickDistricts(seconds = 0) { // Tick districts.
         const state = safeLoadState();
         let mutated = false;
         Object.values(state.districts).forEach((entry) => {
@@ -772,7 +772,7 @@
         }
     }
 
-    function recordMissionOutcome(success) {
+    function recordMissionOutcome(success) { // Record mission outcome.
         const currentMission = mission;
         if (!currentMission?.district) return;
         const cfg = getDistrictConfigById(currentMission.district);
@@ -804,7 +804,7 @@
         };
     }
 
-    function prepareLaunchPayload(mode) {
+    function prepareLaunchPayload(mode) { // Prepare launch payload.
         if (mode === 'mothership' || mission?.district === 'mothership') {
             const mothershipMission = selectMothershipMission();
             return {
@@ -829,7 +829,7 @@
         };
     }
 
-    function selectMothershipMission() {
+    function selectMothershipMission() { // Select mothership mission.
         mission = {
             city: MOTHERSHIP_CONFIG.name,
             district: MOTHERSHIP_CONFIG.id,
@@ -843,7 +843,7 @@
         return mission;
     }
 
-    function ensureMapNodeState(config) {
+    function ensureMapNodeState(config) { // Ensure map node state.
         const existing = mapState.nodes[config.id];
         if (existing) return existing;
         const status = config.timer > 0 ? 'threatened' : 'stable';
@@ -859,27 +859,27 @@
         return mapState.nodes[config.id];
     }
 
-    function setMapTimerDataAvailable(hasTimerData) {
+    function setMapTimerDataAvailable(hasTimerData) { // Set map timer data available.
         mapState.hasTimerData = !!hasTimerData;
         return mapState.hasTimerData;
     }
 
-    function updateMapNodeState(id, patch = {}) {
+    function updateMapNodeState(id, patch = {}) { // Update map node state.
         const node = mapState.nodes[id];
         if (!node) return null;
         mapState.nodes[id] = { ...node, ...patch, lastUpdated: Date.now() };
         return mapState.nodes[id];
     }
 
-    function getMapNodeState(id) {
+    function getMapNodeState(id) { // Get map node state.
         return mapState.nodes[id] || null;
     }
 
-    function getMapState() {
+    function getMapState() { // Get map state.
         return mapState;
     }
 
-    function hasMapTimerData() {
+    function hasMapTimerData() { // Has map timer data.
         return !!mapState.hasTimerData;
     }
 

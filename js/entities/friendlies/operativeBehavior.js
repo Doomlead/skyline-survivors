@@ -94,7 +94,7 @@ const COMRADE_BUFF_CONFIG = {
     minFireRateMultiplier: 0.6
 };
 
-function pickOperativeType() {
+function pickOperativeType() { // Pick operative type.
     const total = OPERATIVE_RARITY_WEIGHTS.reduce((sum, entry) => sum + entry.weight, 0);
     const roll = Math.random() * total;
     let accumulator = 0;
@@ -105,7 +105,7 @@ function pickOperativeType() {
     return 'infantry';
 }
 
-function spawnOperative(scene, type, x, y) {
+function spawnOperative(scene, type, x, y) { // Spawn operative.
     const { friendlies, audioManager } = scene;
     if (!friendlies) return null;
     const config = OPERATIVE_CLASS_CONFIG[type] || OPERATIVE_CLASS_CONFIG.infantry;
@@ -140,7 +140,7 @@ function spawnOperative(scene, type, x, y) {
     return operative;
 }
 
-function spawnMedicPickup(scene, x, y) {
+function spawnMedicPickup(scene, x, y) { // Spawn medic pickup.
     const { powerUps } = scene;
     if (!powerUps) return null;
 
@@ -166,7 +166,7 @@ function spawnMedicPickup(scene, x, y) {
     return pickup;
 }
 
-function getOperativeFormationOffset(index, squadSize, time) {
+function getOperativeFormationOffset(index, squadSize, time) { // Get operative formation offset.
     if (!squadSize) return { x: 0, y: 0 };
     const ringIndex = index % Math.max(1, Math.ceil(squadSize / 6));
     const radius = SQUAD_AURA_CONFIG.baseRadius + ringIndex * SQUAD_AURA_CONFIG.ringSpacing;
@@ -178,7 +178,7 @@ function getOperativeFormationOffset(index, squadSize, time) {
     };
 }
 
-function getAuraMultiplier(operative, player, auraActive) {
+function getAuraMultiplier(operative, player, auraActive) { // Get aura multiplier.
     if (!auraActive || !player) return 1.0;
     const dx = typeof wrappedDistance === 'function'
         ? wrappedDistance(operative.x, player.x, CONFIG.worldWidth)
@@ -189,7 +189,7 @@ function getAuraMultiplier(operative, player, auraActive) {
     return 1.0;
 }
 
-function getComradeBuffs() {
+function getComradeBuffs() { // Get comrade buffs.
     const level = Math.max(0, playerState.comradeBuffs?.level || 0);
     const fireRateMultiplier = Math.max(
         COMRADE_BUFF_CONFIG.minFireRateMultiplier,
@@ -203,7 +203,7 @@ function getComradeBuffs() {
     };
 }
 
-function getTargetDistance(origin, target) {
+function getTargetDistance(origin, target) { // Get target distance.
     if (!origin || !target) return Infinity;
     const dx = typeof wrappedDistance === 'function'
         ? wrappedDistance(origin.x, target.x, CONFIG.worldWidth)
@@ -212,7 +212,7 @@ function getTargetDistance(origin, target) {
     return Math.hypot(dx, dy);
 }
 
-function findSquadTarget(scene, operative, player) {
+function findSquadTarget(scene, operative, player) { // Find squad target.
     if (!player) return findNearestEnemy(scene, operative).target;
     const { target: nearestToPlayer, distance } = findNearestEnemy(scene, player);
     if (nearestToPlayer && distance < 200) {
@@ -221,7 +221,7 @@ function findSquadTarget(scene, operative, player) {
     return findNearestEnemy(scene, operative).target;
 }
 
-function getRebuildLandingZone(scene) {
+function getRebuildLandingZone(scene) { // Get rebuild landing zone.
     const { friendlies } = scene;
     if (!friendlies || !friendlies.children) return null;
     for (const friendly of friendlies.children.entries) {
@@ -233,7 +233,7 @@ function getRebuildLandingZone(scene) {
     return null;
 }
 
-function isPilotInRebuildZone(scene, landingZone) {
+function isPilotInRebuildZone(scene, landingZone) { // Is pilot in rebuild zone.
     if (!landingZone || !pilotState.active || aegisState.active) return false;
     if (typeof isPlayerOnLandingZone === 'function') {
         return isPlayerOnLandingZone(scene, landingZone);
@@ -248,7 +248,7 @@ function isPilotInRebuildZone(scene, landingZone) {
     return Math.abs(dx) <= xRange && Math.abs(dy) <= yRange;
 }
 
-function findThreateningProjectile(scene, targetX, targetY, radius, maxTime) {
+function findThreateningProjectile(scene, targetX, targetY, radius, maxTime) { // Find threatening projectile.
     const { enemyProjectiles } = scene;
     if (!enemyProjectiles || !enemyProjectiles.children) return null;
     let best = null;
@@ -279,7 +279,7 @@ function findThreateningProjectile(scene, targetX, targetY, radius, maxTime) {
     return best;
 }
 
-function applyOperativeDefenseVisual(operative, isDefending) {
+function applyOperativeDefenseVisual(operative, isDefending) { // Apply operative defense visual.
     if (isDefending) {
         operative.setTint(SQUAD_AURA_CONFIG.bodyBlockTint);
     } else if (operative.tintTopLeft !== 0xffffff) {
@@ -287,7 +287,7 @@ function applyOperativeDefenseVisual(operative, isDefending) {
     }
 }
 
-function setOperativeState(scene, operative, nextState, time) {
+function setOperativeState(scene, operative, nextState, time) { // Set operative state.
     if (operative.currentState === nextState) return;
     operative.currentState = nextState;
     const { audioManager } = scene;
@@ -298,7 +298,7 @@ function setOperativeState(scene, operative, nextState, time) {
     scene.lastOperativeCallout = time;
 }
 
-function findNearestEnemy(scene, origin) {
+function findNearestEnemy(scene, origin) { // Find nearest enemy.
     const { enemies, bosses, battleships } = scene;
     const candidates = [];
     if (enemies) candidates.push(...enemies.children.entries);
@@ -323,7 +323,7 @@ function findNearestEnemy(scene, origin) {
     return { target: nearest, distance: nearestDist };
 }
 
-function findNearestAssaultTarget(scene, origin) {
+function findNearestAssaultTarget(scene, origin) { // Find nearest assault target.
     const { assaultTargets } = scene;
     if (!assaultTargets) return { target: null, distance: Infinity };
 
@@ -346,7 +346,7 @@ function findNearestAssaultTarget(scene, origin) {
     return { target: nearest, distance: nearestDist };
 }
 
-function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, player, auraActive) {
+function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, player, auraActive) { // Update operative infantry.
     const config = OPERATIVE_CLASS_CONFIG.infantry;
     const buffs = getComradeBuffs();
     const patrolAngle = (operative.patrolAngle || 0) + 0.02 * timeSlowMultiplier;
@@ -376,7 +376,7 @@ function updateOperativeInfantry(scene, operative, time, timeSlowMultiplier, pla
     }
 }
 
-function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, player, auraActive) {
+function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, player, auraActive) { // Update operative gunner.
     const config = OPERATIVE_CLASS_CONFIG.gunner;
     const buffs = getComradeBuffs();
     const target = findSquadTarget(scene, operative, player);
@@ -417,7 +417,7 @@ function updateOperativeGunner(scene, operative, time, timeSlowMultiplier, playe
     }
 }
 
-function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) {
+function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) { // Update operative medic.
     const config = OPERATIVE_CLASS_CONFIG.medic;
     const player = getActivePlayer(scene);
 
@@ -447,7 +447,7 @@ function updateOperativeMedic(scene, operative, time, timeSlowMultiplier) {
     }
 }
 
-function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, player, auraActive) {
+function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, player, auraActive) { // Update operative saboteur.
     const config = OPERATIVE_CLASS_CONFIG.saboteur;
     const buffs = getComradeBuffs();
     const useAssaultTargets = gameState.mode === 'assault' && scene.assaultTargets;
@@ -502,7 +502,7 @@ function updateOperativeSaboteur(scene, operative, time, timeSlowMultiplier, pla
     }
 }
 
-function handleOperativeFire(scene, operative, time, player, auraActive) {
+function handleOperativeFire(scene, operative, time, player, auraActive) { // Handle operative fire.
     const config = OPERATIVE_CLASS_CONFIG[operative.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
     const buffs = getComradeBuffs();
     const auraMultiplier = getAuraMultiplier(operative, player, auraActive);
@@ -588,7 +588,7 @@ function handleOperativeFire(scene, operative, time, player, auraActive) {
     }
 }
 
-function updateOperativeHomeAnchor(scene, operative, timeSlowMultiplier, delta) {
+function updateOperativeHomeAnchor(scene, operative, timeSlowMultiplier, delta) { // Update operative home anchor.
     const config = OPERATIVE_CLASS_CONFIG[operative.operativeType] || OPERATIVE_CLASS_CONFIG.infantry;
     const player = getActivePlayer(scene);
     if (!player || !config.roamSpeed) return;
@@ -606,7 +606,7 @@ function updateOperativeHomeAnchor(scene, operative, timeSlowMultiplier, delta) 
     }
 }
 
-function updateOperatives(scene, time, delta) {
+function updateOperatives(scene, time, delta) { // Update operatives.
     const { friendlies } = scene;
     if (!friendlies) return;
 

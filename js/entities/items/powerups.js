@@ -2,7 +2,7 @@
 // Power-up system - All 16 power-up types
 // ------------------------
 
-function spawnPowerUp(scene, x, y) {
+function spawnPowerUp(scene, x, y) { // Spawn power up.
     const { powerUps } = scene;
     if (!powerUps) return;
     const powerUpPool = [
@@ -27,7 +27,7 @@ function spawnPowerUp(scene, x, y) {
     });
 }
 
-function refreshDecayTimer(path, tier) {
+function refreshDecayTimer(path, tier) { // Refresh decay timer.
     const duration = getDecayDurationMs(path, tier);
     if (!duration) {
         playerState.powerUpDecay[path] = 0;
@@ -36,12 +36,12 @@ function refreshDecayTimer(path, tier) {
     playerState.powerUpDecay[path] = duration;
 }
 
-function triggerDecayFlash(path) {
+function triggerDecayFlash(path) { // Trigger decay flash.
     if (!playerState.decayFlash) return;
     playerState.decayFlash[path] = 400;
 }
 
-function normalizePrimaryWeapon() {
+function normalizePrimaryWeapon() { // Normalize primary weapon.
     const p = playerState.powerUps;
     if (playerState.primaryWeapon === 'laser' && p.laser <= 0 && p.multiShot > 0) {
         playerState.primaryWeapon = 'multiShot';
@@ -52,7 +52,7 @@ function normalizePrimaryWeapon() {
     }
 }
 
-function updatePowerUps(scene) {
+function updatePowerUps(scene) { // Update power ups.
     const { powerUps, player } = scene;
     if (!powerUps || !player) return;
     powerUps.children.entries.forEach(powerUp => {
@@ -71,7 +71,7 @@ function updatePowerUps(scene) {
 }
 
 
-function collectPowerUp(playerSprite, powerUp) {
+function collectPowerUp(playerSprite, powerUp) { // Collect power up.
     gameState.score += getMissionScaledReward(200);
     const audioManager = this.audioManager;
     if (audioManager) audioManager.playSound('powerUpCollect');
@@ -204,7 +204,7 @@ function collectPowerUp(playerSprite, powerUp) {
     powerUp.destroy();
 }
 
-function shouldOverflowToComrades(powerUpType, powerUps) {
+function shouldOverflowToComrades(powerUpType, powerUps) { // Should overflow to comrades.
     const tiers = {
         laser: 2,
         multiShot: 3,
@@ -219,7 +219,7 @@ function shouldOverflowToComrades(powerUpType, powerUps) {
     return currentTier >= tiers[powerUpType];
 }
 
-function applyComradeOverflowUpgrade(scene, powerUp) {
+function applyComradeOverflowUpgrade(scene, powerUp) { // Apply comrade overflow upgrade.
     const currentLevel = playerState.comradeBuffs?.level || 0;
     const nextLevel = Math.min(currentLevel + 1, 12);
     playerState.comradeBuffs = {
@@ -244,7 +244,7 @@ function applyComradeOverflowUpgrade(scene, powerUp) {
     }
 }
 
-function updatePowerUpMagnet(scene) {
+function updatePowerUpMagnet(scene) { // Update power up magnet.
     const { powerUps } = scene;
     const player = getActivePlayer(scene);
     if (!powerUps || !player) return;
@@ -261,7 +261,7 @@ function updatePowerUpMagnet(scene) {
 }
 
 
-function updatePowerUpTimers(scene, delta) {
+function updatePowerUpTimers(scene, delta) { // Update power up timers.
     const player = getActivePlayer(scene);
     if (!player) return;
     let minFireRate = 200;
@@ -313,7 +313,7 @@ function updatePowerUpTimers(scene, delta) {
     updatePowerUpDecayTimers(delta);
 }
 
-function updatePowerUpDecayTimers(delta) {
+function updatePowerUpDecayTimers(delta) { // Update power up decay timers.
     const p = playerState.powerUps;
     const decay = playerState.powerUpDecay;
     if (!decay) return;

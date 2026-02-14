@@ -3,7 +3,7 @@
 // ------------------------
 
 class AudioManager {
-    constructor(scene) {
+    constructor(scene) { // Constructor.
         this.scene = scene;
         this.sounds = {};
         this.musicVolume = userSettings.musicVolume;
@@ -17,8 +17,8 @@ class AudioManager {
         this.initSounds();
     }
 
-    setupUnlockHandlers() {
-        const unlock = async () => {
+    setupUnlockHandlers() { // Setup unlock handlers.
+        const unlock = async () => { // Unlock.
             if (this.audioContext && this.audioContext.state === 'suspended') {
                 try {
                     await this.audioContext.resume();
@@ -36,7 +36,7 @@ class AudioManager {
         });
     }
 
-    initSounds() {
+    initSounds() { // Init sounds.
         this.sounds.bgMusic = {
             type: 'file',
             buffer: null,
@@ -77,7 +77,7 @@ class AudioManager {
         this.sounds.gameOver = { type: 'synth', frequencies: [1200, 800, 400], duration: 0.8, waveform: 'sine', pitch: 'down' };
     }
 
-    playSound(soundName, options = {}) {
+    playSound(soundName, options = {}) { // Play sound.
         if (this.isMuted || !this.sounds[soundName]) return;
         const sound = this.sounds[soundName];
         const volume = options.volume !== undefined ? options.volume : this.sfxVolume;
@@ -89,7 +89,7 @@ class AudioManager {
         }
     }
 
-    playSynthSound(sound, volume, options = {}) {
+    playSynthSound(sound, volume, options = {}) { // Play synth sound.
         const now = this.audioContext.currentTime;
         const duration = sound.duration || 0.2;
         const waveform = sound.waveform || 'sine';
@@ -142,7 +142,7 @@ class AudioManager {
         }
     }
 
-    playNoiseSound(sound, volume, options = {}) {
+    playNoiseSound(sound, volume, options = {}) { // Play noise sound.
         const now = this.audioContext.currentTime;
         const duration = sound.duration || 0.3;
 
@@ -172,7 +172,7 @@ class AudioManager {
         source.stop(now + duration);
     }
 
-    async loadMusicBuffer() {
+    async loadMusicBuffer() { // Load music buffer.
         if (this.sounds.bgMusic.buffer) return this.sounds.bgMusic.buffer;
 
         if (!this.musicBufferPromise) {
@@ -193,7 +193,7 @@ class AudioManager {
         return this.musicBufferPromise;
     }
 
-    async playAmbientMusic() {
+    async playAmbientMusic() { // Play ambient music.
         if (this.isMuted || this.musicSource) return;
 
         try {
@@ -224,7 +224,7 @@ class AudioManager {
         }
     }
 
-    stopMusic() {
+    stopMusic() { // Stop music.
         if (this.musicSource) {
             this.musicSource.stop();
             this.musicSource.disconnect();
@@ -236,7 +236,7 @@ class AudioManager {
         }
     }
 
-    toggleMute() {
+    toggleMute() { // Toggle mute.
         this.isMuted = !this.isMuted;
         userSettings.muted = this.isMuted;
         persistUserSettings();
@@ -245,7 +245,7 @@ class AudioManager {
         return this.isMuted;
     }
 
-    setMusicVolume(value) {
+    setMusicVolume(value) { // Set music volume.
         this.musicVolume = Math.max(0, Math.min(1, value));
         userSettings.musicVolume = this.musicVolume;
         persistUserSettings();
@@ -254,13 +254,13 @@ class AudioManager {
         }
     }
 
-    setSFXVolume(value) {
+    setSFXVolume(value) { // Set sfxvolume.
         this.sfxVolume = Math.max(0, Math.min(1, value));
         userSettings.sfxVolume = this.sfxVolume;
         persistUserSettings();
     }
 
-    dispose() {
+    dispose() { // Dispose.
         this.stopMusic();
     }
 }

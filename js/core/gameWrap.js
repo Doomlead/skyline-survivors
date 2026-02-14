@@ -11,7 +11,7 @@ function getGhostSprites(scene) {
     return scene.ghostSprites;
 }
 
-function wrapValue(x, worldWidth) {
+function wrapValue(x, worldWidth) { // Wrap value.
     x = x % worldWidth;
     if (x < 0) x += worldWidth;
     return x;
@@ -77,7 +77,7 @@ function updateGhostSprite(scene, entity, ghostX) {
     }
 }
 
-function removeGhostSprite(scene, entity) {
+function removeGhostSprite(scene, entity) { // Remove ghost sprite.
     const ghostSprites = getGhostSprites(scene);
     const ghost = ghostSprites.get(entity);
     if (ghost) {
@@ -113,7 +113,7 @@ function updateEntityWrapping(scene) {
     // Boundary threshold - how close to edge before we need a ghost
     const boundaryThreshold = camWidth;
     
-    const processEntity = (entity) => {
+    const processEntity = (entity) => { // Process entity.
         if (!entity || !entity.active) {
             removeGhostSprite(scene, entity);
             return;
@@ -152,7 +152,7 @@ function updateEntityWrapping(scene) {
         entity.x = canonicalX;
     };
     
-    const processGroup = (group) => {
+    const processGroup = (group) => { // Process group.
         if (!group || !group.children || !group.children.entries) return;
         group.children.entries.forEach(processEntity);
     };

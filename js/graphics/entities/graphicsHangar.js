@@ -2,7 +2,7 @@
 // Hangar Graphics - Fortified Extraction Hub
 // ------------------------
 
-function createHangarGraphics(scene) {
+function createHangarGraphics(scene) { // Create hangar graphics.
     const hangar = scene.add.graphics();
     const width = 96;
     const height = 64;

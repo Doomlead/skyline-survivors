@@ -2,7 +2,7 @@
 // file js/ui/uiPauseMenu.js Pause menu and key bindings
 // ------------------------
 
-function togglePause(scene) {
+function togglePause(scene) { // Toggle pause.
     const audioManager = scene.audioManager;
     gameState.paused = !gameState.paused;
 
@@ -18,7 +18,7 @@ function togglePause(scene) {
     }
 }
 
-function createPauseMenu(scene, audioManager) {
+function createPauseMenu(scene, audioManager) { // Create pause menu.
     const centerX = scene.cameras.main.width / 2;
     const centerY = scene.cameras.main.height / 2;
 
@@ -188,7 +188,7 @@ function createPauseMenu(scene, audioManager) {
 
     // === EVENT HANDLERS ===
 
-    const showMainMenu = () => {
+    const showMainMenu = () => { // Show main menu.
         scene.pauseMenuView = 'main';
         mainElements.forEach(el => el.setVisible(true));
         keyBindingsElements.forEach(el => el.setVisible(false));
@@ -196,20 +196,20 @@ function createPauseMenu(scene, audioManager) {
         cancelRebind();
     };
 
-    const showKeyBindings = () => {
+    const showKeyBindings = () => { // Show key bindings.
         scene.pauseMenuView = 'keybindings';
         mainElements.forEach(el => el.setVisible(false));
         keyBindingsElements.forEach(el => el.setVisible(true));
         keyMapValueTexts.forEach(({ text }) => text.setVisible(true));
     };
 
-    const updateKeyMapValues = () => {
+    const updateKeyMapValues = () => { // Update key map values.
         keyMapValueTexts.forEach(({ actionId, text }) => {
             text.setText(`[ ${formatKeyLabel(userSettings.keyBindings[actionId])} ]`);
         });
     };
 
-    const cancelRebind = () => {
+    const cancelRebind = () => { // Cancel rebind.
         scene.isRebindingKey = false;
         scene.rebindingAction = null;
         keyBindingsHint.setText('Click a binding to change it. Press ESC to cancel.').setColor('#94a3b8');
@@ -219,7 +219,7 @@ function createPauseMenu(scene, audioManager) {
         }
     };
 
-    const startKeyRebind = (actionId, actionLabel, textObj) => {
+    const startKeyRebind = (actionId, actionLabel, textObj) => { // Start key rebind.
         if (scene.keyRebindHandler) {
             scene.input.keyboard.off('keydown', scene.keyRebindHandler);
             scene.keyRebindHandler = null;
@@ -306,8 +306,8 @@ function createPauseMenu(scene, audioManager) {
     musicKnob.on('pointerdown', () => { dragTarget = 'music'; });
     sfxKnob.on('pointerdown', () => { dragTarget = 'sfx'; });
 
-    const onPointerUp = () => { dragTarget = null; };
-    const onPointerMove = (pointer) => {
+    const onPointerUp = () => { dragTarget = null; }; // On pointer up.
+    const onPointerMove = (pointer) => { // On pointer move.
         if (!dragTarget || !audioManager) return;
         const sliderCenterX = centerX + 40;
         const sliderWidth = 150;
@@ -357,7 +357,7 @@ function createPauseMenu(scene, audioManager) {
     scene.input.keyboard.on('keydown-ESC', scene.escHandler);
 }
 
-function cleanupPauseUI(scene) {
+function cleanupPauseUI(scene) { // Cleanup pause ui.
     if (scene.pauseUI) {
         const { overlay, mainElements, keyBindingsElements, keyMapValueTexts } = scene.pauseUI;
 
@@ -415,7 +415,7 @@ function cleanupPauseUI(scene) {
     scene.pauseMenuView = null;
 }
 
-function returnToMainMenu(scene) {
+function returnToMainMenu(scene) { // Return to main menu.
     cleanupPauseUI(scene);
     resetGameState();
 

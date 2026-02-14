@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 class ParallaxManager {
-    constructor(scene, config) {
+    constructor(scene, config) { // Constructor.
         this.scene = scene;
         this.config = config;
         this.layers = [];
@@ -13,7 +13,7 @@ class ParallaxManager {
         this._accumScrollY = 0;
     }
 
-    createLayers() {
+    createLayers() { // Create layers.
         const { worldWidth, worldHeight } = this.config;
         
         // Use the ACTUAL current camera/canvas dimensions, not the config snapshot
@@ -55,14 +55,14 @@ class ParallaxManager {
         this.config.height = camHeight;
     }
 
-    initTracking(playerX, playerY) {
+    initTracking(playerX, playerY) { // Init tracking.
         this._prevPlayerX = playerX;
         this._accumScrollX = 0;
         this._prevPlayerY = playerY || 0;
         this._accumScrollY = 0;
     }
 
-    update(playerX, playerY) {
+    update(playerX, playerY) { // Update.
         const worldWidth = this.config.worldWidth;
         
         // --- Horizontal Logic ---
@@ -88,14 +88,14 @@ class ParallaxManager {
         }
     }
 
-    refresh() {
+    refresh() { // Refresh.
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
             layer.sprite.tilePositionY = this._accumScrollY / (layer.scaleY || 1);
         }
     }
 
-    resize(width, height) {
+    resize(width, height) { // Resize.
         this.config.width = width;
         this.config.height = height;
 
@@ -112,7 +112,7 @@ class ParallaxManager {
         this.refresh();
     }
 
-    destroy() {
+    destroy() { // Destroy.
         for (const layer of this.layers) {
             layer.sprite.destroy();
         }

@@ -8,7 +8,7 @@ let gameSceneInitialized = false;
 // Store canonical positions separately from render positions
 // This is the key to making wrap-around work properly
 
-function initializeGame(scene) {
+function initializeGame(scene) { // Initialize game.
     for (let i = 0; i < gameState.humans; i++) {
         spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
     }
@@ -33,10 +33,10 @@ function initializeGame(scene) {
     updateUI(scene);
 }
 
-function applyKeyBindings(scene) {
+function applyKeyBindings(scene) { // Apply key bindings.
     const bindings = userSettings.keyBindings || DEFAULT_KEY_BINDINGS;
     const keyCodes = Phaser.Input.Keyboard.KeyCodes;
-    const resolveKeyCode = (action) => keyCodes[bindings[action] || DEFAULT_KEY_BINDINGS[action]];
+    const resolveKeyCode = (action) => keyCodes[bindings[action] || DEFAULT_KEY_BINDINGS[action]]; // Resolve key code.
 
     if (scene.boundKeys) {
         Object.values(scene.boundKeys).forEach((key) => {
@@ -76,11 +76,11 @@ function applyKeyBindings(scene) {
     scene.switchPrimaryKey = boundKeys.switchPrimary;
 }
 
-function preload() {
+function preload() { // Preload.
     createGraphics(this);
 }
 
-function showRebuildObjectiveBanner(scene, message, color = '#66ccff') {
+function showRebuildObjectiveBanner(scene, message, color = '#66ccff') { // Show rebuild objective banner.
     if (!scene) return;
     const banner = scene.add.text(
         CONFIG.width / 2,
@@ -105,7 +105,7 @@ function showRebuildObjectiveBanner(scene, message, color = '#66ccff') {
     });
 }
 
-function showSupplyDropBanner(scene, message, color = '#38bdf8') {
+function showSupplyDropBanner(scene, message, color = '#38bdf8') { // Show supply drop banner.
     if (!scene || !message) return;
     const scale = typeof getOverlayScale === 'function' ? getOverlayScale(scene) : 1;
     const banner = scene.add.text(
@@ -132,7 +132,7 @@ function showSupplyDropBanner(scene, message, color = '#38bdf8') {
     });
 }
 
-function initHangarRebuildUi(scene) {
+function initHangarRebuildUi(scene) { // Init hangar rebuild ui.
     if (!scene || scene.hangarRebuildUi) return;
     const rebuildText = scene.add.text(0, 0, '', {
         fontSize: '20px',
@@ -149,7 +149,7 @@ function initHangarRebuildUi(scene) {
     };
 }
 
-function updateHangarRebuildUi(scene) {
+function updateHangarRebuildUi(scene) { // Update hangar rebuild ui.
     if (!scene || !scene.hangarRebuildUi) return;
     const ui = scene.hangarRebuildUi;
     const objective = gameState.rebuildObjective;
@@ -187,7 +187,7 @@ function updateHangarRebuildUi(scene) {
     ui.text.setVisible(true);
 }
 
-function spawnExtractionDropship(scene, objective) {
+function spawnExtractionDropship(scene, objective) { // Spawn extraction dropship.
     const spawnOffset = Math.random() < 0.5 ? -260 : 260;
     const spawnX = wrapValue(objective.extractionX + spawnOffset, CONFIG.worldWidth);
     const spawnY = CONFIG.height * 0.35;
@@ -203,7 +203,7 @@ function spawnExtractionDropship(scene, objective) {
     return dropShip;
 }
 
-function rebuildAegisAtExtraction(scene, objective) {
+function rebuildAegisAtExtraction(scene, objective) { // Rebuild aegis at extraction.
     if (!scene.aegis || !scene.pilot) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const terrainVariation = Math.sin(objective.extractionX / 200) * 30;
@@ -228,13 +228,13 @@ function rebuildAegisAtExtraction(scene, objective) {
     showRebuildObjectiveBanner(scene, 'Aegis rebuilt - return to battle', '#66ff88');
 }
 
-function addAlienTechToRebuildObjective(amount = 1) {
+function addAlienTechToRebuildObjective(amount = 1) { // Add alien tech to rebuild objective.
     const objective = gameState.rebuildObjective;
     if (!objective || !objective.active || objective.branch !== 'station') return;
     objective.collectedAlienTech += amount;
 }
 
-function updateRebuildObjective(scene, delta) {
+function updateRebuildObjective(scene, delta) { // Update rebuild objective.
     const objective = gameState.rebuildObjective;
     if (!objective || !objective.active) return;
 
@@ -265,7 +265,7 @@ function updateRebuildObjective(scene, delta) {
 }
 
 
-function create() {
+function create() { // Create.
     if (window.DistrictLayoutManager) {
         DistrictLayoutManager.switchToGameLayout();
     }
@@ -425,7 +425,7 @@ function create() {
     }
 }
 
-function update(time, delta) {
+function update(time, delta) { // Update.
     const { particleManager } = this;
     const player = getActivePlayer(this);
     

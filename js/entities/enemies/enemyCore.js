@@ -114,7 +114,7 @@ function getClassicWaveEnemyPool(wave) {
     return [...CLASSIC_LIGHT_ENEMIES, ...CLASSIC_HEAVY_ENEMIES, ...CLASSIC_ELITE_ENEMIES];
 }
 
-function getWaveSpawnTiming(wave) {
+function getWaveSpawnTiming(wave) { // Get wave spawn timing.
     const waveIndex = Math.max(1, wave);
     const initialDelay = Phaser.Math.Clamp(8000 - (waveIndex - 1) * 350, 2500, 8000);
     const groupDelay = Phaser.Math.Clamp(4000 - (waveIndex - 1) * 180, 1200, 4000);
@@ -131,7 +131,7 @@ function getWaveSpawnTiming(wave) {
     };
 }
 
-function scheduleSpawnBurst(scene, allowedTypes, startDelay, burstSize, burstSpacing) {
+function scheduleSpawnBurst(scene, allowedTypes, startDelay, burstSize, burstSpacing) { // Schedule spawn burst.
     for (let i = 0; i < burstSize; i++) {
         scene.time.delayedCall(startDelay + i * burstSpacing, () => {
             spawnRandomEnemy(scene, allowedTypes);

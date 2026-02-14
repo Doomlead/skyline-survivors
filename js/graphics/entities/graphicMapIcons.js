@@ -2,12 +2,12 @@
 // Map Icon Graphics - Battleship & Mothership
 // ------------------------
 
-function createMapIconGraphics(scene) {
+function createMapIconGraphics(scene) { // Create map icon graphics.
     createMapBattleshipIcon(scene);
     createMapMothershipIcon(scene);
 }
 
-function createMapBattleshipIcon(scene) {
+function createMapBattleshipIcon(scene) { // Create map battleship icon.
     const icon = scene.add.graphics();
     const w = 36;
     const h = 30;
@@ -57,7 +57,7 @@ function createMapBattleshipIcon(scene) {
     icon.destroy();
 }
 
-function createMapMothershipIcon(scene) {
+function createMapMothershipIcon(scene) { // Create map mothership icon.
     const icon = scene.add.graphics();
     const w = 44;
     const h = 36;

@@ -8,7 +8,7 @@ test('regenerator heal timer scales with delta and slow effects', () => {
         lastHeal: 0,
         lastShot: Infinity,
         patrolAngle: 0,
-        setVelocity(x, y) {
+        setVelocity(x, y) { // Set velocity.
             this.velocity = { x, y };
         }
     };

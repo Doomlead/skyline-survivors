@@ -2,7 +2,7 @@
 // Enemy AI Behaviors and Update Functions
 // ------------------------
 
-function releaseTargetHuman(enemy) {
+function releaseTargetHuman(enemy) { // Release target human.
     const target = enemy.targetHuman;
     if (!target) return;
     target.isAbducted = false;

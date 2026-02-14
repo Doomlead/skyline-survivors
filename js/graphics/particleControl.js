@@ -1,6 +1,6 @@
 // ParticleControl.js - Wrap-aware particle controller
 class ParticleControl {
-    constructor(sprite, velocity, lifespan, color, worldWidth, worldHeight) {
+    constructor(sprite, velocity, lifespan, color, worldWidth, worldHeight) { // Constructor.
         this.sprite = sprite;
         this.velocity = velocity; // {x, y}
         this.lifespan = lifespan;
@@ -21,7 +21,7 @@ class ParticleControl {
         return x;
     }
 
-    update(delta, cameraScrollX, cameraWidth) {
+    update(delta, cameraScrollX, cameraWidth) { // Update.
         const tpf = delta / 1000; // Convert milliseconds to seconds
 
         // Movement - update canonical position
@@ -101,7 +101,7 @@ class ParticleControl {
         return true; // Particle still alive
     }
 
-    applyGravity(gravityPoint, distance) {
+    applyGravity(gravityPoint, distance) { // Apply gravity.
         const gravityStrength = 1000 / (distance * distance + 10000);
         this.velocity.x += gravityPoint.x * gravityStrength;
         this.velocity.y += gravityPoint.y * gravityStrength;
@@ -114,7 +114,7 @@ class ParticleControl {
         }
     }
 
-    lesserValue(a, b) {
+    lesserValue(a, b) { // Lesser value.
         return a < b ? a : b;
     }
 }

@@ -4,11 +4,11 @@
 
 const ShipController = {
     cargo: 0,
-    addCargo(amount = 1) {
+    addCargo(amount = 1) { // Add cargo.
         this.cargo = Math.max(0, this.cargo + amount);
         return this.cargo;
     },
-    resetCargo() {
+    resetCargo() { // Reset cargo.
         this.cargo = 0;
     }
 };

@@ -30,7 +30,7 @@ const KEY_BINDING_ACTIONS = [
     { id: 'switchPrimary', label: 'Switch Primary' }
 ];
 
-function formatKeyLabel(keyName) {
+function formatKeyLabel(keyName) { // Format key label.
     if (!keyName) return 'Unassigned';
     switch (keyName) {
         case 'LEFT': return 'Left Arrow';
@@ -45,7 +45,7 @@ function formatKeyLabel(keyName) {
     }
 }
 
-function normalizeKeyName(event) {
+function normalizeKeyName(event) { // Normalize key name.
     if (!event || !event.key) return null;
     switch (event.key) {
         case ' ': return 'SPACE';
@@ -66,7 +66,7 @@ function normalizeKeyName(event) {
     return event.key.toUpperCase();
 }
 
-function formatMetaTimer(seconds) {
+function formatMetaTimer(seconds) { // Format meta timer.
     const clamped = Math.max(0, Math.floor(seconds));
     const mins = String(Math.floor(clamped / 60)).padStart(2, '0');
     const secs = String(clamped % 60).padStart(2, '0');

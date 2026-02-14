@@ -3,7 +3,7 @@
 // Includes Phase 1 (exterior boss) and Phase 2 (interior on-foot assault)
 // 
 
-function initializeMothershipCore(boss) {
+function initializeMothershipCore(boss) { // Initialize mothership core.
     if (!boss) return;
     boss.corePhase = 0;
     boss.lastPulse = 0;
@@ -16,7 +16,7 @@ function initializeMothershipCore(boss) {
     }
 }
 
-function getMothershipBreachPosition(scene) {
+function getMothershipBreachPosition(scene) { // Get mothership breach position.
     const worldWidth = CONFIG.worldWidth;
     const groundLevel = scene?.groundLevel ?? CONFIG.worldHeight - 80;
     const breachX = worldWidth * 0.68;
@@ -24,7 +24,7 @@ function getMothershipBreachPosition(scene) {
     return { x: breachX, y: breachY };
 }
 
-function setupMothershipEncounter(scene) {
+function setupMothershipEncounter(scene) { // Setup mothership encounter.
     if (!scene) return;
     const objective = gameState.mothershipObjective;
     if (!objective) return;
@@ -74,7 +74,7 @@ function setupMothershipEncounter(scene) {
     showRebuildObjectiveBanner(scene, 'FINAL ASSAULT: DESTROY THE MOTHERSHIP CORE', '#38bdf8');
 }
 
-function updateMothershipEncounter(scene, delta) {
+function updateMothershipEncounter(scene, delta) { // Update mothership encounter.
     const objective = gameState.mothershipObjective;
     if (!objective?.active) return;
 
@@ -118,7 +118,7 @@ function updateMothershipEncounter(scene, delta) {
 // PHASE 2 - INTERIOR ENCOUNTER
 // ═══════════════════════════════════════════════════════════════════════
 
-function handleMothershipCoreDefeat(scene) {
+function handleMothershipCoreDefeat(scene) { // Handle mothership core defeat.
     const objective = gameState.mothershipObjective;
     if (!objective) {
         // Fallback if no objective state
@@ -149,7 +149,7 @@ function handleMothershipCoreDefeat(scene) {
     });
 }
 
-function beginMothershipInterior(scene) {
+function beginMothershipInterior(scene) { // Begin mothership interior.
     const objective = gameState.mothershipObjective;
     if (!objective) return;
 
@@ -175,7 +175,7 @@ function beginMothershipInterior(scene) {
     showRebuildObjectiveBanner(scene, 'INTERIOR BREACH\nDestroy all power conduits and security nodes', '#ff00ff');
 }
 
-function clearExteriorEntities(scene) {
+function clearExteriorEntities(scene) { // Clear exterior entities.
     // Destroy all active enemies
     if (scene.enemies) {
         scene.enemies.children.entries.slice().forEach(enemy => {
@@ -228,7 +228,7 @@ function clearExteriorEntities(scene) {
     }
 }
 
-function swapToInteriorBackground(scene) {
+function swapToInteriorBackground(scene) { // Swap to interior background.
     // Destroy existing parallax layers
     destroyParallax();
 
@@ -244,7 +244,7 @@ function swapToInteriorBackground(scene) {
     console.log('[MothershipCore] Background swapped to mothership_interior');
 }
 
-function forceOnFoot(scene) {
+function forceOnFoot(scene) { // Force on foot.
     const objective = gameState.mothershipObjective;
 
     // If player is in Aegis, force eject
@@ -291,7 +291,7 @@ function forceOnFoot(scene) {
     }
 }
 
-function spawnInteriorObjectives(scene) {
+function spawnInteriorObjectives(scene) { // Spawn interior objectives.
     const objective = gameState.mothershipObjective;
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
@@ -343,7 +343,7 @@ function spawnInteriorObjectives(scene) {
     spawnInteriorDefenders(scene, 4);
 }
 
-function createInteriorComponent(scene, x, y, texture, role, hp) {
+function createInteriorComponent(scene, x, y, texture, role, hp) { // Create interior component.
     const component = scene.assaultTargets.create(x, y, texture);
     component.setDepth(FG_DEPTH_BASE + 3);
     component.setImmovable(true);
@@ -357,7 +357,7 @@ function createInteriorComponent(scene, x, y, texture, role, hp) {
     return component;
 }
 
-function spawnInteriorDefenders(scene, count) {
+function spawnInteriorDefenders(scene, count) { // Spawn interior defenders.
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
     const camX = scene.cameras.main ? scene.cameras.main.scrollX : 0;
 
@@ -372,7 +372,7 @@ function spawnInteriorDefenders(scene, count) {
     }
 }
 
-function spawnCoreChamber(scene) {
+function spawnCoreChamber(scene) { // Spawn core chamber.
     const objective = gameState.mothershipObjective;
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
@@ -401,7 +401,7 @@ function spawnCoreChamber(scene) {
     spawnInteriorDefenders(scene, 3);
 }
 
-function updateMothershipInterior(scene, delta) {
+function updateMothershipInterior(scene, delta) { // Update mothership interior.
     const objective = gameState.mothershipObjective;
     if (!objective || !objective.interiorPhase) return;
 
@@ -480,7 +480,7 @@ function updateMothershipInterior(scene, delta) {
     }
 }
 
-function fireInteriorTurret(scene, turret) {
+function fireInteriorTurret(scene, turret) { // Fire interior turret.
     if (!scene || !turret || !turret.active) return;
     const player = getActivePlayer(scene);
     if (!player || !player.active) return;
@@ -510,7 +510,7 @@ function fireInteriorTurret(scene, turret) {
     });
 }
 
-function hitInteriorTarget(projectile, target) {
+function hitInteriorTarget(projectile, target) { // Hit interior target.
     const objective = gameState.mothershipObjective;
     if (!objective || !objective.interiorPhase || !target.active || !target.interiorTarget) {
         if (projectile && projectile.active) projectile.destroy();

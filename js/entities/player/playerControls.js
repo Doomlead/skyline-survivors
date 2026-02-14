@@ -2,7 +2,7 @@
 // file: js/entities/player/playerControls.js
 // ------------------------
 
-function updatePlayer(scene, time, delta) {
+function updatePlayer(scene, time, delta) { // Update player.
     const {
         aegis,
         pilot,
@@ -240,7 +240,7 @@ function updatePlayer(scene, time, delta) {
     }
 }
 
-function getPilotAimAngle(left, right, up, down, grounded) {
+function getPilotAimAngle(left, right, up, down, grounded) { // Get pilot aim angle.
     let aimX = 0;
     let aimY = 0;
 
@@ -257,7 +257,7 @@ function getPilotAimAngle(left, right, up, down, grounded) {
     return Math.atan2(aimY, aimX);
 }
 
-function getBulwarkAimAngle(left, right, up, down) {
+function getBulwarkAimAngle(left, right, up, down) { // Get bulwark aim angle.
     const aimX = (left ? -1 : 0) + (right ? 1 : 0);
     const aimY = (up ? -1 : 0) + (down ? 1 : 0);
     if (aimX === 0 && aimY === 0) {

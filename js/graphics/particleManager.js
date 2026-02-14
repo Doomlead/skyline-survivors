@@ -1,6 +1,6 @@
 // ParticleManager.js - Wrap-aware particle manager
 class ParticleManager {
-    constructor(scene, worldWidth, worldHeight) {
+    constructor(scene, worldWidth, worldHeight) { // Constructor.
         this.scene = scene;
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
@@ -12,7 +12,7 @@ class ParticleManager {
         this.createParticleTextures();
     }
 
-    createParticleTextures() {
+    createParticleTextures() { // Create particle textures.
         if (!this.scene.textures.exists('particle')) {
             const graphics = this.scene.add.graphics();
             graphics.fillStyle(0xffffff, 1);
@@ -37,7 +37,7 @@ class ParticleManager {
         return x;
     }
 
-    update(delta) {
+    update(delta) { // Update.
         // Get camera info for wrap-aware rendering
         const mainCam = this.scene.cameras.main;
         const cameraScrollX = mainCam ? mainCam.scrollX : 0;
@@ -48,7 +48,7 @@ class ParticleManager {
         });
     }
 
-    applyGravityToParticles(gravitySourceX, gravitySourceY) {
+    applyGravityToParticles(gravitySourceX, gravitySourceY) { // Apply gravity to particles.
         this.particles.forEach(particleControl => {
             if (particleControl.affectedByGravity) {
                 // Use canonical X for gravity calculations
@@ -66,7 +66,7 @@ class ParticleManager {
         });
     }
 
-    enemyExplosion(x, y) {
+    enemyExplosion(x, y) { // Enemy explosion.
         // Wrap the spawn position to canonical coordinates
         x = this.wrapX(x);
         
@@ -92,7 +92,7 @@ class ParticleManager {
         }
     }
 
-    bulletExplosion(x, y) {
+    bulletExplosion(x, y) { // Bullet explosion.
         x = this.wrapX(x);
         const color = { r: 0.676, g: 0.844, b: 0.898 };
 
@@ -107,7 +107,7 @@ class ParticleManager {
         }
     }
 
-    playerExplosion(x, y) {
+    playerExplosion(x, y) { // Player explosion.
         x = this.wrapX(x);
         const color1 = { r: 1, g: 1, b: 1 };
         const color2 = { r: 1, g: 1, b: 0 };
@@ -130,7 +130,7 @@ class ParticleManager {
         }
     }
 
-    sprayParticle(x, y, sprayVelX, sprayVelY) {
+    sprayParticle(x, y, sprayVelX, sprayVelY) { // Spray particle.
         x = this.wrapX(x);
         const sprite = this.scene.add.sprite(x, y, 'particle');
         sprite.setDepth(FG_DEPTH_BASE + 20);
@@ -142,7 +142,7 @@ class ParticleManager {
         this.particles.push(control);
     }
 
-    blackHoleExplosion(x, y) {
+    blackHoleExplosion(x, y) { // Black hole explosion.
         x = this.wrapX(x);
         const hue = ((Date.now() - this.spawnTime) * 0.003) % 6;
         const numParticles = 150;
@@ -168,7 +168,7 @@ class ParticleManager {
         }
     }
 
-    makeExhaustFire(x, y, rotation) {
+    makeExhaustFire(x, y, rotation) { // Make exhaust fire.
         x = this.wrapX(x);
         const midColor = { r: 1, g: 0.73, b: 0.12 };
         const sideColor = { r: 0.78, g: 0.15, b: 0.04 };
@@ -218,7 +218,7 @@ class ParticleManager {
         this.createExhaustParticle(posX, posY, velSide2, sideColor, 'glowParticle');
     }
 
-    makeExhaustTrail(x, y, rotation, speed) {
+    makeExhaustTrail(x, y, rotation, speed) { // Make exhaust trail.
         const direction = { x: Math.cos(rotation), y: Math.sin(rotation) };
         const trailOrigin = {
             x: this.wrapX(x + direction.x * -20),
@@ -268,11 +268,11 @@ class ParticleManager {
         this.lastTrailPosition = { ...trailOrigin };
     }
 
-    stopExhaustTrail() {
+    stopExhaustTrail() { // Stop exhaust trail.
         this.lastTrailPosition = null;
     }
 
-    createTrailParticle(x, y, velocity, color) {
+    createTrailParticle(x, y, velocity, color) { // Create trail particle.
         const sprite = this.scene.add.sprite(x, y, 'glowParticle');
         sprite.setDepth(FG_DEPTH_BASE + 15);
         const lifespan = 500 + Math.random() * 350;
@@ -281,7 +281,7 @@ class ParticleManager {
         this.particles.push(control);
     }
 
-    createExhaustParticle(x, y, velocity, color, texture) {
+    createExhaustParticle(x, y, velocity, color, texture) { // Create exhaust particle.
         const sprite = this.scene.add.sprite(x, y, texture);
         sprite.setDepth(FG_DEPTH_BASE + 15);
         sprite.setData('affectedByGravity', true);
@@ -289,7 +289,7 @@ class ParticleManager {
         this.particles.push(control);
     }
 
-    hsvToColor(h, s, v) {
+    hsvToColor(h, s, v) { // Hsv to color.
         if (h === 0 && s === 0) {
             return { r: v, g: v, b: v };
         }
@@ -306,7 +306,7 @@ class ParticleManager {
         else return { r: c + m, g: m, b: x + m };
     }
 
-    getRandomVelocity(max) {
+    getRandomVelocity(max) { // Get random velocity.
         const angle = Math.random() * Math.PI * 2;
         const random = Math.random() * 5 + 1;
         const particleSpeed = max * (1 - 0.6 / random);
@@ -317,7 +317,7 @@ class ParticleManager {
         };
     }
 
-    destroy() {
+    destroy() { // Destroy.
         this.particles.forEach(control => {
             if (control.sprite && !control.sprite.destroyed) {
                 control.sprite.destroy();

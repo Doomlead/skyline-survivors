@@ -2,7 +2,7 @@
 // file: js/entities/player/playerSupport.js
 // ------------------------
 
-function useSmartBomb(scene) {
+function useSmartBomb(scene) { // Use smart bomb.
     const { enemies, enemyProjectiles, audioManager } = scene;
     if (!enemies || !enemyProjectiles) return;
     if (gameState.smartBombs <= 0) return;
@@ -31,7 +31,7 @@ function useSmartBomb(scene) {
     });
 }
 
-function useHyperspace(scene) {
+function useHyperspace(scene) { // Use hyperspace.
     const { particleManager, audioManager } = scene;
     const player = getActivePlayer(scene);
     if (!player) return;
@@ -45,7 +45,7 @@ function useHyperspace(scene) {
     if (audioManager) audioManager.playSound('hyperspace');
 }
 
-function updateDrones(scene, time) {
+function updateDrones(scene, time) { // Update drones.
     const { drones } = scene;
     const player = getActivePlayer(scene);
     if (!drones || !player) return;

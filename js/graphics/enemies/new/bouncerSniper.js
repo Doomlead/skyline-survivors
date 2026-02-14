@@ -2,7 +2,7 @@
 // Enemy Graphics - New (Bouncer, Sniper)
 // ------------------------
 
-function createBouncerGraphics(scene) {
+function createBouncerGraphics(scene) { // Create bouncer graphics.
     // ========================
     // BOUNCER - Erratic Ricochet Movement
     // ========================
@@ -104,7 +104,7 @@ function createBouncerGraphics(scene) {
 
 }
 
-function createSniperGraphics(scene) {
+function createSniperGraphics(scene) { // Create sniper graphics.
     // ========================
     // SNIPER - Long-range Precision Shooter
     // ========================

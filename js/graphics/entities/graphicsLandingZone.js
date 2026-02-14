@@ -2,7 +2,7 @@
 // Landing Zone Graphics - Rebuild Pad
 // ------------------------
 
-function createLandingZoneGraphics(scene) {
+function createLandingZoneGraphics(scene) { // Create landing zone graphics.
     const zone = scene.add.graphics();
     const width = 120;
     const height = 56;

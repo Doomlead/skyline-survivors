@@ -7,11 +7,11 @@ const SupplyDropUnboxing = (function() {
     let scene = null;
     let isPlaying = false;
 
-    function setScene(phaserScene) {
+    function setScene(phaserScene) { // Set scene.
         scene = phaserScene;
     }
 
-    function playUnboxingSequence(lootResult, onComplete) {
+    function playUnboxingSequence(lootResult, onComplete) { // Play unboxing sequence.
         if (isPlaying || !scene) {
             if (onComplete) onComplete();
             return;
@@ -51,7 +51,7 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
-    function showSatelliteSequence(overlay, items, isElite, isJackpot, onComplete) {
+    function showSatelliteSequence(overlay, items, isElite, isJackpot, onComplete) { // Show satellite sequence.
         const centerX = scene.scale.width / 2;
         const centerY = scene.scale.height / 2;
 
@@ -112,7 +112,7 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
-    function firePod(overlay, satellite, satText, energyGlow, chargeText, items, isJackpot, onComplete) {
+    function firePod(overlay, satellite, satText, energyGlow, chargeText, items, isJackpot, onComplete) { // Fire pod.
         const centerX = scene.scale.width / 2;
         const centerY = scene.scale.height / 2;
 
@@ -155,7 +155,7 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
-    function impactSequence(overlay, satellite, satText, pod, items, isJackpot, onComplete) {
+    function impactSequence(overlay, satellite, satText, pod, items, isJackpot, onComplete) { // Impact sequence.
         const centerX = scene.scale.width / 2;
         const centerY = scene.scale.height / 2;
 
@@ -200,7 +200,7 @@ const SupplyDropUnboxing = (function() {
         }, 400);
     }
 
-    function revealItems(overlay, pod, items, isJackpot, onComplete) {
+    function revealItems(overlay, pod, items, isJackpot, onComplete) { // Reveal items.
         const centerX = scene.scale.width / 2;
         const centerY = scene.scale.height / 2;
 
@@ -357,7 +357,7 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
-    function closeUnboxing(overlay, itemContainer, onComplete) {
+    function closeUnboxing(overlay, itemContainer, onComplete) { // Close unboxing.
         scene.tweens.add({
             targets: [overlay, itemContainer],
             alpha: 0,
@@ -371,15 +371,15 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
-    function getTierColorHex(tier) {
+    function getTierColorHex(tier) { // Get tier color hex.
         return tier === 'tier3' ? 0xa855f7 : tier === 'tier2' ? 0x22d3ee : 0x94a3b8;
     }
 
-    function getTierColorString(tier) {
+    function getTierColorString(tier) { // Get tier color string.
         return tier === 'tier3' ? '#a855f7' : tier === 'tier2' ? '#22d3ee' : '#94a3b8';
     }
 
-    function getTierLabel(tier) {
+    function getTierLabel(tier) { // Get tier label.
         return tier === 'tier3' ? 'RARE' : tier === 'tier2' ? 'COMBAT' : 'UTILITY';
     }
 

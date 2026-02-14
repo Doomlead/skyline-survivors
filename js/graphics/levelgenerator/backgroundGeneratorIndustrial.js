@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGeneratorIndustrial = (function() {
-    function BackgroundGeneratorIndustrial(scene, config) {
+    function BackgroundGeneratorIndustrial(scene, config) { // Background generator industrial.
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();
@@ -216,7 +216,7 @@ var BackgroundGeneratorIndustrial = (function() {
         graphics.moveTo(0, worldHeight);
 
         var buildingRng = this.createRNG(seed);
-        var buildingRandom = function() { return buildingRng(); };
+        var buildingRandom = function() { return buildingRng(); }; // Building random.
 
         for (var i = 0; i < skylineNoise.length; i++) {
             var x = i * noiseStep;

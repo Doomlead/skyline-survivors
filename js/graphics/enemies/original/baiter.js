@@ -2,7 +2,7 @@
 // Enemy Graphics - Original (Baiter)
 // ------------------------
 
-function createBaiterGraphics(scene) {
+function createBaiterGraphics(scene) { // Create baiter graphics.
     // ========================
     // BAITER - Fast Aggressive Chaser
     // ========================

@@ -13,7 +13,7 @@ const HANGAR_REBUILD_CONFIG = {
     pulseRange: 0.2
 };
 
-function isPlayerOverHangar(scene, hangar) {
+function isPlayerOverHangar(scene, hangar) { // Is player over hangar.
     const player = getActivePlayer(scene);
     if (!player || !hangar) return false;
     const dx = typeof wrappedDistance === 'function'
@@ -25,7 +25,7 @@ function isPlayerOverHangar(scene, hangar) {
         && Math.abs(dy) <= HANGAR_DROP_OFF_CONFIG.yRange;
 }
 
-function dropOffCargo(scene, hangar) {
+function dropOffCargo(scene, hangar) { // Drop off cargo.
     const { audioManager } = scene;
     const cargoCount = window.ShipController?.cargo ?? 0;
     if (cargoCount <= 0) return;
@@ -68,7 +68,7 @@ function dropOffCargo(scene, hangar) {
     }
 }
 
-function isPlayerOnLandingZone(scene, landingZone) {
+function isPlayerOnLandingZone(scene, landingZone) { // Is player on landing zone.
     const player = getActivePlayer(scene);
     if (!player || !landingZone) return false;
     const dx = typeof wrappedDistance === 'function'
@@ -81,7 +81,7 @@ function isPlayerOnLandingZone(scene, landingZone) {
     return Math.abs(dx) <= xRange && Math.abs(dy) <= yRange;
 }
 
-function handleHangarRebuild(scene, hangar, delta) {
+function handleHangarRebuild(scene, hangar, delta) { // Handle hangar rebuild.
     const objective = gameState.rebuildObjective;
     if (gameState.mothershipObjective?.shipLocked) return;
     if (!objective || !objective.active || !aegisState.destroyed || !pilotState.active) return;
@@ -108,7 +108,7 @@ function handleHangarRebuild(scene, hangar, delta) {
     objective.shipReturned = true;
 }
 
-function updateHangars(scene, time, delta) {
+function updateHangars(scene, time, delta) { // Update hangars.
     const { friendlies } = scene;
     if (!friendlies || !friendlies.children) return;
 

@@ -5,7 +5,7 @@
 // No changes needed - this file doesn't handle boss AI, it handles the
 // assault mission objective spawning/reinforcement timers.
 
-function spawnAssaultDefenders(scene, baseX) {
+function spawnAssaultDefenders(scene, baseX) { // Spawn assault defenders.
     const defenderTypes = GARRISON_DEFENDER_TYPES || ['rifle'];
     for (let i = 0; i < ASSAULT_BASE_CONFIG.defenderCount; i++) {
         const type = Phaser.Utils.Array.GetRandom(defenderTypes);
@@ -16,7 +16,7 @@ function spawnAssaultDefenders(scene, baseX) {
     }
 }
 
-function updateAssaultObjective(scene, delta) {
+function updateAssaultObjective(scene, delta) { // Update assault objective.
     const objective = gameState.assaultObjective;
     if (!objective || !objective.active) return;
     objective.spawnTimer += delta;

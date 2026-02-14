@@ -2,7 +2,7 @@
 // file: js/entities/player/playerCollisions.js
 // ------------------------
 
-function playerHitEnemy(playerSprite, enemy) {
+function playerHitEnemy(playerSprite, enemy) { // Player hit enemy.
     const audioManager = this.audioManager;
     if (playerState.powerUps.invincibility > 0) {
         destroyEnemy(this, enemy);
@@ -19,7 +19,7 @@ function playerHitEnemy(playerSprite, enemy) {
     }
 }
 
-function playerHitProjectile(playerSprite, projectile) {
+function playerHitProjectile(playerSprite, projectile) { // Player hit projectile.
     const audioManager = this.audioManager;
     if (playerState.powerUps.invincibility > 0) {
         projectile.destroy();
@@ -37,14 +37,14 @@ function playerHitProjectile(playerSprite, projectile) {
     }
 }
 
-function droneHitEnemy(drone, enemy) {
+function droneHitEnemy(drone, enemy) { // Drone hit enemy.
     if (!drone || !drone.active) return;
     createExplosion(this, drone.x, drone.y, 0x22d3ee);
     drone.destroy();
     playerState.powerUps.drone = Math.max((playerState.powerUps.drone || 0) - 1, 0);
 }
 
-function droneHitProjectile(drone, projectile) {
+function droneHitProjectile(drone, projectile) { // Drone hit projectile.
     if (!drone || !drone.active) return;
     if (projectile && projectile.active) {
         projectile.destroy();
@@ -54,7 +54,7 @@ function droneHitProjectile(drone, projectile) {
     playerState.powerUps.drone = Math.max((playerState.powerUps.drone || 0) - 1, 0);
 }
 
-function operativeHitProjectile(operative, projectile) {
+function operativeHitProjectile(operative, projectile) { // Operative hit projectile.
     const scene = this;
     if (!operative || !operative.active || !projectile || !projectile.active) return;
     if (!operative.isOperative || !operative.isBodyBlocking) return;

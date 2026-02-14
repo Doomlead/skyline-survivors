@@ -2,7 +2,7 @@
 // Enemy Graphics - All Enemy Sprites (Wrappers)
 // ------------------------
 
-function createOriginalEnemyGraphics(scene) {
+function createOriginalEnemyGraphics(scene) { // Create original enemy graphics.
     createLanderGraphics(scene);
     createMutantGraphics(scene);
     createDroneGraphics(scene);
@@ -12,7 +12,7 @@ function createOriginalEnemyGraphics(scene) {
     createBaiterGraphics(scene);
 }
 
-function createNewEnemyGraphics(scene) {
+function createNewEnemyGraphics(scene) { // Create new enemy graphics.
     createKamikazeGraphics(scene);
     createTurretGraphics(scene);
     createShieldGraphics(scene);

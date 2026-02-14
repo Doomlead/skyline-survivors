@@ -2,7 +2,7 @@
 // Enemy Graphics - New (Shield, Seeker)
 // ------------------------
 
-function createShieldGraphics(scene) {
+function createShieldGraphics(scene) { // Create shield graphics.
     // ========================
     // SHIELD - Tanky Enemy with Protective Barrier
     // ========================
@@ -116,7 +116,7 @@ function createShieldGraphics(scene) {
     shieldGraphics.destroy();
 }
 
-function createSeekerGraphics(scene) {
+function createSeekerGraphics(scene) { // Create seeker graphics.
     // ========================
     // SEEKER - Predictive Targeting Enemy
     // ========================

@@ -13,7 +13,7 @@ const FullscreenController = (function() {
     let fullscreenTarget;
     let toggleButtons;
 
-    function init() {
+    function init() { // Init.
         radarContainer = document.getElementById('radar-container');
         radarSlot = document.getElementById('gameplay-radar-slot');
         hudContainer = document.getElementById('hud-container');
@@ -43,7 +43,7 @@ const FullscreenController = (function() {
         handleFullscreenChange();
     }
 
-    function isGameLayoutActive() {
+    function isGameLayoutActive() { // Is game layout active.
         // Check if we're in district layout mode
         if (typeof DistrictLayoutManager !== 'undefined') {
             const currentLayout = DistrictLayoutManager.getCurrentLayout();
@@ -61,7 +61,7 @@ const FullscreenController = (function() {
         return true;
     }
 
-    function handleToggle() {
+    function handleToggle() { // Handle toggle.
         // Prevent fullscreen operations when in district layout
         if (!isGameLayoutActive()) {
             console.warn('[Fullscreen] Cannot toggle fullscreen while in district layout');
@@ -75,7 +75,7 @@ const FullscreenController = (function() {
         }
     }
 
-    function enterFullscreen() {
+    function enterFullscreen() { // Enter fullscreen.
         // Double-check we're in game layout before entering fullscreen
         if (!isGameLayoutActive()) {
             console.warn('[Fullscreen] Cannot enter fullscreen while in district layout');
@@ -86,12 +86,12 @@ const FullscreenController = (function() {
         fullscreenTarget.requestFullscreen();
     }
 
-    function exitFullscreen() {
+    function exitFullscreen() { // Exit fullscreen.
         if (!document.exitFullscreen) return;
         document.exitFullscreen();
     }
 
-    function handleFullscreenChange() {
+    function handleFullscreenChange() { // Handle fullscreen change.
         const isActive = document.fullscreenElement === fullscreenTarget;
         
         // If we're exiting fullscreen OR if we're in district layout, ensure fullscreen class is removed
@@ -131,7 +131,7 @@ const FullscreenController = (function() {
         }, 100);
     }
 
-    function updateToggleButtons(isActive) {
+    function updateToggleButtons(isActive) { // Update toggle buttons.
         toggleButtons.forEach((button) => {
             button.textContent = isActive ? 'Exit Fullscreen' : 'Fullscreen';
             button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
@@ -147,7 +147,7 @@ const FullscreenController = (function() {
         });
     }
 
-    function updateRadarPlacement(isActive) {
+    function updateRadarPlacement(isActive) { // Update radar placement.
         if (!radarContainer || !radarSlot) return;
         
         // Don't move radar if we're not in game layout
@@ -168,7 +168,7 @@ const FullscreenController = (function() {
         }
     }
 
-    function updateHudPlacement(isActive) {
+    function updateHudPlacement(isActive) { // Update hud placement.
         if (!hudContainer || !fullscreenTarget) return;
 
         if (!isGameLayoutActive()) return;
@@ -194,7 +194,7 @@ const FullscreenController = (function() {
         }
     }
 
-    function scheduleResize() {
+    function scheduleResize() { // Schedule resize.
         if (typeof applyResponsiveResize !== 'function') return;
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {

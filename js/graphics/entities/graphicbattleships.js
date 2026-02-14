@@ -3,7 +3,7 @@
 // Aligned with Enemy/Boss visual style
 // ------------------------
 
-function createBattleshipGraphics(scene) {
+function createBattleshipGraphics(scene) { // Create battleship graphics.
     createRaiderBattleship(scene);
     createCarrierBattleship(scene);
     createNovaBattleship(scene);
@@ -11,7 +11,7 @@ function createBattleshipGraphics(scene) {
     createDreadnoughtBattleship(scene);
 }
 
-function createRaiderBattleship(scene) {
+function createRaiderBattleship(scene) { // Create raider battleship.
     // ========================
     // RAIDER - Sleek attack craft
     // ========================
@@ -76,7 +76,7 @@ function createRaiderBattleship(scene) {
     raiderGraphics.destroy();
 }
 
-function createCarrierBattleship(scene) {
+function createCarrierBattleship(scene) { // Create carrier battleship.
     // ========================
     // CARRIER - Heavy hangar ship
     // ========================
@@ -125,7 +125,7 @@ function createCarrierBattleship(scene) {
     carrierGraphics.destroy();
 }
 
-function createNovaBattleship(scene) {
+function createNovaBattleship(scene) { // Create nova battleship.
     // ========================
     // NOVA - Twin-ring assault ship
     // ========================
@@ -171,7 +171,7 @@ function createNovaBattleship(scene) {
     novaGraphics.destroy();
 }
 
-function createSiegeBattleship(scene) {
+function createSiegeBattleship(scene) { // Create siege battleship.
     // ========================
     // SIEGE - Long-range artillery ship
     // ========================
@@ -220,7 +220,7 @@ function createSiegeBattleship(scene) {
     siegeGraphics.destroy();
 }
 
-function createDreadnoughtBattleship(scene) {
+function createDreadnoughtBattleship(scene) { // Create dreadnought battleship.
     // ========================
     // DREADNOUGHT - Massive command ship
     // ========================

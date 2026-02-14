@@ -3,7 +3,7 @@
 // ------------------------
 
 class BuildScene extends Phaser.Scene {
-    constructor() {
+    constructor() { // Constructor.
         super({ key: SCENE_KEYS.build, active: false, visible: false });
         this.selectedDistrict = null;
         this.mission = null;
@@ -12,11 +12,11 @@ class BuildScene extends Phaser.Scene {
         this._lastMetaRefresh = 0;
     }
 
-    preload() {
+    preload() { // Preload.
         this.mapModule.preload();
     }
 
-    create() {
+    create() { // Create.
         console.log('=== BuildScene.create() ===');
         
         // 1. Clean up old state first
@@ -39,7 +39,7 @@ class BuildScene extends Phaser.Scene {
         }, 150); 
     }
     
-    performCreate() {
+    performCreate() { // Perform create.
         // 1. Get dimensions
         const width = this.scale.width;
         const height = this.scale.height;
@@ -109,7 +109,7 @@ class BuildScene extends Phaser.Scene {
     }
 
 
-    createSceneOverlay(width, height) {
+    createSceneOverlay(width, height) { // Create scene overlay.
         if (this.hintText) this.hintText.destroy();
         if (this.titleText) this.titleText.destroy();
 
@@ -128,14 +128,14 @@ class BuildScene extends Phaser.Scene {
         }).setOrigin(0.5).setAlpha(0.7);
     }
 
-    handleResize(gameSize) {
+    handleResize(gameSize) { // Handle resize.
         const width = gameSize.width;
         const height = gameSize.height;
         this.mapModule.resize(width, height);
         this.updateSceneOverlay(width, height);
     }
 
-    updateSceneOverlay(width, height) {
+    updateSceneOverlay(width, height) { // Update scene overlay.
         if (this.hintText) {
             this.hintText.setPosition(width / 2, height - 20);
         }
@@ -144,7 +144,7 @@ class BuildScene extends Phaser.Scene {
         }
     }
 
-    focusDistrict(district, skipTweens = false) {
+    focusDistrict(district, skipTweens = false) { // Focus district.
         if (this.selectedDistrict === district) {
             return;
         }
@@ -191,27 +191,27 @@ class BuildScene extends Phaser.Scene {
         }
     }
 
-    handleDistrictFocus(district) {
+    handleDistrictFocus(district) { // Handle district focus.
         this.focusDistrict(district);
     }
 
-    handleNodeDetails(node) {
+    handleNodeDetails(node) { // Handle node details.
         if (!node) return;
         console.log('[BuildScene] Node details requested', node);
     }
 
-    handleOrbitNodeSelected(nodeId) {
+    handleOrbitNodeSelected(nodeId) { // Handle orbit node selected.
         this.handleOrbitNodeSelection(nodeId);
     }
 
-    rollMission() {
+    rollMission() { // Roll mission.
         if (window.missionPlanner) {
             this.mission = missionPlanner.rerollCity();
             this.syncHTMLPanels();
         }
     }
 
-    launchMission() {
+    launchMission() { // Launch mission.
         if (!this.selectedDistrict) {
             this.tweens.add({
                 targets: this.hintText,
@@ -239,7 +239,7 @@ class BuildScene extends Phaser.Scene {
         this.scene.stop();
     }
 
-    selectMode(mode) {
+    selectMode(mode) { // Select mode.
         if (this.selectedDistrict?.state?.status === 'occupied' && mode !== 'assault') {
             this.selectedMode = 'assault';
         } else {
@@ -251,13 +251,13 @@ class BuildScene extends Phaser.Scene {
         this.syncHTMLPanels();
     }
 
-    updateHTMLDetail(title, body) {
+    updateHTMLDetail(title, body) { // Update htmldetail.
         if (window.DistrictLayoutManager) {
             DistrictLayoutManager.updateMissionPanel(this.mission, this.selectedDistrict);
         }
     }
 
-    syncHTMLPanels() {
+    syncHTMLPanels() { // Sync htmlpanels.
         if (!window.DistrictLayoutManager) return;
         
         DistrictLayoutManager.updateDistrictPanels();
@@ -268,7 +268,7 @@ class BuildScene extends Phaser.Scene {
         }
     }
 
-    update(time, delta) {
+    update(time, delta) { // Update.
         if (typeof missionPlanner === 'undefined') return;
         
         const updatedMission = this.mapModule.update(time, delta, this.mission);
@@ -286,14 +286,14 @@ class BuildScene extends Phaser.Scene {
         }
     }
 
-    formatTimer(seconds) {
+    formatTimer(seconds) { // Format timer.
         const clamped = Math.max(0, Math.floor(seconds));
         const mins = String(Math.floor(clamped / 60)).padStart(2, '0');
         const secs = String(clamped % 60).padStart(2, '0');
         return `${mins}:${secs}`;
     }
 
-    handleOrbitNodeSelection(id) {
+    handleOrbitNodeSelection(id) { // Handle orbit node selection.
         if (id === 'shop') {
             console.log('Shop node selected');
         }

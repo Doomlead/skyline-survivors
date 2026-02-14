@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGeneratorDestroyedIndustrial = (function() {
-    function BackgroundGeneratorDestroyedIndustrial(scene, config) {
+    function BackgroundGeneratorDestroyedIndustrial(scene, config) { // Background generator destroyed industrial.
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();
@@ -230,7 +230,7 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         graphics.fillStyle(0x060608, 1);
         
         var copyRng = this.createRNG(seed);
-        var cRand = function() { return copyRng(); };
+        var cRand = function() { return copyRng(); }; // C rand.
         
         graphics.beginPath();
         graphics.moveTo(0, worldHeight);

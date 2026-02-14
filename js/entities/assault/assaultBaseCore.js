@@ -30,14 +30,14 @@ const ASSAULT_BASE_TEXTURES = [
     'assaultBaseDreadnought'
 ];
 
-function getAssaultBaseTextureKey(objective) {
+function getAssaultBaseTextureKey(objective) { // Get assault base texture key.
     if (objective?.baseVariant && ASSAULT_BASE_TEXTURES.includes(objective.baseVariant)) {
         return objective.baseVariant;
     }
     return Phaser.Utils.Array.GetRandom(ASSAULT_BASE_TEXTURES);
 }
 
-function createAssaultComponent(scene, x, y, texture, role, hp) {
+function createAssaultComponent(scene, x, y, texture, role, hp) { // Create assault component.
     const component = scene.assaultTargets.create(x, y, texture);
     component.setDepth(FG_DEPTH_BASE + 2);
     component.setImmovable(true);
@@ -50,7 +50,7 @@ function createAssaultComponent(scene, x, y, texture, role, hp) {
     return component;
 }
 
-function isAssaultShieldBlocking(scene) {
+function isAssaultShieldBlocking(scene) { // Is assault shield blocking.
     const objective = gameState.assaultObjective;
     if (!objective || objective.shieldsRemaining <= 0) return false;
     const { assaultTargets } = scene;
@@ -65,7 +65,7 @@ function isAssaultShieldBlocking(scene) {
     return blocking;
 }
 
-function spawnAssaultShieldGenerators(scene, objective) {
+function spawnAssaultShieldGenerators(scene, objective) { // Spawn assault shield generators.
     const baseX = objective?.baseX || CONFIG.worldWidth * 0.5;
     const base = scene.assaultBase;
     const baseY = base?.y || (CONFIG.worldHeight * 0.6);
@@ -79,7 +79,7 @@ function spawnAssaultShieldGenerators(scene, objective) {
     }
 }
 
-function setupAssaultObjective(scene) {
+function setupAssaultObjective(scene) { // Setup assault objective.
     if (!scene || !scene.assaultTargets) return;
     const objective = gameState.assaultObjective;
     if (!objective) return;
@@ -122,7 +122,7 @@ function setupAssaultObjective(scene) {
     spawnAssaultDefenders(scene, baseX);
 }
 
-function hitAssaultTarget(projectile, target) {
+function hitAssaultTarget(projectile, target) { // Hit assault target.
     const mothershipObjective = gameState.mothershipObjective;
     if (target?.assaultRole && typeof target.assaultRole === 'string' && target.assaultRole.indexOf('interior_') === 0) {
         if (mothershipObjective?.active && mothershipObjective.stage === 'interior_assault' && typeof hitMothershipInteriorTarget === 'function') {

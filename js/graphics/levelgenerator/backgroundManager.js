@@ -23,7 +23,7 @@ var BACKGROUND_STYLE_GENERATORS = {
 var BACKGROUND_STYLE_OPTIONS = Object.keys(BACKGROUND_STYLE_GENERATORS);
 var MOTHERSHIP_STYLE_KEYS = ['mothership_exterior', 'mothership_interior'];
 
-function resolveBackgroundStyle(style) {
+function resolveBackgroundStyle(style) { // Resolve background style.
     var requested = style || CONFIG.backgroundStyle;
     if (requested) {
         var normalized = requested.toLowerCase();
@@ -45,7 +45,7 @@ function resolveBackgroundStyle(style) {
     return options[index];
 }
 
-function createBackground(scene, style) {
+function createBackground(scene, style) { // Create background.
     // Use the ACTUAL current camera dimensions, not just CONFIG
     var cam = scene.cameras ? scene.cameras.main : null;
     var actualWidth = cam ? cam.width : CONFIG.width;
@@ -80,21 +80,21 @@ function createBackground(scene, style) {
     }
 }
 
-function initParallaxTracking(playerX, playerY) {
+function initParallaxTracking(playerX, playerY) { // Init parallax tracking.
     if (parallaxManagerInstance) {
         // Pass both X and Y to the manager
         parallaxManagerInstance.initTracking(playerX, playerY);
     }
 }
 
-function updateParallax(playerX, playerY) {
+function updateParallax(playerX, playerY) { // Update parallax.
     if (parallaxManagerInstance) {
         // Pass both X and Y to the manager
         parallaxManagerInstance.update(playerX, playerY);
     }
 }
 
-function resizeParallaxLayers(width, height) {
+function resizeParallaxLayers(width, height) { // Resize parallax layers.
     if (parallaxManagerInstance) {
         parallaxManagerInstance.resize(width, height);
         var scene = parallaxManagerInstance.scene;
@@ -112,7 +112,7 @@ function resizeParallaxLayers(width, height) {
     }
 }
 
-function alignGroundedActors(scene) {
+function alignGroundedActors(scene) { // Align grounded actors.
     var groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     if (scene.humans && scene.humans.children && scene.humans.children.entries) {
         scene.humans.children.entries.forEach(function(human) {
@@ -188,7 +188,7 @@ function alignGroundedActors(scene) {
     }
 }
 
-function destroyParallax() {
+function destroyParallax() { // Destroy parallax.
     if (parallaxManagerInstance) {
         parallaxManagerInstance.destroy();
         parallaxManagerInstance = null;

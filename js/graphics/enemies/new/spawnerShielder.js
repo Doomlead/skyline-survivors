@@ -2,7 +2,7 @@
 // Enemy Graphics - New (Spawner, Shielder)
 // ------------------------
 
-function createSpawnerGraphics(scene) {
+function createSpawnerGraphics(scene) { // Create spawner graphics.
     // ========================
     // SPAWNER - Enemy that Creates Minions
     // ========================
@@ -130,7 +130,7 @@ function createSpawnerGraphics(scene) {
 
 }
 
-function createShielderGraphics(scene) {
+function createShielderGraphics(scene) { // Create shielder graphics.
     // ========================
     // SHIELDER - Protects Other Enemies
     // ========================
