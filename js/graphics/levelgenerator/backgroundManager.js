@@ -106,6 +106,9 @@ function resizeParallaxLayers(width, height) {
             if (scene.physics && scene.physics.world) {
                 scene.physics.world.setBounds(0, 0, CONFIG.worldWidth, height, false, false, true, true);
             }
+            if (scene.interiorPlatformsActive && typeof rebuildInteriorPlatformsOnResize === 'function') {
+                rebuildInteriorPlatformsOnResize(scene);
+            }
             alignGroundedActors(scene);
         }
         CONFIG.worldHeight = height;

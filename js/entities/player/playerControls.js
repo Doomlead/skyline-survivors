@@ -126,7 +126,6 @@ function updatePlayer(scene, time, delta) {
         playerState.direction = aegisState.facing < 0 ? 'left' : 'right';
         syncActivePlayer(scene);
     } else if (pilotState.active) {
-        pilot.nearbyLadder = null;
         const speed = 200;
         const horizontalSpeed = speed * 0.65;
         const jumpForce = -320;
@@ -134,7 +133,7 @@ function updatePlayer(scene, time, delta) {
 
         if (interiorPlatformsActive) {
             const climbSpeed = 150;
-            const onLadder = pilot.nearbyLadder;
+            const onLadder = findInteriorNearbyLadder(scene, pilot);
 
             if (onLadder && (up || down)) {
                 pilotState.climbing = true;

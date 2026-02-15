@@ -17,7 +17,8 @@ function buildInteriorPlatforms(scene, seed) {
     scene.ladders = scene.physics.add.staticGroup();
 
     const worldWidth = CONFIG.worldWidth;
-    const worldHeight = CONFIG.worldHeight || (scene.cameras && scene.cameras.main ? scene.cameras.main.height : CONFIG.height);
+    const camHeight = scene.cameras && scene.cameras.main ? scene.cameras.main.height : CONFIG.height;
+    const worldHeight = camHeight || CONFIG.worldHeight || CONFIG.height;
     const groundY = worldHeight - 100;
     const ceilingY = 80;
 
@@ -121,8 +122,11 @@ function buildInteriorPlatforms(scene, seed) {
     }
 
     scene.interiorPlatformsActive = true;
+    scene.interiorPlatformSeed = seed || 1337;
     scene.interiorPlatformAnchors = platformAnchors;
     scene.groundLevel = groundY;
+
+    repositionInteriorObjectivesToPlatforms(scene);
 
     console.log('[InteriorPlatforms] Created ' + scene.platforms.getLength() + ' platforms, ' + scene.ladders.getLength() + ' ladders');
 
@@ -165,7 +169,9 @@ function createInteriorPlatform(scene, config) {
     const height = config.height;
     const type = config.type;
 
-    const platform = scene.add.rectangle(x, y, width, height, 0x000000, 0);
+    const fill = type === 'ground' ? 0x3b2a52 : 0x4d3a63;
+    const alpha = type === 'ground' ? 0.35 : 0.28;
+    const platform = scene.add.rectangle(x, y, width, height, fill, alpha);
     scene.physics.add.existing(platform, true);
 
     if (type === 'platform') {
@@ -174,6 +180,7 @@ function createInteriorPlatform(scene, config) {
         platform.body.checkCollision.right = false;
     }
 
+    platform.setStrokeStyle(1, 0x8c7aa5, 0.35);
     platform.platformType = type;
     platform.setDepth(FG_DEPTH_BASE - 1);
     return platform;
@@ -189,7 +196,7 @@ function createInteriorLadder(scene, config) {
     const height = bottomY - topY;
     const centerY = topY + height * 0.5;
 
-    const ladder = scene.add.rectangle(x, centerY, width, height, 0x00ffff, 0);
+    const ladder = scene.add.rectangle(x, centerY, width, height, 0x46c7cf, 0.22);
     scene.physics.add.existing(ladder, true);
 
     ladder.body.checkCollision.up = false;
@@ -220,4 +227,56 @@ function createInteriorRNG(seed) {
         t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
+}
+
+
+// Returns ladder candidate for current pilot position without relying on callback ordering.
+function findInteriorNearbyLadder(scene, pilot) {
+    if (!scene || !scene.ladders || !scene.ladders.children || !pilot) return null;
+    const ladders = scene.ladders.children.entries || [];
+    let best = null;
+    let bestDist = Number.POSITIVE_INFINITY;
+
+    for (let i = 0; i < ladders.length; i++) {
+        const ladder = ladders[i];
+        if (!ladder || !ladder.active) continue;
+        const halfW = (ladder.width || 0) * 0.5;
+        const halfH = (ladder.height || 0) * 0.5;
+        const inX = Math.abs(pilot.x - ladder.x) <= Math.max(halfW + 14, 20);
+        const inY = pilot.y >= ladder.y - halfH - 10 && pilot.y <= ladder.y + halfH + 10;
+        if (!inX || !inY) continue;
+        const d = Math.abs(pilot.x - ladder.x) + Math.abs(pilot.y - ladder.y) * 0.25;
+        if (d < bestDist) {
+            bestDist = d;
+            best = ladder;
+        }
+    }
+    return best;
+}
+
+// Keeps interior objectives visually/physically aligned to platform anchors after rebuild/resize.
+function repositionInteriorObjectivesToPlatforms(scene) {
+    if (!scene || !scene.assaultTargets || !scene.assaultTargets.children) return;
+    const entries = scene.assaultTargets.children.entries || [];
+    for (let i = 0; i < entries.length; i++) {
+        const target = entries[i];
+        if (!target || !target.active || !target.interiorTarget) continue;
+        let clearance = 24;
+        switch (target.assaultRole) {
+            case 'power_conduit': clearance = 20; break;
+            case 'security_node': clearance = 40; break;
+            case 'interior_core': clearance = 30; break;
+            default: break;
+        }
+        const fallbackY = target.y;
+        target.y = getInteriorAnchorY(scene, target.x, fallbackY, clearance);
+        if (target.body) target.body.setVelocity(0, 0);
+    }
+}
+
+// Rebuilds interior platforms after viewport/height changes to prevent off-screen colliders.
+function rebuildInteriorPlatformsOnResize(scene) {
+    if (!scene || !scene.interiorPlatformsActive) return;
+    const seed = scene.interiorPlatformSeed || CONFIG.backgroundSeed || 1337;
+    buildInteriorPlatforms(scene, seed);
 }
