@@ -95,6 +95,7 @@ These soldiers provide "fire-and-forget" support, making the battlefield feel al
 | **Standard Infantry** | Common (65%) | Equipped with a rapid-fire rifle; auto-fires at nearest enemy. Moves in small squads to provide basic screen coverage. |
 | **Heavy Gunner** | Uncommon (20%) | High DPS unit with a Gatling-style weapon. Slows down to a "braced" position to shred through Bombers or Pods. |
 | **Saboteur** | Elite (5%) | Specifically targets **Enemy Ground Bases** in Assault Missions. Uses EMP grenades to disable Turrets and Shield Generators. |
+| **Medic** | Rare (10%) | Prioritizes keeping nearby Comrades and the on-foot pilot alive via sustain pulses and support positioning during rebuild/extraction pressure. |
 
 ### 4.3. On-Foot Command (Ship Destruction)
 If the Aegis is destroyed, the game does not end. The pilot ejects, and the genre shifts to a run-and-gun survival mode.
@@ -173,7 +174,14 @@ If the Aegis is destroyed, the game does not end. The pilot ejects, and the genr
 ### 7.2. Mission Types
 *   **Defense:** 15 Waves. Focus on keeping the Fortified Hangar safe and deploying troops.
 *   **Assault:** Destroy Enemy Base. Saboteurs and Bulwark Mode are highly effective here.
-*   **Mothership:** The final "Boss Rush" style level.
+*   **Mothership:** A two-part finale: exterior core siege followed by an interior boarding run-and-gun objective chain.
+
+#### 7.2.1. Mothership Interior Boarding (Run-and-Gun Phase)
+*   **Transition:** Destroying the exterior core triggers a breach/boarding sequence and forces pilot-only gameplay (AEGIS locked).
+*   **Traversal:** Procedurally generated interior platforms + ladders create a side-on run-and-gun route with verticality (Contra/Metal Slug-inspired cadence).
+*   **Objectives:** Destroy all **Power Conduits** and **Security Nodes** to open the **Core Chamber**.
+*   **Pressure:** Interior defenders and turret fire reinforce continuously until the reactor core is destroyed.
+*   **Win Condition:** Destroy the interior reactor core chamber to complete campaign victory.
 
 ### 7.3. Challenges
 *   **"Last Stand":** Infinite waves, global leaderboard.
