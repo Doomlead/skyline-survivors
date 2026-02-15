@@ -195,6 +195,14 @@ function updatePlayer(scene, time, delta) {
 
                 if (pilot.y < minY) pilot.y = minY;
                 pilotState.grounded = Boolean((pilot.body && pilot.body.blocked && pilot.body.blocked.down) || (pilot.body && pilot.body.touching && pilot.body.touching.down));
+
+                var interiorFloorY = (scene.groundLevel || CONFIG.worldHeight - 80) - 6;
+                if (!pilotState.grounded && pilot.y > interiorFloorY) {
+                    pilot.y = interiorFloorY;
+                    pilotState.vy = 0;
+                    pilot.body.setVelocityY(0);
+                    pilotState.grounded = true;
+                }
             }
         } else {
             if (left) {

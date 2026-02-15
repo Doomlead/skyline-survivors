@@ -6,10 +6,14 @@
 function buildInteriorPlatforms(scene, seed) {
     if (!scene || !scene.physics) return null;
 
-    if (scene.platforms) {
+    if (typeof ensurePlatformLadderGraphics === 'function') ensurePlatformLadderGraphics(scene);
+
+    if (scene.platforms && scene.platforms.children) {
+        (scene.platforms.children.entries || []).forEach(function(platform) { if (platform && platform.visual) platform.visual.destroy(); });
         scene.platforms.clear(true, true);
     }
-    if (scene.ladders) {
+    if (scene.ladders && scene.ladders.children) {
+        (scene.ladders.children.entries || []).forEach(function(ladder) { if (ladder && ladder.visual) ladder.visual.destroy(); });
         scene.ladders.clear(true, true);
     }
 
@@ -169,9 +173,7 @@ function createInteriorPlatform(scene, config) {
     const height = config.height;
     const type = config.type;
 
-    const fill = type === 'ground' ? 0x3b2a52 : 0x4d3a63;
-    const alpha = type === 'ground' ? 0.35 : 0.28;
-    const platform = scene.add.rectangle(x, y, width, height, fill, alpha);
+    const platform = scene.add.rectangle(x, y, width, height, 0x000000, 0);
     scene.physics.add.existing(platform, true);
 
     if (type === 'platform') {
@@ -180,7 +182,16 @@ function createInteriorPlatform(scene, config) {
         platform.body.checkCollision.right = false;
     }
 
-    platform.setStrokeStyle(1, 0x8c7aa5, 0.35);
+    if (scene.textures.exists('interior_platform_tile')) {
+        var visual = scene.add.tileSprite(x, y, Math.max(8, width), Math.max(6, height), 'interior_platform_tile');
+        visual.setDepth(FG_DEPTH_BASE - 1);
+        platform.visual = visual;
+    } else {
+        platform.fillColor = 0x4d3a63;
+        platform.fillAlpha = 0.28;
+        platform.setStrokeStyle(1, 0x8c7aa5, 0.35);
+    }
+
     platform.platformType = type;
     platform.setDepth(FG_DEPTH_BASE - 1);
     return platform;
@@ -196,13 +207,22 @@ function createInteriorLadder(scene, config) {
     const height = bottomY - topY;
     const centerY = topY + height * 0.5;
 
-    const ladder = scene.add.rectangle(x, centerY, width, height, 0x46c7cf, 0.22);
+    const ladder = scene.add.rectangle(x, centerY, width, height, 0x000000, 0);
     scene.physics.add.existing(ladder, true);
 
     ladder.body.checkCollision.up = false;
     ladder.body.checkCollision.down = false;
     ladder.body.checkCollision.left = false;
     ladder.body.checkCollision.right = false;
+
+    if (scene.textures.exists('interior_ladder_tile')) {
+        var ladderVisual = scene.add.tileSprite(x, centerY, Math.max(8, width), Math.max(8, height), 'interior_ladder_tile');
+        ladderVisual.setDepth(FG_DEPTH_BASE - 1);
+        ladder.visual = ladderVisual;
+    } else {
+        ladder.fillColor = 0x46c7cf;
+        ladder.fillAlpha = 0.22;
+    }
 
     ladder.ladderType = type || 'standard';
     ladder.topY = topY;
