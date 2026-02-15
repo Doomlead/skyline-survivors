@@ -167,6 +167,9 @@ function beginMothershipInterior(scene) {
     // 2. Swap background to interior
     swapToInteriorBackground(scene);
 
+    // 2.5. Build interior collision platforms/ladders while keeping groundLevel compatibility
+    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337);
+
     // 3. Force pilot ejection - lock ship controls
     forceOnFoot(scene);
 
@@ -322,7 +325,8 @@ function spawnInteriorObjectives(scene) {
     for (let i = 0; i < cfg.powerConduitCount; i++) {
         const cx = conduitSpacing * (i + 1) + (Math.random() - 0.5) * 100;
         const terrainVar = Math.sin(cx / 200) * 30;
-        const cy = Math.max(120, groundLevel - terrainVar - 20);
+        const fallbackY = Math.max(120, groundLevel - terrainVar - 20);
+        const cy = getInteriorAnchorY(scene, cx, fallbackY, 20);
 
         const conduit = createInteriorComponent(
             scene, cx, cy,
@@ -338,7 +342,8 @@ function spawnInteriorObjectives(scene) {
     for (let i = 0; i < cfg.securityNodeCount; i++) {
         const nx = nodeSpacing * (i + 1) + (Math.random() - 0.5) * 150;
         const terrainVar = Math.sin(nx / 200) * 30;
-        const ny = Math.max(100, groundLevel - terrainVar - 40);
+        const fallbackY = Math.max(100, groundLevel - terrainVar - 40);
+        const ny = getInteriorAnchorY(scene, nx, fallbackY, 40);
 
         const node = createInteriorComponent(
             scene, nx, ny,
@@ -393,7 +398,8 @@ function spawnCoreChamber(scene) {
     // Place core chamber at center of world
     const coreX = CONFIG.worldWidth * 0.5;
     const terrainVar = Math.sin(coreX / 200) * 30;
-    const coreY = Math.max(140, groundLevel - terrainVar - 30);
+    const fallbackY = Math.max(140, groundLevel - terrainVar - 30);
+    const coreY = getInteriorAnchorY(scene, coreX, fallbackY, 30);
 
     const core = createInteriorComponent(
         scene, coreX, coreY,

@@ -67,6 +67,7 @@ function updatePlayer(scene, time, delta) {
 
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const minY = 20;
+    const interiorPlatformsActive = Boolean(scene.interiorPlatformsActive && scene.platforms);
 
     if (aegisState.active) {
         const speed = aegisState.mode === 'interceptor' ? 320 : 220;
@@ -130,38 +131,113 @@ function updatePlayer(scene, time, delta) {
         const jumpForce = -320;
         const gravity = 900;
 
-        if (left) {
-            pilotState.vx = -horizontalSpeed;
-            pilotState.facing = -1;
-        } else if (right) {
-            pilotState.vx = horizontalSpeed;
-            pilotState.facing = 1;
+        if (interiorPlatformsActive) {
+            const climbSpeed = 150;
+            const onLadder = findInteriorNearbyLadder(scene, pilot);
+
+            if (onLadder && (up || down)) {
+                pilotState.climbing = true;
+                pilotState.vy = 0;
+                pilot.body.setAllowGravity(false);
+
+                if (up) {
+                    pilot.y -= climbSpeed * (delta / 1000);
+                    if (pilot.y <= onLadder.topY) {
+                        pilotState.climbing = false;
+                        pilot.body.setAllowGravity(true);
+                        pilotState.vy = -100;
+                    }
+                } else if (down) {
+                    pilot.y += climbSpeed * (delta / 1000);
+                    if (pilot.y >= onLadder.bottomY) {
+                        pilotState.climbing = false;
+                        pilot.body.setAllowGravity(true);
+                    }
+                }
+
+                pilotState.vx = 0;
+                if (left) {
+                    pilotState.vx = -horizontalSpeed * 0.3;
+                    pilotState.facing = -1;
+                } else if (right) {
+                    pilotState.vx = horizontalSpeed * 0.3;
+                    pilotState.facing = 1;
+                }
+
+                pilot.x += pilotState.vx * (delta / 1000);
+                pilot.body.setVelocity(pilotState.vx, 0);
+            } else {
+                pilotState.climbing = false;
+                pilot.body.setAllowGravity(true);
+
+                if (left) {
+                    pilotState.vx = -horizontalSpeed;
+                    pilotState.facing = -1;
+                } else if (right) {
+                    pilotState.vx = horizontalSpeed;
+                    pilotState.facing = 1;
+                } else {
+                    pilotState.vx *= 0.8;
+                }
+
+                const jumpPressed = (jumpKey && jumpKey.isDown) || vInput.up;
+                if (jumpPressed && pilotState.grounded && (left || right || !(fireKey.isDown || vInput.fire))) {
+                    pilotState.vy = jumpForce;
+                    pilotState.grounded = false;
+                }
+
+                pilotState.vy += gravity * (delta / 1000);
+                pilotState.vy = Math.min(pilotState.vy, 900);
+
+                pilot.x += pilotState.vx * (delta / 1000);
+                pilot.y += pilotState.vy * (delta / 1000);
+                pilot.body.setVelocity(pilotState.vx, pilotState.vy);
+
+                if (pilot.y < minY) pilot.y = minY;
+                pilotState.grounded = Boolean((pilot.body && pilot.body.blocked && pilot.body.blocked.down) || (pilot.body && pilot.body.touching && pilot.body.touching.down));
+
+                var interiorFloorY = (scene.groundLevel || CONFIG.worldHeight - 80) - 6;
+                if (!pilotState.grounded && pilot.y > interiorFloorY) {
+                    pilot.y = interiorFloorY;
+                    pilotState.vy = 0;
+                    pilot.body.setVelocityY(0);
+                    pilotState.grounded = true;
+                }
+            }
         } else {
-            pilotState.vx *= 0.8;
-        }
+            if (left) {
+                pilotState.vx = -horizontalSpeed;
+                pilotState.facing = -1;
+            } else if (right) {
+                pilotState.vx = horizontalSpeed;
+                pilotState.facing = 1;
+            } else {
+                pilotState.vx *= 0.8;
+            }
 
-        const jumpPressed = (jumpKey && jumpKey.isDown) || vInput.up;
-        if (jumpPressed && pilotState.grounded && (left || right || !(fireKey.isDown || vInput.fire))) {
-            pilotState.vy = jumpForce;
-            pilotState.grounded = false;
-        }
+            const jumpPressed = (jumpKey && jumpKey.isDown) || vInput.up;
+            if (jumpPressed && pilotState.grounded && (left || right || !(fireKey.isDown || vInput.fire))) {
+                pilotState.vy = jumpForce;
+                pilotState.grounded = false;
+            }
 
-        pilotState.vy += gravity * (delta / 1000);
-        pilotState.vy = Math.min(pilotState.vy, 900);
+            pilotState.vy += gravity * (delta / 1000);
+            pilotState.vy = Math.min(pilotState.vy, 900);
 
-        pilot.x += pilotState.vx * (delta / 1000);
-        pilot.y += pilotState.vy * (delta / 1000);
-        pilot.body.setVelocity(pilotState.vx, pilotState.vy);
+            pilot.x += pilotState.vx * (delta / 1000);
+            pilot.y += pilotState.vy * (delta / 1000);
+            pilot.body.setVelocity(pilotState.vx, pilotState.vy);
 
-        const terrainVariation = Math.sin(pilot.x / 200) * 30;
-        const maxY = groundLevel - terrainVariation - 12;
-        if (pilot.y < minY) pilot.y = minY;
-        if (pilot.y > maxY) {
-            pilot.y = maxY;
-            pilotState.vy = 0;
-            pilotState.grounded = true;
-        } else {
-            pilotState.grounded = false;
+            const terrainVariation = Math.sin(pilot.x / 200) * 30;
+            const maxY = groundLevel - terrainVariation - 12;
+            if (pilot.y < minY) pilot.y = minY;
+            if (pilot.y > maxY) {
+                pilot.y = maxY;
+                pilotState.vy = 0;
+                pilotState.grounded = true;
+            } else {
+                pilotState.grounded = false;
+            }
         }
 
         pilot.flipX = pilotState.facing < 0;

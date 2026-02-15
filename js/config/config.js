@@ -293,6 +293,7 @@ const pilotState = {
     active: false,
     facing: 1,
     grounded: false,
+    climbing: false,
     vx: 0,
     vy: 0
 };
@@ -372,6 +373,7 @@ function resetGameState() {
     pilotState.active = false;
     pilotState.facing = 1;
     pilotState.grounded = false;
+    pilotState.climbing = false;
     pilotState.vx = 0;
     pilotState.vy = 0;
 
