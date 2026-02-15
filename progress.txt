@@ -14,6 +14,7 @@
 - **Defend and Reclaim**: Districts exist in three states (Friendly/Threatened/Occupied)
 - **Squad Leader Fantasy (Core Loop):** On-foot aura, formation follow, and sacrifice/body-block behaviors
 - **Active Deployment:** Humans convert into operatives when dropped at the hangar
+- **Mothership Finale Structure:** Exterior boss breach transitions into an interior pilot-only boarding phase
 
 ⚠️ **Partially Implemented:**
 - **Seamless transition (Ship/Foot):** Ejection + hangar rebuild + squad leader aura exist, but Bulwark/ground synergies and stronger UI messaging are missing.
@@ -62,6 +63,17 @@
 - Base core objective with HP / Shield generators / Turrets
 - Garrison defender squads
 - **Saboteur Synergy:** EMP-style disables against turrets/shields
+
+#### Mothership Finale (Endgame)
+**Implementation Status: 92% Complete**
+✅ **Fully Implemented:**
+- Exterior mothership core encounter with phase-gated shields/damage windows
+- Automatic transition into interior boarding phase after hull breach
+- Pilot-only run-and-gun gameplay with procedural platforms and ladders
+- Interior objective chain (power conduits + security nodes -> core chamber)
+
+⚠️ **Partially Implemented:**
+- Additional cinematic polish for the breach-to-interior transition
 
 ❌ **Not Implemented:**
 - **Bulwark Form Synergy:** Increased effectiveness against structures
@@ -113,7 +125,7 @@
 
 ✅ **Fully Implemented:**
 - Operative spawning from hangar deployment
-- **Operative Classes:** Infantry, Gunner, Medic, Saboteur
+- **Operative Classes:** Infantry, Gunner, Medic, Saboteur (Medic is live and integrated into follow/aura behaviors)
 - **Formation + Aura:** On-foot squad formation, fire-rate aura, and formation offsets
 - **Saboteur Assault Logic:** Assault targets prioritized with EMP disable
 
@@ -226,7 +238,7 @@
 - Operative class behaviors including saboteur utility plus overflow-based troop buffs.
 - Supply Drop gacha sequence with pending inventory and mission-start hot-start application.
 - Unified shield-gate cadence across bosses, battleships, assault core, and mothership core.
-- Mothership mission chain with exterior encounter, interior objective stage, and final core kill.
+- Mothership mission chain with exterior encounter, interior objective stage, procedural platform/ladders traversal, and final core kill.
 - Combo/flow tracking surfaced in HUD layer.
 
 **Partially Aligned**
