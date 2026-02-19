@@ -130,9 +130,13 @@ function setupAssaultObjective(scene) {
 // Handles projectile damage against assault targets, including shields, turret/base deaths, and scoring.
 function hitAssaultTarget(projectile, target) {
     const mothershipObjective = gameState.mothershipObjective;
-    if (target?.assaultRole && typeof target.assaultRole === 'string' && target.assaultRole.indexOf('interior_') === 0) {
-        if (mothershipObjective?.active && mothershipObjective.stage === 'interior_assault' && typeof hitMothershipInteriorTarget === 'function') {
-            hitMothershipInteriorTarget(projectile, target);
+    const isInteriorTarget = !!target?.interiorTarget
+        || target?.assaultRole === 'power_conduit'
+        || target?.assaultRole === 'security_node'
+        || target?.assaultRole === 'interior_core';
+    if (isInteriorTarget) {
+        if (mothershipObjective?.active && mothershipObjective?.interiorPhase && typeof hitInteriorTarget === 'function') {
+            hitInteriorTarget(projectile, target);
         } else if (projectile && projectile.active && !projectile.isPiercing) {
             projectile.destroy();
         }
