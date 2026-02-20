@@ -30,6 +30,26 @@ const ASSAULT_BASE_TEXTURES = [
     'assaultBaseDreadnought'
 ];
 
+const ASSAULT_INTERIOR_CONFIG = {
+    transitionDelayMs: 1200,
+    powerConduitCount: 6,
+    securityNodeCount: 4,
+    powerConduitHp: 12,
+    securityNodeHp: 18,
+    coreChamberHp: 120,
+    reinforcementInterval: 4200,
+    reinforcementBatch: 2,
+    interiorEnemyTypes: ['seeker', 'kamikaze', 'shield', 'bomber']
+};
+
+const ASSAULT_INTERIOR_STYLE_BY_BASE = {
+    assaultBaseRaider: 'raider_interior',
+    assaultBaseCarrier: 'carrier_interior',
+    assaultBaseNova: 'nova_interior',
+    assaultBaseSiege: 'siege_interior',
+    assaultBaseDreadnought: 'dreadnought_interior'
+};
+
 // Returns the assault base texture variant key based on objective state or random selection.
 function getAssaultBaseTextureKey(objective) {
     if (objective?.baseVariant && ASSAULT_BASE_TEXTURES.includes(objective.baseVariant)) {
@@ -94,6 +114,22 @@ function setupAssaultObjective(scene) {
     objective.turretFireTimer = 0;
     objective.shieldHitCooldown = 0;
     objective.reinforcementTimer = 0;
+    objective.phaseLabel = '';
+    objective.gateLabel = '';
+    objective.gateColor = '#ffffff';
+    objective.interiorPhase = false;
+    objective.interiorStarted = false;
+    objective.powerConduitsRemaining = 0;
+    objective.powerConduitsTotal = 0;
+    objective.securityNodesRemaining = 0;
+    objective.securityNodesTotal = 0;
+    objective.coreChamberOpen = false;
+    objective.coreChamberHp = 0;
+    objective.coreChamberHpMax = 0;
+    objective.coreChamberActive = false;
+    objective.interiorReinforcementTimer = 0;
+    objective.shipLocked = false;
+    objective.transitionTimer = 0;
     const scaledHp = Math.round(ASSAULT_BASE_CONFIG.baseHp * (gameState.spawnMultiplier || 1));
     objective.baseHpMax = scaledHp;
     objective.baseHp = scaledHp;
@@ -129,13 +165,16 @@ function setupAssaultObjective(scene) {
 
 // Handles projectile damage against assault targets, including shields, turret/base deaths, and scoring.
 function hitAssaultTarget(projectile, target) {
+    const assaultObjective = gameState.assaultObjective;
     const mothershipObjective = gameState.mothershipObjective;
     const isInteriorTarget = !!target?.interiorTarget
         || target?.assaultRole === 'power_conduit'
         || target?.assaultRole === 'security_node'
         || target?.assaultRole === 'interior_core';
     if (isInteriorTarget) {
-        if (mothershipObjective?.active && mothershipObjective?.interiorPhase && typeof hitInteriorTarget === 'function') {
+        if (assaultObjective?.active && assaultObjective?.interiorPhase) {
+            hitAssaultInteriorTarget(projectile, target);
+        } else if (mothershipObjective?.active && mothershipObjective?.interiorPhase && typeof hitInteriorTarget === 'function') {
             hitInteriorTarget(projectile, target);
         } else if (projectile && projectile.active && !projectile.isPiercing) {
             projectile.destroy();
@@ -195,13 +234,309 @@ function hitAssaultTarget(projectile, target) {
     if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
 
     if (objective.baseHp <= 0 && objective.active) {
-        objective.active = false;
         objective.baseHp = 0;
         createExplosion(scene, target.x, target.y, 0xff6b35);
         if (target && target.active && target.assaultRole === 'core') target.destroy();
         scene.assaultBase = null;
-        const baseReward = getMissionScaledReward(5000);
-        gameState.score += baseReward;
-        winGame(scene);
+        handleAssaultBaseExteriorDefeat(scene, objective);
     }
+}
+
+// Handles exterior assault-base destruction by transitioning into on-foot interior phase.
+function handleAssaultBaseExteriorDefeat(scene, objective) {
+    if (!scene || !objective) return;
+
+    objective.interiorPhase = true;
+    objective.active = true;
+    objective.interiorStarted = false;
+    objective.shipLocked = true;
+
+    const phaseReward = getMissionScaledReward(3000);
+    gameState.score += phaseReward;
+
+    showRebuildObjectiveBanner(scene, 'ASSAULT BASE BREACHED - INFILTRATION IN PROGRESS', '#ff6b35');
+
+    scene.time.delayedCall(ASSAULT_INTERIOR_CONFIG.transitionDelayMs, () => {
+        beginAssaultBaseInterior(scene);
+    });
+}
+
+// Starts the assault-base interior phase by swapping to interior visuals and spawning targets.
+function beginAssaultBaseInterior(scene) {
+    const objective = gameState.assaultObjective;
+    if (!objective) return;
+
+    objective.interiorStarted = true;
+
+    if (typeof clearExteriorEntities === 'function') {
+        clearExteriorEntities(scene);
+    }
+
+    const interiorStyle = ASSAULT_INTERIOR_STYLE_BY_BASE[objective.baseVariant] || 'raider_interior';
+    destroyParallax();
+    createBackground(scene, interiorStyle);
+    const mainCam = scene.cameras.main;
+    if (mainCam) {
+        initParallaxTracking(mainCam.scrollX, mainCam.scrollY);
+    }
+
+    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337);
+    forceOnFootForAssault(scene);
+    spawnAssaultInteriorObjectives(scene);
+
+    objective.phaseLabel = 'PHASE 2 - INTERIOR';
+    objective.gateLabel = 'Destroy power conduits & security nodes';
+    objective.gateColor = '#ff00ff';
+
+    showRebuildObjectiveBanner(scene, 'INTERIOR BREACH\nDestroy all power conduits and security nodes', '#ff00ff');
+}
+
+// Forces pilot-only gameplay during assault interior phase.
+function forceOnFootForAssault(scene) {
+    const objective = gameState.assaultObjective;
+    if (!objective) return;
+
+    if (aegisState.active && scene.aegis) {
+        ejectPilot(scene);
+    }
+
+    aegisState.active = false;
+    aegisState.destroyed = true;
+    objective.shipLocked = true;
+
+    if (scene.aegis) {
+        scene.aegis.setActive(false).setVisible(false);
+        scene.aegis.body.enable = false;
+    }
+
+    if (scene.pilot) {
+        pilotState.active = true;
+        scene.pilot.setActive(true).setVisible(true);
+        scene.pilot.setAlpha(1);
+        scene.pilot.clearTint();
+        scene.pilot.body.enable = true;
+
+        const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+        scene.pilot.setPosition(200, groundLevel - 30);
+        pilotState.grounded = false;
+        pilotState.vx = 0;
+        pilotState.vy = 0;
+    }
+
+    syncActivePlayer(scene);
+    playerState.powerUps.invincibility = 3000;
+
+    if (gameState.rebuildObjective) {
+        gameState.rebuildObjective.active = false;
+        gameState.rebuildObjective.stage = null;
+    }
+}
+
+// Spawns interior objectives for the assault-base phase.
+function spawnAssaultInteriorObjectives(scene) {
+    const objective = gameState.assaultObjective;
+    const cfg = ASSAULT_INTERIOR_CONFIG;
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+
+    objective.powerConduitsTotal = cfg.powerConduitCount;
+    objective.powerConduitsRemaining = cfg.powerConduitCount;
+    objective.securityNodesTotal = cfg.securityNodeCount;
+    objective.securityNodesRemaining = cfg.securityNodeCount;
+    objective.coreChamberOpen = false;
+    objective.coreChamberActive = false;
+    objective.coreChamberHp = 0;
+    objective.coreChamberHpMax = cfg.coreChamberHp;
+    objective.interiorReinforcementTimer = 0;
+
+    const conduitSpacing = CONFIG.worldWidth / (cfg.powerConduitCount + 1);
+    for (let i = 0; i < cfg.powerConduitCount; i++) {
+        const cx = conduitSpacing * (i + 1) + (Math.random() - 0.5) * 100;
+        const terrainVar = Math.sin(cx / 200) * 30;
+        const fallbackY = Math.max(120, groundLevel - terrainVar - 20);
+        const cy = getInteriorAnchorY(scene, cx, fallbackY, 20);
+
+        const conduit = createAssaultInteriorComponent(scene, cx, cy, 'assaultTurret', 'power_conduit', cfg.powerConduitHp);
+        conduit.setTint(0x00ffff);
+    }
+
+    const nodeSpacing = CONFIG.worldWidth / (cfg.securityNodeCount + 1);
+    for (let i = 0; i < cfg.securityNodeCount; i++) {
+        const nx = nodeSpacing * (i + 1) + (Math.random() - 0.5) * 150;
+        const terrainVar = Math.sin(nx / 200) * 30;
+        const fallbackY = Math.max(100, groundLevel - terrainVar - 40);
+        const ny = getInteriorAnchorY(scene, nx, fallbackY, 40);
+
+        const node = createAssaultInteriorComponent(scene, nx, ny, 'assaultShieldGen', 'security_node', cfg.securityNodeHp);
+        node.setTint(0xff00ff);
+    }
+
+    spawnAssaultInteriorDefenders(scene, 4);
+}
+
+// Creates one interior objective component.
+function createAssaultInteriorComponent(scene, x, y, texture, role, hp) {
+    const component = scene.assaultTargets.create(x, y, texture);
+    component.setDepth(FG_DEPTH_BASE + 3);
+    component.setImmovable(true);
+    component.body.setAllowGravity(false);
+    component.body.setVelocity(0, 0);
+    component.assaultRole = role;
+    component.interiorTarget = true;
+    component.hp = hp;
+    component.maxHp = hp;
+    component.nextShot = Phaser.Math.Between(800, 1800);
+    return component;
+}
+
+// Spawns interior defenders near the camera location.
+function spawnAssaultInteriorDefenders(scene, count) {
+    const cfg = ASSAULT_INTERIOR_CONFIG;
+    const camX = scene.cameras.main ? scene.cameras.main.scrollX : 0;
+
+    for (let i = 0; i < count; i++) {
+        const type = Phaser.Utils.Array.GetRandom(cfg.interiorEnemyTypes);
+        const spawnX = wrapValue(camX + CONFIG.width * 0.3 + Math.random() * CONFIG.width * 0.4, CONFIG.worldWidth);
+        const spawnY = CONFIG.height * 0.2 + Math.random() * CONFIG.height * 0.5;
+        spawnEnemy(scene, type, spawnX, spawnY, false);
+    }
+}
+
+// Spawns the assault interior core chamber once all gates are destroyed.
+function spawnAssaultCoreChamber(scene) {
+    const objective = gameState.assaultObjective;
+    const cfg = ASSAULT_INTERIOR_CONFIG;
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+
+    const coreX = CONFIG.worldWidth * 0.5;
+    const terrainVar = Math.sin(coreX / 200) * 30;
+    const fallbackY = Math.max(140, groundLevel - terrainVar - 30);
+    const coreY = getInteriorAnchorY(scene, coreX, fallbackY, 30);
+
+    const core = createAssaultInteriorComponent(scene, coreX, coreY, 'assaultBaseRaider', 'interior_core', cfg.coreChamberHp);
+    core.setTint(0xffaa00);
+    core.setScale(1.3);
+
+    objective.coreChamberActive = true;
+    objective.coreChamberHp = cfg.coreChamberHp;
+    objective.coreChamberHpMax = cfg.coreChamberHp;
+
+    showRebuildObjectiveBanner(scene, 'CORE CHAMBER EXPOSED\nDestroy the reactor core!', '#ffaa00');
+    spawnAssaultInteriorDefenders(scene, 3);
+}
+
+// Updates assault interior objective progress, reinforcement cadence, and turret firing.
+function updateAssaultInterior(scene, delta) {
+    const objective = gameState.assaultObjective;
+    if (!objective || !objective.interiorPhase || !objective.interiorStarted) return;
+
+    if (gameState.rebuildObjective && gameState.rebuildObjective.active) {
+        gameState.rebuildObjective.active = false;
+        gameState.rebuildObjective.stage = null;
+    }
+
+    if (!objective.coreChamberOpen) {
+        const totalGates = objective.powerConduitsTotal + objective.securityNodesTotal;
+        const remaining = objective.powerConduitsRemaining + objective.securityNodesRemaining;
+        objective.phaseLabel = 'PHASE 2 - INTERIOR';
+        objective.gateLabel = `Targets: ${remaining}/${totalGates} remaining`;
+        objective.gateColor = remaining > 0 ? '#ff00ff' : '#00ff00';
+        objective.baseHp = remaining;
+        objective.baseHpMax = totalGates;
+    } else if (objective.coreChamberActive) {
+        objective.phaseLabel = 'PHASE 2 - CORE CHAMBER';
+        objective.gateLabel = 'Destroy the reactor core!';
+        objective.gateColor = '#ffaa00';
+        objective.baseHp = objective.coreChamberHp;
+        objective.baseHpMax = objective.coreChamberHpMax;
+    }
+
+    if (!objective.coreChamberOpen && objective.powerConduitsRemaining <= 0 && objective.securityNodesRemaining <= 0) {
+        objective.coreChamberOpen = true;
+        spawnAssaultCoreChamber(scene);
+    }
+
+    objective.interiorReinforcementTimer += delta;
+    if (objective.interiorReinforcementTimer >= ASSAULT_INTERIOR_CONFIG.reinforcementInterval) {
+        objective.interiorReinforcementTimer = 0;
+        const activeEnemies = scene.enemies ? scene.enemies.countActive(true) : 0;
+        if (activeEnemies < 8) {
+            spawnAssaultInteriorDefenders(scene, ASSAULT_INTERIOR_CONFIG.reinforcementBatch);
+        }
+    }
+
+    if (scene.assaultTargets) {
+        const now = scene.time?.now || 0;
+        scene.assaultTargets.children.entries.forEach(target => {
+            if (!target || !target.active || !target.interiorTarget) return;
+            if (target.assaultRole === 'interior_core') return;
+            if (now >= (target.nextShot || 0)) {
+                fireInteriorTurret(scene, target);
+                target.nextShot = now + 1200 + Math.random() * 1000;
+            }
+        });
+    }
+}
+
+// Handles damage logic for assault interior targets and final core destruction.
+function hitAssaultInteriorTarget(projectile, target) {
+    const objective = gameState.assaultObjective;
+    if (!objective || !objective.interiorPhase || !target.active || !target.interiorTarget) {
+        if (projectile && projectile.active) projectile.destroy();
+        return;
+    }
+
+    const scene = projectile.scene;
+    target.hp -= projectile.damage || 1;
+
+    target.setTint(0xff0000);
+    scene.time.delayedCall(60, () => {
+        if (target && target.active) {
+            if (target.assaultRole === 'power_conduit') target.setTint(0x00ffff);
+            else if (target.assaultRole === 'security_node') target.setTint(0xff00ff);
+            else if (target.assaultRole === 'interior_core') target.setTint(0xffaa00);
+            else target.clearTint();
+        }
+    });
+
+    if (target.hp <= 0) {
+        if (target.assaultRole === 'power_conduit') {
+            objective.powerConduitsRemaining = Math.max(0, objective.powerConduitsRemaining - 1);
+            createExplosion(scene, target.x, target.y, 0x00ffff);
+            createFloatingText(scene, target.x, target.y - 30, 'CONDUIT DESTROYED', '#00ffff');
+            gameState.score += getMissionScaledReward(500);
+        } else if (target.assaultRole === 'security_node') {
+            objective.securityNodesRemaining = Math.max(0, objective.securityNodesRemaining - 1);
+            createExplosion(scene, target.x, target.y, 0xff00ff);
+            createFloatingText(scene, target.x, target.y - 30, 'NODE DESTROYED', '#ff00ff');
+            gameState.score += getMissionScaledReward(750);
+        } else if (target.assaultRole === 'interior_core') {
+            objective.coreChamberHp = 0;
+            objective.coreChamberActive = false;
+            createExplosion(scene, target.x, target.y, 0xffaa00);
+            createExplosion(scene, target.x - 30, target.y + 10, 0xff6b35);
+            createExplosion(scene, target.x + 30, target.y - 10, 0xff6b35);
+            screenShake(scene, 30, 800);
+            gameState.score += getMissionScaledReward(8000);
+
+            target.destroy();
+            objective.active = false;
+            objective.interiorPhase = false;
+            objective.shipLocked = false;
+
+            showRebuildObjectiveBanner(scene, 'ASSAULT BASE CORE DESTROYED\nTARGET ELIMINATED!', '#00ff00');
+            scene.time.delayedCall(2000, () => {
+                winGame(scene);
+            });
+            if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
+            return;
+        }
+
+        target.destroy();
+    }
+
+    if (target.assaultRole === 'interior_core' && target.active) {
+        objective.coreChamberHp = Math.max(0, target.hp);
+    }
+
+    if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
 }

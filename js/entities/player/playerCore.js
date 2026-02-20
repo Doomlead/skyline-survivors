@@ -51,7 +51,7 @@ function ejectPilot(scene) {
 // Re-enters AEGIS from pilot state when conditions allow, restoring ship control.
 function enterAegis(scene) {
     if (!scene.aegis || !scene.pilot || !pilotState.active) return;
-    if (gameState.mothershipObjective?.shipLocked) return;
+    if ((gameState.mothershipObjective?.shipLocked || gameState.assaultObjective?.shipLocked)) return;
     if (aegisState.destroyed) return;
     const dist = Phaser.Math.Distance.Between(scene.pilot.x, scene.pilot.y, scene.aegis.x, scene.aegis.y);
     if (dist > 60) return;
@@ -93,7 +93,7 @@ function playerDie(scene) {
             scene.aegis.body.enable = false;
         }
         ejectPilot(scene);
-        if (gameState.rebuildObjective && !gameState.mothershipObjective?.shipLocked) {
+        if (gameState.rebuildObjective && !(gameState.mothershipObjective?.shipLocked || gameState.assaultObjective?.shipLocked)) {
             const useHangarRebuild = typeof isDefenseMission === 'function' ? isDefenseMission() : false;
             const defaultBranch = gameState.rebuildObjective.branch || 'dropship';
             gameState.rebuildObjective.active = true;
@@ -120,7 +120,7 @@ function playerDie(scene) {
         player.setActive(false).setVisible(false);
         player.body.enable = false;
 
-        const mothershipShipLocked = Boolean(gameState.mothershipObjective?.shipLocked);
+        const mothershipShipLocked = Boolean((gameState.mothershipObjective?.shipLocked || gameState.assaultObjective?.shipLocked));
         pilotState.active = false;
         aegisState.active = !mothershipShipLocked;
 

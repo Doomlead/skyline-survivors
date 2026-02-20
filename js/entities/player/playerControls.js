@@ -35,7 +35,7 @@ function updatePlayer(scene, time, delta) {
         aegisState.transformCooldown -= delta;
     }
 
-    const mothershipShipLocked = Boolean(gameState?.mothershipObjective?.shipLocked);
+    const mothershipShipLocked = Boolean((gameState?.mothershipObjective?.shipLocked || gameState?.assaultObjective?.shipLocked));
 
     if (Phaser.Input.Keyboard.JustDown(transformKey) && aegisState.active && !mothershipShipLocked && aegisState.transformCooldown <= 0) {
         const nextMode = aegisState.mode === 'interceptor' ? 'bulwark' : 'interceptor';

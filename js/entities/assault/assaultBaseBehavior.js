@@ -21,6 +21,12 @@ function spawnAssaultDefenders(scene, baseX) {
 function updateAssaultObjective(scene, delta) {
     const objective = gameState.assaultObjective;
     if (!objective || !objective.active) return;
+    if (objective.interiorPhase) {
+        if (typeof updateAssaultInterior === 'function') {
+            updateAssaultInterior(scene, delta);
+        }
+        return;
+    }
     objective.spawnTimer += delta;
     objective.turretFireTimer += delta;
     objective.reinforcementTimer += delta;

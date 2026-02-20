@@ -118,7 +118,8 @@ function updateUI(scene) {
         const objective = gameState.assaultObjective;
         const baseHp = objective?.baseHp ?? 0;
         const baseMax = objective?.baseHpMax ?? 0;
-        waveEl.innerText = 'ASSAULT: BASE CORE TARGET';
+        const interiorPhase = Boolean(objective?.interiorPhase);
+        waveEl.innerText = interiorPhase ? 'ASSAULT: INTERIOR INFILTRATION' : 'ASSAULT: BASE CORE TARGET';
         if (assaultHudEl) assaultHudEl.classList.remove('hidden');
         if (assaultCoreFillEl) {
             const pct = baseMax > 0 ? Math.max(0, Math.min(1, baseHp / baseMax)) : 0;
@@ -128,13 +129,21 @@ function updateUI(scene) {
             assaultCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(baseHp))}/${Math.max(0, Math.ceil(baseMax))}`;
         }
         if (assaultShieldLabelEl) {
-            const shields = objective?.shieldsRemaining ?? 0;
-            const stage = objective?.shieldStage || 1;
-            const total = objective?.shieldStageTotal || 1;
-            const now = scene?.time?.now || 0;
-            const windowLeft = Math.max(0, ((objective?.damageWindowUntil || 0) - now));
-            const windowTag = windowLeft > 0 ? ` · Window ${Math.ceil(windowLeft / 1000)}s` : '';
-            assaultShieldLabelEl.innerText = `Stage ${stage}/${total} · Shields: ${shields}${windowTag}`;
+            if (interiorPhase) {
+                const phase = objective?.phaseLabel || 'PHASE 2 - INTERIOR';
+                const gate = objective?.gateLabel ? ` · ${objective.gateLabel}` : '';
+                assaultShieldLabelEl.innerText = `${phase}${gate}`;
+                if (objective?.gateColor) assaultShieldLabelEl.style.color = objective.gateColor;
+            } else {
+                const shields = objective?.shieldsRemaining ?? 0;
+                const stage = objective?.shieldStage || 1;
+                const total = objective?.shieldStageTotal || 1;
+                const now = scene?.time?.now || 0;
+                const windowLeft = Math.max(0, ((objective?.damageWindowUntil || 0) - now));
+                const windowTag = windowLeft > 0 ? ` · Window ${Math.ceil(windowLeft / 1000)}s` : '';
+                assaultShieldLabelEl.innerText = `Stage ${stage}/${total} · Shields: ${shields}${windowTag}`;
+                assaultShieldLabelEl.style.color = '';
+            }
         }
     } else if (gameState.mode === 'mothership') {
         timerEl.style.display = 'none';
