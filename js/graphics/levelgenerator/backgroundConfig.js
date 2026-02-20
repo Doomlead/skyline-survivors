@@ -131,6 +131,37 @@ var MOTHERSHIP_INT_ORDER = [
     'infrastructure'
 ];
 
+
+var RAIDER_INT_LAYERS = {
+    corridorBack: { key: 'raider_int_back', speedX: 0.2, depth: 4, generator: 'generateCorridorBack' },
+    infrastructure: { key: 'raider_int_infra', speedX: 0.5, depth: 5, generator: 'generateInfrastructure' }
+};
+
+var CARRIER_INT_LAYERS = {
+    corridorBack: { key: 'carrier_int_back', speedX: 0.2, depth: 4, generator: 'generateCorridorBack' },
+    infrastructure: { key: 'carrier_int_infra', speedX: 0.5, depth: 5, generator: 'generateInfrastructure' }
+};
+
+var NOVA_INT_LAYERS = {
+    corridorBack: { key: 'nova_int_back', speedX: 0.2, depth: 4, generator: 'generateCorridorBack' },
+    infrastructure: { key: 'nova_int_infra', speedX: 0.5, depth: 5, generator: 'generateInfrastructure' }
+};
+
+var SIEGE_INT_LAYERS = {
+    corridorBack: { key: 'siege_int_back', speedX: 0.2, depth: 4, generator: 'generateCorridorBack' },
+    infrastructure: { key: 'siege_int_infra', speedX: 0.5, depth: 5, generator: 'generateInfrastructure' }
+};
+
+var DREADNOUGHT_INT_LAYERS = {
+    corridorBack: { key: 'dreadnought_int_back', speedX: 0.2, depth: 4, generator: 'generateCorridorBack' },
+    infrastructure: { key: 'dreadnought_int_infra', speedX: 0.5, depth: 5, generator: 'generateInfrastructure' }
+};
+
+var ASSAULT_INT_ORDER = [
+    'corridorBack',
+    'infrastructure'
+];
+
 var BACKGROUND_LAYER_SETS = {
     default: {
         layers: BACKGROUND_LAYERS,
@@ -143,6 +174,26 @@ var BACKGROUND_LAYER_SETS = {
     mothership_interior: {
         layers: MOTHERSHIP_INT_LAYERS,
         order: MOTHERSHIP_INT_ORDER
+    },
+    raider_interior: {
+        layers: RAIDER_INT_LAYERS,
+        order: ASSAULT_INT_ORDER
+    },
+    carrier_interior: {
+        layers: CARRIER_INT_LAYERS,
+        order: ASSAULT_INT_ORDER
+    },
+    nova_interior: {
+        layers: NOVA_INT_LAYERS,
+        order: ASSAULT_INT_ORDER
+    },
+    siege_interior: {
+        layers: SIEGE_INT_LAYERS,
+        order: ASSAULT_INT_ORDER
+    },
+    dreadnought_interior: {
+        layers: DREADNOUGHT_INT_LAYERS,
+        order: ASSAULT_INT_ORDER
     }
 };
 

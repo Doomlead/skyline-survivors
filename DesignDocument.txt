@@ -173,10 +173,18 @@ If the Aegis is destroyed, the game does not end. The pilot ejects, and the genr
 
 ### 7.2. Mission Types
 *   **Defense:** 15 Waves. Focus on keeping the Fortified Hangar safe and deploying troops.
-*   **Assault:** Destroy Enemy Base. Saboteurs and Bulwark Mode are highly effective here.
+*   **Assault:** Two-phase strike. First destroy the exterior base core, then board and destroy the interior reactor core.
 *   **Mothership:** A two-part finale: exterior core siege followed by an interior boarding run-and-gun objective chain.
 
-#### 7.2.1. Mothership Interior Boarding (Run-and-Gun Phase)
+#### 7.2.1. Assault Base Interior Breach (Run-and-Gun Phase)
+*   **Transition Trigger:** Destroying the assault base exterior core now starts a breach sequence instead of immediate mission completion.
+*   **Pilot-Only Lock:** The AEGIS is disabled/locked and the player must continue on foot as the pilot during interior combat.
+*   **Battleship-Specific Interiors:** Assault interiors swap to one of five procedural interior themes based on the active base variant: **Raider, Carrier, Nova, Siege,** or **Dreadnought**.
+*   **Objective Chain:** Destroy all interior **Power Conduits** and **Security Nodes** to expose the interior **Core Chamber**, then destroy the reactor core.
+*   **Pressure Model:** Interior defenders and turret fire continue to reinforce throughout the breach phase.
+*   **Win Condition:** Assault mission success is now granted only after both phases are complete (exterior destruction + interior reactor kill).
+
+#### 7.2.2. Mothership Interior Boarding (Run-and-Gun Phase)
 *   **Transition:** Destroying the exterior core triggers a breach/boarding sequence and forces pilot-only gameplay (AEGIS locked).
 *   **Traversal:** Procedurally generated interior platforms + ladders create a side-on run-and-gun route with verticality (Contra/Metal Slug-inspired cadence).
 *   **Objectives:** Destroy all **Power Conduits** and **Security Nodes** to open the **Core Chamber**.
