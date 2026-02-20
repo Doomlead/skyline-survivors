@@ -17,7 +17,12 @@ var BACKGROUND_STYLE_GENERATORS = {
     industrial: BackgroundGeneratorIndustrial,
     destroyedindustrial: BackgroundGeneratorDestroyedIndustrial,
     mothership_exterior: BackgroundGeneratorMothershipExterior,
-    mothership_interior: BackgroundGeneratorMothershipInterior
+    mothership_interior: BackgroundGeneratorMothershipInterior,
+    raider_interior: BackgroundGeneratorRaiderInterior,
+    carrier_interior: BackgroundGeneratorCarrierInterior,
+    nova_interior: BackgroundGeneratorNovaInterior,
+    siege_interior: BackgroundGeneratorSiegeInterior,
+    dreadnought_interior: BackgroundGeneratorDreadnoughtInterior
 };
 
 var BACKGROUND_STYLE_OPTIONS = Object.keys(BACKGROUND_STYLE_GENERATORS);

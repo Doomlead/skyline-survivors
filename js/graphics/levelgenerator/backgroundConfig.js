@@ -131,6 +131,35 @@ var MOTHERSHIP_INT_ORDER = [
     'infrastructure'
 ];
 
+
+function createBattleshipInteriorLayers(prefix, backSpeed, infraSpeed) {
+    return {
+        corridorBack: {
+            key: prefix + '_int_back',
+            speedX: backSpeed,
+            depth: 4,
+            generator: 'generateCorridorBack'
+        },
+        infrastructure: {
+            key: prefix + '_int_infra',
+            speedX: infraSpeed,
+            depth: 5,
+            generator: 'generateInfrastructure'
+        }
+    };
+}
+
+var BATTLESHIP_INT_ORDER = [
+    'corridorBack',
+    'infrastructure'
+];
+
+var RAIDER_INT_LAYERS = createBattleshipInteriorLayers('raider', 0.24, 0.58);
+var CARRIER_INT_LAYERS = createBattleshipInteriorLayers('carrier', 0.22, 0.55);
+var NOVA_INT_LAYERS = createBattleshipInteriorLayers('nova', 0.26, 0.6);
+var SIEGE_INT_LAYERS = createBattleshipInteriorLayers('siege', 0.2, 0.52);
+var DREADNOUGHT_INT_LAYERS = createBattleshipInteriorLayers('dreadnought', 0.23, 0.57);
+
 var BACKGROUND_LAYER_SETS = {
     default: {
         layers: BACKGROUND_LAYERS,
@@ -143,6 +172,26 @@ var BACKGROUND_LAYER_SETS = {
     mothership_interior: {
         layers: MOTHERSHIP_INT_LAYERS,
         order: MOTHERSHIP_INT_ORDER
+    },
+    raider_interior: {
+        layers: RAIDER_INT_LAYERS,
+        order: BATTLESHIP_INT_ORDER
+    },
+    carrier_interior: {
+        layers: CARRIER_INT_LAYERS,
+        order: BATTLESHIP_INT_ORDER
+    },
+    nova_interior: {
+        layers: NOVA_INT_LAYERS,
+        order: BATTLESHIP_INT_ORDER
+    },
+    siege_interior: {
+        layers: SIEGE_INT_LAYERS,
+        order: BATTLESHIP_INT_ORDER
+    },
+    dreadnought_interior: {
+        layers: DREADNOUGHT_INT_LAYERS,
+        order: BATTLESHIP_INT_ORDER
     }
 };
 
