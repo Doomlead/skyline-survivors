@@ -17,11 +17,17 @@ var BACKGROUND_STYLE_GENERATORS = {
     industrial: BackgroundGeneratorIndustrial,
     destroyedindustrial: BackgroundGeneratorDestroyedIndustrial,
     mothership_exterior: BackgroundGeneratorMothershipExterior,
-    mothership_interior: BackgroundGeneratorMothershipInterior
+    mothership_interior: BackgroundGeneratorMothershipInterior,
+    raider_interior: BackgroundGeneratorRaiderInterior,
+    carrier_interior: BackgroundGeneratorCarrierInterior,
+    nova_interior: BackgroundGeneratorNovaInterior,
+    siege_interior: BackgroundGeneratorSiegeInterior,
+    dreadnought_interior: BackgroundGeneratorDreadnoughtInterior
 };
 
 var BACKGROUND_STYLE_OPTIONS = Object.keys(BACKGROUND_STYLE_GENERATORS);
 var MOTHERSHIP_STYLE_KEYS = ['mothership_exterior', 'mothership_interior'];
+var INTERIOR_STYLE_KEYS = ['mothership_interior', 'raider_interior', 'carrier_interior', 'nova_interior', 'siege_interior', 'dreadnought_interior'];
 
 function resolveBackgroundStyle(style) {
     var requested = style || CONFIG.backgroundStyle;
@@ -38,7 +44,7 @@ function resolveBackgroundStyle(style) {
     }
 
     var nonMothershipOptions = BACKGROUND_STYLE_OPTIONS.filter(function(option) {
-        return MOTHERSHIP_STYLE_KEYS.indexOf(option) === -1;
+        return MOTHERSHIP_STYLE_KEYS.indexOf(option) === -1 && INTERIOR_STYLE_KEYS.indexOf(option) === -1;
     });
     var options = nonMothershipOptions.length ? nonMothershipOptions : BACKGROUND_STYLE_OPTIONS;
     var index = Math.floor(Math.random() * options.length);
