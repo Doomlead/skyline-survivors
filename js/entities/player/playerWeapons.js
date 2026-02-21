@@ -6,7 +6,7 @@
 function fireWeapon(scene, angleOverride = null) {
     const { projectiles, drones } = scene;
     const player = getActivePlayer(scene);
-    if (!player || !projectiles || !drones) return;
+    if (!player || !projectiles) return;
     let speed = 600;
     if (playerState.powerUps.speed > 0) speed = 750;
     const p = playerState.powerUps;
@@ -63,6 +63,7 @@ function fireWeapon(scene, angleOverride = null) {
     }
 
     // Drone projectiles - green energy orbs
+    if (!drones || !drones.children || !drones.children.entries) return;
     drones.children.entries.forEach(drone => {
         const dProj = projectiles.create(drone.x, drone.y, 'projectile_drone');
         dProj.setScale(1.25);
@@ -444,6 +445,7 @@ if (typeof module !== 'undefined') {
     module.exports = {
         getClusterTargets,
         spawnClusterMissiles,
-        updateProjectiles
+        updateProjectiles,
+        fireWeapon
     };
 }
