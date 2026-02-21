@@ -23,12 +23,11 @@ function updateLanderBehavior(scene, enemy, time) {
         let nearestHuman = null;
         let nearestDist = Infinity;
         humans.children.entries.forEach(human => {
-            if (!human.isAbducted) {
-                const dist = Phaser.Math.Distance.Between(enemy.x, enemy.y, human.x, human.y);
-                if (dist < nearestDist && dist < 700) {
-                    nearestDist = dist;
-                    nearestHuman = human;
-                }
+            if (!human || human.active === false || human.isAbducted) return;
+            const dist = Phaser.Math.Distance.Between(enemy.x, enemy.y, human.x, human.y);
+            if (dist < nearestDist && dist < 700) {
+                nearestDist = dist;
+                nearestHuman = human;
             }
         });
         if (nearestHuman) {
