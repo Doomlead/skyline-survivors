@@ -4,8 +4,8 @@
 
 // Activates a smart bomb, clearing nearby threats and consuming one bomb charge.
 function useSmartBomb(scene) {
-    const { enemies, enemyProjectiles, audioManager } = scene;
-    if (!enemies || !enemyProjectiles) return;
+    const { enemies, garrisonDefenders, enemyProjectiles, audioManager } = scene;
+    if (!enemies) return;
     if (gameState.smartBombs <= 0) return;
     gameState.smartBombs--;
     if (audioManager) audioManager.playSound('smartBomb');
@@ -14,7 +14,20 @@ function useSmartBomb(scene) {
         createExplosion(scene, enemy.x, enemy.y);
         destroyEnemy(scene, enemy);
     });
-    enemyProjectiles.clear(true);
+    if (garrisonDefenders && garrisonDefenders.children && garrisonDefenders.children.entries) {
+        garrisonDefenders.children.entries.forEach(defender => {
+            if (!defender.active) return;
+            createExplosion(scene, defender.x, defender.y);
+            if (typeof destroyGarrisonDefender === 'function') {
+                destroyGarrisonDefender(scene, defender);
+            } else {
+                defender.destroy();
+            }
+        });
+    }
+    if (enemyProjectiles && typeof enemyProjectiles.clear === 'function') {
+        enemyProjectiles.clear(true);
+    }
     const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const flash = scene.add.rectangle(
         scene.cameras.main.scrollX + CONFIG.width / 2,
@@ -32,13 +45,28 @@ function useSmartBomb(scene) {
     });
 }
 
+
+// Returns a terrain-safe random destination for hyperspace travel.
+function getHyperspaceDestination(scene) {
+    const x = Math.random() * CONFIG.worldWidth;
+    const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const terrainVariation = Math.sin(x / 200) * 30;
+    const groundY = groundLevel - terrainVariation;
+    const safeTop = 80;
+    const safeBottom = groundY - 120;
+    const maxY = Math.max(safeTop, safeBottom);
+    const y = safeTop + Math.random() * (maxY - safeTop);
+    return { x, y };
+}
+
 // Performs a hyperspace jump to a random safe position with audiovisual feedback.
 function useHyperspace(scene) {
     const { particleManager, audioManager } = scene;
     const player = getActivePlayer(scene);
     if (!player) return;
-    player.x = Math.random() * CONFIG.worldWidth;
-    player.y = 100 + Math.random() * (CONFIG.worldHeight - 200);
+    const destination = getHyperspaceDestination(scene);
+    player.x = destination.x;
+    player.y = destination.y;
     if (particleManager) {
         particleManager.blackHoleExplosion(player.x, player.y);
     } else {
@@ -57,4 +85,12 @@ function updateDrones(scene, time) {
         drone.x = player.x + Math.cos(angle) * 60;
         drone.y = player.y + Math.sin(angle) * 40;
     });
+}
+
+if (typeof module !== 'undefined') {
+    module.exports = {
+        useSmartBomb,
+        getHyperspaceDestination,
+        useHyperspace
+    };
 }

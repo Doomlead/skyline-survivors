@@ -6,7 +6,7 @@
 function fireWeapon(scene, angleOverride = null) {
     const { projectiles, drones } = scene;
     const player = getActivePlayer(scene);
-    if (!player || !projectiles || !drones) return;
+    if (!player || !projectiles) return;
     let speed = 600;
     if (playerState.powerUps.speed > 0) speed = 750;
     const p = playerState.powerUps;
@@ -63,6 +63,7 @@ function fireWeapon(scene, angleOverride = null) {
     }
 
     // Drone projectiles - green energy orbs
+    if (!drones || !drones.children || !drones.children.entries) return;
     drones.children.entries.forEach(drone => {
         const dProj = projectiles.create(drone.x, drone.y, 'projectile_drone');
         dProj.setScale(1.25);
@@ -172,6 +173,7 @@ function getClusterTargets(scene, originX, originY, count, excludeTarget = null)
     if (scene.garrisonDefenders) candidates.push(...scene.garrisonDefenders.children.entries);
     if (scene.bosses) candidates.push(...scene.bosses.children.entries);
     if (scene.battleships) candidates.push(...scene.battleships.children.entries);
+    if (scene.assaultTargets) candidates.push(...scene.assaultTargets.children.entries);
 
     return candidates
         .filter(target => target.active && target !== excludeTarget)
@@ -328,8 +330,17 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
 
 // Updates player/enemy projectile movement modifiers, wrapping, lifetimes, and special behaviors.
 function updateProjectiles(scene) {
-    const { projectiles, enemyProjectiles, enemies, garrisonDefenders, player, particleManager } = scene;
-    if (!projectiles || !enemyProjectiles || !player) return;
+    const {
+        projectiles,
+        enemyProjectiles,
+        enemies,
+        garrisonDefenders,
+        bosses,
+        battleships,
+        player,
+        particleManager
+    } = scene;
+    if (!projectiles || !player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     /**
      * Handles the destroyIfGrounded routine and encapsulates its core gameplay logic.
@@ -396,6 +407,9 @@ function updateProjectiles(scene) {
             const candidates = [];
             if (enemies) candidates.push(...enemies.children.entries);
             if (garrisonDefenders) candidates.push(...garrisonDefenders.children.entries);
+            if (bosses) candidates.push(...bosses.children.entries);
+            if (battleships) candidates.push(...battleships.children.entries);
+            if (scene.assaultTargets) candidates.push(...scene.assaultTargets.children.entries);
             const homingTier = proj.homingTier || 1;
             if (homingTier < 2) return;
             const maxRange = 360;
@@ -416,6 +430,8 @@ function updateProjectiles(scene) {
         }
     });
 
+    if (!enemyProjectiles || !enemyProjectiles.children || !enemyProjectiles.children.entries) return;
+
     enemyProjectiles.children.entries.forEach(proj => {
         wrapWorldBounds(proj);
         if (!proj.active || destroyIfGrounded(proj)) return;
@@ -427,4 +443,13 @@ function updateProjectiles(scene) {
             proj.isSlowed = false;
         }
     });
+}
+
+if (typeof module !== 'undefined') {
+    module.exports = {
+        getClusterTargets,
+        spawnClusterMissiles,
+        updateProjectiles,
+        fireWeapon
+    };
 }
