@@ -444,11 +444,13 @@ function updateProjectiles(scene) {
         if (!proj) return;
         wrapWorldBounds(proj);
         if (!proj.active || destroyIfGrounded(proj)) return;
+        const velocity = proj.body && proj.body.velocity;
+        if (!velocity || typeof proj.setVelocity !== 'function') return;
         if (playerState.powerUps.timeSlow > 0 && !proj.isSlowed) {
-            proj.setVelocity(proj.body.velocity.x * 0.3, proj.body.velocity.y * 0.3);
+            proj.setVelocity(velocity.x * 0.3, velocity.y * 0.3);
             proj.isSlowed = true;
         } else if (playerState.powerUps.timeSlow <= 0 && proj.isSlowed) {
-            proj.setVelocity(proj.body.velocity.x * 3.33, proj.body.velocity.y * 3.33);
+            proj.setVelocity(velocity.x * 3.33, velocity.y * 3.33);
             proj.isSlowed = false;
         }
     });
