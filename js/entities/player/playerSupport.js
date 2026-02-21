@@ -5,7 +5,7 @@
 // Activates a smart bomb, clearing nearby threats and consuming one bomb charge.
 function useSmartBomb(scene) {
     const { enemies, garrisonDefenders, enemyProjectiles, audioManager } = scene;
-    if (!enemies || !enemyProjectiles) return;
+    if (!enemies) return;
     if (gameState.smartBombs <= 0) return;
     gameState.smartBombs--;
     if (audioManager) audioManager.playSound('smartBomb');
@@ -25,7 +25,9 @@ function useSmartBomb(scene) {
             }
         });
     }
-    enemyProjectiles.clear(true);
+    if (enemyProjectiles && typeof enemyProjectiles.clear === 'function') {
+        enemyProjectiles.clear(true);
+    }
     const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const flash = scene.add.rectangle(
         scene.cameras.main.scrollX + CONFIG.width / 2,
