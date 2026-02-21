@@ -183,7 +183,7 @@ function getClusterTargets(scene, originX, originY, count, excludeTarget = null)
     candidates.push(...getGroupEntries(scene.assaultTargets));
 
     return candidates
-        .filter(target => target.active && target !== excludeTarget)
+        .filter(target => target && target.active && target !== excludeTarget)
         .map(target => ({
             target,
             dist: Phaser.Math.Distance.Between(originX, originY, target.x, target.y)
@@ -422,7 +422,7 @@ function updateProjectiles(scene) {
             const maxRange = 360;
             const homingSpeed = 550;
             candidates.forEach(enemy => {
-                if (!enemy.active) return;
+                if (!enemy || !enemy.active) return;
                 const dist = Phaser.Math.Distance.Between(proj.x, proj.y, enemy.x, enemy.y);
                 if (dist < nearestDist && dist < maxRange) {
                     nearestDist = dist;
