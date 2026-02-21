@@ -82,6 +82,8 @@ function updateMutantBehavior(scene, enemy, time, timeSlowMultiplier) {
 
 // Gives drones a lazy patrol arc and opportunistic potshots at the player.
 function updateDroneBehavior(scene, enemy, time, timeSlowMultiplier) {
+    if (typeof enemy.patrolAngle !== 'number') enemy.patrolAngle = 0;
+    if (typeof enemy.lastShot !== 'number') enemy.lastShot = 0;
     enemy.patrolAngle += 0.02 * timeSlowMultiplier;
     enemy.setVelocity(Math.cos(enemy.patrolAngle) * 120 * timeSlowMultiplier, Math.sin(enemy.patrolAngle) * 120 * timeSlowMultiplier);
     if (time > enemy.lastShot + 1500 && Math.random() < 0.03) {
@@ -547,5 +549,5 @@ function updateEnemies(scene, time, delta) {
 }
 
 if (typeof module !== 'undefined') {
-    module.exports = { updateLanderBehavior, updateRegeneratorBehavior };
+    module.exports = { updateLanderBehavior, updateRegeneratorBehavior, updateDroneBehavior };
 }
