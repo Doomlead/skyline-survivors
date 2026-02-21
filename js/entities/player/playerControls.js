@@ -56,13 +56,18 @@ function updatePlayer(scene, time, delta) {
     if (hyperspaceKey && Phaser.Input.Keyboard.JustDown(hyperspaceKey)) useHyperspace(scene);
     if (pauseKey && Phaser.Input.Keyboard.JustDown(pauseKey)) togglePause(scene);
     if (switchPrimaryKey && Phaser.Input.Keyboard.JustDown(switchPrimaryKey)) {
-        const p = playerState.powerUps;
-        if (p.laser > 0 && p.multiShot > 0) {
-            playerState.primaryWeapon = playerState.primaryWeapon === 'laser' ? 'multiShot' : 'laser';
-        } else if (p.laser > 0) {
-            playerState.primaryWeapon = 'laser';
-        } else if (p.multiShot > 0) {
-            playerState.primaryWeapon = 'multiShot';
+        const isInteriorPilotContext = pilotState.active || (Boolean(scene.interiorPlatformsActive && scene.platforms) && !aegisState.active);
+        if (isInteriorPilotContext && typeof cyclePilotWeapon === 'function') {
+            cyclePilotWeapon(1);
+        } else {
+            const p = playerState.powerUps;
+            if (p.laser > 0 && p.multiShot > 0) {
+                playerState.primaryWeapon = playerState.primaryWeapon === 'laser' ? 'multiShot' : 'laser';
+            } else if (p.laser > 0) {
+                playerState.primaryWeapon = 'laser';
+            } else if (p.multiShot > 0) {
+                playerState.primaryWeapon = 'multiShot';
+            }
         }
     }
 

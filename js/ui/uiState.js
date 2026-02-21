@@ -13,6 +13,7 @@ let decayCoverageFillEl, decayCoverageLabelEl;
 let decayMissileFillEl, decayMissileLabelEl;
 let decayOverdriveFillEl, decayOverdriveLabelEl;
 let decayStatusStripEl;
+let pilotWeaponHudEl, pilotWeaponIconEl, pilotWeaponNameEl, pilotWeaponAmmoEl, pilotWeaponTierEl, pilotWeaponDronesEl, pilotWeaponStatusEl;
 
 const KEY_BINDING_ACTIONS = [
     { id: 'moveLeft', label: 'Move Left' },
@@ -27,7 +28,7 @@ const KEY_BINDING_ACTIONS = [
     { id: 'enter', label: 'Enter Mech' },
     { id: 'hyperspace', label: 'Hyperspace' },
     { id: 'pause', label: 'Pause' },
-    { id: 'switchPrimary', label: 'Switch Primary' }
+    { id: 'switchPrimary', label: 'Switch Primary / Pilot Weapon' }
 ];
 
 /**

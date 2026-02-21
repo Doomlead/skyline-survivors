@@ -331,3 +331,19 @@ The game already has strong macro structure (district flow, rescue loop, boss ph
 3. Assault rewards/jackpot emotional payoff.
 4. Bulwark siege role clarity.
 5. Challenge mode productization.
+
+## Pilot Weapon Addendum Compliance Update (4.4+)
+- Added pilot weapon module files:
+  - `js/entities/player/pilotWeapons/pilotWeaponConfig.js`
+  - `js/entities/player/pilotWeapons/pilotWeaponState.js`
+  - `js/entities/player/pilotWeapons/pilotWeaponController.js`
+  - `js/entities/player/pilotWeapons/pilotWeaponEffects.js`
+  - `js/entities/items/pilotWeaponPickups.js`
+- Updated `js/config/config.js` with persistent pilot weapon state model (owned weapons, ammo pools, tiers, active weapon, drone/status fields) and reset wiring.
+- Updated `js/entities/player/playerControls.js` TAB behavior to cycle pilot weapons in pilot/interior contexts while preserving ship primary switching elsewhere.
+- Updated `js/entities/items/powerups.js` to branch pilot-weapon pickup handling from ship power-up handling.
+- Updated `partials/game-layout.html` with pilot weapon HUD slot block (icon/name/ammo/tier/drone/status).
+- Updated `js/ui/uiState.js` + `js/ui/uiHud.js` to bind and refresh pilot weapon HUD in on-foot/interior mode.
+- Updated `js/config/metaProgression.js` with persistent pilot unlock/tier model and accessors for pilot shop unlocks.
+- Updated `js/entities/assault/assaultBaseCore.js` and `js/entities/bosses/mothershipCore.js` to initialize pilot loadout/HUD mode on interior start.
+- Updated `js/entities/friendlies/hangarBehavior.js` to apply pilot ammo reinforcement from rescue drop-offs.

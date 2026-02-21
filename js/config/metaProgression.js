@@ -64,7 +64,20 @@ const DEFAULT_META_STATE = {
     runHistory: [],
     lastRun: null,
     totalDropsPurchased: 0,
-    lootHistory: [] // Last 5 drops for "history" display
+    lootHistory: [], // Last 5 drops for "history" display
+    pilotWeaponUnlocks: {
+        combatRifle: true,
+        scattergun: false,
+        plasmaLauncher: false,
+        lightningGun: false,
+        stingerDrone: false
+    },
+    pilotWeaponUpgradeTiers: {
+        scattergun: 1,
+        plasmaLauncher: 1,
+        lightningGun: 1,
+        stingerDrone: 1
+    }
 };
 
 let metaState = null;
@@ -84,7 +97,9 @@ function loadMetaProgression() {
                 ...stored,
                 pendingDrop: stored.pendingDrop || null,
                 runHistory: Array.isArray(stored.runHistory) ? stored.runHistory.slice(-8) : [],
-                lootHistory: Array.isArray(stored.lootHistory) ? stored.lootHistory.slice(-5) : []
+                lootHistory: Array.isArray(stored.lootHistory) ? stored.lootHistory.slice(-5) : [],
+                pilotWeaponUnlocks: { ...DEFAULT_META_STATE.pilotWeaponUnlocks, ...(stored.pilotWeaponUnlocks || {}) },
+                pilotWeaponUpgradeTiers: { ...DEFAULT_META_STATE.pilotWeaponUpgradeTiers, ...(stored.pilotWeaponUpgradeTiers || {}) }
             };
         }
     } catch (err) {
@@ -372,6 +387,24 @@ function getLootHistory() {
     return state.lootHistory || [];
 }
 
+
+function getPilotWeaponShopUnlocks() {
+    return [
+        { id: 'scattergun', name: 'Pilot Weapon: Scattergun', type: 'unlock' },
+        { id: 'plasmaLauncher', name: 'Pilot Weapon: Plasma Launcher', type: 'unlock' },
+        { id: 'lightningGun', name: 'Pilot Weapon: Lightning Gun', type: 'unlock' },
+        { id: 'stingerDrone', name: 'Stinger Drone Capacity +2', type: 'drone' }
+    ];
+}
+
+function unlockPilotWeapon(weaponId) {
+    const state = loadMetaProgression();
+    if (!state.pilotWeaponUnlocks || !Object.prototype.hasOwnProperty.call(state.pilotWeaponUnlocks, weaponId)) return false;
+    state.pilotWeaponUnlocks[weaponId] = true;
+    persistMetaProgression();
+    return true;
+}
+
 window.metaProgression = {
     getMetaState,
     addCredits,
@@ -383,6 +416,8 @@ window.metaProgression = {
     recordRunOutcome,
     getLastRunSummary,
     getLootHistory,
+    getPilotWeaponShopUnlocks,
+    unlockPilotWeapon,
     LOOT_TABLES,
     POWERUP_TIERS
 };

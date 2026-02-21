@@ -291,7 +291,16 @@ const playerState = {
         level: 0
     },
     direction: 'right',
-    baseSpeed: 300
+    baseSpeed: 300,
+    pilotWeapons: {
+        ownedWeapons: { combatRifle: true },
+        missionTemporaryWeapons: {},
+        weaponTiers: { combatRifle: 1 },
+        ammoPools: { scattergun: 200, plasmaLauncher: 150, lightningGun: 25 },
+        activeWeapon: 'combatRifle',
+        droneCount: 1,
+        statusEffects: { electrocuted: 0, radiation: 0 }
+    }
 };
 
 // Aegis + pilot states
@@ -379,6 +388,19 @@ function resetGameState() {
         level: 0
     };
     playerState.direction = 'right';
+    if (typeof resetPilotWeaponStateToDefaults === 'function') {
+        resetPilotWeaponStateToDefaults();
+    } else {
+        playerState.pilotWeapons = {
+            ownedWeapons: { combatRifle: true },
+            missionTemporaryWeapons: {},
+            weaponTiers: { combatRifle: 1 },
+            ammoPools: { scattergun: 200, plasmaLauncher: 150, lightningGun: 25 },
+            activeWeapon: 'combatRifle',
+            droneCount: 1,
+            statusEffects: { electrocuted: 0, radiation: 0 }
+        };
+    }
     aegisState.mode = 'interceptor';
     aegisState.active = true;
     aegisState.facing = 1;

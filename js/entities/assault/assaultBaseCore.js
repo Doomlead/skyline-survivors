@@ -324,6 +324,9 @@ function forceOnFootForAssault(scene) {
     }
 
     syncActivePlayer(scene);
+    if (typeof initializePilotLoadoutForInterior === 'function') {
+        initializePilotLoadoutForInterior(scene);
+    }
     playerState.powerUps.invincibility = 3000;
 
     if (gameState.rebuildObjective) {

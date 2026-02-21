@@ -28,6 +28,7 @@ function initializeGame(scene) {
         gameState.enemiesToKillThisWave = Math.max(5, Math.round((20 + (gameState.wave - 1) * 5) * spawnScale));
     }
     setupDefenseHangar(scene);
+    if (typeof initializePilotWeaponLoadout === 'function') initializePilotWeaponLoadout();
     if (gameState.mode === 'classic') {
         spawnEnemyWave(scene);
     }

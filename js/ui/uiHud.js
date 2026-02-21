@@ -40,6 +40,13 @@ function createUI(scene) {
     decayOverdriveFillEl = document.getElementById('decay-overdrive-fill');
     decayOverdriveLabelEl = document.getElementById('decay-overdrive-label');
     decayStatusStripEl = document.getElementById('decay-status-strip');
+    pilotWeaponHudEl = document.getElementById('pilot-weapon-hud');
+    pilotWeaponIconEl = document.getElementById('pilot-weapon-icon');
+    pilotWeaponNameEl = document.getElementById('pilot-weapon-name');
+    pilotWeaponAmmoEl = document.getElementById('pilot-weapon-ammo');
+    pilotWeaponTierEl = document.getElementById('pilot-weapon-tier');
+    pilotWeaponDronesEl = document.getElementById('pilot-weapon-drones');
+    pilotWeaponStatusEl = document.getElementById('pilot-weapon-status');
 
     radarCanvas = document.getElementById('radar-canvas');
     if (radarCanvas) {
@@ -57,6 +64,20 @@ function updateUI(scene) {
     const humansGroup = scene?.humans;
     const activeBoss = scene?.bosses?.children?.entries?.find(entry => entry.active && entry.bossType !== 'mothershipCore')
         || scene?.battleships?.children?.entries?.find(entry => entry.active);
+
+    const inPilotHudMode = Boolean(scene?.showPilotWeaponHud || pilotState.active || scene?.interiorPlatformsActive);
+    if (pilotWeaponHudEl) {
+        pilotWeaponHudEl.classList.toggle('hidden', !inPilotHudMode);
+        if (inPilotHudMode && typeof getPilotWeaponHudSnapshot === 'function') {
+            const snapshot = getPilotWeaponHudSnapshot();
+            if (pilotWeaponIconEl) pilotWeaponIconEl.innerText = snapshot.icon;
+            if (pilotWeaponNameEl) pilotWeaponNameEl.innerText = snapshot.name;
+            if (pilotWeaponAmmoEl) pilotWeaponAmmoEl.innerText = String(snapshot.ammo);
+            if (pilotWeaponTierEl) pilotWeaponTierEl.innerText = `T${snapshot.tier}`;
+            if (pilotWeaponDronesEl) pilotWeaponDronesEl.innerText = String(snapshot.droneCount);
+            if (pilotWeaponStatusEl) pilotWeaponStatusEl.innerText = snapshot.status;
+        }
+    }
 
     /**
      * Handles the formatBossName routine and encapsulates its core gameplay logic.

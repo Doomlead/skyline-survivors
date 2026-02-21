@@ -37,6 +37,9 @@ function dropOffCargo(scene, hangar) {
     registerComboEvent(Math.min(3, cargoCount));
     const dropOffScore = getCombatScaledReward(HUMAN_RESCUE_SCORE * HUMAN_DROP_OFF_SCORE_MULTIPLIER * cargoCount);
     gameState.score += dropOffScore;
+    if (typeof grantPilotAmmoFromRescue === 'function') {
+        for (let i = 0; i < cargoCount; i++) grantPilotAmmoFromRescue();
+    }
 
     if (audioManager) audioManager.playSound('cargoDrop');
     const dropText = scene.add.text(

@@ -292,6 +292,9 @@ function forceOnFoot(scene) {
     }
 
     syncActivePlayer(scene);
+    if (typeof initializePilotLoadoutForInterior === 'function') {
+        initializePilotLoadoutForInterior(scene);
+    }
 
     // Grant brief invincibility for transition
     playerState.powerUps.invincibility = 3000;

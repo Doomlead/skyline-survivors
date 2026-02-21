@@ -106,6 +106,14 @@ function collectPowerUp(playerSprite, powerUp) {
         ? 'COMRADE UPGRADE'
         : (powerUpNames[powerUp.powerUpType] || 'POWER-UP');
 
+
+    if (typeof isPilotWeaponPickupType === 'function' && isPilotWeaponPickupType(powerUp.powerUpType)) {
+        const handled = typeof collectPilotWeaponPickup === 'function' && collectPilotWeaponPickup(this, powerUp);
+        if (handled) {
+            return;
+        }
+    }
+
     const nameText = this.add.text(
         powerUp.x,
         powerUp.y - 20,
