@@ -4,7 +4,7 @@
 
 // Activates a smart bomb, clearing nearby threats and consuming one bomb charge.
 function useSmartBomb(scene) {
-    const { enemies, enemyProjectiles, audioManager } = scene;
+    const { enemies, garrisonDefenders, enemyProjectiles, audioManager } = scene;
     if (!enemies || !enemyProjectiles) return;
     if (gameState.smartBombs <= 0) return;
     gameState.smartBombs--;
@@ -14,6 +14,17 @@ function useSmartBomb(scene) {
         createExplosion(scene, enemy.x, enemy.y);
         destroyEnemy(scene, enemy);
     });
+    if (garrisonDefenders && garrisonDefenders.children && garrisonDefenders.children.entries) {
+        garrisonDefenders.children.entries.forEach(defender => {
+            if (!defender.active) return;
+            createExplosion(scene, defender.x, defender.y);
+            if (typeof destroyGarrisonDefender === 'function') {
+                destroyGarrisonDefender(scene, defender);
+            } else {
+                defender.destroy();
+            }
+        });
+    }
     enemyProjectiles.clear(true);
     const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const flash = scene.add.rectangle(
@@ -76,6 +87,7 @@ function updateDrones(scene, time) {
 
 if (typeof module !== 'undefined') {
     module.exports = {
+        useSmartBomb,
         getHyperspaceDestination,
         useHyperspace
     };
