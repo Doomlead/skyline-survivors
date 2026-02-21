@@ -349,7 +349,7 @@ function updateProjectiles(scene) {
         player,
         particleManager
     } = scene;
-    if (!projectiles || !player) return;
+    if (!projectiles || !projectiles.children || !projectiles.children.entries || !player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     /**
      * Handles the destroyIfGrounded routine and encapsulates its core gameplay logic.
