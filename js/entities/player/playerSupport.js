@@ -5,15 +5,16 @@
 // Activates a smart bomb, clearing nearby threats and consuming one bomb charge.
 function useSmartBomb(scene) {
     const { enemies, garrisonDefenders, enemyProjectiles, audioManager } = scene;
-    if (!enemies) return;
     if (gameState.smartBombs <= 0) return;
     gameState.smartBombs--;
     if (audioManager) audioManager.playSound('smartBomb');
-    enemies.children.entries.forEach(enemy => {
-        if (!enemy.active) return;
-        createExplosion(scene, enemy.x, enemy.y);
-        destroyEnemy(scene, enemy);
-    });
+    if (enemies && enemies.children && enemies.children.entries) {
+        enemies.children.entries.forEach(enemy => {
+            if (!enemy.active) return;
+            createExplosion(scene, enemy.x, enemy.y);
+            destroyEnemy(scene, enemy);
+        });
+    }
     if (garrisonDefenders && garrisonDefenders.children && garrisonDefenders.children.entries) {
         garrisonDefenders.children.entries.forEach(defender => {
             if (!defender.active) return;
@@ -30,7 +31,7 @@ function useSmartBomb(scene) {
     }
     const reduceFlashes = typeof isFlashReductionEnabled === 'function' && isFlashReductionEnabled();
     const flash = scene.add.rectangle(
-        scene.cameras.main.scrollX + CONFIG.width / 2,
+        CONFIG.width / 2,
         CONFIG.height / 2,
         CONFIG.width,
         CONFIG.height,
