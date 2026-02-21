@@ -65,7 +65,9 @@ function fireWeapon(scene, angleOverride = null) {
     // Drone projectiles - green energy orbs
     if (!drones || !drones.children || !drones.children.entries) return;
     drones.children.entries.forEach(drone => {
+        if (!drone || drone.active === false) return;
         const dProj = projectiles.create(drone.x, drone.y, 'projectile_drone');
+        if (!dProj) return;
         dProj.setScale(1.25);
         dProj.setDepth(FG_DEPTH_BASE + 6);
         dProj.setVelocity(velocityX, velocityY);
