@@ -68,7 +68,7 @@ function useHyperspace(scene) {
     const destination = getHyperspaceDestination(scene);
     player.x = destination.x;
     player.y = destination.y;
-    if (particleManager) {
+    if (particleManager && typeof particleManager.blackHoleExplosion === 'function') {
         particleManager.blackHoleExplosion(player.x, player.y);
     } else {
         createExplosion(scene, player.x, player.y, 0x00ffff);
