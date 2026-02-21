@@ -368,6 +368,7 @@ function updateProjectiles(scene) {
     };
 
     projectiles.children.entries.forEach(proj => {
+        if (!proj) return;
         wrapWorldBounds(proj);
         if (!proj.active || destroyIfGrounded(proj)) return;
         if (proj.maxRange) {
@@ -440,6 +441,7 @@ function updateProjectiles(scene) {
     if (!enemyProjectiles || !enemyProjectiles.children || !enemyProjectiles.children.entries) return;
 
     enemyProjectiles.children.entries.forEach(proj => {
+        if (!proj) return;
         wrapWorldBounds(proj);
         if (!proj.active || destroyIfGrounded(proj)) return;
         if (playerState.powerUps.timeSlow > 0 && !proj.isSlowed) {
