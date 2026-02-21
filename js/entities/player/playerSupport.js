@@ -10,14 +10,14 @@ function useSmartBomb(scene) {
     if (audioManager) audioManager.playSound('smartBomb');
     if (enemies && enemies.children && enemies.children.entries) {
         enemies.children.entries.forEach(enemy => {
-            if (!enemy.active) return;
+            if (!enemy || !enemy.active) return;
             createExplosion(scene, enemy.x, enemy.y);
             destroyEnemy(scene, enemy);
         });
     }
     if (garrisonDefenders && garrisonDefenders.children && garrisonDefenders.children.entries) {
         garrisonDefenders.children.entries.forEach(defender => {
-            if (!defender.active) return;
+            if (!defender || !defender.active) return;
             createExplosion(scene, defender.x, defender.y);
             if (typeof destroyGarrisonDefender === 'function') {
                 destroyGarrisonDefender(scene, defender);
@@ -68,7 +68,7 @@ function useHyperspace(scene) {
     const destination = getHyperspaceDestination(scene);
     player.x = destination.x;
     player.y = destination.y;
-    if (particleManager) {
+    if (particleManager && typeof particleManager.blackHoleExplosion === 'function') {
         particleManager.blackHoleExplosion(player.x, player.y);
     } else {
         createExplosion(scene, player.x, player.y, 0x00ffff);
