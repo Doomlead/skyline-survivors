@@ -35,19 +35,20 @@ function updatePlayer(scene, time, delta) {
         aegisState.transformCooldown -= delta;
     }
 
-    const mothershipShipLocked = Boolean((gameState?.mothershipObjective?.shipLocked || gameState?.assaultObjective?.shipLocked));
+    const shipLocked = (gameState.mode === 'mothership' && gameState?.mothershipObjective?.shipLocked)
+        || (gameState.mode === 'assault' && gameState?.assaultObjective?.shipLocked);
 
-    if (Phaser.Input.Keyboard.JustDown(transformKey) && aegisState.active && !mothershipShipLocked && aegisState.transformCooldown <= 0) {
+    if (Phaser.Input.Keyboard.JustDown(transformKey) && aegisState.active && !shipLocked && aegisState.transformCooldown <= 0) {
         const nextMode = aegisState.mode === 'interceptor' ? 'bulwark' : 'interceptor';
         setAegisMode(scene, nextMode);
         aegisState.transformCooldown = 350;
     }
 
-    if (ejectKey && Phaser.Input.Keyboard.JustDown(ejectKey) && aegisState.active && !mothershipShipLocked) {
+    if (ejectKey && Phaser.Input.Keyboard.JustDown(ejectKey) && aegisState.active && !shipLocked) {
         ejectPilot(scene);
     }
 
-    if (enterKey && Phaser.Input.Keyboard.JustDown(enterKey) && pilotState.active && !mothershipShipLocked) {
+    if (enterKey && Phaser.Input.Keyboard.JustDown(enterKey) && pilotState.active && !shipLocked) {
         enterAegis(scene);
     }
 
