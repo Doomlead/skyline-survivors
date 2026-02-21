@@ -15,6 +15,96 @@ test('lander releases target humans that are no longer active', () => {
     assert.strictEqual(targetHuman.abductor, null);
 });
 
+
+test('lander ignores null or inactive humans when selecting abduction targets', () => {
+    global.Phaser = {
+        Math: {
+            Distance: {
+                Between: (x1, y1, x2, y2) => Math.hypot(x2 - x1, y2 - y1)
+            },
+            Angle: {
+                Between: () => 0
+            }
+        }
+    };
+
+    const activeHuman = { x: 200, y: 100, active: true, isAbducted: false, abductor: null };
+    const inactiveHuman = { x: 101, y: 100, active: false, isAbducted: false, abductor: null };
+    const enemy = {
+        x: 100,
+        y: 100,
+        targetHuman: null,
+        abductedHuman: null,
+        setVelocity: () => {}
+    };
+    const scene = {
+        humans: {
+            children: {
+                entries: [null, inactiveHuman, activeHuman]
+            }
+        }
+    };
+
+    updateLanderBehavior(scene, enemy, 0);
+
+    assert.strictEqual(enemy.targetHuman, activeHuman);
+    assert.strictEqual(activeHuman.isAbducted, true);
+    assert.strictEqual(inactiveHuman.isAbducted, false);
+
+    delete global.Phaser;
+});
+
+
+
+test('lander safely handles missing humans group entries', () => {
+    const enemy = { targetHuman: null, abductedHuman: null };
+
+    assert.doesNotThrow(() => updateLanderBehavior({ humans: {} }, enemy, 0));
+    assert.doesNotThrow(() => updateLanderBehavior({ humans: { children: {} } }, enemy, 0));
+});
+
+
+test('lander idle drift does not throw when enemy body is missing', () => {
+    const originalRandom = Math.random;
+    Math.random = () => 0;
+
+    global.Phaser = {
+        Math: {
+            Distance: {
+                Between: () => 999
+            },
+            Angle: {
+                Between: () => 0
+            }
+        }
+    };
+    global.shootAtPlayer = () => {};
+
+    const enemy = {
+        x: 100,
+        y: 100,
+        targetHuman: null,
+        abductedHuman: null,
+        lastShot: 0,
+        setVelocity: () => {},
+        setVelocityX: (vx) => { enemy.lastVelocityX = vx; }
+    };
+    const scene = {
+        humans: {
+            children: {
+                entries: []
+            }
+        }
+    };
+
+    assert.doesNotThrow(() => updateLanderBehavior(scene, enemy, 1000));
+    assert.ok(Object.is(enemy.lastVelocityX, -0) || enemy.lastVelocityX === 0);
+
+    Math.random = originalRandom;
+    delete global.Phaser;
+    delete global.shootAtPlayer;
+});
+
 test('destroying a lander frees its targeted human if not yet abducted', () => {
     global.createExplosion = () => {};
     global.createEnhancedDeathEffect = () => {};

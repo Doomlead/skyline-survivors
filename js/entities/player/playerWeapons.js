@@ -262,6 +262,7 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     }
     
     proj = projectiles.create(x, y, textureName);
+    if (!proj) return null;
     proj.setScale(1.25);
     proj.setDepth(FG_DEPTH_BASE + 6);
     proj.setVelocity(vx, vy);

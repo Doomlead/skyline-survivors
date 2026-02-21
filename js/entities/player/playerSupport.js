@@ -80,9 +80,11 @@ function useHyperspace(scene) {
 function updateDrones(scene, time) {
     const { drones } = scene;
     const player = getActivePlayer(scene);
-    if (!drones || !player) return;
-    drones.children.entries.forEach((drone, index) => {
-        const angle = (time * 0.002 + index * Math.PI * 2 / drones.children.entries.length) % (Math.PI * 2);
+    const droneEntries = drones && drones.children && drones.children.entries;
+    if (!droneEntries || !player || droneEntries.length === 0) return;
+    droneEntries.forEach((drone, index) => {
+        if (!drone || drone.active === false) return;
+        const angle = (time * 0.002 + index * Math.PI * 2 / droneEntries.length) % (Math.PI * 2);
         drone.x = player.x + Math.cos(angle) * 60;
         drone.y = player.y + Math.sin(angle) * 40;
     });
@@ -92,6 +94,7 @@ if (typeof module !== 'undefined') {
     module.exports = {
         useSmartBomb,
         getHyperspaceDestination,
-        useHyperspace
+        useHyperspace,
+        updateDrones
     };
 }

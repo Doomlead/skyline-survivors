@@ -59,3 +59,39 @@ test('fireWeapon still fires primary shots when drones group is unavailable', ()
     delete global.playerState;
     delete global.FG_DEPTH_BASE;
 });
+
+
+test('fireWeapon does not throw when projectile pool returns null', () => {
+    global.getActivePlayer = (scene) => scene.player;
+    global.playerState = {
+        direction: 'right',
+        primaryWeapon: 'multiShot',
+        powerUps: {
+            speed: 0,
+            double: 0,
+            laser: 0,
+            multiShot: 0,
+            piercing: 0,
+            coverage: 0,
+            missile: 0,
+            overdrive: 0,
+            timeSlow: 0
+        }
+    };
+    global.FG_DEPTH_BASE = 0;
+
+    const scene = {
+        player: { x: 100, y: 100, active: true },
+        projectiles: {
+            create: () => null
+        },
+        drones: null,
+        time: { now: 0, delayedCall: () => {} }
+    };
+
+    assert.doesNotThrow(() => fireWeapon(scene));
+
+    delete global.getActivePlayer;
+    delete global.playerState;
+    delete global.FG_DEPTH_BASE;
+});

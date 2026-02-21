@@ -18,17 +18,17 @@ function updateLanderBehavior(scene, enemy, time) {
         releaseTargetHuman(enemy);
     }
     const humans = scene.humans;
-    if (!humans) return;
+    const humanEntries = humans && humans.children && humans.children.entries;
+    if (!humanEntries) return;
     if (!enemy.targetHuman && !enemy.abductedHuman) {
         let nearestHuman = null;
         let nearestDist = Infinity;
-        humans.children.entries.forEach(human => {
-            if (!human.isAbducted) {
-                const dist = Phaser.Math.Distance.Between(enemy.x, enemy.y, human.x, human.y);
-                if (dist < nearestDist && dist < 700) {
-                    nearestDist = dist;
-                    nearestHuman = human;
-                }
+        humanEntries.forEach(human => {
+            if (!human || human.active === false || human.isAbducted) return;
+            const dist = Phaser.Math.Distance.Between(enemy.x, enemy.y, human.x, human.y);
+            if (dist < nearestDist && dist < 700) {
+                nearestDist = dist;
+                nearestHuman = human;
             }
         });
         if (nearestHuman) {
@@ -61,7 +61,10 @@ function updateLanderBehavior(scene, enemy, time) {
             spawnEnemy(scene, 'mutant', humanX, humanY);
         }
     } else if (!enemy.targetHuman) {
-        if (Math.random() < 0.01) enemy.setVelocityX(-enemy.body.velocity.x);
+        if (Math.random() < 0.01) {
+            const velocityX = enemy.body && enemy.body.velocity ? enemy.body.velocity.x : 0;
+            enemy.setVelocityX(-velocityX);
+        }
         if (time > enemy.lastShot + 2000 && Math.random() < 0.02) {
             shootAtPlayer(scene, enemy);
             enemy.lastShot = time;
@@ -79,6 +82,8 @@ function updateMutantBehavior(scene, enemy, time, timeSlowMultiplier) {
 
 // Gives drones a lazy patrol arc and opportunistic potshots at the player.
 function updateDroneBehavior(scene, enemy, time, timeSlowMultiplier) {
+    if (typeof enemy.patrolAngle !== 'number') enemy.patrolAngle = 0;
+    if (typeof enemy.lastShot !== 'number') enemy.lastShot = 0;
     enemy.patrolAngle += 0.02 * timeSlowMultiplier;
     enemy.setVelocity(Math.cos(enemy.patrolAngle) * 120 * timeSlowMultiplier, Math.sin(enemy.patrolAngle) * 120 * timeSlowMultiplier);
     if (time > enemy.lastShot + 1500 && Math.random() < 0.03) {
@@ -544,5 +549,5 @@ function updateEnemies(scene, time, delta) {
 }
 
 if (typeof module !== 'undefined') {
-    module.exports = { updateLanderBehavior, updateRegeneratorBehavior };
+    module.exports = { updateLanderBehavior, updateRegeneratorBehavior, updateDroneBehavior };
 }
