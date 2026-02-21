@@ -197,7 +197,7 @@ function updatePlayer(scene, time, delta) {
                 if (pilot.y < minY) pilot.y = minY;
                 pilotState.grounded = Boolean((pilot.body && pilot.body.blocked && pilot.body.blocked.down) || (pilot.body && pilot.body.touching && pilot.body.touching.down));
 
-                var interiorFloorY = (scene.groundLevel || CONFIG.worldHeight - 80) - 6;
+                var interiorFloorY = getInteriorGroundClampY(scene, pilot);
                 if (!pilotState.grounded && pilot.y > interiorFloorY) {
                     pilot.y = interiorFloorY;
                     pilotState.vy = 0;
@@ -316,6 +316,16 @@ function updatePlayer(scene, time, delta) {
     } else if (particleManager) {
         particleManager.stopExhaustTrail();
     }
+}
+
+// Returns pilot center-Y clamp so feet land on top of interior ground platform.
+function getInteriorGroundClampY(scene, pilot) {
+    const groundCenterY = (scene && scene.groundLevel) || CONFIG.worldHeight - 80;
+    const groundTopY = groundCenterY - 10;
+    const halfHeight = (pilot && pilot.body && typeof pilot.body.halfHeight === 'number')
+        ? pilot.body.halfHeight
+        : ((pilot && pilot.body && typeof pilot.body.height === 'number') ? pilot.body.height * 0.5 : 9);
+    return groundTopY - halfHeight;
 }
 
 // Computes pilot aim direction from movement inputs and grounded state.

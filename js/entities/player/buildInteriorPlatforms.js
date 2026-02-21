@@ -9,7 +9,13 @@ function buildInteriorPlatforms(scene, seed) {
     if (typeof ensurePlatformLadderGraphics === 'function') ensurePlatformLadderGraphics(scene);
 
     if (scene.platforms && scene.platforms.children) {
-        (scene.platforms.children.entries || []).forEach(function(platform) { if (platform && platform.visual) platform.visual.destroy(); });
+        (scene.platforms.children.entries || []).forEach(function(platform) {
+            if (!platform) return;
+            if (platform.visual) platform.visual.destroy();
+            if (Array.isArray(platform.visuals)) {
+                platform.visuals.forEach(function(part) { if (part) part.destroy(); });
+            }
+        });
         scene.platforms.clear(true, true);
     }
     if (scene.ladders && scene.ladders.children) {
@@ -194,9 +200,23 @@ function createInteriorPlatform(scene, config) {
     }
 
     if (scene.textures.exists('interior_platform_tile')) {
-        var visual = scene.add.tileSprite(x, y, Math.max(8, width), Math.max(6, height), 'interior_platform_tile');
-        visual.setDepth(FG_DEPTH_BASE - 1);
-        platform.visual = visual;
+        if (type === 'ground' && width > 1024) {
+            const visuals = [];
+            const segmentWidth = 768;
+            const count = Math.ceil(width / segmentWidth);
+            for (let i = 0; i < count; i++) {
+                const partWidth = Math.min(segmentWidth, width - i * segmentWidth);
+                const partX = (x - width * 0.5) + (i * segmentWidth) + partWidth * 0.5;
+                const partVisual = scene.add.tileSprite(partX, y, Math.max(8, partWidth), Math.max(6, height), 'interior_platform_tile');
+                partVisual.setDepth(FG_DEPTH_BASE + 1);
+                visuals.push(partVisual);
+            }
+            platform.visuals = visuals;
+        } else {
+            var visual = scene.add.tileSprite(x, y, Math.max(8, width), Math.max(6, height), 'interior_platform_tile');
+            visual.setDepth(FG_DEPTH_BASE + 1);
+            platform.visual = visual;
+        }
     } else {
         platform.fillColor = 0x4d3a63;
         platform.fillAlpha = 0.28;
