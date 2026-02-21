@@ -30,6 +30,11 @@ const KEY_BINDING_ACTIONS = [
     { id: 'switchPrimary', label: 'Switch Primary' }
 ];
 
+/**
+ * Handles the formatKeyLabel routine and encapsulates its core gameplay logic.
+ * Parameters: keyName.
+ * Returns: value defined by the surrounding game flow.
+ */
 function formatKeyLabel(keyName) {
     if (!keyName) return 'Unassigned';
     switch (keyName) {
@@ -45,6 +50,11 @@ function formatKeyLabel(keyName) {
     }
 }
 
+/**
+ * Handles the normalizeKeyName routine and encapsulates its core gameplay logic.
+ * Parameters: event.
+ * Returns: value defined by the surrounding game flow.
+ */
 function normalizeKeyName(event) {
     if (!event || !event.key) return null;
     switch (event.key) {
@@ -66,6 +76,11 @@ function normalizeKeyName(event) {
     return event.key.toUpperCase();
 }
 
+/**
+ * Handles the formatMetaTimer routine and encapsulates its core gameplay logic.
+ * Parameters: seconds.
+ * Returns: value defined by the surrounding game flow.
+ */
 function formatMetaTimer(seconds) {
     const clamped = Math.max(0, Math.floor(seconds));
     const mins = String(Math.floor(clamped / 60)).padStart(2, '0');

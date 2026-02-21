@@ -106,6 +106,11 @@ function createLanderGraphics(scene) {
     landerGraphics.destroy();
 }
 
+/**
+ * Handles the createMutantGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createMutantGraphics(scene) {
     // ========================
     // MUTANT - Transformed Human Alien

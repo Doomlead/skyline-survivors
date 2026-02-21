@@ -8,6 +8,11 @@ test('regenerator heal timer scales with delta and slow effects', () => {
         lastHeal: 0,
         lastShot: Infinity,
         patrolAngle: 0,
+        /**
+         * Handles the setVelocity routine and encapsulates its core gameplay logic.
+         * Parameters: x, y.
+         * Returns: value defined by the surrounding game flow.
+         */
         setVelocity(x, y) {
             this.velocity = { x, y };
         }

@@ -12,6 +12,11 @@ function createOriginalEnemyGraphics(scene) {
     createBaiterGraphics(scene);
 }
 
+/**
+ * Handles the createNewEnemyGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createNewEnemyGraphics(scene) {
     createKamikazeGraphics(scene);
     createTurretGraphics(scene);

@@ -3,12 +3,22 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGeneratorSiegeInterior = (function() {
+    /**
+     * Handles the BackgroundGeneratorSiegeInterior routine and encapsulates its core gameplay logic.
+     * Parameters: scene, config.
+     * Returns: value defined by the surrounding game flow.
+     */
     function BackgroundGeneratorSiegeInterior(scene, config) {
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();
     }
 
+    /**
+     * Handles the createRNG routine and encapsulates its core gameplay logic.
+     * Parameters: seed.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorSiegeInterior.prototype.createRNG = function(seed) {
         var state = seed >>> 0;
         return function() {
@@ -20,6 +30,11 @@ var BackgroundGeneratorSiegeInterior = (function() {
         };
     };
 
+    /**
+     * Handles the generateLoopingNoise routine and encapsulates its core gameplay logic.
+     * Parameters: length, step, magnitude, seed.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorSiegeInterior.prototype.generateLoopingNoise = function(length, step, magnitude, seed) {
         var values = [];
         var numSteps = Math.ceil(length / step);
@@ -34,6 +49,11 @@ var BackgroundGeneratorSiegeInterior = (function() {
         return values;
     };
 
+    /**
+     * Handles the generateAllTextures routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorSiegeInterior.prototype.generateAllTextures = function() {
         console.log('[BackgroundGeneratorSiegeInterior] Starting texture generation...');
 
@@ -47,6 +67,11 @@ var BackgroundGeneratorSiegeInterior = (function() {
         return this.generatedTextures;
     };
 
+    /**
+     * Handles the generateLayerTexture routine and encapsulates its core gameplay logic.
+     * Parameters: layerName, layerConfig.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorSiegeInterior.prototype.generateLayerTexture = function(layerName, layerConfig) {
         var worldWidth = this.config.worldWidth;
         var worldHeight = this.config.worldHeight;
@@ -135,6 +160,11 @@ var BackgroundGeneratorSiegeInterior = (function() {
         }
     };
 
+    /**
+     * Handles the generateInfrastructure routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorSiegeInterior.prototype.generateInfrastructure = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;

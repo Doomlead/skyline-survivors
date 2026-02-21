@@ -21,6 +21,11 @@ class BuildMissionUi {
         this.historyContainer = null;
     }
 
+    /**
+     * Handles the createOverlay routine and encapsulates its core gameplay logic.
+     * Parameters: width.
+     * Returns: value defined by the surrounding game flow.
+     */
     createOverlay(width) {
         const header = this.scene.add.text(width / 2, 24, 'District + Supply Drop', {
             fontFamily: 'Orbitron',
@@ -42,10 +47,20 @@ class BuildMissionUi {
         });
     }
 
+    /**
+     * Handles the createModeButtons routine and encapsulates its core gameplay logic.
+     * Parameters: width, selectedMode.
+     * Returns: value defined by the surrounding game flow.
+     */
     createModeButtons(width, selectedMode) {
         this.modeButtons = this.scene.add.container(width * 0.42, 168);
         this.modeButtonRefs = [];
 
+        /**
+         * Handles the createButton routine and encapsulates its core gameplay logic.
+         * Parameters: offsetX, label, color, mode.
+         * Returns: value defined by the surrounding game flow.
+         */
         const createButton = (offsetX, label, color, mode) => {
             const rect = this.scene.add.rectangle(offsetX, 0, 150, 38, 0x0f172a, 0.85)
                 .setStrokeStyle(2, color, 0.7)
@@ -83,6 +98,11 @@ class BuildMissionUi {
         this.updateModeButtonStyles(selectedMode);
     }
 
+    /**
+     * Handles the createDetailBody routine and encapsulates its core gameplay logic.
+     * Parameters: width, mapNodes.
+     * Returns: value defined by the surrounding game flow.
+     */
     createDetailBody(width, mapNodes) {
         const hasTimedNodes = (typeof missionPlanner !== 'undefined' && missionPlanner.hasMapTimerData()) && mapNodes.some(
             node => (node.state?.timer || 0) > 0);
@@ -99,6 +119,11 @@ class BuildMissionUi {
         });
     }
 
+    /**
+     * Handles the createMissionConsole routine and encapsulates its core gameplay logic.
+     * Parameters: width, height, onLaunch, onReroute.
+     * Returns: value defined by the surrounding game flow.
+     */
     createMissionConsole(width, height, { onLaunch, onReroute }) {
         const panelWidth = width * 0.36;
         const panelHeight = height * 0.64;
@@ -151,6 +176,11 @@ class BuildMissionUi {
         }).setOrigin(0.5);
     }
 
+    /**
+     * Handles the createBuildShopPanel routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     createBuildShopPanel(width, height) {
         const panelWidth = width * 0.46;
         const panelHeight = 280;
@@ -207,6 +237,11 @@ class BuildMissionUi {
         }).setOrigin(0.5);
     }
 
+    /**
+     * Handles the createSupplyDropButton routine and encapsulates its core gameplay logic.
+     * Parameters: x, y, drop, panelWidth.
+     * Returns: value defined by the surrounding game flow.
+     */
     createSupplyDropButton(x, y, drop, panelWidth) {
         const rowWidth = panelWidth - 24;
         
@@ -252,6 +287,11 @@ class BuildMissionUi {
         return { id: drop.id, bg, name, desc, button };
     }
 
+    /**
+     * Handles the createMissionButton routine and encapsulates its core gameplay logic.
+     * Parameters: x, y, label, strokeColor, handler.
+     * Returns: value defined by the surrounding game flow.
+     */
     createMissionButton(x, y, label, strokeColor, handler) {
         const button = this.scene.add.rectangle(x, y, 240, 38, 0x0f172a, 0.9)
             .setStrokeStyle(2, strokeColor, 0.8)
@@ -276,6 +316,11 @@ class BuildMissionUi {
         return { button, text };
     }
 
+    /**
+     * Handles the updateModeButtonStyles routine and encapsulates its core gameplay logic.
+     * Parameters: selectedMode.
+     * Returns: value defined by the surrounding game flow.
+     */
     updateModeButtonStyles(selectedMode) {
         if (!this.modeButtonRefs) return;
         this.modeButtonRefs.forEach(({ rect, text, mode, color }) => {
@@ -287,6 +332,11 @@ class BuildMissionUi {
         });
     }
 
+    /**
+     * Handles the setModeButtonsEnabled routine and encapsulates its core gameplay logic.
+     * Parameters: enabled.
+     * Returns: value defined by the surrounding game flow.
+     */
     setModeButtonsEnabled(enabled) {
         if (!this.modeButtonRefs) return;
         this.modeButtonRefs.forEach(({ rect, text }) => {
@@ -302,11 +352,21 @@ class BuildMissionUi {
         });
     }
 
+    /**
+     * Handles the updateDetail routine and encapsulates its core gameplay logic.
+     * Parameters: title, body.
+     * Returns: value defined by the surrounding game flow.
+     */
     updateDetail(title, body) {
         if (this.detailTitle) this.detailTitle.setText(title);
         if (this.detailBody) this.detailBody.setText(body);
     }
 
+    /**
+     * Handles the refreshNodeStatusText routine and encapsulates its core gameplay logic.
+     * Parameters: mapNodes, selectedDistrict.
+     * Returns: value defined by the surrounding game flow.
+     */
     refreshNodeStatusText(mapNodes, selectedDistrict) {
         if (!this.nodeStatusText) return;
         const lines = mapNodes.map(node => {
@@ -335,6 +395,11 @@ class BuildMissionUi {
         ].join('\n'));
     }
 
+    /**
+     * Handles the updateMissionUi routine and encapsulates its core gameplay logic.
+     * Parameters: mission, selectedMode, selectedDistrict, mapNodes.
+     * Returns: value defined by the surrounding game flow.
+     */
     updateMissionUi(mission, selectedMode, selectedDistrict, mapNodes) {
         if (!mission || !this.panelSummary) return;
 
@@ -369,6 +434,11 @@ class BuildMissionUi {
         this.updateModeButtonStyles(modeToUse);
     }
 
+    /**
+     * Handles the updateExternalLaunchButton routine and encapsulates its core gameplay logic.
+     * Parameters: selectedDistrict, mission, selectedMode.
+     * Returns: value defined by the surrounding game flow.
+     */
     updateExternalLaunchButton(selectedDistrict, mission, selectedMode) {
         const btn = document.getElementById('build-launch');
         if (!btn) return;
@@ -385,6 +455,11 @@ class BuildMissionUi {
         btn.classList.toggle('cursor-not-allowed', !hasSelection);
     }
 
+    /**
+     * Handles the refreshBuildShopPanel routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     refreshBuildShopPanel() {
         if (!this.shopPanel) return;
         const meta = window.metaProgression?.getMetaState?.() || { credits: 0 };
@@ -416,6 +491,11 @@ class BuildMissionUi {
         this.renderPendingItems(pending);
     }
 
+    /**
+     * Handles the renderPendingItems routine and encapsulates its core gameplay logic.
+     * Parameters: pending.
+     * Returns: value defined by the surrounding game flow.
+     */
     renderPendingItems(pending) {
         if (!this.pendingItemsContainer) return;
         this.pendingItemsContainer.removeAll(true);
@@ -454,14 +534,29 @@ class BuildMissionUi {
         });
     }
 
+    /**
+     * Handles the getTierColor routine and encapsulates its core gameplay logic.
+     * Parameters: tier.
+     * Returns: value defined by the surrounding game flow.
+     */
     getTierColor(tier) {
         return tier === 'tier3' ? '#a855f7' : tier === 'tier2' ? '#22d3ee' : '#94a3b8';
     }
 
+    /**
+     * Handles the getTierLabel routine and encapsulates its core gameplay logic.
+     * Parameters: tier.
+     * Returns: value defined by the surrounding game flow.
+     */
     getTierLabel(tier) {
         return tier === 'tier3' ? 'RARE' : tier === 'tier2' ? 'COMBAT' : 'UTIL';
     }
 
+    /**
+     * Handles the highlightShopPanel routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     highlightShopPanel() {
         if (!this.shopPanel) return;
         this.scene.tweens.add({
@@ -473,6 +568,11 @@ class BuildMissionUi {
         });
     }
 
+    /**
+     * Handles the purchaseDrop routine and encapsulates its core gameplay logic.
+     * Parameters: dropId.
+     * Returns: value defined by the surrounding game flow.
+     */
     purchaseDrop(dropId) {
         if (!window.metaProgression?.purchaseSupplyDrop) return;
         

@@ -11,6 +11,11 @@ function createBattleshipGraphics(scene) {
     createDreadnoughtBattleship(scene);
 }
 
+/**
+ * Handles the createRaiderBattleship routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createRaiderBattleship(scene) {
     // ========================
     // RAIDER - Sleek attack craft
@@ -76,6 +81,11 @@ function createRaiderBattleship(scene) {
     raiderGraphics.destroy();
 }
 
+/**
+ * Handles the createCarrierBattleship routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createCarrierBattleship(scene) {
     // ========================
     // CARRIER - Heavy hangar ship
@@ -125,6 +135,11 @@ function createCarrierBattleship(scene) {
     carrierGraphics.destroy();
 }
 
+/**
+ * Handles the createNovaBattleship routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createNovaBattleship(scene) {
     // ========================
     // NOVA - Twin-ring assault ship
@@ -171,6 +186,11 @@ function createNovaBattleship(scene) {
     novaGraphics.destroy();
 }
 
+/**
+ * Handles the createSiegeBattleship routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createSiegeBattleship(scene) {
     // ========================
     // SIEGE - Long-range artillery ship
@@ -220,6 +240,11 @@ function createSiegeBattleship(scene) {
     siegeGraphics.destroy();
 }
 
+/**
+ * Handles the createDreadnoughtBattleship routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createDreadnoughtBattleship(scene) {
     // ========================
     // DREADNOUGHT - Massive command ship

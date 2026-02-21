@@ -166,6 +166,11 @@ function getInteriorAnchorY(scene, x, fallbackY, clearance) {
     return Math.max(80, best.y - desiredClearance);
 }
 
+/**
+ * Handles the createInteriorPlatform routine and encapsulates its core gameplay logic.
+ * Parameters: scene, config.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createInteriorPlatform(scene, config) {
     const x = config.x;
     const y = config.y;
@@ -197,6 +202,11 @@ function createInteriorPlatform(scene, config) {
     return platform;
 }
 
+/**
+ * Handles the createInteriorLadder routine and encapsulates its core gameplay logic.
+ * Parameters: scene, config.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createInteriorLadder(scene, config) {
     const x = config.x;
     const topY = config.topY;
@@ -232,12 +242,22 @@ function createInteriorLadder(scene, config) {
     return ladder;
 }
 
+/**
+ * Handles the handleInteriorLadderInteraction routine and encapsulates its core gameplay logic.
+ * Parameters: player, ladder.
+ * Returns: value defined by the surrounding game flow.
+ */
 function handleInteriorLadderInteraction(player, ladder) {
     if (!player.nearbyLadder || Math.abs(ladder.y - player.y) < Math.abs(player.nearbyLadder.y - player.y)) {
         player.nearbyLadder = ladder;
     }
 }
 
+/**
+ * Handles the createInteriorRNG routine and encapsulates its core gameplay logic.
+ * Parameters: seed.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createInteriorRNG(seed) {
     let state = seed >>> 0;
     return function() {

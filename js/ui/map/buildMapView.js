@@ -49,11 +49,21 @@ class BuildMapView {
         this._isBuilt = false;
     }
 
+    /**
+     * Handles the preload routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     preload() { 
         // Ensure we are clean before we start
         this.cleanup();
     }
 
+    /**
+     * Handles the build routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     build(width, height) {
         console.log('[BuildMapView.build] Called with dimensions:', { width, height, _isBuilt: this._isBuilt });
         
@@ -103,6 +113,11 @@ class BuildMapView {
         this._isBuilt = true;
     }
 
+    /**
+     * Handles the resize routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     resize(width, height) {
         if (!this._isBuilt) return;
 
@@ -117,6 +132,11 @@ class BuildMapView {
         this.renderGlobe();
     }
 
+    /**
+     * Handles the cleanup routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     cleanup() {
         this._isBuilt = false; // Stop updates immediately
 
@@ -146,6 +166,11 @@ class BuildMapView {
         this.oceanGraphics = null;
     }
 	
+	/**
+	 * Handles the calculateDimensions routine and encapsulates its core gameplay logic.
+	 * Parameters: width, height.
+	 * Returns: value defined by the surrounding game flow.
+	 */
 	calculateDimensions(width, height) {
         const layout = GLOBE_LAYOUT;
         
@@ -171,6 +196,11 @@ class BuildMapView {
         console.log(`[BuildMapView] Resizing: ${safeWidth}x${safeHeight} -> Radius: ${this.globeRadius}`);
     }
 
+    /**
+     * Handles the createStars routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     createStars() {
         if (!this.scene.textures.exists('build-star')) {
             const g = this.scene.add.graphics();
@@ -192,6 +222,11 @@ class BuildMapView {
         });
     }
 
+    /**
+     * Handles the createBackdrop routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     createBackdrop(width, height) {
         this.backdropGrid = this.scene.add.graphics();
         this.backdropGrid.lineStyle(1, 0x102a3f, 0.4);
@@ -207,12 +242,22 @@ class BuildMapView {
         this.backdropGlow.setBlendMode(Phaser.BlendModes.ADD);
     }
 
+    /**
+     * Handles the refreshBackdrop routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     refreshBackdrop(width, height) {
         if (this.backdropGrid) this.backdropGrid.destroy();
         if (this.backdropGlow) this.backdropGlow.destroy();
         this.createBackdrop(width, height);
     }
 
+    /**
+     * Handles the setupGlobeInput routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     setupGlobeInput() {
         this.scene.input.on('pointerdown', (pointer) => {
             const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.centerX, this.centerY);
@@ -245,6 +290,11 @@ class BuildMapView {
         });
     }
 
+    /**
+     * Handles the project3D routine and encapsulates its core gameplay logic.
+     * Parameters: lat, lon.
+     * Returns: value defined by the surrounding game flow.
+     */
     project3D(lat, lon) {
         const latRad = lat * Math.PI / 180;
         const lonRad = lon * Math.PI / 180;
@@ -273,6 +323,11 @@ class BuildMapView {
         };
     }
 
+    /**
+     * Handles the renderGlobe routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     renderGlobe() {
         if (!this.atmosphereGraphics) return;
 
@@ -293,6 +348,11 @@ class BuildMapView {
         this.drawGlobeRim();
     }
 
+    /**
+     * Handles the drawAtmosphere routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawAtmosphere() {
         for (let i = 5; i > 0; i--) {
             this.atmosphereGraphics.lineStyle(3, 0x4ade80, 0.03 * i);
@@ -300,6 +360,11 @@ class BuildMapView {
         }
     }
 
+    /**
+     * Handles the drawOcean routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawOcean() {
         this.oceanGraphics.fillStyle(0x0a3d62, 1);
         this.oceanGraphics.fillCircle(0, 0, this.globeRadius);
@@ -307,6 +372,11 @@ class BuildMapView {
         this.oceanGraphics.fillCircle(-this.globeRadius * 0.2, -this.globeRadius * 0.2, this.globeRadius * 0.7);
     }
 
+    /**
+     * Handles the drawGrid routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawGrid() {
         this.gridGraphics.lineStyle(0.5, 0x3498db, 0.12);
         for (let lat = -80; lat <= 80; lat += 20) this.drawLatLine(lat);
@@ -315,6 +385,11 @@ class BuildMapView {
         this.drawLatLine(0);
     }
 
+    /**
+     * Handles the drawLatLine routine and encapsulates its core gameplay logic.
+     * Parameters: lat.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawLatLine(lat) {
         const points = [];
         for (let lon = -180; lon <= 180; lon += 5) {
@@ -326,6 +401,11 @@ class BuildMapView {
         if (points.length > 1) this.strokePoints(points, this.gridGraphics);
     }
 
+    /**
+     * Handles the drawLonLine routine and encapsulates its core gameplay logic.
+     * Parameters: lon.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawLonLine(lon) {
         const points = [];
         for (let lat = -90; lat <= 90; lat += 5) {
@@ -337,6 +417,11 @@ class BuildMapView {
         if (points.length > 1) this.strokePoints(points, this.gridGraphics);
     }
 
+    /**
+     * Handles the strokePoints routine and encapsulates its core gameplay logic.
+     * Parameters: points, graphics.
+     * Returns: value defined by the surrounding game flow.
+     */
     strokePoints(points, graphics) {
         if (points.length < 2) return;
         graphics.beginPath();
@@ -345,6 +430,11 @@ class BuildMapView {
         graphics.strokePath();
     }
 
+    /**
+     * Handles the drawAllLand routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawAllLand() {
         if (typeof WORLD_DATA === 'undefined') {
             console.warn('WORLD_DATA missing - cannot draw land');
@@ -363,6 +453,11 @@ class BuildMapView {
         }
     }
 
+    /**
+     * Handles the drawLandMass routine and encapsulates its core gameplay logic.
+     * Parameters: projectedPoints, colors.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawLandMass(projectedPoints, colors) {
         const visiblePoints = projectedPoints.filter(p => p.visible);
         if (visiblePoints.length < 3) return;
@@ -400,11 +495,21 @@ class BuildMapView {
         }
     }
 
+    /**
+     * Handles the drawGlobeRim routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawGlobeRim() {
         this.atmosphereGraphics.lineStyle(2, 0x0ea5e9, 0.6);
         this.atmosphereGraphics.strokeCircle(0, 0, this.globeRadius);
     }
 
+    /**
+     * Handles the initializeDistricts routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     initializeDistricts() {
         if (typeof missionPlanner === 'undefined') return;
         const sectorConfigs = missionPlanner.getDistrictConfigs();
@@ -415,6 +520,11 @@ class BuildMapView {
         });
     }
 
+    /**
+     * Handles the createBattleshipMarkers routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     createBattleshipMarkers() {
         if (typeof missionPlanner === 'undefined' || !this.planetContainer) return;
         this.battleshipMarkers.forEach(marker => marker.destroy());
@@ -439,11 +549,21 @@ class BuildMapView {
         });
     }
 
+    /**
+     * Handles the getActiveBattleships routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     getActiveBattleships() {
         if (typeof missionPlanner === 'undefined') return [];
         return missionPlanner.getBattleships().filter(ship => ship.active !== false);
     }
 
+    /**
+     * Handles the getDistrictCenterCoords routine and encapsulates its core gameplay logic.
+     * Parameters: config.
+     * Returns: value defined by the surrounding game flow.
+     */
     getDistrictCenterCoords(config) {
         if (!config) return { lat: 0, lon: 0 };
         if (config.center) return config.center;
@@ -458,6 +578,11 @@ class BuildMapView {
         return { lat: 0, lon: 0 };
     }
 
+    /**
+     * Handles the drawDistricts routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawDistricts() {
         if (!this.districts.length) return;
         this.districts.forEach(district => {
@@ -496,6 +621,11 @@ class BuildMapView {
         this.setupDistrictInteraction();
     }
 
+    /**
+     * Handles the getDistrictStatusColor routine and encapsulates its core gameplay logic.
+     * Parameters: state.
+     * Returns: value defined by the surrounding game flow.
+     */
     getDistrictStatusColor(state) {
         if (!state) return 0x22c55e;
         if (state.underAttack && state.status !== 'occupied') {
@@ -514,6 +644,11 @@ class BuildMapView {
         }
     }
 
+    /**
+     * Handles the drawDistrictThreatPulse routine and encapsulates its core gameplay logic.
+     * Parameters: district, projected, radius.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawDistrictThreatPulse(district, projected, radius) {
         if (!district?.state || !['threatened', 'critical'].includes(district.state.status)) return;
         const maxTimer = district.config?.timer || 1;
@@ -538,6 +673,11 @@ class BuildMapView {
         }
     }
 
+    /**
+     * Handles the drawProsperitySignals routine and encapsulates its core gameplay logic.
+     * Parameters: district, projected, radius.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawProsperitySignals(district, projected, radius) {
         if (!district?.state) return;
         const prosperityMultiplier = district.state.prosperityMultiplier || 1;
@@ -562,6 +702,11 @@ class BuildMapView {
         }
     }
 
+    /**
+     * Handles the setupDistrictInteraction routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     setupDistrictInteraction() {
         if (this._districtClickHandler) this.scene.input.off('pointerdown', this._districtClickHandler);
         this._districtClickHandler = (pointer) => {
@@ -579,6 +724,11 @@ class BuildMapView {
         this.scene.input.on('pointerdown', this._districtClickHandler);
     }
 
+    /**
+     * Handles the drawMarkers routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     drawMarkers() {
         if (!this.selectedDistrict) return;
         const center = this.getDistrictCenterCoords(this.selectedDistrict.config);
@@ -594,6 +744,11 @@ class BuildMapView {
         this.markerGraphics.strokeCircle(projected.x, projected.y, 5);
     }
 
+    /**
+     * Handles the focusDistrict routine and encapsulates its core gameplay logic.
+     * Parameters: district, skipTweens.
+     * Returns: value defined by the surrounding game flow.
+     */
     focusDistrict(district, skipTweens = false) {
         if (this.selectedDistrict === district) return;
         this.selectedDistrict = district;
@@ -622,6 +777,11 @@ class BuildMapView {
         this.autoRotate = false;
     }
 
+    /**
+     * Handles the createOrbitNodes routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     createOrbitNodes() {
         if (typeof missionPlanner === 'undefined') return;
 
@@ -661,6 +821,11 @@ class BuildMapView {
         this.updateOrbitNodesPositions();
     }
 
+    /**
+     * Handles the updateOrbitNodesPositions routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     updateOrbitNodesPositions() {
         this.mapNodes.forEach(mapNode => {
             const config = mapNode.config;
@@ -679,6 +844,11 @@ class BuildMapView {
         });
     }
 
+    /**
+     * Handles the flashConnector routine and encapsulates its core gameplay logic.
+     * Parameters: connector.
+     * Returns: value defined by the surrounding game flow.
+     */
     flashConnector(connector) {
         this.scene.tweens.add({
             targets: connector,
@@ -689,6 +859,11 @@ class BuildMapView {
         });
     }
 
+    /**
+     * Handles the update routine and encapsulates its core gameplay logic.
+     * Parameters: time, delta, mission.
+     * Returns: value defined by the surrounding game flow.
+     */
     update(time, delta, mission) {
         // Critical safety check: Don't update if we aren't fully built
         if (!this._isBuilt || typeof missionPlanner === 'undefined') return mission;

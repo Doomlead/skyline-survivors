@@ -7,6 +7,11 @@ const DistrictShop = (function() {
     let elements = null;
     let initialized = false;
 
+    /**
+     * Handles the cacheElements routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function cacheElements() {
         elements = {
             panel: document.getElementById('district-shop-panel'),
@@ -17,6 +22,11 @@ const DistrictShop = (function() {
         return elements;
     }
 
+    /**
+     * Handles the init routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function init() {
         if (initialized) return;
         cacheElements();
@@ -25,6 +35,11 @@ const DistrictShop = (function() {
         refresh();
     }
 
+    /**
+     * Handles the refresh routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function refresh() {
         if (!initialized) {
             init();
@@ -35,6 +50,11 @@ const DistrictShop = (function() {
         renderLootHistory();
     }
 
+    /**
+     * Handles the renderSupplyDrops routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function renderSupplyDrops() {
         const container = elements.dropOptions;
         if (!container) return;
@@ -94,6 +114,11 @@ const DistrictShop = (function() {
         });
     }
 
+    /**
+     * Handles the renderPendingDrop routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function renderPendingDrop() {
         const container = elements.pendingItems;
         if (!container) return;
@@ -158,6 +183,11 @@ const DistrictShop = (function() {
         container.appendChild(warning);
     }
 
+    /**
+     * Handles the renderLootHistory routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function renderLootHistory() {
         const container = elements.historyPanel;
         if (!container) return;
@@ -204,6 +234,11 @@ const DistrictShop = (function() {
         });
     }
 
+    /**
+     * Handles the getTierColor routine and encapsulates its core gameplay logic.
+     * Parameters: tier, alpha.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getTierColor(tier, alpha = 1) {
         const colors = {
             tier1: `rgba(148, 163, 184, ${alpha})`, // Gray
@@ -213,6 +248,11 @@ const DistrictShop = (function() {
         return colors[tier] || colors.tier1;
     }
 
+    /**
+     * Handles the buildEmptyRow routine and encapsulates its core gameplay logic.
+     * Parameters: message.
+     * Returns: value defined by the surrounding game flow.
+     */
     function buildEmptyRow(message) {
         const row = document.createElement('div');
         row.className = 'district-shop-row';
@@ -229,6 +269,11 @@ const DistrictShop = (function() {
         return row;
     }
 
+    /**
+     * Handles the purchaseDrop routine and encapsulates its core gameplay logic.
+     * Parameters: dropType.
+     * Returns: value defined by the surrounding game flow.
+     */
     function purchaseDrop(dropType) {
         if (!window.metaProgression?.purchaseSupplyDrop) return;
         

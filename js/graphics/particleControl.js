@@ -21,6 +21,11 @@ class ParticleControl {
         return x;
     }
 
+    /**
+     * Handles the update routine and encapsulates its core gameplay logic.
+     * Parameters: delta, cameraScrollX, cameraWidth.
+     * Returns: value defined by the surrounding game flow.
+     */
     update(delta, cameraScrollX, cameraWidth) {
         const tpf = delta / 1000; // Convert milliseconds to seconds
 
@@ -101,6 +106,11 @@ class ParticleControl {
         return true; // Particle still alive
     }
 
+    /**
+     * Handles the applyGravity routine and encapsulates its core gameplay logic.
+     * Parameters: gravityPoint, distance.
+     * Returns: value defined by the surrounding game flow.
+     */
     applyGravity(gravityPoint, distance) {
         const gravityStrength = 1000 / (distance * distance + 10000);
         this.velocity.x += gravityPoint.x * gravityStrength;
@@ -114,6 +124,11 @@ class ParticleControl {
         }
     }
 
+    /**
+     * Handles the lesserValue routine and encapsulates its core gameplay logic.
+     * Parameters: a, b.
+     * Returns: value defined by the surrounding game flow.
+     */
     lesserValue(a, b) {
         return a < b ? a : b;
     }

@@ -5,12 +5,22 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGeneratorWasteland2 = (function() {
+    /**
+     * Handles the BackgroundGeneratorWasteland2 routine and encapsulates its core gameplay logic.
+     * Parameters: scene, config.
+     * Returns: value defined by the surrounding game flow.
+     */
     function BackgroundGeneratorWasteland2(scene, config) {
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();
     }
 
+    /**
+     * Handles the createRNG routine and encapsulates its core gameplay logic.
+     * Parameters: seed.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorWasteland2.prototype.createRNG = function(seed) {
         var state = seed >>> 0;
         return function() {
@@ -22,6 +32,11 @@ var BackgroundGeneratorWasteland2 = (function() {
         };
     };
 
+    /**
+     * Handles the generateLoopingNoise routine and encapsulates its core gameplay logic.
+     * Parameters: length, step, magnitude, seed.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorWasteland2.prototype.generateLoopingNoise = function(length, step, magnitude, seed) {
         var values = [];
         var numSteps = Math.ceil(length / step);
@@ -36,6 +51,11 @@ var BackgroundGeneratorWasteland2 = (function() {
         return values;
     };
 
+    /**
+     * Handles the generateAllTextures routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorWasteland2.prototype.generateAllTextures = function() {
         console.log('[BackgroundGeneratorWasteland2] Starting texture generation...');
 
@@ -49,6 +69,11 @@ var BackgroundGeneratorWasteland2 = (function() {
         return this.generatedTextures;
     };
 
+    /**
+     * Handles the generateLayerTexture routine and encapsulates its core gameplay logic.
+     * Parameters: layerName, layerConfig.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorWasteland2.prototype.generateLayerTexture = function(layerName, layerConfig) {
         var worldWidth = this.config.worldWidth;
         var worldHeight = this.config.worldHeight;
@@ -128,6 +153,11 @@ var BackgroundGeneratorWasteland2 = (function() {
         }
     };
 
+    /**
+     * Handles the generateAtmosphereLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorWasteland2.prototype.generateAtmosphereLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -163,6 +193,11 @@ var BackgroundGeneratorWasteland2 = (function() {
         }
     };
 
+    /**
+     * Handles the generateStarsLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorWasteland2.prototype.generateStarsLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -212,6 +247,11 @@ var BackgroundGeneratorWasteland2 = (function() {
         }
     };
 
+    /**
+     * Handles the generateHorizonCityLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorWasteland2.prototype.generateHorizonCityLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -221,6 +261,11 @@ var BackgroundGeneratorWasteland2 = (function() {
         graphics.fillStyle(0x060608, 1);
         
         var copyRng = this.createRNG(seed);
+        /**
+         * Handles the cRand routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         var cRand = function() { return copyRng(); };
         
         graphics.beginPath();
@@ -257,6 +302,11 @@ var BackgroundGeneratorWasteland2 = (function() {
         }
     };
 
+    /**
+     * Handles the generateMidCityLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorWasteland2.prototype.generateMidCityLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -407,6 +457,11 @@ var BackgroundGeneratorWasteland2 = (function() {
         graphics.lineStyle(0);
     };
 
+    /**
+     * Handles the generateTerrainLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorWasteland2.prototype.generateTerrainLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;

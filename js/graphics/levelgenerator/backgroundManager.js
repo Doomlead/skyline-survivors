@@ -29,6 +29,11 @@ var BACKGROUND_STYLE_OPTIONS = Object.keys(BACKGROUND_STYLE_GENERATORS);
 var MOTHERSHIP_STYLE_KEYS = ['mothership_exterior', 'mothership_interior'];
 var INTERIOR_STYLE_KEYS = ['mothership_interior', 'raider_interior', 'carrier_interior', 'nova_interior', 'siege_interior', 'dreadnought_interior'];
 
+/**
+ * Handles the resolveBackgroundStyle routine and encapsulates its core gameplay logic.
+ * Parameters: style.
+ * Returns: value defined by the surrounding game flow.
+ */
 function resolveBackgroundStyle(style) {
     var requested = style || CONFIG.backgroundStyle;
     if (requested) {
@@ -51,6 +56,11 @@ function resolveBackgroundStyle(style) {
     return options[index];
 }
 
+/**
+ * Handles the createBackground routine and encapsulates its core gameplay logic.
+ * Parameters: scene, style.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createBackground(scene, style) {
     // Use the ACTUAL current camera dimensions, not just CONFIG
     var cam = scene.cameras ? scene.cameras.main : null;
@@ -86,6 +96,11 @@ function createBackground(scene, style) {
     }
 }
 
+/**
+ * Handles the initParallaxTracking routine and encapsulates its core gameplay logic.
+ * Parameters: playerX, playerY.
+ * Returns: value defined by the surrounding game flow.
+ */
 function initParallaxTracking(playerX, playerY) {
     if (parallaxManagerInstance) {
         // Pass both X and Y to the manager
@@ -93,6 +108,11 @@ function initParallaxTracking(playerX, playerY) {
     }
 }
 
+/**
+ * Handles the updateParallax routine and encapsulates its core gameplay logic.
+ * Parameters: playerX, playerY.
+ * Returns: value defined by the surrounding game flow.
+ */
 function updateParallax(playerX, playerY) {
     if (parallaxManagerInstance) {
         // Pass both X and Y to the manager
@@ -100,6 +120,11 @@ function updateParallax(playerX, playerY) {
     }
 }
 
+/**
+ * Handles the resizeParallaxLayers routine and encapsulates its core gameplay logic.
+ * Parameters: width, height.
+ * Returns: value defined by the surrounding game flow.
+ */
 function resizeParallaxLayers(width, height) {
     if (parallaxManagerInstance) {
         parallaxManagerInstance.resize(width, height);
@@ -121,6 +146,11 @@ function resizeParallaxLayers(width, height) {
     }
 }
 
+/**
+ * Handles the alignGroundedActors routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function alignGroundedActors(scene) {
     var groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     if (scene.humans && scene.humans.children && scene.humans.children.entries) {
@@ -197,6 +227,11 @@ function alignGroundedActors(scene) {
     }
 }
 
+/**
+ * Handles the destroyParallax routine and encapsulates its core gameplay logic.
+ * Parameters: none.
+ * Returns: value defined by the surrounding game flow.
+ */
 function destroyParallax() {
     if (parallaxManagerInstance) {
         parallaxManagerInstance.destroy();

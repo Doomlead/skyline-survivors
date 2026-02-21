@@ -194,6 +194,11 @@ function createKamikazeGraphics(scene) {
     kamikazeGraphics.destroy();
 }
 
+/**
+ * Handles the createTurretGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createTurretGraphics(scene) {
     // ========================
     // TURRET - Stationary Multi-directional Shooter

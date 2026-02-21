@@ -18,6 +18,11 @@ function togglePause(scene) {
     }
 }
 
+/**
+ * Handles the createPauseMenu routine and encapsulates its core gameplay logic.
+ * Parameters: scene, audioManager.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createPauseMenu(scene, audioManager) {
     const centerX = scene.cameras.main.width / 2;
     const centerY = scene.cameras.main.height / 2;
@@ -196,6 +201,11 @@ function createPauseMenu(scene, audioManager) {
         cancelRebind();
     };
 
+    /**
+     * Handles the showKeyBindings routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     const showKeyBindings = () => {
         scene.pauseMenuView = 'keybindings';
         mainElements.forEach(el => el.setVisible(false));
@@ -203,12 +213,22 @@ function createPauseMenu(scene, audioManager) {
         keyMapValueTexts.forEach(({ text }) => text.setVisible(true));
     };
 
+    /**
+     * Handles the updateKeyMapValues routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     const updateKeyMapValues = () => {
         keyMapValueTexts.forEach(({ actionId, text }) => {
             text.setText(`[ ${formatKeyLabel(userSettings.keyBindings[actionId])} ]`);
         });
     };
 
+    /**
+     * Handles the cancelRebind routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     const cancelRebind = () => {
         scene.isRebindingKey = false;
         scene.rebindingAction = null;
@@ -219,6 +239,11 @@ function createPauseMenu(scene, audioManager) {
         }
     };
 
+    /**
+     * Handles the startKeyRebind routine and encapsulates its core gameplay logic.
+     * Parameters: actionId, actionLabel, textObj.
+     * Returns: value defined by the surrounding game flow.
+     */
     const startKeyRebind = (actionId, actionLabel, textObj) => {
         if (scene.keyRebindHandler) {
             scene.input.keyboard.off('keydown', scene.keyRebindHandler);
@@ -306,7 +331,17 @@ function createPauseMenu(scene, audioManager) {
     musicKnob.on('pointerdown', () => { dragTarget = 'music'; });
     sfxKnob.on('pointerdown', () => { dragTarget = 'sfx'; });
 
+    /**
+     * Handles the onPointerUp routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     const onPointerUp = () => { dragTarget = null; };
+    /**
+     * Handles the onPointerMove routine and encapsulates its core gameplay logic.
+     * Parameters: pointer.
+     * Returns: value defined by the surrounding game flow.
+     */
     const onPointerMove = (pointer) => {
         if (!dragTarget || !audioManager) return;
         const sliderCenterX = centerX + 40;
@@ -357,6 +392,11 @@ function createPauseMenu(scene, audioManager) {
     scene.input.keyboard.on('keydown-ESC', scene.escHandler);
 }
 
+/**
+ * Handles the cleanupPauseUI routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function cleanupPauseUI(scene) {
     if (scene.pauseUI) {
         const { overlay, mainElements, keyBindingsElements, keyMapValueTexts } = scene.pauseUI;
@@ -415,6 +455,11 @@ function cleanupPauseUI(scene) {
     scene.pauseMenuView = null;
 }
 
+/**
+ * Handles the returnToMainMenu routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function returnToMainMenu(scene) {
     cleanupPauseUI(scene);
     resetGameState();

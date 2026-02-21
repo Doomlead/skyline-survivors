@@ -12,6 +12,11 @@ class ParticleManager {
         this.createParticleTextures();
     }
 
+    /**
+     * Handles the createParticleTextures routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     createParticleTextures() {
         if (!this.scene.textures.exists('particle')) {
             const graphics = this.scene.add.graphics();
@@ -37,6 +42,11 @@ class ParticleManager {
         return x;
     }
 
+    /**
+     * Handles the update routine and encapsulates its core gameplay logic.
+     * Parameters: delta.
+     * Returns: value defined by the surrounding game flow.
+     */
     update(delta) {
         // Get camera info for wrap-aware rendering
         const mainCam = this.scene.cameras.main;
@@ -48,6 +58,11 @@ class ParticleManager {
         });
     }
 
+    /**
+     * Handles the applyGravityToParticles routine and encapsulates its core gameplay logic.
+     * Parameters: gravitySourceX, gravitySourceY.
+     * Returns: value defined by the surrounding game flow.
+     */
     applyGravityToParticles(gravitySourceX, gravitySourceY) {
         this.particles.forEach(particleControl => {
             if (particleControl.affectedByGravity) {
@@ -66,6 +81,11 @@ class ParticleManager {
         });
     }
 
+    /**
+     * Handles the enemyExplosion routine and encapsulates its core gameplay logic.
+     * Parameters: x, y.
+     * Returns: value defined by the surrounding game flow.
+     */
     enemyExplosion(x, y) {
         // Wrap the spawn position to canonical coordinates
         x = this.wrapX(x);
@@ -92,6 +112,11 @@ class ParticleManager {
         }
     }
 
+    /**
+     * Handles the bulletExplosion routine and encapsulates its core gameplay logic.
+     * Parameters: x, y.
+     * Returns: value defined by the surrounding game flow.
+     */
     bulletExplosion(x, y) {
         x = this.wrapX(x);
         const color = { r: 0.676, g: 0.844, b: 0.898 };
@@ -107,6 +132,11 @@ class ParticleManager {
         }
     }
 
+    /**
+     * Handles the playerExplosion routine and encapsulates its core gameplay logic.
+     * Parameters: x, y.
+     * Returns: value defined by the surrounding game flow.
+     */
     playerExplosion(x, y) {
         x = this.wrapX(x);
         const color1 = { r: 1, g: 1, b: 1 };
@@ -130,6 +160,11 @@ class ParticleManager {
         }
     }
 
+    /**
+     * Handles the sprayParticle routine and encapsulates its core gameplay logic.
+     * Parameters: x, y, sprayVelX, sprayVelY.
+     * Returns: value defined by the surrounding game flow.
+     */
     sprayParticle(x, y, sprayVelX, sprayVelY) {
         x = this.wrapX(x);
         const sprite = this.scene.add.sprite(x, y, 'particle');
@@ -142,6 +177,11 @@ class ParticleManager {
         this.particles.push(control);
     }
 
+    /**
+     * Handles the blackHoleExplosion routine and encapsulates its core gameplay logic.
+     * Parameters: x, y.
+     * Returns: value defined by the surrounding game flow.
+     */
     blackHoleExplosion(x, y) {
         x = this.wrapX(x);
         const hue = ((Date.now() - this.spawnTime) * 0.003) % 6;
@@ -168,6 +208,11 @@ class ParticleManager {
         }
     }
 
+    /**
+     * Handles the makeExhaustFire routine and encapsulates its core gameplay logic.
+     * Parameters: x, y, rotation.
+     * Returns: value defined by the surrounding game flow.
+     */
     makeExhaustFire(x, y, rotation) {
         x = this.wrapX(x);
         const midColor = { r: 1, g: 0.73, b: 0.12 };
@@ -218,6 +263,11 @@ class ParticleManager {
         this.createExhaustParticle(posX, posY, velSide2, sideColor, 'glowParticle');
     }
 
+    /**
+     * Handles the makeExhaustTrail routine and encapsulates its core gameplay logic.
+     * Parameters: x, y, rotation, speed.
+     * Returns: value defined by the surrounding game flow.
+     */
     makeExhaustTrail(x, y, rotation, speed) {
         const direction = { x: Math.cos(rotation), y: Math.sin(rotation) };
         const trailOrigin = {
@@ -268,10 +318,20 @@ class ParticleManager {
         this.lastTrailPosition = { ...trailOrigin };
     }
 
+    /**
+     * Handles the stopExhaustTrail routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     stopExhaustTrail() {
         this.lastTrailPosition = null;
     }
 
+    /**
+     * Handles the createTrailParticle routine and encapsulates its core gameplay logic.
+     * Parameters: x, y, velocity, color.
+     * Returns: value defined by the surrounding game flow.
+     */
     createTrailParticle(x, y, velocity, color) {
         const sprite = this.scene.add.sprite(x, y, 'glowParticle');
         sprite.setDepth(FG_DEPTH_BASE + 15);
@@ -281,6 +341,11 @@ class ParticleManager {
         this.particles.push(control);
     }
 
+    /**
+     * Handles the createExhaustParticle routine and encapsulates its core gameplay logic.
+     * Parameters: x, y, velocity, color, texture.
+     * Returns: value defined by the surrounding game flow.
+     */
     createExhaustParticle(x, y, velocity, color, texture) {
         const sprite = this.scene.add.sprite(x, y, texture);
         sprite.setDepth(FG_DEPTH_BASE + 15);
@@ -289,6 +354,11 @@ class ParticleManager {
         this.particles.push(control);
     }
 
+    /**
+     * Handles the hsvToColor routine and encapsulates its core gameplay logic.
+     * Parameters: h, s, v.
+     * Returns: value defined by the surrounding game flow.
+     */
     hsvToColor(h, s, v) {
         if (h === 0 && s === 0) {
             return { r: v, g: v, b: v };
@@ -306,6 +376,11 @@ class ParticleManager {
         else return { r: c + m, g: m, b: x + m };
     }
 
+    /**
+     * Handles the getRandomVelocity routine and encapsulates its core gameplay logic.
+     * Parameters: max.
+     * Returns: value defined by the surrounding game flow.
+     */
     getRandomVelocity(max) {
         const angle = Math.random() * Math.PI * 2;
         const random = Math.random() * 5 + 1;
@@ -317,6 +392,11 @@ class ParticleManager {
         };
     }
 
+    /**
+     * Handles the destroy routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     destroy() {
         this.particles.forEach(control => {
             if (control.sprite && !control.sprite.destroyed) {

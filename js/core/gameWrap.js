@@ -120,6 +120,11 @@ function updateEntityWrapping(scene) {
     // Boundary threshold - how close to edge before we need a ghost
     const boundaryThreshold = camWidth;
     
+    /**
+     * Handles the processEntity routine and encapsulates its core gameplay logic.
+     * Parameters: entity.
+     * Returns: value defined by the surrounding game flow.
+     */
     const processEntity = (entity) => {
         if (!entity || !entity.active) {
             removeGhostSprite(scene, entity);
@@ -159,6 +164,11 @@ function updateEntityWrapping(scene) {
         entity.x = canonicalX;
     };
     
+    /**
+     * Handles the processGroup routine and encapsulates its core gameplay logic.
+     * Parameters: group.
+     * Returns: value defined by the surrounding game flow.
+     */
     const processGroup = (group) => {
         if (!group || !group.children || !group.children.entries) return;
         group.children.entries.forEach(processEntity);

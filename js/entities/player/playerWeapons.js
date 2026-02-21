@@ -331,6 +331,11 @@ function updateProjectiles(scene) {
     const { projectiles, enemyProjectiles, enemies, garrisonDefenders, player, particleManager } = scene;
     if (!projectiles || !enemyProjectiles || !player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    /**
+     * Handles the destroyIfGrounded routine and encapsulates its core gameplay logic.
+     * Parameters: proj.
+     * Returns: value defined by the surrounding game flow.
+     */
     const destroyIfGrounded = (proj) => {
         const terrainVariation = Math.sin(proj.x / 200) * 30;
         const groundY = groundLevel - terrainVariation - 15;

@@ -116,6 +116,11 @@ function createShieldGraphics(scene) {
     shieldGraphics.destroy();
 }
 
+/**
+ * Handles the createSeekerGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createSeekerGraphics(scene) {
     // ========================
     // SEEKER - Predictive Targeting Enemy

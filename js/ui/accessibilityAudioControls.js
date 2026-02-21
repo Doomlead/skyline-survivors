@@ -35,6 +35,11 @@ function wireAccessibilityPanel() {
     const flashLabel = document.getElementById('reduce-flash-label');
 
     if (musicSlider && musicLabel) {
+        /**
+         * Handles the applyMusic routine and encapsulates its core gameplay logic.
+         * Parameters: value.
+         * Returns: value defined by the surrounding game flow.
+         */
         const applyMusic = (value) => {
             musicLabel.textContent = `${Math.round(value * 100)}%`;
             const audioManager = getActiveAudioManager();
@@ -53,6 +58,11 @@ function wireAccessibilityPanel() {
     }
 
     if (sfxSlider && sfxLabel) {
+        /**
+         * Handles the applySfx routine and encapsulates its core gameplay logic.
+         * Parameters: value.
+         * Returns: value defined by the surrounding game flow.
+         */
         const applySfx = (value) => {
             sfxLabel.textContent = `${Math.round(value * 100)}%`;
             const audioManager = getActiveAudioManager();

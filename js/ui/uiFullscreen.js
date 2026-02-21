@@ -13,6 +13,11 @@ const FullscreenController = (function() {
     let fullscreenTarget;
     let toggleButtons;
 
+    /**
+     * Handles the init routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function init() {
         radarContainer = document.getElementById('radar-container');
         radarSlot = document.getElementById('gameplay-radar-slot');
@@ -43,6 +48,11 @@ const FullscreenController = (function() {
         handleFullscreenChange();
     }
 
+    /**
+     * Handles the isGameLayoutActive routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function isGameLayoutActive() {
         // Check if we're in district layout mode
         if (typeof DistrictLayoutManager !== 'undefined') {
@@ -61,6 +71,11 @@ const FullscreenController = (function() {
         return true;
     }
 
+    /**
+     * Handles the handleToggle routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function handleToggle() {
         // Prevent fullscreen operations when in district layout
         if (!isGameLayoutActive()) {
@@ -75,6 +90,11 @@ const FullscreenController = (function() {
         }
     }
 
+    /**
+     * Handles the enterFullscreen routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function enterFullscreen() {
         // Double-check we're in game layout before entering fullscreen
         if (!isGameLayoutActive()) {
@@ -86,11 +106,21 @@ const FullscreenController = (function() {
         fullscreenTarget.requestFullscreen();
     }
 
+    /**
+     * Handles the exitFullscreen routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function exitFullscreen() {
         if (!document.exitFullscreen) return;
         document.exitFullscreen();
     }
 
+    /**
+     * Handles the handleFullscreenChange routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function handleFullscreenChange() {
         const isActive = document.fullscreenElement === fullscreenTarget;
         
@@ -131,6 +161,11 @@ const FullscreenController = (function() {
         }, 100);
     }
 
+    /**
+     * Handles the updateToggleButtons routine and encapsulates its core gameplay logic.
+     * Parameters: isActive.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateToggleButtons(isActive) {
         toggleButtons.forEach((button) => {
             button.textContent = isActive ? 'Exit Fullscreen' : 'Fullscreen';
@@ -147,6 +182,11 @@ const FullscreenController = (function() {
         });
     }
 
+    /**
+     * Handles the updateRadarPlacement routine and encapsulates its core gameplay logic.
+     * Parameters: isActive.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateRadarPlacement(isActive) {
         if (!radarContainer || !radarSlot) return;
         
@@ -168,6 +208,11 @@ const FullscreenController = (function() {
         }
     }
 
+    /**
+     * Handles the updateHudPlacement routine and encapsulates its core gameplay logic.
+     * Parameters: isActive.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateHudPlacement(isActive) {
         if (!hudContainer || !fullscreenTarget) return;
 
@@ -194,6 +239,11 @@ const FullscreenController = (function() {
         }
     }
 
+    /**
+     * Handles the scheduleResize routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function scheduleResize() {
         if (typeof applyResponsiveResize !== 'function') return;
         requestAnimationFrame(() => {

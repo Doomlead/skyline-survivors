@@ -33,15 +33,40 @@ test('destroying a lander frees its targeted human if not yet abducted', () => {
         enemyType: 'lander',
         targetHuman,
         abductedHuman: null,
+        /**
+         * Handles the destroy routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         destroy() { this.destroyed = true; }
     };
     targetHuman.abductor = enemy;
 
     const makeTextStub = () => ({
         y: 0,
+        /**
+         * Handles the setOrigin routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         setOrigin() { return this; },
+        /**
+         * Handles the setDepth routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         setDepth() { return this; },
+        /**
+         * Handles the setScrollFactor routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         setScrollFactor() { return this; },
+        /**
+         * Handles the destroy routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         destroy() { this.destroyed = true; }
     });
     const scene = {

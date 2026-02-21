@@ -1,3 +1,8 @@
+/**
+ * Handles the createHumanGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createHumanGraphics(scene) {
     // ========================
     // HUMAN (8x12 Pixel Art Style)
@@ -35,6 +40,11 @@ function createHumanGraphics(scene) {
     humanGraphics.destroy();
 }
 
+/**
+ * Handles the createPowerUpGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createPowerUpGraphics(scene) {
     const powerUpColors = {
         laser:      0x16537e,
@@ -93,6 +103,11 @@ function createPowerUpGraphics(scene) {
     }
 }
 
+/**
+ * Handles the createUtilityGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createUtilityGraphics(scene) {
     // ========================
     // FORCE DRONE (Helper Bot)
