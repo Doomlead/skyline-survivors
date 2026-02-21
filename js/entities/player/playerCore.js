@@ -77,14 +77,6 @@ function playerDie(scene) {
     if (!player) return;
     if (scene._isRespawning || gameState.gameOver) return;
     const isAegisActive = aegisState.active || player === scene.aegis;
-    const assaultObjective = gameState.assaultObjective;
-    const allowAssaultReentry = Boolean(
-        gameState.mode === 'assault'
-        && isAegisActive
-        && assaultObjective
-        && !assaultObjective.shipLocked
-        && !assaultObjective.interiorPhase
-    );
     resetComboMeter();
     if (particleManager) {
         if (audioManager) audioManager.playSound('explosion');
@@ -95,12 +87,6 @@ function playerDie(scene) {
     screenShake(scene, 20, 500);
 
     if (isAegisActive) {
-        if (allowAssaultReentry) {
-            ejectPilot(scene);
-            playerState.powerUps.invincibility = 1500;
-            return;
-        }
-
         aegisState.destroyed = true;
         if (scene.aegis) {
             scene.aegis.setActive(false).setVisible(false);
