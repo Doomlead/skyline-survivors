@@ -51,7 +51,9 @@ function ejectPilot(scene) {
 // Re-enters AEGIS from pilot state when conditions allow, restoring ship control.
 function enterAegis(scene) {
     if (!scene.aegis || !scene.pilot || !pilotState.active) return;
-    if ((gameState.mothershipObjective?.shipLocked || gameState.assaultObjective?.shipLocked)) return;
+    const shipLocked = (gameState.mode === 'mothership' && gameState.mothershipObjective?.shipLocked)
+        || (gameState.mode === 'assault' && gameState.assaultObjective?.shipLocked);
+    if (shipLocked) return;
     if (aegisState.destroyed) return;
     const dist = Phaser.Math.Distance.Between(scene.pilot.x, scene.pilot.y, scene.aegis.x, scene.aegis.y);
     if (dist > 60) return;
@@ -77,14 +79,6 @@ function playerDie(scene) {
     if (!player) return;
     if (scene._isRespawning || gameState.gameOver) return;
     const isAegisActive = aegisState.active || player === scene.aegis;
-    const assaultObjective = gameState.assaultObjective;
-    const allowAssaultReentry = Boolean(
-        gameState.mode === 'assault'
-        && isAegisActive
-        && assaultObjective
-        && !assaultObjective.shipLocked
-        && !assaultObjective.interiorPhase
-    );
     resetComboMeter();
     if (particleManager) {
         if (audioManager) audioManager.playSound('explosion');
@@ -95,21 +89,19 @@ function playerDie(scene) {
     screenShake(scene, 20, 500);
 
     if (isAegisActive) {
-        if (allowAssaultReentry) {
-            ejectPilot(scene);
-            playerState.powerUps.invincibility = 1500;
-            return;
-        }
-
         aegisState.destroyed = true;
         if (scene.aegis) {
             scene.aegis.setActive(false).setVisible(false);
             scene.aegis.body.enable = false;
         }
         ejectPilot(scene);
-        if (gameState.rebuildObjective && !(gameState.mothershipObjective?.shipLocked || gameState.assaultObjective?.shipLocked)) {
+        const shipLocked = (gameState.mode === 'mothership' && gameState.mothershipObjective?.shipLocked)
+            || (gameState.mode === 'assault' && gameState.assaultObjective?.shipLocked);
+        if (gameState.rebuildObjective && !shipLocked) {
             const useHangarRebuild = typeof isDefenseMission === 'function' ? isDefenseMission() : false;
-            const defaultBranch = gameState.rebuildObjective.branch || 'dropship';
+            const defaultBranch = (gameState.mode === 'assault' || gameState.mode === 'mothership')
+                ? 'dropship'
+                : (gameState.rebuildObjective.branch || 'dropship');
             gameState.rebuildObjective.active = true;
             gameState.rebuildObjective.stage = useHangarRebuild ? 'hangar_rebuild' : 'secure_extraction';
             gameState.rebuildObjective.timer = 0;
@@ -134,9 +126,10 @@ function playerDie(scene) {
         player.setActive(false).setVisible(false);
         player.body.enable = false;
 
-        const mothershipShipLocked = Boolean((gameState.mothershipObjective?.shipLocked || gameState.assaultObjective?.shipLocked));
+        const shipLocked = (gameState.mode === 'mothership' && gameState.mothershipObjective?.shipLocked)
+            || (gameState.mode === 'assault' && gameState.assaultObjective?.shipLocked);
         pilotState.active = false;
-        aegisState.active = !mothershipShipLocked;
+        aegisState.active = !shipLocked;
 
         const p = playerState.powerUps;
         const weaponKeys = ['laser','drone','shield','missile','overdrive','coverage','rapid','multiShot','piercing','speed','magnet','double','timeSlow'];
@@ -170,7 +163,7 @@ function playerDie(scene) {
         }
 
         scene.time.delayedCall(1000, () => {
-            if (mothershipShipLocked) {
+            if (shipLocked) {
                 const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
                 const spawnX = 200;
                 const terrainVariation = Math.sin(spawnX / 200) * 30;
