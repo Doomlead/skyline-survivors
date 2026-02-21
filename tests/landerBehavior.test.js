@@ -54,6 +54,15 @@ test('lander ignores null or inactive humans when selecting abduction targets', 
     delete global.Phaser;
 });
 
+
+
+test('lander safely handles missing humans group entries', () => {
+    const enemy = { targetHuman: null, abductedHuman: null };
+
+    assert.doesNotThrow(() => updateLanderBehavior({ humans: {} }, enemy, 0));
+    assert.doesNotThrow(() => updateLanderBehavior({ humans: { children: {} } }, enemy, 0));
+});
+
 test('destroying a lander frees its targeted human if not yet abducted', () => {
     global.createExplosion = () => {};
     global.createEnhancedDeathEffect = () => {};
