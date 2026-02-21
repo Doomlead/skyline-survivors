@@ -166,14 +166,21 @@ function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, lase
     });
 }
 
+// Returns entries for a Phaser group-like object, or an empty list when unavailable.
+
+function getGroupEntries(group) {
+    if (!group || !group.children || !group.children.entries) return [];
+    return group.children.entries;
+}
+
 // Selects nearest valid hostile targets for cluster-missile retargeting.
 function getClusterTargets(scene, originX, originY, count, excludeTarget = null) {
     const candidates = [];
-    if (scene.enemies) candidates.push(...scene.enemies.children.entries);
-    if (scene.garrisonDefenders) candidates.push(...scene.garrisonDefenders.children.entries);
-    if (scene.bosses) candidates.push(...scene.bosses.children.entries);
-    if (scene.battleships) candidates.push(...scene.battleships.children.entries);
-    if (scene.assaultTargets) candidates.push(...scene.assaultTargets.children.entries);
+    candidates.push(...getGroupEntries(scene.enemies));
+    candidates.push(...getGroupEntries(scene.garrisonDefenders));
+    candidates.push(...getGroupEntries(scene.bosses));
+    candidates.push(...getGroupEntries(scene.battleships));
+    candidates.push(...getGroupEntries(scene.assaultTargets));
 
     return candidates
         .filter(target => target.active && target !== excludeTarget)
@@ -405,11 +412,11 @@ function updateProjectiles(scene) {
             let nearestEnemy = null;
             let nearestDist = Infinity;
             const candidates = [];
-            if (enemies) candidates.push(...enemies.children.entries);
-            if (garrisonDefenders) candidates.push(...garrisonDefenders.children.entries);
-            if (bosses) candidates.push(...bosses.children.entries);
-            if (battleships) candidates.push(...battleships.children.entries);
-            if (scene.assaultTargets) candidates.push(...scene.assaultTargets.children.entries);
+            candidates.push(...getGroupEntries(enemies));
+            candidates.push(...getGroupEntries(garrisonDefenders));
+            candidates.push(...getGroupEntries(bosses));
+            candidates.push(...getGroupEntries(battleships));
+            candidates.push(...getGroupEntries(scene.assaultTargets));
             const homingTier = proj.homingTier || 1;
             if (homingTier < 2) return;
             const maxRange = 360;
