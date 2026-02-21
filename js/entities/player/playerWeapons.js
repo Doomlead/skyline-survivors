@@ -7,6 +7,12 @@ function fireWeapon(scene, angleOverride = null) {
     const { projectiles, drones } = scene;
     const player = getActivePlayer(scene);
     if (!player || !projectiles) return;
+
+    if (typeof pilotState !== 'undefined' && pilotState.active && typeof handlePilotWeaponFire === 'function') {
+        const fired = handlePilotWeaponFire(scene, player, angleOverride);
+        if (fired) return;
+    }
+
     let speed = 600;
     if (playerState.powerUps.speed > 0) speed = 750;
     const p = playerState.powerUps;
@@ -459,6 +465,94 @@ function updateProjectiles(scene) {
             proj.isSlowed = false;
         }
     });
+}
+
+
+
+// Handles pilot weapon projectile behavior while the pilot is on foot (defense + interiors).
+function handlePilotWeaponFire(scene, player, angleOverride) {
+    if (typeof getPilotWeaponState !== 'function') return false;
+    const state = getPilotWeaponState();
+    const weaponId = state.activeWeapon || 'combatRifle';
+    const cfg = PILOT_WEAPON_CONFIG?.[weaponId];
+    if (!cfg) return false;
+    if (typeof canFireActivePilotWeapon === 'function' && !canFireActivePilotWeapon()) {
+        state.activeWeapon = 'combatRifle';
+        return false;
+    }
+
+    const tier = typeof getPilotWeaponTier === 'function' ? getPilotWeaponTier(weaponId) : Math.max(1, state.weaponTiers?.[weaponId] || 1);
+    const baseAngle = typeof angleOverride === 'number'
+        ? angleOverride
+        : (playerState.direction === 'right' ? 0 : Math.PI);
+    const origin = getFireOrigin(player, baseAngle, 18);
+
+    const spawnShot = (angle, speed, type, damage, options = null) => {
+        createProjectile(
+            scene,
+            origin.fireX,
+            origin.fireY,
+            Math.cos(angle) * speed,
+            Math.sin(angle) * speed,
+            type,
+            damage,
+            options
+        );
+    };
+
+    if (weaponId === 'combatRifle') {
+        const damage = tier >= 3 ? 1.6 : 1;
+        spawnShot(baseAngle, 650, 'normal', damage);
+        if (tier >= 3) {
+            spawnShot(baseAngle + 0.03, 650, 'normal', damage);
+            spawnShot(baseAngle - 0.03, 650, 'normal', damage);
+        }
+        return true;
+    }
+
+    if (weaponId === 'scattergun') {
+        const pelletCount = 7;
+        const spread = 0.34;
+        const damage = tier >= 3 ? 0.8 : 0.55;
+        for (let i = 0; i < pelletCount; i++) {
+            const t = pelletCount === 1 ? 0.5 : i / (pelletCount - 1);
+            const angle = baseAngle - spread / 2 + spread * t;
+            const type = tier >= 3 ? 'overdrive' : 'normal';
+            spawnShot(angle, 560, type, damage);
+        }
+        if (typeof consumeActivePilotWeaponAmmo === 'function') consumeActivePilotWeaponAmmo(1);
+        return true;
+    }
+
+    if (weaponId === 'plasmaLauncher') {
+        const plasmaDamage = tier >= 3 ? 2.3 : (tier === 2 ? 1.9 : 1.5);
+        spawnShot(baseAngle, 430, tier >= 2 ? 'piercing' : 'normal', plasmaDamage, { piercing: tier >= 2 });
+        if (tier >= 3) {
+            spawnShot(baseAngle + 0.22, 430, 'piercing', plasmaDamage * 0.8, { piercing: true });
+        }
+        if (typeof consumeActivePilotWeaponAmmo === 'function') consumeActivePilotWeaponAmmo(1);
+        return true;
+    }
+
+    if (weaponId === 'lightningGun') {
+        const arcs = tier >= 3 ? [-0.08, 0, 0.08] : [0];
+        const damage = tier >= 2 ? 1.25 : 1;
+        arcs.forEach((off) => spawnShot(baseAngle + off, 700, 'piercing', damage, { piercing: true }));
+        if (typeof consumeActivePilotWeaponAmmo === 'function') consumeActivePilotWeaponAmmo(0.25);
+        return true;
+    }
+
+    if (weaponId === 'stingerDrone') {
+        const droneCount = tier >= 3 ? 3 : Math.max(1, state.droneCount || 1);
+        const spacing = 0.18;
+        for (let i = 0; i < droneCount; i++) {
+            const offset = (i - (droneCount - 1) / 2) * spacing;
+            spawnShot(baseAngle + offset, 640, 'drone', 1);
+        }
+        return true;
+    }
+
+    return false;
 }
 
 if (typeof module !== 'undefined') {

@@ -80,3 +80,31 @@ function grantPilotAmmoFromRescue() {
     if (!cfg || cfg.infiniteAmmo) return;
     state.ammoPools[state.activeWeapon] = Math.min(cfg.ammoCapacity, (state.ammoPools[state.activeWeapon] || 0) + 2);
 }
+
+
+function getActivePilotWeaponConfig() {
+    const state = getPilotWeaponState();
+    const weaponId = state.activeWeapon || 'combatRifle';
+    return PILOT_WEAPON_CONFIG[weaponId] || PILOT_WEAPON_CONFIG.combatRifle;
+}
+
+function getPilotWeaponTier(weaponId = null) {
+    const state = getPilotWeaponState();
+    const id = weaponId || state.activeWeapon || 'combatRifle';
+    return Math.max(1, state.weaponTiers[id] || 1);
+}
+
+function canFireActivePilotWeapon() {
+    const state = getPilotWeaponState();
+    const cfg = getActivePilotWeaponConfig();
+    if (!cfg || cfg.infiniteAmmo) return true;
+    return (state.ammoPools[cfg.id] || 0) > 0;
+}
+
+function consumeActivePilotWeaponAmmo(cost = 1) {
+    const state = getPilotWeaponState();
+    const cfg = getActivePilotWeaponConfig();
+    if (!cfg || cfg.infiniteAmmo) return;
+    const safeCost = Math.max(0, cost || 0);
+    state.ammoPools[cfg.id] = Math.max(0, (state.ammoPools[cfg.id] || 0) - safeCost);
+}
