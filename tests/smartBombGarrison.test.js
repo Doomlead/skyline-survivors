@@ -221,3 +221,72 @@ test('smart bomb still clears garrison defenders when enemies group is missing',
     delete global.CONFIG;
     delete global.FG_DEPTH_BASE;
 });
+
+test('smart bomb ignores null entries in enemy and garrison groups', () => {
+    global.gameState = { smartBombs: 1 };
+    global.createExplosion = () => {};
+    global.isFlashReductionEnabled = () => false;
+    global.CONFIG = { width: 800, height: 600 };
+    global.FG_DEPTH_BASE = 0;
+
+    const destroyedEnemies = [];
+    global.destroyEnemy = (_scene, enemy) => {
+        destroyedEnemies.push(enemy);
+    };
+
+    const destroyedDefenders = [];
+    global.destroyGarrisonDefender = (_scene, defender) => {
+        destroyedDefenders.push(defender);
+    };
+
+    const scene = {
+        enemies: {
+            children: {
+                entries: [
+                    null,
+                    { active: true, x: 11, y: 22 },
+                    { active: false, x: 33, y: 44 }
+                ]
+            }
+        },
+        garrisonDefenders: {
+            children: {
+                entries: [
+                    null,
+                    { active: true, x: 55, y: 66, destroy: () => {} },
+                    { active: false, x: 77, y: 88, destroy: () => {} }
+                ]
+            }
+        },
+        enemyProjectiles: { clear: () => {} },
+        audioManager: { playSound: () => {} },
+        cameras: { main: { scrollX: 0 } },
+        add: {},
+        tweens: {
+            add: ({ onComplete }) => {
+                if (onComplete) onComplete();
+            }
+        }
+    };
+
+    scene.add.rectangle = () => {
+        const rect = {
+            setScrollFactor: () => rect,
+            setDepth: () => rect,
+            destroy: () => {}
+        };
+        return rect;
+    };
+
+    assert.doesNotThrow(() => useSmartBomb(scene));
+    assert.strictEqual(destroyedEnemies.length, 1);
+    assert.strictEqual(destroyedDefenders.length, 1);
+
+    delete global.gameState;
+    delete global.createExplosion;
+    delete global.destroyEnemy;
+    delete global.destroyGarrisonDefender;
+    delete global.isFlashReductionEnabled;
+    delete global.CONFIG;
+    delete global.FG_DEPTH_BASE;
+});
