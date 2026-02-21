@@ -173,6 +173,7 @@ function getClusterTargets(scene, originX, originY, count, excludeTarget = null)
     if (scene.garrisonDefenders) candidates.push(...scene.garrisonDefenders.children.entries);
     if (scene.bosses) candidates.push(...scene.bosses.children.entries);
     if (scene.battleships) candidates.push(...scene.battleships.children.entries);
+    if (scene.assaultTargets) candidates.push(...scene.assaultTargets.children.entries);
 
     return candidates
         .filter(target => target.active && target !== excludeTarget)
@@ -408,6 +409,7 @@ function updateProjectiles(scene) {
             if (garrisonDefenders) candidates.push(...garrisonDefenders.children.entries);
             if (bosses) candidates.push(...bosses.children.entries);
             if (battleships) candidates.push(...battleships.children.entries);
+            if (scene.assaultTargets) candidates.push(...scene.assaultTargets.children.entries);
             const homingTier = proj.homingTier || 1;
             if (homingTier < 2) return;
             const maxRange = 360;
