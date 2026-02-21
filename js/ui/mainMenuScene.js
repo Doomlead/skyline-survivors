@@ -7,6 +7,11 @@ class MainMenuScene extends Phaser.Scene {
         super({ key: SCENE_KEYS.menu, active: false });
     }
 
+    /**
+     * Handles the create routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     create() {
         const { width, height } = this.scale;
         this.cameras.main.setBackgroundColor('#050912');
@@ -22,6 +27,11 @@ class MainMenuScene extends Phaser.Scene {
         });
     }
 
+    /**
+     * Handles the createBackdrop routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     createBackdrop(width, height) {
         const g = this.add.graphics();
         g.lineStyle(1, 0x0f1f3a, 0.35);
@@ -36,6 +46,11 @@ class MainMenuScene extends Phaser.Scene {
         glow.setBlendMode(Phaser.BlendModes.ADD);
     }
 
+    /**
+     * Handles the createTitle routine and encapsulates its core gameplay logic.
+     * Parameters: width.
+     * Returns: value defined by the surrounding game flow.
+     */
     createTitle(width) {
         const title = this.add.text(width / 2, 80, 'Skyline Survivors', {
             fontFamily: 'Orbitron',
@@ -53,6 +68,11 @@ class MainMenuScene extends Phaser.Scene {
         }).setOrigin(0.5);
     }
 
+    /**
+     * Handles the createIntroPanel routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     createIntroPanel(width, height) {
         const frame = this.add.rectangle(width / 2, height / 2, width * 0.7, height * 0.5, 0x0b1220, 0.8);
         frame.setStrokeStyle(3, 0x1b4f8f, 0.7);
@@ -85,6 +105,11 @@ class MainMenuScene extends Phaser.Scene {
         });
     }
 
+    /**
+     * Handles the createMenuButton routine and encapsulates its core gameplay logic.
+     * Parameters: x, y, label, strokeColor, handler.
+     * Returns: value defined by the surrounding game flow.
+     */
     createMenuButton(x, y, label, strokeColor, handler) {
         const button = this.add.rectangle(x, y, 220, 40, 0x0f172a, 0.9)
             .setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(strokeColor).color, 0.8)

@@ -130,6 +130,11 @@ function createSpawnerGraphics(scene) {
 
 }
 
+/**
+ * Handles the createShielderGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createShielderGraphics(scene) {
     // ========================
     // SHIELDER - Protects Other Enemies

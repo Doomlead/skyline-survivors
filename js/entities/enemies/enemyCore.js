@@ -114,6 +114,11 @@ function getClassicWaveEnemyPool(wave) {
     return [...CLASSIC_LIGHT_ENEMIES, ...CLASSIC_HEAVY_ENEMIES, ...CLASSIC_ELITE_ENEMIES];
 }
 
+/**
+ * Handles the getWaveSpawnTiming routine and encapsulates its core gameplay logic.
+ * Parameters: wave.
+ * Returns: value defined by the surrounding game flow.
+ */
 function getWaveSpawnTiming(wave) {
     const waveIndex = Math.max(1, wave);
     const initialDelay = Phaser.Math.Clamp(8000 - (waveIndex - 1) * 350, 2500, 8000);
@@ -131,6 +136,11 @@ function getWaveSpawnTiming(wave) {
     };
 }
 
+/**
+ * Handles the scheduleSpawnBurst routine and encapsulates its core gameplay logic.
+ * Parameters: scene, allowedTypes, startDelay, burstSize, burstSpacing.
+ * Returns: value defined by the surrounding game flow.
+ */
 function scheduleSpawnBurst(scene, allowedTypes, startDelay, burstSize, burstSpacing) {
     for (let i = 0; i < burstSize; i++) {
         scene.time.delayedCall(startDelay + i * burstSpacing, () => {

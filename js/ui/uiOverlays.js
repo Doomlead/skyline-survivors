@@ -21,12 +21,22 @@ function gameOver(scene) {
     showMissionDefeat(scene, metaResult);
 }
 
+/**
+ * Handles the getOverlayScale routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function getOverlayScale(scene) {
     const cam = scene.cameras.main;
     const scale = cam && cam.height ? cam.height / 700 : 1;
     return Math.min(1, Math.max(0.7, scale));
 }
 
+/**
+ * Handles the showMissionDefeat routine and encapsulates its core gameplay logic.
+ * Parameters: scene, metaResult.
+ * Returns: value defined by the surrounding game flow.
+ */
 function showMissionDefeat(scene, metaResult) {
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
@@ -76,6 +86,11 @@ function showMissionDefeat(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
+    /**
+     * Handles the handleReturn routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     const handleReturn = () => {
         resetGameState();
         if (window.enterDistrictMap) {
@@ -87,6 +102,11 @@ function showMissionDefeat(scene, metaResult) {
     returnButton.on('pointerdown', handleReturn);
 }
 
+/**
+ * Handles the winGame routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function winGame(scene) {
     const audioManager = scene.audioManager;
     gameState.gameOver = true;
@@ -105,6 +125,11 @@ function winGame(scene) {
     showMissionVictory(scene, metaResult);
 }
 
+/**
+ * Handles the showCampaignDefeat routine and encapsulates its core gameplay logic.
+ * Parameters: scene, metaResult.
+ * Returns: value defined by the surrounding game flow.
+ */
 function showCampaignDefeat(scene, metaResult) {
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
@@ -148,6 +173,11 @@ function showCampaignDefeat(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
+    /**
+     * Handles the handleReturn routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     const handleReturn = () => {
         resetGameState();
         if (window.enterDistrictMap) {
@@ -159,6 +189,11 @@ function showCampaignDefeat(scene, metaResult) {
     returnButton.on('pointerdown', handleReturn);
 }
 
+/**
+ * Handles the showMissionVictory routine and encapsulates its core gameplay logic.
+ * Parameters: scene, metaResult.
+ * Returns: value defined by the surrounding game flow.
+ */
 function showMissionVictory(scene, metaResult) {
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
@@ -208,6 +243,11 @@ function showMissionVictory(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
+    /**
+     * Handles the handleReturn routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     const handleReturn = () => {
         resetGameState();
         if (window.enterDistrictMap) {
@@ -219,6 +259,11 @@ function showMissionVictory(scene, metaResult) {
     returnButton.on('pointerdown', handleReturn);
 }
 
+/**
+ * Handles the showMissionVictory routine and encapsulates its core gameplay logic.
+ * Parameters: scene, metaResult.
+ * Returns: value defined by the surrounding game flow.
+ */
 function showMissionVictory(scene, metaResult) {
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
@@ -268,6 +313,11 @@ function showMissionVictory(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
+    /**
+     * Handles the handleReturn routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     const handleReturn = () => {
         resetGameState();
         if (window.enterDistrictMap) {
@@ -279,6 +329,11 @@ function showMissionVictory(scene, metaResult) {
     returnButton.on('pointerdown', handleReturn);
 }
 
+/**
+ * Handles the getCampaignVictoryStats routine and encapsulates its core gameplay logic.
+ * Parameters: none.
+ * Returns: value defined by the surrounding game flow.
+ */
 function getCampaignVictoryStats() {
     const allDistricts = window.missionPlanner?.getAllDistrictStates?.() || [];
     const districtsSaved = allDistricts.filter(entry => entry.state?.status === 'friendly').length;
@@ -290,6 +345,11 @@ function getCampaignVictoryStats() {
     };
 }
 
+/**
+ * Handles the formatCampaignTime routine and encapsulates its core gameplay logic.
+ * Parameters: ms.
+ * Returns: value defined by the surrounding game flow.
+ */
 function formatCampaignTime(ms = 0) {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
     const hours = Math.floor(totalSeconds / 3600);
@@ -302,6 +362,11 @@ function formatCampaignTime(ms = 0) {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
+/**
+ * Handles the showCampaignVictory routine and encapsulates its core gameplay logic.
+ * Parameters: scene, metaResult.
+ * Returns: value defined by the surrounding game flow.
+ */
 function showCampaignVictory(scene, metaResult) {
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
@@ -367,6 +432,11 @@ function showCampaignVictory(scene, metaResult) {
     menuButton.on('pointerdown', () => returnToMainMenu(scene));
 }
 
+/**
+ * Handles the getCampaignVictoryStats routine and encapsulates its core gameplay logic.
+ * Parameters: none.
+ * Returns: value defined by the surrounding game flow.
+ */
 function getCampaignVictoryStats() {
     const allDistricts = window.missionPlanner?.getAllDistrictStates?.() || [];
     const districtsSaved = allDistricts.filter(entry => entry.state?.status === 'friendly').length;
@@ -378,6 +448,11 @@ function getCampaignVictoryStats() {
     };
 }
 
+/**
+ * Handles the formatCampaignTime routine and encapsulates its core gameplay logic.
+ * Parameters: ms.
+ * Returns: value defined by the surrounding game flow.
+ */
 function formatCampaignTime(ms = 0) {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000));
     const hours = Math.floor(totalSeconds / 3600);
@@ -390,6 +465,11 @@ function formatCampaignTime(ms = 0) {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
+/**
+ * Handles the recordMetaOutcome routine and encapsulates its core gameplay logic.
+ * Parameters: success.
+ * Returns: value defined by the surrounding game flow.
+ */
 function recordMetaOutcome(success) {
     if (!window.metaProgression || gameState.metaRewardsGranted) return null;
     const outcome = {

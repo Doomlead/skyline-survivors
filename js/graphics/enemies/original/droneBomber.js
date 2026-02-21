@@ -94,6 +94,11 @@ function createDroneGraphics(scene) {
     droneGraphics.destroy();
 }
 
+/**
+ * Handles the createBomberGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createBomberGraphics(scene) {
     // ========================
     // BOMBER - Heavy Ordnance Dropper

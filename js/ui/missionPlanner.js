@@ -274,6 +274,11 @@
     let battleshipState = null;
     const mapState = { nodes: {}, hasTimerData: false };
 
+    /**
+     * Handles the getDefaultDistrictState routine and encapsulates its core gameplay logic.
+     * Parameters: config.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getDefaultDistrictState(config) {
         const roll = Math.random();
         const status = roll < 0.4 ? 'friendly' : 'occupied';
@@ -292,6 +297,11 @@
         return state;
     }
 
+    /**
+     * Handles the syncProsperityMetrics routine and encapsulates its core gameplay logic.
+     * Parameters: entry.
+     * Returns: value defined by the surrounding game flow.
+     */
     function syncProsperityMetrics(entry) {
         if (!entry) return;
         const level = Math.max(0, Math.floor(entry.prosperity || 0));
@@ -299,6 +309,11 @@
         entry.prosperityMultiplier = 1 + level * PROSPERITY_CONFIG.bonusPerLevel;
     }
 
+    /**
+     * Handles the applyProsperityGain routine and encapsulates its core gameplay logic.
+     * Parameters: entry, seconds.
+     * Returns: value defined by the surrounding game flow.
+     */
     function applyProsperityGain(entry, seconds = 0) {
         if (!entry || seconds <= 0) return false;
         const current = Number(entry.prosperity || 0);
@@ -309,6 +324,11 @@
         return true;
     }
 
+    /**
+     * Handles the applyProsperityLoss routine and encapsulates its core gameplay logic.
+     * Parameters: entry.
+     * Returns: value defined by the surrounding game flow.
+     */
     function applyProsperityLoss(entry) {
         if (!entry) return;
         const lost = Math.max(0, Math.round(entry.prosperity || 0));
@@ -318,6 +338,11 @@
         syncProsperityMetrics(entry);
     }
 
+    /**
+     * Handles the safeLoadState routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function safeLoadState() {
         if (districtState) return districtState;
         let stored = null;
@@ -379,6 +404,11 @@
         return districtState;
     }
 
+    /**
+     * Handles the persistState routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function persistState() {
         if (typeof localStorage === 'undefined' || !districtState) return;
         try {
@@ -389,6 +419,11 @@
         }
     }
 
+    /**
+     * Handles the resetCampaignState routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function resetCampaignState() {
         districtState = null;
         battleshipState = null;
@@ -405,6 +440,11 @@
         safeLoadState();
     }
 
+    /**
+     * Handles the randomCityMission routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function randomCityMission() {
         const districtConfig = Phaser.Utils.Array.GetRandom(DISTRICT_CONFIGS);
         const district = getDistrictState(districtConfig.id);
@@ -422,6 +462,11 @@
         };
     }
 
+    /**
+     * Handles the ensureMission routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function ensureMission() {
         if (!mission) {
             mission = randomCityMission();
@@ -429,10 +474,20 @@
         return mission;
     }
 
+    /**
+     * Handles the getMission routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getMission() {
         return ensureMission();
     }
 
+    /**
+     * Handles the rerollCity routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function rerollCity() {
         const current = ensureMission();
         const newMission = randomCityMission();
@@ -441,6 +496,11 @@
         return mission;
     }
 
+    /**
+     * Handles the setMode routine and encapsulates its core gameplay logic.
+     * Parameters: mode.
+     * Returns: value defined by the surrounding game flow.
+     */
     function setMode(mode) {
         const current = ensureMission();
         if (mode === 'mothership') {
@@ -452,10 +512,20 @@
         return mission;
     }
 
+    /**
+     * Handles the getDistrictConfigById routine and encapsulates its core gameplay logic.
+     * Parameters: id.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getDistrictConfigById(id) {
         return DISTRICT_CONFIGS.find(d => d.id === id);
     }
 
+    /**
+     * Handles the getDistrictCenter routine and encapsulates its core gameplay logic.
+     * Parameters: config.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getDistrictCenter(config) {
         if (!config) return { lat: 0, lon: 0 };
         if (config.center) return config.center;
@@ -470,10 +540,20 @@
         return { lat: 0, lon: 0 };
     }
 
+    /**
+     * Handles the getActiveDistrictConfigs routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getActiveDistrictConfigs() {
         return DISTRICT_CONFIGS.filter(cfg => getDistrictState(cfg.id).status !== 'occupied');
     }
 
+    /**
+     * Handles the pickRandomDistrictId routine and encapsulates its core gameplay logic.
+     * Parameters: excludeId.
+     * Returns: value defined by the surrounding game flow.
+     */
     function pickRandomDistrictId(excludeId = null) {
         const candidates = getActiveDistrictConfigs();
         const pool = candidates.length ? candidates : DISTRICT_CONFIGS;
@@ -482,6 +562,11 @@
         return Phaser.Utils.Array.GetRandom(pickFrom).id;
     }
 
+    /**
+     * Handles the ensureBattleshipState routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function ensureBattleshipState() {
         if (battleshipState) return battleshipState;
         battleshipState = Array.from({ length: BATTLESHIP_CONFIG.count }).map((_, index) => {
@@ -501,10 +586,20 @@
         return battleshipState;
     }
 
+    /**
+     * Handles the lerpValue routine and encapsulates its core gameplay logic.
+     * Parameters: start, end, t.
+     * Returns: value defined by the surrounding game flow.
+     */
     function lerpValue(start, end, t) {
         return start + (end - start) * t;
     }
 
+    /**
+     * Handles the tickBattleships routine and encapsulates its core gameplay logic.
+     * Parameters: seconds.
+     * Returns: value defined by the surrounding game flow.
+     */
     function tickBattleships(seconds = 0) {
         if (seconds <= 0) return ensureBattleshipState();
         const state = safeLoadState();
@@ -588,10 +683,20 @@
         return ships;
     }
 
+    /**
+     * Handles the getBattleships routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getBattleships() {
         return ensureBattleshipState();
     }
 
+    /**
+     * Handles the retireBattleshipsForDistrict routine and encapsulates its core gameplay logic.
+     * Parameters: districtId.
+     * Returns: value defined by the surrounding game flow.
+     */
     function retireBattleshipsForDistrict(districtId) {
         if (!districtId) return;
         const ships = ensureBattleshipState();
@@ -604,6 +709,11 @@
         });
     }
 
+    /**
+     * Handles the selectDistrict routine and encapsulates its core gameplay logic.
+     * Parameters: name, longitudeOverride, providedState.
+     * Returns: value defined by the surrounding game flow.
+     */
     function selectDistrict(name, longitudeOverride = null, providedState = null) {
         const current = ensureMission();
         const config = DISTRICT_CONFIGS.find(d => d.name === name || d.id === name);
@@ -630,6 +740,11 @@
         return mission;
     }
 
+    /**
+     * Handles the getDistrictState routine and encapsulates its core gameplay logic.
+     * Parameters: id.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getDistrictState(id) {
         const state = safeLoadState();
         if (!state.districts[id]) {
@@ -639,6 +754,11 @@
         return state.districts[id];
     }
 
+    /**
+     * Handles the updateDistrictState routine and encapsulates its core gameplay logic.
+     * Parameters: id, patch.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateDistrictState(id, patch) {
         const state = safeLoadState();
         const existing = getDistrictState(id);
@@ -648,16 +768,31 @@
         return state.districts[id];
     }
 
+    /**
+     * Handles the getAllDistrictStates routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getAllDistrictStates() {
         safeLoadState();
         return DISTRICT_CONFIGS.map(cfg => ({ config: cfg, state: getDistrictState(cfg.id) }));
     }
 
+    /**
+     * Handles the areAllDistrictsFriendly routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function areAllDistrictsFriendly() {
         const state = safeLoadState();
         return Object.values(state.districts).every(entry => entry.status === 'friendly');
     }
 
+    /**
+     * Handles the buildMissionDirectives routine and encapsulates its core gameplay logic.
+     * Parameters: config, state, modeOverride.
+     * Returns: value defined by the surrounding game flow.
+     */
     function buildMissionDirectives(config, state, modeOverride = null) {
         if (!config || !state) return null;
         const urgency = state.status === 'occupied'
@@ -708,6 +843,11 @@
         };
     }
 
+    /**
+     * Handles the buildMothershipDirectives routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function buildMothershipDirectives() {
         const threatMix = MOTHERSHIP_CONFIG.threatMix.map(type => ({ type, weight: 2 }));
         return {
@@ -728,6 +868,11 @@
         };
     }
 
+    /**
+     * Handles the tickDistricts routine and encapsulates its core gameplay logic.
+     * Parameters: seconds.
+     * Returns: value defined by the surrounding game flow.
+     */
     function tickDistricts(seconds = 0) {
         const state = safeLoadState();
         let mutated = false;
@@ -772,6 +917,11 @@
         }
     }
 
+    /**
+     * Handles the recordMissionOutcome routine and encapsulates its core gameplay logic.
+     * Parameters: success.
+     * Returns: value defined by the surrounding game flow.
+     */
     function recordMissionOutcome(success) {
         const currentMission = mission;
         if (!currentMission?.district) return;
@@ -804,6 +954,11 @@
         };
     }
 
+    /**
+     * Handles the prepareLaunchPayload routine and encapsulates its core gameplay logic.
+     * Parameters: mode.
+     * Returns: value defined by the surrounding game flow.
+     */
     function prepareLaunchPayload(mode) {
         if (mode === 'mothership' || mission?.district === 'mothership') {
             const mothershipMission = selectMothershipMission();
@@ -829,6 +984,11 @@
         };
     }
 
+    /**
+     * Handles the selectMothershipMission routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function selectMothershipMission() {
         mission = {
             city: MOTHERSHIP_CONFIG.name,
@@ -843,6 +1003,11 @@
         return mission;
     }
 
+    /**
+     * Handles the ensureMapNodeState routine and encapsulates its core gameplay logic.
+     * Parameters: config.
+     * Returns: value defined by the surrounding game flow.
+     */
     function ensureMapNodeState(config) {
         const existing = mapState.nodes[config.id];
         if (existing) return existing;
@@ -859,11 +1024,21 @@
         return mapState.nodes[config.id];
     }
 
+    /**
+     * Handles the setMapTimerDataAvailable routine and encapsulates its core gameplay logic.
+     * Parameters: hasTimerData.
+     * Returns: value defined by the surrounding game flow.
+     */
     function setMapTimerDataAvailable(hasTimerData) {
         mapState.hasTimerData = !!hasTimerData;
         return mapState.hasTimerData;
     }
 
+    /**
+     * Handles the updateMapNodeState routine and encapsulates its core gameplay logic.
+     * Parameters: id, patch.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateMapNodeState(id, patch = {}) {
         const node = mapState.nodes[id];
         if (!node) return null;
@@ -871,14 +1046,29 @@
         return mapState.nodes[id];
     }
 
+    /**
+     * Handles the getMapNodeState routine and encapsulates its core gameplay logic.
+     * Parameters: id.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getMapNodeState(id) {
         return mapState.nodes[id] || null;
     }
 
+    /**
+     * Handles the getMapState routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getMapState() {
         return mapState;
     }
 
+    /**
+     * Handles the hasMapTimerData routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function hasMapTimerData() {
         return !!mapState.hasTimerData;
     }

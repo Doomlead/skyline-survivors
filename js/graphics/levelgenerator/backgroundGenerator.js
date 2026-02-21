@@ -3,12 +3,22 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGenerator = (function() {
+    /**
+     * Handles the BackgroundGenerator routine and encapsulates its core gameplay logic.
+     * Parameters: scene, config.
+     * Returns: value defined by the surrounding game flow.
+     */
     function BackgroundGenerator(scene, config) {
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();
     }
 
+    /**
+     * Handles the createRNG routine and encapsulates its core gameplay logic.
+     * Parameters: seed.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGenerator.prototype.createRNG = function(seed) {
         var state = seed >>> 0;
         return function() {
@@ -35,6 +45,11 @@ var BackgroundGenerator = (function() {
         return values;
     };
 
+    /**
+     * Handles the generateAllTextures routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGenerator.prototype.generateAllTextures = function() {
         console.log('[BackgroundGenerator] Starting texture generation...');
 
@@ -48,6 +63,11 @@ var BackgroundGenerator = (function() {
         return this.generatedTextures;
     };
 
+    /**
+     * Handles the generateLayerTexture routine and encapsulates its core gameplay logic.
+     * Parameters: layerName, layerConfig.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGenerator.prototype.generateLayerTexture = function(layerName, layerConfig) {
         var worldWidth = this.config.worldWidth;
         var worldHeight = this.config.worldHeight;
@@ -111,6 +131,11 @@ var BackgroundGenerator = (function() {
         }
     };
 
+    /**
+     * Handles the generateAtmosphereLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGenerator.prototype.generateAtmosphereLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -140,6 +165,11 @@ var BackgroundGenerator = (function() {
         }
     };
 
+    /**
+     * Handles the generateStarsLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGenerator.prototype.generateStarsLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -167,6 +197,11 @@ var BackgroundGenerator = (function() {
         }
     };
 
+    /**
+     * Handles the generateHorizonCityLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGenerator.prototype.generateHorizonCityLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -216,6 +251,11 @@ var BackgroundGenerator = (function() {
         }
     };
 
+    /**
+     * Handles the generateMidCityLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGenerator.prototype.generateMidCityLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -277,6 +317,11 @@ var BackgroundGenerator = (function() {
         }
     };
 
+    /**
+     * Handles the generateTerrainLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGenerator.prototype.generateTerrainLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;

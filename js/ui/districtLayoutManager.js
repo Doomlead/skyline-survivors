@@ -9,6 +9,11 @@ const DistrictLayoutManager = (function() {
     let selectedMode = 'classic';
     let assaultLocked = false;
     
+    /**
+     * Handles the init routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function init() {
         // Find the Phaser canvas once it's created
         const checkCanvas = setInterval(() => {
@@ -21,6 +26,11 @@ const DistrictLayoutManager = (function() {
         }, 100);
     }
     
+    /**
+     * Handles the switchToDistrictLayout routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function switchToDistrictLayout() {
         if (currentLayout === 'district') return;
         currentLayout = 'district';
@@ -58,6 +68,11 @@ const DistrictLayoutManager = (function() {
         if (buildToggle) buildToggle.style.display = 'none';
     }
 	
+    /**
+     * Handles the switchToGameLayout routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function switchToGameLayout() {
         if (currentLayout === 'game') return;
         currentLayout = 'game';
@@ -103,6 +118,11 @@ const DistrictLayoutManager = (function() {
             // Force the game canvas back to its proper size
             // This ensures it doesn't stay at the district size
             if (window.game && window.game.scale) {
+                /**
+                 * Handles the resizeToGameLayout routine and encapsulates its core gameplay logic.
+                 * Parameters: none.
+                 * Returns: value defined by the surrounding game flow.
+                 */
                 const resizeToGameLayout = () => {
                     const responsive = typeof getResponsiveScale === 'function'
                         ? getResponsiveScale()
@@ -125,6 +145,11 @@ const DistrictLayoutManager = (function() {
         }
     }
     
+    /**
+     * Handles the styleCanvasForDistrict routine and encapsulates its core gameplay logic.
+     * Parameters: container.
+     * Returns: value defined by the surrounding game flow.
+     */
     function styleCanvasForDistrict(container) {
     if (!phaserCanvas) return;
     
@@ -141,6 +166,11 @@ const DistrictLayoutManager = (function() {
     container.style.overflow = 'hidden';
 }
     
+    /**
+     * Handles the removeDistrictStyling routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function removeDistrictStyling() {
         if (!phaserCanvas) return;
         
@@ -155,6 +185,11 @@ const DistrictLayoutManager = (function() {
         phaserCanvas.style.boxShadow = '';
     }
     
+    /**
+     * Handles the updateDistrictPanels routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateDistrictPanels() {
         updateElement('district-lives', gameState?.lives ?? 3);
         updateElement('district-bombs', gameState?.smartBombs ?? 3);
@@ -176,6 +211,11 @@ const DistrictLayoutManager = (function() {
         updateModeButtons(selectedMode);
     }
     
+    /**
+     * Handles the updateMissionPanel routine and encapsulates its core gameplay logic.
+     * Parameters: mission, district.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateMissionPanel(mission, district) {
         if (!mission) {
             updateElement('district-mission-city', 'No district selected');
@@ -232,6 +272,11 @@ const DistrictLayoutManager = (function() {
         }
     }
     
+    /**
+     * Handles the updateDistrictStatus routine and encapsulates its core gameplay logic.
+     * Parameters: district.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateDistrictStatus(district) {
         const container = document.getElementById('district-node-status');
         if (!container) return;
@@ -262,6 +307,11 @@ const DistrictLayoutManager = (function() {
         `;
     }
     
+    /**
+     * Handles the updateModeButtons routine and encapsulates its core gameplay logic.
+     * Parameters: mode.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateModeButtons(mode) {
         selectedMode = mode;
         
@@ -279,6 +329,11 @@ const DistrictLayoutManager = (function() {
         }
     }
     
+    /**
+     * Handles the selectMode routine and encapsulates its core gameplay logic.
+     * Parameters: mode.
+     * Returns: value defined by the surrounding game flow.
+     */
     function selectMode(mode) {
         if (assaultLocked && mode !== 'assault') {
             return;
@@ -298,23 +353,48 @@ const DistrictLayoutManager = (function() {
         }
     }
 
+    /**
+     * Handles the getModeLabel routine and encapsulates its core gameplay logic.
+     * Parameters: mode.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getModeLabel(mode) {
         return mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Defense';
     }
     
+    /**
+     * Handles the getSelectedMode routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getSelectedMode() {
         return selectedMode;
     }
     
+    /**
+     * Handles the getCurrentLayout routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getCurrentLayout() {
         return currentLayout;
     }
     
+    /**
+     * Handles the updateElement routine and encapsulates its core gameplay logic.
+     * Parameters: id, value.
+     * Returns: value defined by the surrounding game flow.
+     */
     function updateElement(id, value) {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
     }
     
+    /**
+     * Handles the formatSeconds routine and encapsulates its core gameplay logic.
+     * Parameters: seconds.
+     * Returns: value defined by the surrounding game flow.
+     */
     function formatSeconds(seconds) {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
@@ -352,6 +432,11 @@ function selectDistrictMode(mode) {
     }
 }
 
+/**
+ * Handles the launchFromDistrictMap routine and encapsulates its core gameplay logic.
+ * Parameters: none.
+ * Returns: value defined by the surrounding game flow.
+ */
 function launchFromDistrictMap() {
     const mode = DistrictLayoutManager.getSelectedMode();
     
@@ -368,10 +453,20 @@ function launchFromDistrictMap() {
     }
 }
 
+/**
+ * Handles the returnToGameFromDistrict routine and encapsulates its core gameplay logic.
+ * Parameters: none.
+ * Returns: value defined by the surrounding game flow.
+ */
 function returnToGameFromDistrict() {
     closeBuildView();
 }
 
+/**
+ * Handles the closeSettingsToGame routine and encapsulates its core gameplay logic.
+ * Parameters: none.
+ * Returns: value defined by the surrounding game flow.
+ */
 function closeSettingsToGame() {
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';

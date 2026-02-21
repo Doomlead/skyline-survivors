@@ -226,6 +226,11 @@ function getResponsiveScale() {
     const buildControls = document.getElementById('build-controls');
     const gameContainer = document.getElementById('game-container');
 
+    /**
+     * Handles the getOuterHeight routine and encapsulates its core gameplay logic.
+     * Parameters: el.
+     * Returns: value defined by the surrounding game flow.
+     */
     const getOuterHeight = (el) => {
         if (!el) return 0;
         const styles = window.getComputedStyle(el);

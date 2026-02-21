@@ -13,6 +13,11 @@ class ParallaxManager {
         this._accumScrollY = 0;
     }
 
+    /**
+     * Handles the createLayers routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     createLayers() {
         const { worldWidth, worldHeight } = this.config;
         
@@ -55,6 +60,11 @@ class ParallaxManager {
         this.config.height = camHeight;
     }
 
+    /**
+     * Handles the initTracking routine and encapsulates its core gameplay logic.
+     * Parameters: playerX, playerY.
+     * Returns: value defined by the surrounding game flow.
+     */
     initTracking(playerX, playerY) {
         this._prevPlayerX = playerX;
         this._accumScrollX = 0;
@@ -62,6 +72,11 @@ class ParallaxManager {
         this._accumScrollY = 0;
     }
 
+    /**
+     * Handles the update routine and encapsulates its core gameplay logic.
+     * Parameters: playerX, playerY.
+     * Returns: value defined by the surrounding game flow.
+     */
     update(playerX, playerY) {
         const worldWidth = this.config.worldWidth;
         
@@ -88,6 +103,11 @@ class ParallaxManager {
         }
     }
 
+    /**
+     * Handles the refresh routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     refresh() {
         for (const layer of this.layers) {
             layer.sprite.tilePositionX = this._accumScrollX * layer.speedX;
@@ -95,6 +115,11 @@ class ParallaxManager {
         }
     }
 
+    /**
+     * Handles the resize routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     resize(width, height) {
         this.config.width = width;
         this.config.height = height;
@@ -112,6 +137,11 @@ class ParallaxManager {
         this.refresh();
     }
 
+    /**
+     * Handles the destroy routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     destroy() {
         for (const layer of this.layers) {
             layer.sprite.destroy();

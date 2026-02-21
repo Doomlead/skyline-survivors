@@ -15,6 +15,11 @@ function createBossGraphics(scene) {
     createOverlordShieldGraphics(scene);
 }
 
+/**
+ * Handles the createMegaLanderGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createMegaLanderGraphics(scene) {
     // ========================
     // MEGA LANDER - Giant UFO with 4 Tentacles
@@ -77,6 +82,11 @@ function createMegaLanderGraphics(scene) {
     megaLanderGraphics.destroy();
 }
 
+/**
+ * Handles the createTitanMutantGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createTitanMutantGraphics(scene) {
     // ========================
     // TITAN MUTANT - Massive Humanoid Alien
@@ -202,6 +212,11 @@ function createTitanMutantGraphics(scene) {
     titanGraphics.destroy();
 }
 
+/**
+ * Handles the createHiveDroneGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createHiveDroneGraphics(scene) {
     // ========================
     // HIVE DRONE - Hexagonal Weapon Platform
@@ -272,6 +287,11 @@ function createHiveDroneGraphics(scene) {
     hiveGraphics.destroy();
 }
 
+/**
+ * Handles the createBehemothBomberGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createBehemothBomberGraphics(scene) {
     // ========================
     // BEHEMOTH BOMBER - Aerial Fortress
@@ -345,6 +365,11 @@ function createBehemothBomberGraphics(scene) {
     bomberGraphics.destroy();
 }
 
+/**
+ * Handles the createColossalPodGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createColossalPodGraphics(scene) {
     // ========================
     // COLOSSAL POD - Giant Organic Spawn Container
@@ -400,6 +425,11 @@ function createColossalPodGraphics(scene) {
     podGraphics.destroy();
 }
 
+/**
+ * Handles the createLeviathanBaiterGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createLeviathanBaiterGraphics(scene) {
     // ========================
     // LEVIATHAN BAITER - Serpentine Sea Monster
@@ -472,6 +502,11 @@ function createLeviathanBaiterGraphics(scene) {
     leviathanGraphics.destroy();
 }
 
+/**
+ * Handles the createApexKamikazeGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createApexKamikazeGraphics(scene) {
     // ========================
     // APEX KAMIKAZE - Angry Suicide Missile
@@ -553,6 +588,11 @@ function createApexKamikazeGraphics(scene) {
     kamikazeGraphics.destroy();
 }
 
+/**
+ * Handles the createFortressTurretGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createFortressTurretGraphics(scene) {
     // ========================
     // FORTRESS TURRET - Immovable Gun Platform
@@ -637,6 +677,11 @@ function createFortressTurretGraphics(scene) {
     turretGraphics.destroy();
 }
 
+/**
+ * Handles the createOverlordShieldGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createOverlordShieldGraphics(scene) {
     // ========================
     // OVERLORD SHIELD - Energy Barrier Master

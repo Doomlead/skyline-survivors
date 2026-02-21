@@ -6,6 +6,11 @@ function createMothershipGraphics(scene) {
     createMothershipCoreGraphics(scene);
 }
 
+/**
+ * Handles the createMothershipCoreGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createMothershipCoreGraphics(scene) {
     // ========================
     // MOTHERSHIP CORE - Stationary breach cannon node

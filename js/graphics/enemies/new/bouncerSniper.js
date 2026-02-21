@@ -104,6 +104,11 @@ function createBouncerGraphics(scene) {
 
 }
 
+/**
+ * Handles the createSniperGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createSniperGraphics(scene) {
     // ========================
     // SNIPER - Long-range Precision Shooter

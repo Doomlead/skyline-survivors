@@ -20,6 +20,11 @@ class AudioManager {
 
     // Adds one-time input listeners so browsers allow Web Audio playback after user interaction.
     setupUnlockHandlers() {
+        /**
+         * Handles the unlock routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         const unlock = async () => {
             if (this.audioContext && this.audioContext.state === 'suspended') {
                 try {

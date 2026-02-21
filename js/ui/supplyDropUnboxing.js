@@ -7,10 +7,20 @@ const SupplyDropUnboxing = (function() {
     let scene = null;
     let isPlaying = false;
 
+    /**
+     * Handles the setScene routine and encapsulates its core gameplay logic.
+     * Parameters: phaserScene.
+     * Returns: value defined by the surrounding game flow.
+     */
     function setScene(phaserScene) {
         scene = phaserScene;
     }
 
+    /**
+     * Handles the playUnboxingSequence routine and encapsulates its core gameplay logic.
+     * Parameters: lootResult, onComplete.
+     * Returns: value defined by the surrounding game flow.
+     */
     function playUnboxingSequence(lootResult, onComplete) {
         if (isPlaying || !scene) {
             if (onComplete) onComplete();
@@ -51,6 +61,11 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
+    /**
+     * Handles the showSatelliteSequence routine and encapsulates its core gameplay logic.
+     * Parameters: overlay, items, isElite, isJackpot, onComplete.
+     * Returns: value defined by the surrounding game flow.
+     */
     function showSatelliteSequence(overlay, items, isElite, isJackpot, onComplete) {
         const centerX = scene.scale.width / 2;
         const centerY = scene.scale.height / 2;
@@ -112,6 +127,11 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
+    /**
+     * Handles the firePod routine and encapsulates its core gameplay logic.
+     * Parameters: overlay, satellite, satText, energyGlow, chargeText, items, isJackpot, onComplete.
+     * Returns: value defined by the surrounding game flow.
+     */
     function firePod(overlay, satellite, satText, energyGlow, chargeText, items, isJackpot, onComplete) {
         const centerX = scene.scale.width / 2;
         const centerY = scene.scale.height / 2;
@@ -155,6 +175,11 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
+    /**
+     * Handles the impactSequence routine and encapsulates its core gameplay logic.
+     * Parameters: overlay, satellite, satText, pod, items, isJackpot, onComplete.
+     * Returns: value defined by the surrounding game flow.
+     */
     function impactSequence(overlay, satellite, satText, pod, items, isJackpot, onComplete) {
         const centerX = scene.scale.width / 2;
         const centerY = scene.scale.height / 2;
@@ -200,6 +225,11 @@ const SupplyDropUnboxing = (function() {
         }, 400);
     }
 
+    /**
+     * Handles the revealItems routine and encapsulates its core gameplay logic.
+     * Parameters: overlay, pod, items, isJackpot, onComplete.
+     * Returns: value defined by the surrounding game flow.
+     */
     function revealItems(overlay, pod, items, isJackpot, onComplete) {
         const centerX = scene.scale.width / 2;
         const centerY = scene.scale.height / 2;
@@ -357,6 +387,11 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
+    /**
+     * Handles the closeUnboxing routine and encapsulates its core gameplay logic.
+     * Parameters: overlay, itemContainer, onComplete.
+     * Returns: value defined by the surrounding game flow.
+     */
     function closeUnboxing(overlay, itemContainer, onComplete) {
         scene.tweens.add({
             targets: [overlay, itemContainer],
@@ -371,14 +406,29 @@ const SupplyDropUnboxing = (function() {
         });
     }
 
+    /**
+     * Handles the getTierColorHex routine and encapsulates its core gameplay logic.
+     * Parameters: tier.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getTierColorHex(tier) {
         return tier === 'tier3' ? 0xa855f7 : tier === 'tier2' ? 0x22d3ee : 0x94a3b8;
     }
 
+    /**
+     * Handles the getTierColorString routine and encapsulates its core gameplay logic.
+     * Parameters: tier.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getTierColorString(tier) {
         return tier === 'tier3' ? '#a855f7' : tier === 'tier2' ? '#22d3ee' : '#94a3b8';
     }
 
+    /**
+     * Handles the getTierLabel routine and encapsulates its core gameplay logic.
+     * Parameters: tier.
+     * Returns: value defined by the surrounding game flow.
+     */
     function getTierLabel(tier) {
         return tier === 'tier3' ? 'RARE' : tier === 'tier2' ? 'COMBAT' : 'UTILITY';
     }

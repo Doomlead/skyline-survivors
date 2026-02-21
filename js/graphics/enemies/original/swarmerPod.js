@@ -92,6 +92,11 @@ function createSwarmerGraphics(scene) {
     swarmerGraphics.destroy();
 }
 
+/**
+ * Handles the createPodGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createPodGraphics(scene) {
     // ========================
     // POD - Swarmer Container

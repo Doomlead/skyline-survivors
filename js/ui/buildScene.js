@@ -12,10 +12,20 @@ class BuildScene extends Phaser.Scene {
         this._lastMetaRefresh = 0;
     }
 
+    /**
+     * Handles the preload routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     preload() {
         this.mapModule.preload();
     }
 
+    /**
+     * Handles the create routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     create() {
         console.log('=== BuildScene.create() ===');
         
@@ -39,6 +49,11 @@ class BuildScene extends Phaser.Scene {
         }, 150); 
     }
     
+    /**
+     * Handles the performCreate routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     performCreate() {
         // 1. Get dimensions
         const width = this.scale.width;
@@ -109,6 +124,11 @@ class BuildScene extends Phaser.Scene {
     }
 
 
+    /**
+     * Handles the createSceneOverlay routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     createSceneOverlay(width, height) {
         if (this.hintText) this.hintText.destroy();
         if (this.titleText) this.titleText.destroy();
@@ -128,6 +148,11 @@ class BuildScene extends Phaser.Scene {
         }).setOrigin(0.5).setAlpha(0.7);
     }
 
+    /**
+     * Handles the handleResize routine and encapsulates its core gameplay logic.
+     * Parameters: gameSize.
+     * Returns: value defined by the surrounding game flow.
+     */
     handleResize(gameSize) {
         const width = gameSize.width;
         const height = gameSize.height;
@@ -135,6 +160,11 @@ class BuildScene extends Phaser.Scene {
         this.updateSceneOverlay(width, height);
     }
 
+    /**
+     * Handles the updateSceneOverlay routine and encapsulates its core gameplay logic.
+     * Parameters: width, height.
+     * Returns: value defined by the surrounding game flow.
+     */
     updateSceneOverlay(width, height) {
         if (this.hintText) {
             this.hintText.setPosition(width / 2, height - 20);
@@ -144,6 +174,11 @@ class BuildScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Handles the focusDistrict routine and encapsulates its core gameplay logic.
+     * Parameters: district, skipTweens.
+     * Returns: value defined by the surrounding game flow.
+     */
     focusDistrict(district, skipTweens = false) {
         if (this.selectedDistrict === district) {
             return;
@@ -191,19 +226,39 @@ class BuildScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Handles the handleDistrictFocus routine and encapsulates its core gameplay logic.
+     * Parameters: district.
+     * Returns: value defined by the surrounding game flow.
+     */
     handleDistrictFocus(district) {
         this.focusDistrict(district);
     }
 
+    /**
+     * Handles the handleNodeDetails routine and encapsulates its core gameplay logic.
+     * Parameters: node.
+     * Returns: value defined by the surrounding game flow.
+     */
     handleNodeDetails(node) {
         if (!node) return;
         console.log('[BuildScene] Node details requested', node);
     }
 
+    /**
+     * Handles the handleOrbitNodeSelected routine and encapsulates its core gameplay logic.
+     * Parameters: nodeId.
+     * Returns: value defined by the surrounding game flow.
+     */
     handleOrbitNodeSelected(nodeId) {
         this.handleOrbitNodeSelection(nodeId);
     }
 
+    /**
+     * Handles the rollMission routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     rollMission() {
         if (window.missionPlanner) {
             this.mission = missionPlanner.rerollCity();
@@ -211,6 +266,11 @@ class BuildScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Handles the launchMission routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     launchMission() {
         if (!this.selectedDistrict) {
             this.tweens.add({
@@ -239,6 +299,11 @@ class BuildScene extends Phaser.Scene {
         this.scene.stop();
     }
 
+    /**
+     * Handles the selectMode routine and encapsulates its core gameplay logic.
+     * Parameters: mode.
+     * Returns: value defined by the surrounding game flow.
+     */
     selectMode(mode) {
         if (this.selectedDistrict?.state?.status === 'occupied' && mode !== 'assault') {
             this.selectedMode = 'assault';
@@ -251,12 +316,22 @@ class BuildScene extends Phaser.Scene {
         this.syncHTMLPanels();
     }
 
+    /**
+     * Handles the updateHTMLDetail routine and encapsulates its core gameplay logic.
+     * Parameters: title, body.
+     * Returns: value defined by the surrounding game flow.
+     */
     updateHTMLDetail(title, body) {
         if (window.DistrictLayoutManager) {
             DistrictLayoutManager.updateMissionPanel(this.mission, this.selectedDistrict);
         }
     }
 
+    /**
+     * Handles the syncHTMLPanels routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     syncHTMLPanels() {
         if (!window.DistrictLayoutManager) return;
         
@@ -268,6 +343,11 @@ class BuildScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Handles the update routine and encapsulates its core gameplay logic.
+     * Parameters: time, delta.
+     * Returns: value defined by the surrounding game flow.
+     */
     update(time, delta) {
         if (typeof missionPlanner === 'undefined') return;
         
@@ -286,6 +366,11 @@ class BuildScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * Handles the formatTimer routine and encapsulates its core gameplay logic.
+     * Parameters: seconds.
+     * Returns: value defined by the surrounding game flow.
+     */
     formatTimer(seconds) {
         const clamped = Math.max(0, Math.floor(seconds));
         const mins = String(Math.floor(clamped / 60)).padStart(2, '0');
@@ -293,6 +378,11 @@ class BuildScene extends Phaser.Scene {
         return `${mins}:${secs}`;
     }
 
+    /**
+     * Handles the handleOrbitNodeSelection routine and encapsulates its core gameplay logic.
+     * Parameters: id.
+     * Returns: value defined by the surrounding game flow.
+     */
     handleOrbitNodeSelection(id) {
         if (id === 'shop') {
             console.log('Shop node selected');

@@ -7,6 +7,11 @@ function createMapIconGraphics(scene) {
     createMapMothershipIcon(scene);
 }
 
+/**
+ * Handles the createMapBattleshipIcon routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createMapBattleshipIcon(scene) {
     const icon = scene.add.graphics();
     const w = 36;
@@ -57,6 +62,11 @@ function createMapBattleshipIcon(scene) {
     icon.destroy();
 }
 
+/**
+ * Handles the createMapMothershipIcon routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createMapMothershipIcon(scene) {
     const icon = scene.add.graphics();
     const w = 44;

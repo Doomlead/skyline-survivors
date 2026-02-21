@@ -3,12 +3,22 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGeneratorCyberpunk = (function() {
+    /**
+     * Handles the BackgroundGeneratorCyberpunk routine and encapsulates its core gameplay logic.
+     * Parameters: scene, config.
+     * Returns: value defined by the surrounding game flow.
+     */
     function BackgroundGeneratorCyberpunk(scene, config) {
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();
     }
 
+    /**
+     * Handles the createRNG routine and encapsulates its core gameplay logic.
+     * Parameters: seed.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorCyberpunk.prototype.createRNG = function(seed) {
         var state = seed >>> 0;
         return function() {
@@ -20,6 +30,11 @@ var BackgroundGeneratorCyberpunk = (function() {
         };
     };
 
+    /**
+     * Handles the generateLoopingNoise routine and encapsulates its core gameplay logic.
+     * Parameters: length, step, magnitude, seed.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorCyberpunk.prototype.generateLoopingNoise = function(length, step, magnitude, seed) {
         var values = [];
         var numSteps = Math.ceil(length / step);
@@ -34,6 +49,11 @@ var BackgroundGeneratorCyberpunk = (function() {
         return values;
     };
 
+    /**
+     * Handles the generateAllTextures routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorCyberpunk.prototype.generateAllTextures = function() {
         console.log('[BackgroundGeneratorCyberpunk] Starting texture generation...');
 
@@ -47,6 +67,11 @@ var BackgroundGeneratorCyberpunk = (function() {
         return this.generatedTextures;
     };
 
+    /**
+     * Handles the generateLayerTexture routine and encapsulates its core gameplay logic.
+     * Parameters: layerName, layerConfig.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorCyberpunk.prototype.generateLayerTexture = function(layerName, layerConfig) {
         var worldWidth = this.config.worldWidth;
         var worldHeight = this.config.worldHeight;
@@ -125,6 +150,11 @@ var BackgroundGeneratorCyberpunk = (function() {
         }
     };
 
+    /**
+     * Handles the generateAtmosphereLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorCyberpunk.prototype.generateAtmosphereLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -157,6 +187,11 @@ var BackgroundGeneratorCyberpunk = (function() {
         }
     };
 
+    /**
+     * Handles the generateStarsLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorCyberpunk.prototype.generateStarsLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -203,6 +238,11 @@ var BackgroundGeneratorCyberpunk = (function() {
         }
     };
 
+    /**
+     * Handles the generateHorizonCityLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorCyberpunk.prototype.generateHorizonCityLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -218,6 +258,11 @@ var BackgroundGeneratorCyberpunk = (function() {
         graphics.moveTo(0, worldHeight);
 
         var buildingRng = this.createRNG(seed);
+        /**
+         * Handles the buildingRandom routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         var buildingRandom = function() { return buildingRng(); };
 
         for (var i = 0; i < skylineNoise.length; i++) {
@@ -283,6 +328,11 @@ var BackgroundGeneratorCyberpunk = (function() {
         }
     };
 
+    /**
+     * Handles the generateMidCityLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorCyberpunk.prototype.generateMidCityLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -426,6 +476,11 @@ var BackgroundGeneratorCyberpunk = (function() {
         }
     };
 
+    /**
+     * Handles the generateTerrainLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorCyberpunk.prototype.generateTerrainLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;

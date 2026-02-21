@@ -9,6 +9,11 @@ class TitleScene extends Phaser.Scene {
         this.isBriefingComplete = false;
     }
 
+    /**
+     * Handles the create routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     create() {
         const overlay = document.getElementById('title-overlay');
         if (!overlay) {
@@ -35,6 +40,11 @@ class TitleScene extends Phaser.Scene {
             authorizeBtn.disabled = true;
         }
 
+        /**
+         * Handles the finishBriefing routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         const finishBriefing = () => {
             this.isBriefingComplete = true;
             if (cursorEl) {
@@ -45,6 +55,11 @@ class TitleScene extends Phaser.Scene {
             }
         };
 
+        /**
+         * Handles the revealAllText routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         const revealAllText = () => {
             if (this.typingEvent) {
                 this.typingEvent.remove(false);
@@ -113,6 +128,11 @@ class TitleScene extends Phaser.Scene {
         });
     }
 
+    /**
+     * Handles the buildBriefingText routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     buildBriefingText() {
         const summary = this.getDistrictSummary();
         const occupied = summary.occupied;
@@ -154,6 +174,11 @@ class TitleScene extends Phaser.Scene {
         ].join('\n');
     }
 
+    /**
+     * Handles the getDistrictSummary routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     getDistrictSummary() {
         let total = 0;
         let occupied = 0;

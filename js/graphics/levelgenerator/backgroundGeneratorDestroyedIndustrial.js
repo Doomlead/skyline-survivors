@@ -5,12 +5,22 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 var BackgroundGeneratorDestroyedIndustrial = (function() {
+    /**
+     * Handles the BackgroundGeneratorDestroyedIndustrial routine and encapsulates its core gameplay logic.
+     * Parameters: scene, config.
+     * Returns: value defined by the surrounding game flow.
+     */
     function BackgroundGeneratorDestroyedIndustrial(scene, config) {
         this.scene = scene;
         this.config = config;
         this.generatedTextures = new Map();
     }
 
+    /**
+     * Handles the createRNG routine and encapsulates its core gameplay logic.
+     * Parameters: seed.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorDestroyedIndustrial.prototype.createRNG = function(seed) {
         var state = seed >>> 0;
         return function() {
@@ -22,6 +32,11 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         };
     };
 
+    /**
+     * Handles the generateLoopingNoise routine and encapsulates its core gameplay logic.
+     * Parameters: length, step, magnitude, seed.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorDestroyedIndustrial.prototype.generateLoopingNoise = function(length, step, magnitude, seed) {
         var values = [];
         var numSteps = Math.ceil(length / step);
@@ -36,6 +51,11 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         return values;
     };
 
+    /**
+     * Handles the generateAllTextures routine and encapsulates its core gameplay logic.
+     * Parameters: none.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorDestroyedIndustrial.prototype.generateAllTextures = function() {
         console.log('[BackgroundGeneratorDestroyedIndustrial] Starting texture generation...');
 
@@ -49,6 +69,11 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         return this.generatedTextures;
     };
 
+    /**
+     * Handles the generateLayerTexture routine and encapsulates its core gameplay logic.
+     * Parameters: layerName, layerConfig.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorDestroyedIndustrial.prototype.generateLayerTexture = function(layerName, layerConfig) {
         var worldWidth = this.config.worldWidth;
         var worldHeight = this.config.worldHeight;
@@ -127,6 +152,11 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         }
     };
 
+    /**
+     * Handles the generateAtmosphereLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorDestroyedIndustrial.prototype.generateAtmosphereLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -170,6 +200,11 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         }
     };
 
+    /**
+     * Handles the generateStarsLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorDestroyedIndustrial.prototype.generateStarsLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -221,6 +256,11 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         }
     };
 
+    /**
+     * Handles the generateHorizonCityLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorDestroyedIndustrial.prototype.generateHorizonCityLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -230,6 +270,11 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         graphics.fillStyle(0x060608, 1);
         
         var copyRng = this.createRNG(seed);
+        /**
+         * Handles the cRand routine and encapsulates its core gameplay logic.
+         * Parameters: none.
+         * Returns: value defined by the surrounding game flow.
+         */
         var cRand = function() { return copyRng(); };
         
         graphics.beginPath();
@@ -286,6 +331,11 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         }
     };
 
+    /**
+     * Handles the generateMidCityLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorDestroyedIndustrial.prototype.generateMidCityLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;
@@ -395,6 +445,11 @@ var BackgroundGeneratorDestroyedIndustrial = (function() {
         }
     };
 
+    /**
+     * Handles the generateTerrainLayer routine and encapsulates its core gameplay logic.
+     * Parameters: graphics, random, dims.
+     * Returns: value defined by the surrounding game flow.
+     */
     BackgroundGeneratorDestroyedIndustrial.prototype.generateTerrainLayer = function(graphics, random, dims) {
         var textureWidth = dims ? dims.width : this.config.worldWidth;
         var worldHeight = dims ? dims.height : this.config.worldHeight;

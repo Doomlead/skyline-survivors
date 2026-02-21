@@ -47,18 +47,33 @@ function createUI(scene) {
     }
 }
 
+/**
+ * Handles the updateUI routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function updateUI(scene) {
     if (!scoreEl) return;
     const humansGroup = scene?.humans;
     const activeBoss = scene?.bosses?.children?.entries?.find(entry => entry.active && entry.bossType !== 'mothershipCore')
         || scene?.battleships?.children?.entries?.find(entry => entry.active);
 
+    /**
+     * Handles the formatBossName routine and encapsulates its core gameplay logic.
+     * Parameters: name.
+     * Returns: value defined by the surrounding game flow.
+     */
     const formatBossName = (name) => {
         if (!name) return 'Boss Target';
         const spaced = name.replace(/([A-Z])/g, ' $1').replace(/[_-]+/g, ' ');
         return spaced.replace(/\s+/g, ' ').trim().replace(/\b\w/g, char => char.toUpperCase());
     };
 
+    /**
+     * Handles the updateBossHud routine and encapsulates its core gameplay logic.
+     * Parameters: boss.
+     * Returns: value defined by the surrounding game flow.
+     */
     const updateBossHud = (boss) => {
         if (!bossHudEl) return;
         if (!boss) {

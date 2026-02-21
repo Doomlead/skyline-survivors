@@ -73,6 +73,11 @@ function createAssaultBaseGraphics(scene) {
     });
 }
 
+/**
+ * Handles the drawAssaultBaseVariant routine and encapsulates its core gameplay logic.
+ * Parameters: scene, textureKey, bw, bh, palette.
+ * Returns: value defined by the surrounding game flow.
+ */
 function drawAssaultBaseVariant(scene, textureKey, bw, bh, palette) {
     const baseGraphics = scene.add.graphics();
     const cx = bw / 2;

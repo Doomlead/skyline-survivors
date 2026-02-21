@@ -170,6 +170,11 @@ function createSwarmLeaderGraphics(scene) {
 
 }
 
+/**
+ * Handles the createRegeneratorGraphics routine and encapsulates its core gameplay logic.
+ * Parameters: scene.
+ * Returns: value defined by the surrounding game flow.
+ */
 function createRegeneratorGraphics(scene) {
     // ========================
     // REGENERATOR - Self-healing Enemy

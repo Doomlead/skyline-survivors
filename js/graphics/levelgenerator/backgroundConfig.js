@@ -197,6 +197,11 @@ var BACKGROUND_LAYER_SETS = {
     }
 };
 
+/**
+ * Handles the setActiveBackgroundLayers routine and encapsulates its core gameplay logic.
+ * Parameters: styleKey.
+ * Returns: value defined by the surrounding game flow.
+ */
 function setActiveBackgroundLayers(styleKey) {
     var setKey = styleKey && BACKGROUND_LAYER_SETS[styleKey] ? styleKey : 'default';
     var selection = BACKGROUND_LAYER_SETS[setKey];

@@ -128,6 +128,11 @@ function applyResponsiveResize(options = {}) {
 // Wires touch-button pointer events into shared virtual input flags and bomb activation behavior.
 (function setupTouchControls() {
     const buttons = document.querySelectorAll('#touch-controls .tc-btn');
+    /**
+     * Handles the setFlag routine and encapsulates its core gameplay logic.
+     * Parameters: btn, isDown.
+     * Returns: value defined by the surrounding game flow.
+     */
     function setFlag(btn, isDown) {
         const dir = btn.getAttribute('data-dir');
         const action = btn.getAttribute('data-action');
