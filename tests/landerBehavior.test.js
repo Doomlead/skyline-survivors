@@ -63,6 +63,48 @@ test('lander safely handles missing humans group entries', () => {
     assert.doesNotThrow(() => updateLanderBehavior({ humans: { children: {} } }, enemy, 0));
 });
 
+
+test('lander idle drift does not throw when enemy body is missing', () => {
+    const originalRandom = Math.random;
+    Math.random = () => 0;
+
+    global.Phaser = {
+        Math: {
+            Distance: {
+                Between: () => 999
+            },
+            Angle: {
+                Between: () => 0
+            }
+        }
+    };
+    global.shootAtPlayer = () => {};
+
+    const enemy = {
+        x: 100,
+        y: 100,
+        targetHuman: null,
+        abductedHuman: null,
+        lastShot: 0,
+        setVelocity: () => {},
+        setVelocityX: (vx) => { enemy.lastVelocityX = vx; }
+    };
+    const scene = {
+        humans: {
+            children: {
+                entries: []
+            }
+        }
+    };
+
+    assert.doesNotThrow(() => updateLanderBehavior(scene, enemy, 1000));
+    assert.ok(Object.is(enemy.lastVelocityX, -0) || enemy.lastVelocityX === 0);
+
+    Math.random = originalRandom;
+    delete global.Phaser;
+    delete global.shootAtPlayer;
+});
+
 test('destroying a lander frees its targeted human if not yet abducted', () => {
     global.createExplosion = () => {};
     global.createEnhancedDeathEffect = () => {};

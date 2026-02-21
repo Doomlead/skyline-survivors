@@ -61,7 +61,10 @@ function updateLanderBehavior(scene, enemy, time) {
             spawnEnemy(scene, 'mutant', humanX, humanY);
         }
     } else if (!enemy.targetHuman) {
-        if (Math.random() < 0.01) enemy.setVelocityX(-enemy.body.velocity.x);
+        if (Math.random() < 0.01) {
+            const velocityX = enemy.body && enemy.body.velocity ? enemy.body.velocity.x : 0;
+            enemy.setVelocityX(-velocityX);
+        }
         if (time > enemy.lastShot + 2000 && Math.random() < 0.02) {
             shootAtPlayer(scene, enemy);
             enemy.lastShot = time;
