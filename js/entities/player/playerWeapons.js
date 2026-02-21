@@ -340,7 +340,7 @@ function updateProjectiles(scene) {
         player,
         particleManager
     } = scene;
-    if (!projectiles || !enemyProjectiles || !player) return;
+    if (!projectiles || !player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     /**
      * Handles the destroyIfGrounded routine and encapsulates its core gameplay logic.
@@ -429,6 +429,8 @@ function updateProjectiles(scene) {
             }
         }
     });
+
+    if (!enemyProjectiles || !enemyProjectiles.children || !enemyProjectiles.children.entries) return;
 
     enemyProjectiles.children.entries.forEach(proj => {
         wrapWorldBounds(proj);
