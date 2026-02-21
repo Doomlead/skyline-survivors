@@ -216,19 +216,19 @@
 
 ## MVP Completion
 
-- **Status:** ~84% complete (core campaign, rescue/deploy loop, and phase-gated encounters are production-ready; major remaining work is assault reward identity + mode expansion).
-- **Primary Blockers:** Assault-specific reward/jackpot loop, Bulwark siege payoff in assault spaces, and formal challenge-mode surfacing.
+- **Status:** ~81% complete (core campaign, rescue/deploy loop, and phase-gated encounters are production-ready; major remaining work is pilot progression compliance and assault interior parity).
+- **Primary Blockers:** Pilot progression compliance, assault interior design-parity pass, assault reward/jackpot loop, and Bulwark siege payoff in assault spaces.
 
 ## Gap Analysis & Next Steps (Codebase Audit Refresh)
 
 ### Overall Completion Statistics
-- **Design Document Alignment:** ~82%
-- **Major Milestones Achieved:** Strategic district-state campaign loop, critical near-miss bonus window, rescue cargo inertia and hangar deployment loop, 4-class operative behavior suite, pilot ejection + rebuild survival loop, supply-drop shop + hot-start inventory flow, combo/flow HUD support, and multi-phase boss architecture including the full mothership route.
-- **Immediate Next Steps (Recommended Order):** (1) Assault rewards + jackpots, (2) Bulwark siege/structure payoff, (3) challenge mode surfacing with score persistence, (4) world reactivity (weather + destruction readability).
-- **Estimated Remaining Work:** ~6-10 dev days to hit MVP feature compliance; ~3-5 additional weeks for full v2.0 design parity and polish.
-- **Post-MVP Polish (Optional):** Adaptive music layering, cinematic district transition stingers, richer deployment VO/SFX variety, challenge mutators, and deeper biome hazard diversity.
-- **MVP Completion:** ~85%
-- **Critical Missing Features for Design Document Compliance:** Assault loot/jackpot identity, Bulwark structural synergy, challenge-mode packaging (Last Stand / Assault Only), and environment reactivity (weather/destruction feedback).
+- **Design Document Alignment:** ~79% (strong core loop coverage, but pilot progression depth and assault interior spec parity remain below v2.0 targets).
+- **Major Milestones Achieved:** Strategic district-state campaign loop, near-miss critical timer behavior, rescue cargo inertia + hangar deployment, class-based operative squads (including saboteur/medic behaviors), pilot ejection + rebuild survival loop, supply-drop economy/hot-start flow, and two-phase assault + mothership encounter structure.
+- **Immediate Next Steps (Recommended Order):** (1) Pilot system compliance pass (persistent pilot unlocks, ammo economy, and clearer pilot-weapon UI loop), (2) Assault ship interior compliance pass (enemy set, objective beats, and readability matching the design document), (3) Assault rewards + jackpot identity, (4) Bulwark siege payoff in assault spaces, (5) challenge mode surfacing with score persistence.
+- **Estimated Remaining Work:** ~10-15 dev days to reach MVP-level design compliance; ~4-6 additional weeks for full v2.0 parity + polish.
+- **Post-MVP Polish (Optional):** Adaptive music intensity layers, cinematic district transition stingers, richer deployment VO/SFX, challenge mutators, biome hazard variants, and expanded autonomous fire-team tactics.
+- **MVP Completion:** ~81%
+- **Critical Missing Features for Design Document Compliance:** Pilot progression package (persistent unlock catalog + ammo loop + stronger on-foot identity), assault interior compliance (exclusive interior enemies/encounter beats/readability), assault reward/jackpot loop, Bulwark structural synergy, and world reactivity systems.
 
 ### Design Document Alignment
 **Aligned / Implemented**
@@ -238,13 +238,13 @@
 - Operative class behaviors including saboteur utility plus overflow-based troop buffs.
 - Supply Drop gacha sequence with pending inventory and mission-start hot-start application.
 - Unified shield-gate cadence across bosses, battleships, assault core, and mothership core.
-- Mothership mission chain with exterior encounter, interior objective stage, procedural platform/ladders traversal, and final core kill.
-- Combo/flow tracking surfaced in HUD layer.
+- Mothership mission chain with exterior encounter and pilot-only interior objective stage.
 
 **Partially Aligned**
-- Bulwark currently has strong handling identity but no explicit structural DPS/siege messaging in assault.
-- Environment framework is broad (multiple biome generators), but weather, destruction readability, and reactive world-state visuals are still thin.
-- Fire-team behavior works well for follow/aura/sacrifice, but persistent autonomous perimeter tactics remain shallow while the pilot is airborne.
+- Pilot combat exists, but the full design-doc pilot progression package (persistent unlock offers, stronger weapon identity surfacing, and mission-loop ammo reinforcement) needs a dedicated completion pass.
+- Assault interiors are functional (phase transition + conduit/node/core flow), but they still need stronger compliance with the design document’s interior-specific enemy/encounter expectations and presentation clarity.
+- Bulwark currently has handling identity but still lacks explicit structural DPS/siege messaging in assault.
+- Environment framework is broad (multiple biome generators), but weather/destruction readability and reactive world-state visuals are still thin.
 
 **Not Yet Aligned (Major Remaining Gaps)**
 - Assault loot rewards + mystery/jackpot outcomes tied to base destruction.
@@ -253,51 +253,60 @@
 
 ### Major Milestones Achieved
 - District campaign + mission routing pipeline (friendly/threatened/occupied).
-- Defense and assault mission objective frameworks and phase progression.
+- Defense and assault mission objective frameworks with staged progression.
+- Assault-to-interior phase transition framework with pilot lock and interior objective sets.
 - Hangar-centered rebuild and ejection-based second-chance gameplay loop.
 - Operative deployment, class variance, and squad sacrifice/body-block behaviors.
 - Supply-drop economy, unboxing UX, loot history, and hot-start integration.
 - Shared phase-gated encounter architecture rolled out across major mission archetypes.
-- End-to-end mothership finale sequence with staged objective beats.
 
 ### Critical Missing Features for Design Document Compliance
-1. **Assault Rewards & Mystery Drops:** Guaranteed base-clear reward tables and jackpot outcomes with clear reward callouts.
-2. **Bulwark Assault Synergy:** Structural damage multipliers/behaviors and explicit HUD/FX confirmation during assault.
-3. **Challenge Mode Productization:** First-class menu access and score persistence for Last Stand + Assault Only.
-4. **World Reactivity Layer:** Weather variation and stronger district destruction-state readability.
+1. **Pilot Progression Compliance:** Persistent pilot unlock catalog + clearer pilot HUD identity + mission-loop ammo reinforcement behavior aligned to the design document.
+2. **Assault Interior Compliance:** Interior-specific encounter package (enemy mix/behaviors/readability/objective drama) that better matches design intent for assault boarding phases.
+3. **Assault Rewards & Mystery Drops:** Guaranteed base-clear reward tables and jackpot outcomes with clear reward callouts.
+4. **Bulwark Assault Synergy:** Structural damage multipliers/behaviors and explicit HUD/FX confirmation during assault.
+5. **World Reactivity Layer:** Weather variation and stronger district destruction-state readability.
 
 ### Immediate Next Steps (Recommended Order)
-1. **Implement assault reward identity (2-3 days)**  
-   - Base-clear loot table and jackpot roll path.
+1. **Pilot system completion sprint (3-4 days)**  
+   - Implement persistent pilot unlock offers defined by the design doc and wire them cleanly into shop/progression.  
+   - Add/finish pilot ammo reinforcement loop and improve pilot weapon HUD switching/readability.  
+   - Validate pilot combat feel in both emergency rebuild and interior contexts.
+
+2. **Assault interior compliance sprint (3-4 days)**  
+   - Expand interior encounter identity (enemy composition/behaviors/objective pacing) toward design-doc parity.  
+   - Improve interior readability (threat telegraphing, objective callouts, and set-piece clarity).  
+   - Tune transition flow so assault exteriors/interiors feel like one cohesive mission arc.
+
+3. **Implement assault reward identity (2-3 days)**  
+   - Base-clear loot table and jackpot roll path.  
    - Reward banner and post-mission summary entries for assault payouts.
 
-2. **Implement Bulwark siege pass (1-2 days)**  
-   - Structural damage bonus against assault objectives.
+4. **Implement Bulwark siege pass (1-2 days)**  
+   - Structural damage bonus against assault objectives.  
    - Live HUD/FX indicator when siege bonus is active.
 
-3. **Ship challenge modes as selectable experiences (2-3 days)**  
-   - Menu entries for Last Stand and Assault Only.
+5. **Ship challenge modes as selectable experiences (2-3 days)**  
+   - Menu entries for Last Stand and Assault Only.  
    - Score persistence/reporting for repeat runs.
-
-4. **Add first world-reactivity slice (2-4 days)**  
-   - Seeded weather/visibility variants.
-   - Occupied/assaulted visual-state readability upgrades.
 
 ### Estimated Remaining Work
 
 ### MVP Completion
-- **Current Progress:** ~85%
+- **Current Progress:** ~81%
 - **Remaining Critical Work:**
+  - Pilot progression compliance sprint: 3-4 days
+  - Assault interior compliance sprint: 3-4 days
   - Assault rewards + jackpot loop: 2-3 days
   - Bulwark siege synergy + HUD feedback: 1-2 days
-  - Challenge mode surfacing + score flow: 2-3 days
-- **Total to MVP target:** ~6-10 days (including QA/balance buffer)
+- **Total to MVP target:** ~10-15 days (including QA/balance buffer)
 
 ### Full Design Document
-- **High Priority Remaining:** ~18%
+- **High Priority Remaining:** ~21%
+  - Pilot progression package and on-foot identity clarity
+  - Assault interior compliance and encounter differentiation
   - Assault reward economy and Bulwark assault identity
-  - Challenge mode implementation and progression framing
-- **Medium Priority Remaining:** ~40%
+- **Medium Priority Remaining:** ~42%
   - Weather/destruction reactivity systems
   - Adaptive audio and cinematic urgency polish
   - Deeper autonomous fire-team coordination
@@ -312,12 +321,13 @@
 - Challenge mutators and richer leaderboard segmentation.
 - Biome-specific hazard bundles for replay variance.
 
-### What We Should Work on Next (New Recommendation)
-**Top recommendation: complete an "Assault Identity Sprint" (Rewards + Bulwark Siege) before any new mode rollout.**  
-This is the highest return-on-effort path because assault missions already have robust objective scaffolding; what they lack is emotional payoff and tactical uniqueness. Shipping rewards first and siege synergy second creates immediate player-visible differentiation and provides cleaner telemetry for challenge mode tuning.
+### What We Should Work On Next (IMO)
+**IMO, the pilot layer needs the most work right now, with assault ship interiors as the second highest priority for design-document compliance.**  
+The game already has strong macro structure (district flow, rescue loop, boss phasing), but the pilot fantasy is still under-realized compared to the design doc’s promises of persistent pilot weapon identity and deeper on-foot progression. In parallel, assault interiors are mechanically present but need stronger authored identity (encounter flavor, enemy behavior differentiation, and objective drama) to feel fully compliant rather than functional.
 
-**Proposed sequence for the next sprint:**
-1. Build assault base-clear reward/jackpot backend + UI callouts.
-2. Add Bulwark structural-damage logic with unmistakable siege-state feedback.
-3. Run a focused assault economy + pacing balance pass.
-4. Promote Last Stand/Assault Only to menu once assault loop differentiation is validated.
+**Recommended immediate focus order:**
+1. Pilot progression + pilot combat UX completion.
+2. Assault ship interior compliance pass.
+3. Assault rewards/jackpot emotional payoff.
+4. Bulwark siege role clarity.
+5. Challenge mode productization.
