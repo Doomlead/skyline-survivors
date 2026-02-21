@@ -149,12 +149,18 @@ function getInteriorAnchorY(scene, x, fallbackY, clearance) {
     }
 
     const desiredClearance = typeof clearance === 'number' ? clearance : 20;
+    const worldWidth = scene.physics?.world?.bounds?.width || CONFIG.worldWidth || 0;
+    const wrapDistance = (a, b) => {
+        const direct = Math.abs(a - b);
+        if (!worldWidth || worldWidth <= 0) return direct;
+        return Math.min(direct, worldWidth - direct);
+    };
     let best = null;
     let bestScore = Number.POSITIVE_INFINITY;
 
     for (let i = 0; i < scene.interiorPlatformAnchors.length; i++) {
         const anchor = scene.interiorPlatformAnchors[i];
-        const dx = Math.abs(anchor.x - x);
+        const dx = wrapDistance(anchor.x, x);
         const score = dx + Math.abs((anchor.y - desiredClearance) - fallbackY) * 0.35;
         if (score < bestScore) {
             bestScore = score;
