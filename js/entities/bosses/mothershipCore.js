@@ -503,6 +503,9 @@ function updateMothershipInterior(scene, delta) {
 // Fires one aimed projectile from an interior target turret toward the active player.
 function fireInteriorTurret(scene, turret) {
     if (!scene || !turret || !turret.active) return;
+    const projectileGroup = scene.enemyProjectiles;
+    if (!projectileGroup || typeof projectileGroup.create !== 'function') return;
+
     const player = getActivePlayer(scene);
     if (!player || !player.active) return;
 
@@ -511,10 +514,12 @@ function fireInteriorTurret(scene, turret) {
     const vx = Math.cos(angle) * speed;
     const vy = Math.sin(angle) * speed;
 
-    const proj = scene.enemyProjectiles.create(turret.x, turret.y, 'enemyProjectile');
+    const proj = projectileGroup.create(turret.x, turret.y, 'enemyProjectile');
     if (!proj) return;
     proj.setDepth(FG_DEPTH_BASE + 1);
-    proj.body.setAllowGravity(false);
+    if (proj.body) {
+        proj.body.setAllowGravity(false);
+    }
     proj.setVelocity(vx, vy);
     proj.damage = 1;
 
