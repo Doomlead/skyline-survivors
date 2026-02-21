@@ -119,6 +119,114 @@ If the Aegis is destroyed, the game does not end. The pilot ejects, and the genr
 *   **Mystery Drops:** Random effects/Jackpots.
 *   **Assault Rewards:** Destroying base sections reveals rare power-ups.
 
+### 4.5. Implemented Player Weapon System (Code-Accurate)
+This section reflects the current in-code behavior of the player weapon stack.
+
+**4.5.1. Fire Trigger, Rate, and Aiming Context**
+*   Firing is gated by `playerState.lastFire + playerState.fireRate`; default cadence is 200ms between shots.
+*   `rapid` and `overdrive` are timed modifiers that lower fire interval to 80ms and 50ms respectively while active.
+*   The same fire pipeline is used for both AEGIS and pilot states, with context aim overrides:
+    *   Pilot aim resolves from directional input (`getPilotAimAngle`).
+    *   Bulwark mode uses an explicit aim angle (`aegisState.aimAngle`).
+
+**4.5.2. Primary Weapon Routing (Laser vs Multi-Shot)**
+*   The active primary path is `playerState.primaryWeapon` and can be switched when both trees are available.
+*   If no explicit selection exists, logic defaults to Laser when available, otherwise Multi-Shot.
+*   Selection auto-normalizes when tiers decay or are lost on death (prevents invalid primary states).
+
+**4.5.3. Shot Pattern and Tier Behavior**
+*   Multi-Shot tiers drive pattern geometry:
+    *   Tier 0: single forward shot.
+    *   Tier 1: twin parallel barrels.
+    *   Tier 2: 3-way spread (`-0.15, 0, +0.15` radians).
+    *   Tier 3: 5-way spread (`-0.25 ... +0.25` radians).
+*   Laser tiers repurpose the same projectile pipeline but change projectile class:
+    *   Tier 1: piercing beam projectile.
+    *   Tier 2: wave projectile with sinusoidal lateral motion.
+*   A global Piercing pickup also promotes baseline shots to piercing behavior.
+
+**4.5.4. Coverage, Missiles, Overdrive, and Drones**
+*   Coverage level 1 adds rear fire (180° opposite aim vector).
+*   Coverage level 2 adds left/right side vectors (±90°), giving near-omnidirectional pressure.
+*   Missile power-up spawns a homing projectile each trigger cycle; tier is stored per projectile (`homingTier`).
+*   Overdrive adds two extra offset flame bolts each shot and concurrently enforces the fastest fire cadence.
+*   Active force drones orbit the current avatar and each emit one forward drone projectile per player shot.
+
+**4.5.5. Projectile Lifecycle and Special Logic**
+*   All player projectiles store `damage`, `projectileType`, piercing flag, spawn time, and travel tracking.
+*   Lifetime controls are dual-layered: hard timeout (~3s) plus range fade-out (`maxRange` based on initial speed).
+*   Wave projectiles continuously alter velocity using a sine-based perpendicular offset.
+*   Homing projectiles retarget nearby enemies only at missile tier 2+.
+*   Tier-3 homing impacts can fork into 3 cluster homing missiles, prioritizing nearest hostile entities across enemy, garrison, boss, battleship, and assault-target groups.
+
+**4.5.6. Damage Application Rules**
+*   Base player projectile damage is 1; Double Damage temporarily raises it to 2.
+*   Non-piercing shots are consumed on impact; piercing/wave shots continue through targets.
+*   The same damage payload is respected by enemy, garrison, boss, battleship, and assault objective hit handlers, while boss/battleship/base shield-phase systems may gate whether damage applies to shield or HP.
+
+**4.5.7. Power-Up Acquisition, Decay, and Overflow**
+*   Weapon-tier power-ups are bounded (`laser` max 2, `multiShot` max 3, `missile` max 3, `coverage` max 2).
+*   Decay timers are tracked per upgrade path (`laser`, `multiShot`, `coverage`, `missile`) with shorter durations in assault mode.
+*   On decay expiration, the relevant tier drops by one and timer refreshes for the new tier until it reaches zero.
+*   Overflow behavior is implemented: collecting a maxed tier in eligible paths converts into a comrade upgrade level (up to 12), improving operative durability and associated buff scaling.
+
+### 4.6. Implemented Weapon Pickup System (Code-Accurate Deep Dive)
+This section documents the exact pickup flow for weapon-related power-ups from spawn source to runtime state mutation.
+
+**4.6.1. Where Weapon Pickups Come From**
+*   **Random combat drops:**
+    *   Standard enemies have a 12% drop chance on death.
+    *   Garrison defenders have a 9% drop chance on death.
+    *   Rescued falling/abducted humans have a 24% chance to drop a pickup.
+*   **Guaranteed boss payout:** Boss deaths spawn two pickups.
+*   **Support-generated pickup:** Medic support can spawn a short-lived shield pickup using the same world pickup group.
+*   All of these routes converge into the same `spawnPowerUp`/`powerUps` collection path (except supply drops, which apply directly to state and do not spawn world entities).
+
+**4.6.2. Pickup Type Pool and Spawn Representation**
+*   Runtime world pickups are rolled uniformly from a 16-type pool:
+    *   `laser`, `drone`, `shield`, `missile`, `overdrive`, `rear`, `side`, `rapid`, `multiShot`, `piercing`, `speed`, `magnet`, `bomb`, `double`, `invincibility`, `timeSlow`.
+*   Spawned pickups are Phaser group entities with:
+    *   sprite key `powerup_<type>`
+    *   gameplay depth set above normal actors
+    *   floating yoyo tween for readability
+    *   hard despawn timer (30s default, 8s for medic shield spawns)
+
+**4.6.3. How Collection Is Triggered**
+*   Collision overlap is registered for both controllable forms:
+    *   AEGIS ↔ pickup
+    *   Pilot ↔ pickup
+*   On overlap, `collectPowerUp` is the single effect dispatcher used for all pickup types.
+*   On collect, the player always receives score bonus + collection SFX + floating label feedback before type-specific effects are applied.
+
+**4.6.4. Weapon Pickup Effects (Exact State Changes)**
+*   `laser`: increments `playerState.powerUps.laser` up to tier 2, refreshes laser decay timer, and can set primary weapon to laser.
+*   `multiShot`: increments `playerState.powerUps.multiShot` up to tier 3, refreshes multishot decay timer, and can set primary weapon to multishot.
+*   `missile`: increments missile tier up to 3 and refreshes missile decay timer.
+*   `rear` / `side`: both map into shared `coverage` tier (max 2) and refresh shared coverage decay timer.
+*   `piercing`: sets piercing active and ensures laser tier is at least 1 (with decay timer refresh if laser tier is raised).
+*   `drone`: increments drone count up to 3 and instantiates a new orbiting drone entity immediately.
+*   Related combat modifiers that affect weapon output but are timed rather than tiered:
+    *   `rapid` → 10s fire-rate boost
+    *   `overdrive` → 7s overdrive + fastest fire-rate profile
+    *   `double` → 8s double-damage window
+
+**4.6.5. Decay and Tier Loss After Pickup**
+*   Only four weapon paths are decay-tracked: `laser`, `multiShot`, `coverage`, `missile`.
+*   Decay duration is tier-specific and comes from `POWERUP_DECAY_CONFIG`; assault mode applies a 0.75 duration multiplier.
+*   When a decay timer hits zero, that path loses exactly one tier, triggers UI warning flash, and re-arms the next lower-tier timer if still above zero.
+*   Primary weapon selection is auto-normalized after decay so the active weapon never points to a depleted path.
+
+**4.6.6. Overflow Conversion (When a Pickup Is Already Maxed)**
+*   Overflow is checked **before** normal pickup application.
+*   Eligible overflow paths: `laser`, `multiShot`, `missile`, `rear`, `side`.
+*   If incoming pickup is already at cap, the pickup is converted into a comrade upgrade instead of increasing weapon tier.
+*   Overflow upgrade raises `playerState.comradeBuffs.level` (cap 12), boosts operative survivability immediately, and triggers dedicated upgrade VFX/banner messaging.
+
+**4.6.7. Meta Supply Drop Interaction With Weapon Pickups**
+*   Supply drops are a separate pre-mission system: purchased loot is stored as pending and applied directly to `playerState.powerUps`/`gameState` on mission start.
+*   Because supply drops bypass world pickup entities, they do not invoke `collectPowerUp`, do not show in-world pickup labels, and do not use pickup-overlap collision.
+*   Functionally, they seed starting weapon tiers/durations that then continue through the same firing, decay, and normalization logic as in-world pickups.
+
 ---
 
 ## 5. Enemy Design
