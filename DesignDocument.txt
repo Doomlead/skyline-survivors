@@ -38,10 +38,18 @@ A modern reimagining of *Defender/Stargate* fused with *Strike Force*, *Vampire 
 ### 2.3. Meta Progression & Shop
 **2.3.1. The "Supply Drop" Gacha Shop**
 *   **Concept:** Variable Ratio Reinforcement. Spend credits on "Supply Drops" for single-mission advantages.
-*   **Inventory:** Items are "Hot Starts" (e.g., start with Tier 2 Laser) that apply only to the next run.
+*   **Inventory Split:**
+    *   **Run-Scoped Hot Starts:** Traditional one-run boosts (e.g., start with Tier 2 Laser).
+    *   **Persistent Pilot Unlocks:** New pilot-weapon purchases that persist across all missions.
+*   **New Pilot Upgrade Offers:**
+    *   Pilot Weapon: Scattergun
+    *   Pilot Weapon: Plasma Launcher
+    *   Stinger Drone Capacity +2
+    *   Lightning Gun: Chain Lightning Unlock
 
 **2.3.2. The Shop "Dopamine" Sequence**
-*   **Visuals:** Satellite charges energy (color indicates rarity) -> Pod slams into hangar (Screen Shake) -> God Rays reveal item.
+*   **Visuals:** Satellite charges energy (color indicates rarity) -> Pod slams into hangar (Screen Shake) -> God Rays reveal reward.
+*   **Pilot-Upgrade Visual Feedback:** Pilot unlock purchases reveal a full **weapon model** in the God Rays instead of a flat item icon.
 *   **Audio:** Shepard Tone build-up -> Bass Thud -> Casino Win Chime.
 
 ---
@@ -100,6 +108,11 @@ These soldiers provide "fire-and-forget" support, making the battlefield feel al
 ### 4.3. On-Foot Command (Ship Destruction)
 If the Aegis is destroyed, the game does not end. The pilot ejects, and the genre shifts to a run-and-gun survival mode.
 
+**4.3.0. Revised Combat Identity (Pilot Weapon Integration)**
+*   On-foot combat now uses a dedicated **Pilot Weapon System** that is independent from ship weapon loadouts.
+*   During both emergency On-Foot Command and interior missions, the pilot can equip and cycle infantry weapons.
+*   Operatives remain active support assets, and Saboteurs gain priority interactions with interior hazards/objectives.
+
 **4.3.1. Squad Leader Aura**
 *   When on foot, nearby Comrades stop patrolling and follow the player's movement exactly.
 *   **Visual:** This creates a "Bullet Hell" wall of return fire (similar to "Options" in *Gradius*), concentrating firepower wherever the pilot moves.
@@ -108,33 +121,85 @@ If the Aegis is destroyed, the game does not end. The pilot ejects, and the genr
 *   To rebuild the Aegis, the pilot must reach the **Fortified Hangar** (Drop-off point) and stand their ground.
 *   **Sacrifice:** While the "Ship Rebuild" timer ticks down, Comrades will physically body-block incoming enemy fire, sacrificing themselves to ensure the pilot gets back in the air.
 
-### 4.4. Power-Up System
-**4.4.1. Core Upgrades**
+**4.3.3. Operative Synergy During On-Foot Command**
+*   Operatives now explicitly fight alongside the pilot during emergency ground phases.
+*   **Saboteur Update:** Saboteurs auto-disable nearby turrets in local combat spaces and can temporarily suppress heavy mechanical threats.
+
+### 4.4. Pilot Weapon Upgrade System (New)
+The pilot now has an independent infantry weapon progression tree. These upgrades are persistent when bought in the Supply Drop Shop and are available in all missions, including internal maps.
+
+**4.4.1. Pilot Weapon Tree**
+| Upgrade | Ammunition | Function | Tier 3 Upgrade |
+| :--- | :--- | :--- | :--- |
+| **Combat Rifle** | **∞** | **Default weapon.** Balanced semi-auto rifle with moderate damage and reliable range. | **Burst Fire:** 3-round burst mode with damage boost. |
+| **Scattergun** | **200 Rounds** | Short-range shotgun with 7-pellet spread and high close-quarters damage. | **Dragon's Breath:** Incendiary rounds with burn DoT/fire trails. |
+| **Plasma Launcher** | **150 Rounds** | Slow explosive plasmids with splash/AoE damage. | **Ricochet Rounds:** Projectiles bounce off walls/enemies (up to 2 bounces). |
+| **Lightning Gun** | **25 Seconds Active** | Continuous stream weapon (flamethrower-style), instantly deletes weak enemies and ignores shields. | **Chain Lightning:** Arcs into up to 3 nearby targets. |
+| **Stinger Drone** | **∞ (Destructible)** | Deploys hovering auto-target drone(s) that synergize with all weapons and can be shot down. | **Combat Swarm:** Deploys 3 drones simultaneously. |
+
+**4.4.2. Weapon Acquisition & Unlocking**
+*   **Shop Purchase (Persistent):** Spend credits to permanently unlock pilot weapons for all future missions.
+*   **Mission Pickup (Temporary):** Weapon crates found in interior missions grant temporary access if the weapon is not permanently owned.
+*   **Pickup Stacking:** Picking up an already-owned weapon increases its tier if not already maxed.
+
+**4.4.3. Ammo & Replenishment Rules**
+*   **Infinite:** Combat Rifle and Stinger Drone (until drone destruction).
+*   **Limited:** Scattergun (200), Plasma Launcher (150), Lightning Gun (25s active pool).
+*   **Replenishment methods:**
+    *   Rescue humans and deliver to Hangar: **+2 ammo** to current pilot weapon.
+    *   Collect ammo packs from defeated enemies: restores **30% max capacity**.
+    *   Mission start: owned pilot weapons begin at full ammo.
+
+**4.4.4. Weapon Switching & HUD**
+*   **Input:** Press `TAB` to cycle through unlocked pilot weapons.
+*   **Switching Model:** No swap penalty/cooldown to encourage tactical swapping.
+*   **HUD During On-Foot/Internal Missions:**
+    *   Current weapon icon + name
+    *   Ammo count / active-time meter
+    *   Tier level indicator
+    *   Drone counter when Stinger Drone is selected
+    *   Expanded status callouts including **ELECTROCUTED** and **RADIATION**
+
+**4.4.5. Pilot Weapon Tiers**
+| Tier | Enhancement | Unlock Method |
+| :--- | :--- | :--- |
+| **Tier 1** | Base weapon stats | Initial unlock/pickup |
+| **Tier 2** | +25% fire rate, +15% damage, enhanced VFX | Shop purchase or second pickup |
+| **Tier 3 (MAX)** | +50% fire rate, +30% damage, secondary effect unlock | Shop purchase or third pickup |
+
+**4.4.6. Interior Weapon Pickup Rules**
+*   Weapon crates are visually marked with glowing letter icons: **C, S, P, L, D**.
+*   Owned weapon pickup -> upgrades tier by 1 (to max tier 3).
+*   Unowned weapon pickup -> mission-only temporary use.
+*   **Death Penalty:** On life loss, current weapon tier drops by 1; owned weapons cannot drop below tier 1, unowned weapons revert to Combat Rifle.
+
+### 4.5. Power-Up System
+**4.5.1. Core Upgrades**
 *   **Weapons:** Laser, Spread Shot, Homing Missiles (3 Tiers each).
 *   **Defense:** Shields, Speed Boost.
 *   **Utility:** Smart Bombs, Score Multipliers.
 
-**4.4.2. Advanced Systems**
+**4.5.2. Advanced Systems**
 *   **Weapon Decay:** Power-ups have duration; encourages aggression.
 *   **Mystery Drops:** Random effects/Jackpots.
 *   **Assault Rewards:** Destroying base sections reveals rare power-ups.
 
-### 4.5. Implemented Player Weapon System (Code-Accurate)
+### 4.6. Implemented Player Weapon System (Code-Accurate)
 This section reflects the current in-code behavior of the player weapon stack.
 
-**4.5.1. Fire Trigger, Rate, and Aiming Context**
+**4.6.1. Fire Trigger, Rate, and Aiming Context**
 *   Firing is gated by `playerState.lastFire + playerState.fireRate`; default cadence is 200ms between shots.
 *   `rapid` and `overdrive` are timed modifiers that lower fire interval to 80ms and 50ms respectively while active.
 *   The same fire pipeline is used for both AEGIS and pilot states, with context aim overrides:
     *   Pilot aim resolves from directional input (`getPilotAimAngle`).
     *   Bulwark mode uses an explicit aim angle (`aegisState.aimAngle`).
 
-**4.5.2. Primary Weapon Routing (Laser vs Multi-Shot)**
+**4.6.2. Primary Weapon Routing (Laser vs Multi-Shot)**
 *   The active primary path is `playerState.primaryWeapon` and can be switched when both trees are available.
 *   If no explicit selection exists, logic defaults to Laser when available, otherwise Multi-Shot.
 *   Selection auto-normalizes when tiers decay or are lost on death (prevents invalid primary states).
 
-**4.5.3. Shot Pattern and Tier Behavior**
+**4.6.3. Shot Pattern and Tier Behavior**
 *   Multi-Shot tiers drive pattern geometry:
     *   Tier 0: single forward shot.
     *   Tier 1: twin parallel barrels.
@@ -145,35 +210,35 @@ This section reflects the current in-code behavior of the player weapon stack.
     *   Tier 2: wave projectile with sinusoidal lateral motion.
 *   A global Piercing pickup also promotes baseline shots to piercing behavior.
 
-**4.5.4. Coverage, Missiles, Overdrive, and Drones**
+**4.6.4. Coverage, Missiles, Overdrive, and Drones**
 *   Coverage level 1 adds rear fire (180° opposite aim vector).
 *   Coverage level 2 adds left/right side vectors (±90°), giving near-omnidirectional pressure.
 *   Missile power-up spawns a homing projectile each trigger cycle; tier is stored per projectile (`homingTier`).
 *   Overdrive adds two extra offset flame bolts each shot and concurrently enforces the fastest fire cadence.
 *   Active force drones orbit the current avatar and each emit one forward drone projectile per player shot.
 
-**4.5.5. Projectile Lifecycle and Special Logic**
+**4.6.5. Projectile Lifecycle and Special Logic**
 *   All player projectiles store `damage`, `projectileType`, piercing flag, spawn time, and travel tracking.
 *   Lifetime controls are dual-layered: hard timeout (~3s) plus range fade-out (`maxRange` based on initial speed).
 *   Wave projectiles continuously alter velocity using a sine-based perpendicular offset.
 *   Homing projectiles retarget nearby enemies only at missile tier 2+.
 *   Tier-3 homing impacts can fork into 3 cluster homing missiles, prioritizing nearest hostile entities across enemy, garrison, boss, battleship, and assault-target groups.
 
-**4.5.6. Damage Application Rules**
+**4.6.6. Damage Application Rules**
 *   Base player projectile damage is 1; Double Damage temporarily raises it to 2.
 *   Non-piercing shots are consumed on impact; piercing/wave shots continue through targets.
 *   The same damage payload is respected by enemy, garrison, boss, battleship, and assault objective hit handlers, while boss/battleship/base shield-phase systems may gate whether damage applies to shield or HP.
 
-**4.5.7. Power-Up Acquisition, Decay, and Overflow**
+**4.6.7. Power-Up Acquisition, Decay, and Overflow**
 *   Weapon-tier power-ups are bounded (`laser` max 2, `multiShot` max 3, `missile` max 3, `coverage` max 2).
 *   Decay timers are tracked per upgrade path (`laser`, `multiShot`, `coverage`, `missile`) with shorter durations in assault mode.
 *   On decay expiration, the relevant tier drops by one and timer refreshes for the new tier until it reaches zero.
 *   Overflow behavior is implemented: collecting a maxed tier in eligible paths converts into a comrade upgrade level (up to 12), improving operative durability and associated buff scaling.
 
-### 4.6. Implemented Weapon Pickup System (Code-Accurate Deep Dive)
+### 4.7. Implemented Weapon Pickup System (Code-Accurate Deep Dive)
 This section documents the exact pickup flow for weapon-related power-ups from spawn source to runtime state mutation.
 
-**4.6.1. Where Weapon Pickups Come From**
+**4.7.1. Where Weapon Pickups Come From**
 *   **Random combat drops:**
     *   Standard enemies have a 12% drop chance on death.
     *   Garrison defenders have a 9% drop chance on death.
@@ -182,7 +247,7 @@ This section documents the exact pickup flow for weapon-related power-ups from s
 *   **Support-generated pickup:** Medic support can spawn a short-lived shield pickup using the same world pickup group.
 *   All of these routes converge into the same `spawnPowerUp`/`powerUps` collection path (except supply drops, which apply directly to state and do not spawn world entities).
 
-**4.6.2. Pickup Type Pool and Spawn Representation**
+**4.7.2. Pickup Type Pool and Spawn Representation**
 *   Runtime world pickups are rolled uniformly from a 16-type pool:
     *   `laser`, `drone`, `shield`, `missile`, `overdrive`, `rear`, `side`, `rapid`, `multiShot`, `piercing`, `speed`, `magnet`, `bomb`, `double`, `invincibility`, `timeSlow`.
 *   Spawned pickups are Phaser group entities with:
@@ -191,14 +256,14 @@ This section documents the exact pickup flow for weapon-related power-ups from s
     *   floating yoyo tween for readability
     *   hard despawn timer (30s default, 8s for medic shield spawns)
 
-**4.6.3. How Collection Is Triggered**
+**4.7.3. How Collection Is Triggered**
 *   Collision overlap is registered for both controllable forms:
     *   AEGIS ↔ pickup
     *   Pilot ↔ pickup
 *   On overlap, `collectPowerUp` is the single effect dispatcher used for all pickup types.
 *   On collect, the player always receives score bonus + collection SFX + floating label feedback before type-specific effects are applied.
 
-**4.6.4. Weapon Pickup Effects (Exact State Changes)**
+**4.7.4. Weapon Pickup Effects (Exact State Changes)**
 *   `laser`: increments `playerState.powerUps.laser` up to tier 2, refreshes laser decay timer, and can set primary weapon to laser.
 *   `multiShot`: increments `playerState.powerUps.multiShot` up to tier 3, refreshes multishot decay timer, and can set primary weapon to multishot.
 *   `missile`: increments missile tier up to 3 and refreshes missile decay timer.
@@ -210,19 +275,19 @@ This section documents the exact pickup flow for weapon-related power-ups from s
     *   `overdrive` → 7s overdrive + fastest fire-rate profile
     *   `double` → 8s double-damage window
 
-**4.6.5. Decay and Tier Loss After Pickup**
+**4.7.5. Decay and Tier Loss After Pickup**
 *   Only four weapon paths are decay-tracked: `laser`, `multiShot`, `coverage`, `missile`.
 *   Decay duration is tier-specific and comes from `POWERUP_DECAY_CONFIG`; assault mode applies a 0.75 duration multiplier.
 *   When a decay timer hits zero, that path loses exactly one tier, triggers UI warning flash, and re-arms the next lower-tier timer if still above zero.
 *   Primary weapon selection is auto-normalized after decay so the active weapon never points to a depleted path.
 
-**4.6.6. Overflow Conversion (When a Pickup Is Already Maxed)**
+**4.7.6. Overflow Conversion (When a Pickup Is Already Maxed)**
 *   Overflow is checked **before** normal pickup application.
 *   Eligible overflow paths: `laser`, `multiShot`, `missile`, `rear`, `side`.
 *   If incoming pickup is already at cap, the pickup is converted into a comrade upgrade instead of increasing weapon tier.
 *   Overflow upgrade raises `playerState.comradeBuffs.level` (cap 12), boosts operative survivability immediately, and triggers dedicated upgrade VFX/banner messaging.
 
-**4.6.7. Meta Supply Drop Interaction With Weapon Pickups**
+**4.7.7. Meta Supply Drop Interaction With Weapon Pickups**
 *   Supply drops are a separate pre-mission system: purchased loot is stored as pending and applied directly to `playerState.powerUps`/`gameState` on mission start.
 *   Because supply drops bypass world pickup entities, they do not invoke `collectPowerUp`, do not show in-world pickup labels, and do not use pickup-overlap collision.
 *   Functionally, they seed starting weapon tiers/durations that then continue through the same firing, decay, and normalization logic as in-world pickups.
@@ -264,6 +329,12 @@ This section documents the exact pickup flow for weapon-related power-ups from s
 *   **Mini-Radar:** Shows Player, Comrades (Blue dots), Mutants/Enemies (Red dots), Pickups.
 *   **Engagement Tracking:** A "Combo Meter" that does not reset as long as the player moves toward an objective (Flow state).
 *   **Visual Urgency:** Radar pulses faster as "Near-Miss" timers approach zero.
+*   **Internal Mission HUD Additions:**
+    *   Active pilot weapon icon + name
+    *   Ammo count or active-time meter
+    *   Current weapon tier badge
+    *   Drone counter when Stinger Drone is equipped
+    *   Status effect banners (e.g., ⚡ ELECTROCUTED, ☢️ RADIATION)
 
 ### 6.2. Scoring & Rewards
 *   **Points:** Kills, Rescues, Base Destruction.
@@ -285,19 +356,71 @@ This section documents the exact pickup flow for weapon-related power-ups from s
 *   **Mothership:** A two-part finale: exterior core siege followed by an interior boarding run-and-gun objective chain.
 
 #### 7.2.1. Assault Base Interior Breach (Run-and-Gun Phase)
-*   **Transition Trigger:** Destroying the assault base exterior core now starts a breach sequence instead of immediate mission completion.
-*   **Pilot-Only Lock:** The AEGIS is disabled/locked and the player must continue on foot as the pilot during interior combat.
-*   **Battleship-Specific Interiors:** Assault interiors swap to one of five procedural interior themes based on the active base variant: **Raider, Carrier, Nova, Siege,** or **Dreadnought**.
-*   **Objective Chain:** Destroy all interior **Power Conduits** and **Security Nodes** to expose the interior **Core Chamber**, then destroy the reactor core.
-*   **Pressure Model:** Interior defenders and turret fire continue to reinforce throughout the breach phase.
-*   **Win Condition:** Assault mission success is now granted only after both phases are complete (exterior destruction + interior reactor kill).
+*   **Transition Trigger:** Destroying the assault base exterior defenses/core starts an interior breach sequence.
+*   **Pilot-Only Lock:** The AEGIS is disabled/locked and combat continues on foot.
+*   **Primary Objective:** Reach and destroy the **Reactor Core**.
+*   **Map Structure:** Three authored sections with checkpoint gates.
+
+**Section Layout**
+1. **Security Hub**
+   * Traps: Laser grids, locked doors (keys from fallen enemies)
+   * Enemies: Base Troopers, Turret Sentries, Shock Drones
+2. **Power Generation**
+   * Traps: Steam vents, falling debris
+   * Enemies: Heavy Mechs, Electro-Shockers, Swarm Bots
+3. **Reactor Core**
+   * Boss: Reactor Guardian (shielded mini-boss)
+   * Hazard: Radiation zones (damage over time)
+
+**Exclusive Assault Base Interior Enemies**
+| Enemy | Behavior |
+| :--- | :--- |
+| **Base Trooper** | Basic rifle infantry that patrols or charges; vulnerable to Scattergun burst damage. |
+| **Turret Sentry** | Stationary ceiling turret firing spread volleys; must be destroyed to open advance locks. |
+| **Shock Drone** | Hover unit that drops EMP charges, disabling pilot weapons for ~3 seconds. |
+| **Heavy Mech** | Slow armored walker with explosive rockets; rear engine weak spot. |
+| **Electro-Shocker** | Rushes player and emits close-range electric shockwave on contact. |
+| **Swarm Bot** | Small fast drones spawning in packs of 8 to pressure movement. |
+
+*   **Saboteur Utility:** Saboteurs can temporarily disable Turret Sentries and Heavy Mechs, creating safe push windows.
+*   **Win Condition:** Assault mission success requires clearing both phases: exterior destruction + interior reactor kill.
 
 #### 7.2.2. Mothership Interior Boarding (Run-and-Gun Phase)
-*   **Transition:** Destroying the exterior core triggers a breach/boarding sequence and forces pilot-only gameplay (AEGIS locked).
-*   **Traversal:** Procedurally generated interior platforms + ladders create a side-on run-and-gun route with verticality (Contra/Metal Slug-inspired cadence).
-*   **Objectives:** Destroy all **Power Conduits** and **Security Nodes** to open the **Core Chamber**.
-*   **Pressure:** Interior defenders and turret fire reinforce continuously until the reactor core is destroyed.
-*   **Win Condition:** Destroy the interior reactor core chamber to complete campaign victory.
+*   **Unlock Condition:** Available after securing 100% district control; this is the final level chain.
+*   **Transition:** Destroying the exterior core triggers boarding and forces pilot-only gameplay (AEGIS locked).
+*   **Primary Objective:** Traverse all decks and destroy the **Central Intelligence Core**.
+*   **Map Structure:** Five escalating interior sections.
+
+**Section Layout**
+1. **Hangar Bay**
+   * Traps: Landing clamps (grab/crush), emergency bulkheads
+   * Enemies: Mothership Grunts, Hover Mines, Laser Turrets
+2. **Bio-Labs**
+   * Traps: Toxic spores (poison), containment breaches (mutant release)
+   * Enemies: Mutant Test Subjects, Bio-Tanks, Security Chief
+3. **Engine Room**
+   * Traps: Steam jets, overloading wires
+   * Enemies: Repair Bots, Plasma Fodder, Elite Engineer
+4. **Shield Control**
+   * Traps: Rotating shield barriers (can be disabled by Saboteur actions)
+   * Enemies: Shield Operators, Assault Drones, Sniper Nest units
+5. **Central Intelligence Core**
+   * Boss: **The Overseer** (multi-phase)
+   * Hazard: Core energy pulses (high-damage AoE every 10 seconds)
+
+**Exclusive Mothership Interior Enemies**
+| Enemy | Behavior |
+| :--- | :--- |
+| **Mothership Grunt** | Sonic blaster infantry that can raise a reactive shield when hurt. |
+| **Hover Mine** | Floating proximity mine; can be detonated early by player fire. |
+| **Mutant Test Subject** | Splits into 3 smaller mutants on death. |
+| **Bio-Tank** | Stationary mutagen pod spawning fresh mutants every ~20 seconds. |
+| **Repair Bot** | Repairs damaged enemy units; high-priority support target. |
+| **Shield Operator** | Console-linked unit; killing it deactivates nearby shield barriers. |
+| **The Overseer (Boss)** | Phase 1 missiles, Phase 2 minion summons, Phase 3 mobile charge behavior. |
+
+*   **Saboteur Utility:** Saboteurs can hack shield-control assets/operators to open traversal lanes.
+*   **Win Condition:** Destroy the Central Intelligence Core to complete campaign victory.
 
 ### 7.3. Challenges
 *   **"Last Stand":** Infinite waves, global leaderboard.
