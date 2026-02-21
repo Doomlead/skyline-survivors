@@ -486,9 +486,10 @@ function updateMothershipInterior(scene, delta) {
     }
 
     // Interior turret fire from conduits/nodes (reuse existing turret fire pattern)
-    if (scene.assaultTargets) {
+    const interiorTargets = scene.assaultTargets?.children?.entries;
+    if (Array.isArray(interiorTargets)) {
         const now = scene.time?.now || 0;
-        scene.assaultTargets.children.entries.forEach(target => {
+        interiorTargets.forEach(target => {
             if (!target || !target.active || !target.interiorTarget) return;
             if (target.assaultRole === 'interior_core') return; // Core doesn't shoot
 
