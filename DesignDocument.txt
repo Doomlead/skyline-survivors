@@ -170,6 +170,63 @@ This section reflects the current in-code behavior of the player weapon stack.
 *   On decay expiration, the relevant tier drops by one and timer refreshes for the new tier until it reaches zero.
 *   Overflow behavior is implemented: collecting a maxed tier in eligible paths converts into a comrade upgrade level (up to 12), improving operative durability and associated buff scaling.
 
+### 4.6. Implemented Weapon Pickup System (Code-Accurate Deep Dive)
+This section documents the exact pickup flow for weapon-related power-ups from spawn source to runtime state mutation.
+
+**4.6.1. Where Weapon Pickups Come From**
+*   **Random combat drops:**
+    *   Standard enemies have a 12% drop chance on death.
+    *   Garrison defenders have a 9% drop chance on death.
+    *   Rescued falling/abducted humans have a 24% chance to drop a pickup.
+*   **Guaranteed boss payout:** Boss deaths spawn two pickups.
+*   **Support-generated pickup:** Medic support can spawn a short-lived shield pickup using the same world pickup group.
+*   All of these routes converge into the same `spawnPowerUp`/`powerUps` collection path (except supply drops, which apply directly to state and do not spawn world entities).
+
+**4.6.2. Pickup Type Pool and Spawn Representation**
+*   Runtime world pickups are rolled uniformly from a 16-type pool:
+    *   `laser`, `drone`, `shield`, `missile`, `overdrive`, `rear`, `side`, `rapid`, `multiShot`, `piercing`, `speed`, `magnet`, `bomb`, `double`, `invincibility`, `timeSlow`.
+*   Spawned pickups are Phaser group entities with:
+    *   sprite key `powerup_<type>`
+    *   gameplay depth set above normal actors
+    *   floating yoyo tween for readability
+    *   hard despawn timer (30s default, 8s for medic shield spawns)
+
+**4.6.3. How Collection Is Triggered**
+*   Collision overlap is registered for both controllable forms:
+    *   AEGIS ↔ pickup
+    *   Pilot ↔ pickup
+*   On overlap, `collectPowerUp` is the single effect dispatcher used for all pickup types.
+*   On collect, the player always receives score bonus + collection SFX + floating label feedback before type-specific effects are applied.
+
+**4.6.4. Weapon Pickup Effects (Exact State Changes)**
+*   `laser`: increments `playerState.powerUps.laser` up to tier 2, refreshes laser decay timer, and can set primary weapon to laser.
+*   `multiShot`: increments `playerState.powerUps.multiShot` up to tier 3, refreshes multishot decay timer, and can set primary weapon to multishot.
+*   `missile`: increments missile tier up to 3 and refreshes missile decay timer.
+*   `rear` / `side`: both map into shared `coverage` tier (max 2) and refresh shared coverage decay timer.
+*   `piercing`: sets piercing active and ensures laser tier is at least 1 (with decay timer refresh if laser tier is raised).
+*   `drone`: increments drone count up to 3 and instantiates a new orbiting drone entity immediately.
+*   Related combat modifiers that affect weapon output but are timed rather than tiered:
+    *   `rapid` → 10s fire-rate boost
+    *   `overdrive` → 7s overdrive + fastest fire-rate profile
+    *   `double` → 8s double-damage window
+
+**4.6.5. Decay and Tier Loss After Pickup**
+*   Only four weapon paths are decay-tracked: `laser`, `multiShot`, `coverage`, `missile`.
+*   Decay duration is tier-specific and comes from `POWERUP_DECAY_CONFIG`; assault mode applies a 0.75 duration multiplier.
+*   When a decay timer hits zero, that path loses exactly one tier, triggers UI warning flash, and re-arms the next lower-tier timer if still above zero.
+*   Primary weapon selection is auto-normalized after decay so the active weapon never points to a depleted path.
+
+**4.6.6. Overflow Conversion (When a Pickup Is Already Maxed)**
+*   Overflow is checked **before** normal pickup application.
+*   Eligible overflow paths: `laser`, `multiShot`, `missile`, `rear`, `side`.
+*   If incoming pickup is already at cap, the pickup is converted into a comrade upgrade instead of increasing weapon tier.
+*   Overflow upgrade raises `playerState.comradeBuffs.level` (cap 12), boosts operative survivability immediately, and triggers dedicated upgrade VFX/banner messaging.
+
+**4.6.7. Meta Supply Drop Interaction With Weapon Pickups**
+*   Supply drops are a separate pre-mission system: purchased loot is stored as pending and applied directly to `playerState.powerUps`/`gameState` on mission start.
+*   Because supply drops bypass world pickup entities, they do not invoke `collectPowerUp`, do not show in-world pickup labels, and do not use pickup-overlap collision.
+*   Functionally, they seed starting weapon tiers/durations that then continue through the same firing, decay, and normalization logic as in-world pickups.
+
 ---
 
 ## 5. Enemy Design
