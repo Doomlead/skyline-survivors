@@ -247,11 +247,12 @@ function spawnClusterMissiles(scene, projectile, excludeTarget = null) {
 
 // Creates and initializes a player projectile with type-specific behavior metadata.
 function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, options = {}) {
+    const safeOptions = options || {};
     const { projectiles } = scene;
     if (!projectiles) return;
     let proj;
     let textureName;
-    const piercing = options.piercing || false;
+    const piercing = safeOptions.piercing || false;
     
     // Select texture based on projectile type
     switch (type) {
@@ -280,7 +281,7 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     proj.lastX = x;
     proj.lastY = y;
     if (type === 'homing') {
-        proj.homingTier = options.homingTier || 1;
+        proj.homingTier = safeOptions.homingTier || 1;
     }
     
     // Flip sprite if moving left
@@ -487,7 +488,7 @@ function handlePilotWeaponFire(scene, player, angleOverride) {
         : (playerState.direction === 'right' ? 0 : Math.PI);
     const origin = getFireOrigin(player, baseAngle, 18);
 
-    const spawnShot = (angle, speed, type, damage, options = null) => {
+    const spawnShot = (angle, speed, type, damage, options = {}) => {
         createProjectile(
             scene,
             origin.fireX,
