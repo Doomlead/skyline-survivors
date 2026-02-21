@@ -328,7 +328,16 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
 
 // Updates player/enemy projectile movement modifiers, wrapping, lifetimes, and special behaviors.
 function updateProjectiles(scene) {
-    const { projectiles, enemyProjectiles, enemies, garrisonDefenders, player, particleManager } = scene;
+    const {
+        projectiles,
+        enemyProjectiles,
+        enemies,
+        garrisonDefenders,
+        bosses,
+        battleships,
+        player,
+        particleManager
+    } = scene;
     if (!projectiles || !enemyProjectiles || !player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     /**
@@ -396,6 +405,8 @@ function updateProjectiles(scene) {
             const candidates = [];
             if (enemies) candidates.push(...enemies.children.entries);
             if (garrisonDefenders) candidates.push(...garrisonDefenders.children.entries);
+            if (bosses) candidates.push(...bosses.children.entries);
+            if (battleships) candidates.push(...battleships.children.entries);
             const homingTier = proj.homingTier || 1;
             if (homingTier < 2) return;
             const maxRange = 360;
@@ -427,4 +438,12 @@ function updateProjectiles(scene) {
             proj.isSlowed = false;
         }
     });
+}
+
+if (typeof module !== 'undefined') {
+    module.exports = {
+        getClusterTargets,
+        spawnClusterMissiles,
+        updateProjectiles
+    };
 }
