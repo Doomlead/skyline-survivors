@@ -349,7 +349,7 @@ function updateProjectiles(scene) {
         player,
         particleManager
     } = scene;
-    if (!projectiles || !projectiles.children || !projectiles.children.entries || !player) return;
+    if (!player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     /**
      * Handles the destroyIfGrounded routine and encapsulates its core gameplay logic.
@@ -369,76 +369,78 @@ function updateProjectiles(scene) {
         return false;
     };
 
-    projectiles.children.entries.forEach(proj => {
-        if (!proj) return;
-        wrapWorldBounds(proj);
-        if (!proj.active || destroyIfGrounded(proj)) return;
-        if (proj.maxRange) {
-            if (typeof proj.lastX === 'number' && typeof proj.lastY === 'number') {
-                const worldWidth = CONFIG.worldWidth;
-                const deltaX = typeof wrappedDistance === 'function'
-                    ? wrappedDistance(proj.lastX, proj.x, worldWidth)
-                    : proj.x - proj.lastX;
-                const deltaY = proj.y - proj.lastY;
-                proj.travelDistance = (proj.travelDistance || 0) + Math.hypot(deltaX, deltaY);
-            }
-            proj.lastX = proj.x;
-            proj.lastY = proj.y;
-            if (proj.travelDistance > proj.maxRange) {
-                if (!proj.isFadingOut) {
-                    proj.isFadingOut = true;
-                    proj.setVelocity(0, 0);
-                    scene.tweens.add({
-                        targets: proj,
-                        alpha: 0,
-                        duration: 150,
-                        onComplete: () => {
-                            if (proj && proj.active) proj.destroy();
-                        }
-                    });
+    if (projectiles && projectiles.children && projectiles.children.entries) {
+        projectiles.children.entries.forEach(proj => {
+            if (!proj) return;
+            wrapWorldBounds(proj);
+            if (!proj.active || destroyIfGrounded(proj)) return;
+            if (proj.maxRange) {
+                if (typeof proj.lastX === 'number' && typeof proj.lastY === 'number') {
+                    const worldWidth = CONFIG.worldWidth;
+                    const deltaX = typeof wrappedDistance === 'function'
+                        ? wrappedDistance(proj.lastX, proj.x, worldWidth)
+                        : proj.x - proj.lastX;
+                    const deltaY = proj.y - proj.lastY;
+                    proj.travelDistance = (proj.travelDistance || 0) + Math.hypot(deltaX, deltaY);
                 }
-                return;
-            }
-        }
-        if (proj.projectileType === 'wave' && typeof proj.baseVx === 'number') {
-            const elapsed = scene.time.now - (proj.waveStartTime || scene.time.now);
-            const baseSpeed = Math.hypot(proj.baseVx, proj.baseVy) || 1;
-            const perpX = -proj.baseVy / baseSpeed;
-            const perpY = proj.baseVx / baseSpeed;
-            const waveOffset = Math.sin(elapsed * 0.02) * 120;
-            proj.setVelocity(
-                proj.baseVx + perpX * waveOffset,
-                proj.baseVy + perpY * waveOffset
-            );
-        }
-        if (proj.projectileType === 'homing') {
-            let nearestEnemy = null;
-            let nearestDist = Infinity;
-            const candidates = [];
-            candidates.push(...getGroupEntries(enemies));
-            candidates.push(...getGroupEntries(garrisonDefenders));
-            candidates.push(...getGroupEntries(bosses));
-            candidates.push(...getGroupEntries(battleships));
-            candidates.push(...getGroupEntries(scene.assaultTargets));
-            const homingTier = proj.homingTier || 1;
-            if (homingTier < 2) return;
-            const maxRange = 360;
-            const homingSpeed = 550;
-            candidates.forEach(enemy => {
-                if (!enemy || !enemy.active) return;
-                const dist = Phaser.Math.Distance.Between(proj.x, proj.y, enemy.x, enemy.y);
-                if (dist < nearestDist && dist < maxRange) {
-                    nearestDist = dist;
-                    nearestEnemy = enemy;
+                proj.lastX = proj.x;
+                proj.lastY = proj.y;
+                if (proj.travelDistance > proj.maxRange) {
+                    if (!proj.isFadingOut) {
+                        proj.isFadingOut = true;
+                        proj.setVelocity(0, 0);
+                        scene.tweens.add({
+                            targets: proj,
+                            alpha: 0,
+                            duration: 150,
+                            onComplete: () => {
+                                if (proj && proj.active) proj.destroy();
+                            }
+                        });
+                    }
+                    return;
                 }
-            });
-            if (nearestEnemy) {
-                const angle = Phaser.Math.Angle.Between(proj.x, proj.y, nearestEnemy.x, nearestEnemy.y);
-                proj.setVelocity(Math.cos(angle) * homingSpeed, Math.sin(angle) * homingSpeed);
-                proj.rotation = angle;
             }
-        }
-    });
+            if (proj.projectileType === 'wave' && typeof proj.baseVx === 'number') {
+                const elapsed = scene.time.now - (proj.waveStartTime || scene.time.now);
+                const baseSpeed = Math.hypot(proj.baseVx, proj.baseVy) || 1;
+                const perpX = -proj.baseVy / baseSpeed;
+                const perpY = proj.baseVx / baseSpeed;
+                const waveOffset = Math.sin(elapsed * 0.02) * 120;
+                proj.setVelocity(
+                    proj.baseVx + perpX * waveOffset,
+                    proj.baseVy + perpY * waveOffset
+                );
+            }
+            if (proj.projectileType === 'homing') {
+                let nearestEnemy = null;
+                let nearestDist = Infinity;
+                const candidates = [];
+                candidates.push(...getGroupEntries(enemies));
+                candidates.push(...getGroupEntries(garrisonDefenders));
+                candidates.push(...getGroupEntries(bosses));
+                candidates.push(...getGroupEntries(battleships));
+                candidates.push(...getGroupEntries(scene.assaultTargets));
+                const homingTier = proj.homingTier || 1;
+                if (homingTier < 2) return;
+                const maxRange = 360;
+                const homingSpeed = 550;
+                candidates.forEach(enemy => {
+                    if (!enemy || !enemy.active) return;
+                    const dist = Phaser.Math.Distance.Between(proj.x, proj.y, enemy.x, enemy.y);
+                    if (dist < nearestDist && dist < maxRange) {
+                        nearestDist = dist;
+                        nearestEnemy = enemy;
+                    }
+                });
+                if (nearestEnemy) {
+                    const angle = Phaser.Math.Angle.Between(proj.x, proj.y, nearestEnemy.x, nearestEnemy.y);
+                    proj.setVelocity(Math.cos(angle) * homingSpeed, Math.sin(angle) * homingSpeed);
+                    proj.rotation = angle;
+                }
+            }
+        });
+    }
 
     if (!enemyProjectiles || !enemyProjectiles.children || !enemyProjectiles.children.entries) return;
 
