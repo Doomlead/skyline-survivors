@@ -577,6 +577,93 @@ function createPlayerProjectileGraphics(scene) {
     multiGraphics.generateTexture('projectile_multi', mw, mh);
     multiGraphics.destroy();
 
+
+
+    // ========================
+    // PILOT RIFLE PROJECTILE
+    // ========================
+    const pilotRifleGraphics = scene.add.graphics();
+    const prw2 = 14, prh2 = 6;
+    const prcy2 = prh2 / 2;
+    pilotRifleGraphics.fillStyle(0x93c5fd, 0.25);
+    pilotRifleGraphics.fillEllipse(7, prcy2, 14, 6);
+    pilotRifleGraphics.fillStyle(0x60a5fa, 1);
+    pilotRifleGraphics.fillEllipse(8, prcy2, 9, 4);
+    pilotRifleGraphics.fillStyle(0xffffff, 1);
+    pilotRifleGraphics.fillCircle(11.5, prcy2, 1.2);
+    pilotRifleGraphics.generateTexture('projectile_pilot_rifle', prw2, prh2);
+    pilotRifleGraphics.destroy();
+
+    // ========================
+    // PILOT SCATTER PROJECTILE
+    // ========================
+    const pilotScatterGraphics = scene.add.graphics();
+    const psw = 8, psh = 8;
+    const pscx = psw / 2;
+    const pscy = psh / 2;
+    pilotScatterGraphics.fillStyle(0xfbbf24, 0.25);
+    pilotScatterGraphics.fillCircle(pscx, pscy, 4);
+    pilotScatterGraphics.fillStyle(0xf59e0b, 1);
+    pilotScatterGraphics.fillCircle(pscx, pscy, 2.6);
+    pilotScatterGraphics.fillStyle(0xffffff, 0.9);
+    pilotScatterGraphics.fillCircle(pscx, pscy, 1.2);
+    pilotScatterGraphics.generateTexture('projectile_pilot_scatter', psw, psh);
+    pilotScatterGraphics.destroy();
+
+    // ========================
+    // PILOT PLASMA PROJECTILE
+    // ========================
+    const pilotPlasmaGraphics = scene.add.graphics();
+    const ppw = 16, pph = 10;
+    const ppcy = pph / 2;
+    pilotPlasmaGraphics.fillStyle(0xa78bfa, 0.25);
+    pilotPlasmaGraphics.fillEllipse(8, ppcy, 16, 10);
+    pilotPlasmaGraphics.fillStyle(0x8b5cf6, 1);
+    pilotPlasmaGraphics.fillEllipse(9, ppcy, 11, 6);
+    pilotPlasmaGraphics.fillStyle(0xc4b5fd, 1);
+    pilotPlasmaGraphics.fillEllipse(10, ppcy, 6, 3);
+    pilotPlasmaGraphics.fillStyle(0xffffff, 0.9);
+    pilotPlasmaGraphics.fillCircle(12, ppcy, 1.2);
+    pilotPlasmaGraphics.generateTexture('projectile_pilot_plasma', ppw, pph);
+    pilotPlasmaGraphics.destroy();
+
+    // ========================
+    // PILOT LIGHTNING PROJECTILE
+    // ========================
+    const pilotLightningGraphics = scene.add.graphics();
+    const plw = 18, plh = 8;
+    const plcy = plh / 2;
+    pilotLightningGraphics.fillStyle(0x22d3ee, 0.18);
+    pilotLightningGraphics.fillEllipse(9, plcy, 18, 8);
+    pilotLightningGraphics.lineStyle(2, 0x67e8f9, 1);
+    pilotLightningGraphics.beginPath();
+    pilotLightningGraphics.moveTo(2, plcy + 1);
+    pilotLightningGraphics.lineTo(7, plcy - 2);
+    pilotLightningGraphics.lineTo(10, plcy + 2);
+    pilotLightningGraphics.lineTo(15, plcy - 1);
+    pilotLightningGraphics.strokePath();
+    pilotLightningGraphics.fillStyle(0xe0f2fe, 0.95);
+    pilotLightningGraphics.fillCircle(15.5, plcy - 1, 1.4);
+    pilotLightningGraphics.generateTexture('projectile_pilot_lightning', plw, plh);
+    pilotLightningGraphics.destroy();
+
+    // ========================
+    // PILOT DRONE PROJECTILE
+    // ========================
+    const pilotDroneGraphics = scene.add.graphics();
+    const pdw = 12, pdh = 12;
+    const pdc = pdw / 2;
+    pilotDroneGraphics.fillStyle(0x34d399, 0.2);
+    pilotDroneGraphics.fillCircle(pdc, pdc, 6);
+    pilotDroneGraphics.fillStyle(0x10b981, 1);
+    pilotDroneGraphics.fillCircle(pdc, pdc, 3.2);
+    pilotDroneGraphics.fillStyle(0xd1fae5, 1);
+    pilotDroneGraphics.fillCircle(pdc, pdc, 1.3);
+    pilotDroneGraphics.lineStyle(1, 0x6ee7b7, 0.6);
+    pilotDroneGraphics.strokeCircle(pdc, pdc, 4.8);
+    pilotDroneGraphics.generateTexture('projectile_pilot_drone', pdw, pdh);
+    pilotDroneGraphics.destroy();
+
     // ========================
     // MISSILE (Physical Projectile)
     // ========================

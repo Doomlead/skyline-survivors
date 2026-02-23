@@ -264,6 +264,11 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
         case 'side': textureName = 'projectile_side'; break;
         case 'multi': textureName = 'projectile_multi'; break;
         case 'drone': textureName = 'projectile_drone'; break;
+        case 'pilot_rifle': textureName = 'projectile_pilot_rifle'; break;
+        case 'pilot_scatter': textureName = 'projectile_pilot_scatter'; break;
+        case 'pilot_plasma': textureName = 'projectile_pilot_plasma'; break;
+        case 'pilot_lightning': textureName = 'projectile_pilot_lightning'; break;
+        case 'pilot_drone': textureName = 'projectile_pilot_drone'; break;
         case 'normal':
         default: textureName = 'projectile'; break;
     }
@@ -503,10 +508,10 @@ function handlePilotWeaponFire(scene, player, angleOverride) {
 
     if (weaponId === 'combatRifle') {
         const damage = tier >= 3 ? 1.6 : 1;
-        spawnShot(baseAngle, 650, 'normal', damage);
+        spawnShot(baseAngle, 650, 'pilot_rifle', damage);
         if (tier >= 3) {
-            spawnShot(baseAngle + 0.03, 650, 'normal', damage);
-            spawnShot(baseAngle - 0.03, 650, 'normal', damage);
+            spawnShot(baseAngle + 0.03, 650, 'pilot_rifle', damage);
+            spawnShot(baseAngle - 0.03, 650, 'pilot_rifle', damage);
         }
         return true;
     }
@@ -518,7 +523,7 @@ function handlePilotWeaponFire(scene, player, angleOverride) {
         for (let i = 0; i < pelletCount; i++) {
             const t = pelletCount === 1 ? 0.5 : i / (pelletCount - 1);
             const angle = baseAngle - spread / 2 + spread * t;
-            const type = tier >= 3 ? 'overdrive' : 'normal';
+            const type = 'pilot_scatter';
             spawnShot(angle, 560, type, damage);
         }
         if (typeof consumeActivePilotWeaponAmmo === 'function') consumeActivePilotWeaponAmmo(1);
@@ -527,9 +532,9 @@ function handlePilotWeaponFire(scene, player, angleOverride) {
 
     if (weaponId === 'plasmaLauncher') {
         const plasmaDamage = tier >= 3 ? 2.3 : (tier === 2 ? 1.9 : 1.5);
-        spawnShot(baseAngle, 430, tier >= 2 ? 'piercing' : 'normal', plasmaDamage, { piercing: tier >= 2 });
+        spawnShot(baseAngle, 430, 'pilot_plasma', plasmaDamage, { piercing: tier >= 2 });
         if (tier >= 3) {
-            spawnShot(baseAngle + 0.22, 430, 'piercing', plasmaDamage * 0.8, { piercing: true });
+            spawnShot(baseAngle + 0.22, 430, 'pilot_plasma', plasmaDamage * 0.8, { piercing: true });
         }
         if (typeof consumeActivePilotWeaponAmmo === 'function') consumeActivePilotWeaponAmmo(1);
         return true;
@@ -538,7 +543,7 @@ function handlePilotWeaponFire(scene, player, angleOverride) {
     if (weaponId === 'lightningGun') {
         const arcs = tier >= 3 ? [-0.08, 0, 0.08] : [0];
         const damage = tier >= 2 ? 1.25 : 1;
-        arcs.forEach((off) => spawnShot(baseAngle + off, 700, 'piercing', damage, { piercing: true }));
+        arcs.forEach((off) => spawnShot(baseAngle + off, 700, 'pilot_lightning', damage, { piercing: true }));
         if (typeof consumeActivePilotWeaponAmmo === 'function') consumeActivePilotWeaponAmmo(0.25);
         return true;
     }
@@ -548,7 +553,7 @@ function handlePilotWeaponFire(scene, player, angleOverride) {
         const spacing = 0.18;
         for (let i = 0; i < droneCount; i++) {
             const offset = (i - (droneCount - 1) / 2) * spacing;
-            spawnShot(baseAngle + offset, 640, 'drone', 1);
+            spawnShot(baseAngle + offset, 640, 'pilot_drone', 1);
         }
         return true;
     }
