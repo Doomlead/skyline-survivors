@@ -24,6 +24,12 @@ A modern reimagining of *Defender/Stargate* fused with *Strike Force*, *Vampire 
     *   🔴 **Occupied (Enemy Controlled):** Requires Assault Mission. Prosperity reset to zero (Loss Aversion).
 *   **The "Near-Miss" Timer:** When a Threatened timer hits zero, it flashes "CRITICAL" for 30s. Starting a mission here grants a "Clutch Defense" bonus.
 *   **Roaming Battleships:** Mobile boss nodes that block progress/shop items.
+*   **Pilot Weapon Progression Track (District Layer):**
+    *   Each district now displays a small pilot-weapon progression ribbon showing local unlock pressure for **Scattergun, Plasma Launcher, Lightning Gun, and Stinger Drone**.
+    *   Clearing or defending districts grants **Pilot Intel** used to advance this ribbon; Occupied districts suppress intel gain until liberated.
+    *   Every milestone reached on the ribbon grants one of the following outcomes: permanent unlock (if missing), tier increase token (if owned), or ammo-capacity bonus for the next deployment.
+    *   Districts in **CRITICAL Near-Miss** state provide a temporary +50% Pilot Intel bonus, creating a tactical incentive to prioritize clutch defenses.
+    *   The district tooltip shows current pilot weapon ownership and next ribbon reward so route planning naturally supports infantry progression.
 
 **Mechanics:**
 *   **Consequence System:** Ignoring Threatened → District falls to Occupied → Requires Assault.
