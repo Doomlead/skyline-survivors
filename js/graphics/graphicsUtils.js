@@ -302,6 +302,7 @@ function createUtilityGraphics(scene) {
 function createGraphics(scene) {
     createPlayerGraphics(scene);
     createPlayerProjectileGraphics(scene);
+    createPilotProjectileGraphics(scene);
 
     createEnemyProjectileGraphics(scene);
     createOriginalEnemyGraphics(scene);

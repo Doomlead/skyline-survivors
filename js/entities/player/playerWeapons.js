@@ -4,9 +4,18 @@
 
 // Fires the current player weapon loadout, including primary, coverage, and missile behaviors.
 function fireWeapon(scene, angleOverride = null) {
-    const { projectiles, drones } = scene;
     const player = getActivePlayer(scene);
-    if (!player || !projectiles) return;
+    if (!player) return;
+
+    const pilotActive = typeof pilotState !== 'undefined' && pilotState && pilotState.active;
+    const aegisActive = typeof aegisState !== 'undefined' && aegisState && aegisState.active;
+    if (pilotActive && !aegisActive) {
+        firePilotWeapon(scene, player, angleOverride);
+        return;
+    }
+
+    const { projectiles, drones } = scene;
+    if (!projectiles) return;
     let speed = 600;
     if (playerState.powerUps.speed > 0) speed = 750;
     const p = playerState.powerUps;
@@ -57,12 +66,10 @@ function fireWeapon(scene, angleOverride = null) {
         );
     }
     if (p.overdrive > 0) {
-        // Overdrive shots - orange flame bolts
         createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.08) * speed, Math.sin(baseAngle - 0.08) * speed, 'overdrive', damage);
         createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.08) * speed, Math.sin(baseAngle + 0.08) * speed, 'overdrive', damage);
     }
 
-    // Drone projectiles - green energy orbs
     if (!drones || !drones.children || !drones.children.entries) return;
     drones.children.entries.forEach(drone => {
         if (!drone || drone.active === false) return;
@@ -77,6 +84,128 @@ function fireWeapon(scene, angleOverride = null) {
             if (dProj && dProj.active) dProj.destroy();
         });
     });
+}
+
+function getPilotWeaponOrder() {
+    return ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
+}
+
+function getPilotWeaponConfig(weapon) {
+    switch (weapon) {
+        case 'scattergun':
+            return { type: 'scattergun', maxAmmo: 200, infinite: false };
+        case 'plasmaLauncher':
+            return { type: 'plasma', maxAmmo: 150, infinite: false, speed: 480 };
+        case 'lightningGun':
+            return { type: 'lightning', maxAmmo: 25000, infinite: false, useTimePool: true };
+        case 'stingerDrone':
+            return { type: 'drone', infinite: true };
+        case 'combatRifle':
+        default:
+            return { type: 'normal', infinite: true };
+    }
+}
+
+function normalizePilotWeaponSelection() {
+    if (typeof pilotState === 'undefined' || !pilotState) return;
+    const state = pilotState.weaponState;
+    if (!state) return;
+    const order = getPilotWeaponOrder();
+    const canUse = (weapon) => Boolean(state.unlocked?.[weapon] || state.temporaryUnlocks?.[weapon]);
+    if (!canUse(state.selected)) {
+        const fallback = order.find(canUse) || 'combatRifle';
+        state.selected = fallback;
+    }
+}
+
+function cyclePilotWeapon() {
+    if (typeof pilotState === 'undefined' || !pilotState) return;
+    const state = pilotState.weaponState;
+    if (!state) return;
+    const order = getPilotWeaponOrder();
+    normalizePilotWeaponSelection();
+    const currentIndex = Math.max(0, order.indexOf(state.selected));
+    for (let step = 1; step <= order.length; step++) {
+        const next = order[(currentIndex + step) % order.length];
+        if (state.unlocked?.[next] || state.temporaryUnlocks?.[next]) {
+            state.selected = next;
+            return;
+        }
+    }
+}
+
+function firePilotWeapon(scene, player, angleOverride) {
+    if (typeof pilotState === 'undefined' || !pilotState) return;
+    const state = pilotState.weaponState;
+    if (!state) return;
+    normalizePilotWeaponSelection();
+    const selected = state.selected || 'combatRifle';
+    const config = getPilotWeaponConfig(selected);
+    if (!config.infinite) {
+        const pool = state.ammo?.[selected] || 0;
+        if (pool <= 0) {
+            state.selected = 'combatRifle';
+        }
+    }
+    const weapon = state.selected || 'combatRifle';
+    const tier = Math.max(1, state.tiers?.[weapon] || 1);
+    const baseAngle = typeof angleOverride === 'number'
+        ? angleOverride
+        : (pilotState.facing < 0 ? Math.PI : 0);
+    const origin = getFireOrigin(player, baseAngle, 18);
+
+    switch (weapon) {
+        case 'scattergun': {
+            const pellets = 7;
+            const spread = 0.42;
+            const damage = tier >= 3 ? 2 : 1;
+            for (let i = 0; i < pellets; i++) {
+                const t = pellets === 1 ? 0.5 : i / (pellets - 1);
+                const offset = (t - 0.5) * spread;
+                const angle = baseAngle + offset;
+                createProjectile(scene, origin.fireX, origin.fireY, Math.cos(angle) * 680, Math.sin(angle) * 680, 'normal', damage, { texture: 'pilot_projectile_scatter' });
+            }
+            state.ammo.scattergun = Math.max(0, (state.ammo.scattergun || 0) - 1);
+            break;
+        }
+        case 'plasmaLauncher': {
+            const damage = tier >= 2 ? 2 : 1;
+            createProjectile(scene, origin.fireX, origin.fireY, Math.cos(baseAngle) * 480, Math.sin(baseAngle) * 480, 'wave', damage, { piercing: tier >= 3, texture: 'pilot_projectile_plasma' });
+            state.ammo.plasmaLauncher = Math.max(0, (state.ammo.plasmaLauncher || 0) - 1);
+            break;
+        }
+        case 'lightningGun': {
+            const damage = tier >= 2 ? 2 : 1;
+            createProjectile(scene, origin.fireX, origin.fireY, Math.cos(baseAngle) * 900, Math.sin(baseAngle) * 900, 'overdrive', damage, { piercing: true, texture: 'pilot_projectile_lightning' });
+            state.ammo.lightningGun = Math.max(0, (state.ammo.lightningGun || 0) - playerState.fireRate);
+            break;
+        }
+        case 'stingerDrone': {
+            const damage = tier >= 2 ? 2 : 1;
+            createProjectile(scene, origin.fireX, origin.fireY, Math.cos(baseAngle) * 620, Math.sin(baseAngle) * 620, 'drone', damage, { texture: 'pilot_projectile_stinger' });
+            if (tier >= 3) {
+                createProjectile(scene, origin.fireX, origin.fireY, Math.cos(baseAngle - 0.22) * 620, Math.sin(baseAngle - 0.22) * 620, 'drone', damage, { texture: 'pilot_projectile_stinger' });
+                createProjectile(scene, origin.fireX, origin.fireY, Math.cos(baseAngle + 0.22) * 620, Math.sin(baseAngle + 0.22) * 620, 'drone', damage, { texture: 'pilot_projectile_stinger' });
+            }
+            break;
+        }
+        case 'combatRifle':
+        default: {
+            const burstCount = tier >= 3 ? 3 : 1;
+            const damage = tier >= 2 ? 2 : 1;
+            for (let i = 0; i < burstCount; i++) {
+                const delay = i * 45;
+                scene.time.delayedCall(delay, () => {
+                    createProjectile(scene, origin.fireX, origin.fireY, Math.cos(baseAngle) * 760, Math.sin(baseAngle) * 760, 'normal', damage, { texture: 'pilot_projectile_rifle' });
+                });
+            }
+            break;
+        }
+    }
+
+    if (!getPilotWeaponConfig(state.selected).infinite && (state.ammo[state.selected] || 0) <= 0) {
+        state.selected = 'combatRifle';
+    }
 }
 
 // Returns projectile speed/damage/type tuning derived from laser tier and piercing state.
@@ -244,8 +373,10 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     const { projectiles } = scene;
     if (!projectiles) return;
     let proj;
-    let textureName;
+    let textureName = options.texture || null;
     const piercing = options.piercing || false;
+
+    if (!textureName) {
     
     // Select texture based on projectile type
     switch (type) {
@@ -260,7 +391,8 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
         case 'normal':
         default: textureName = 'projectile'; break;
     }
-    
+    }
+
     proj = projectiles.create(x, y, textureName);
     if (!proj) return null;
     proj.setScale(1.25);

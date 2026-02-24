@@ -312,7 +312,36 @@ const pilotState = {
     grounded: false,
     climbing: false,
     vx: 0,
-    vy: 0
+    vy: 0,
+    weaponState: {
+        selected: 'combatRifle',
+        unlocked: {
+            combatRifle: true,
+            scattergun: false,
+            plasmaLauncher: false,
+            lightningGun: false,
+            stingerDrone: false
+        },
+        temporaryUnlocks: {
+            scattergun: false,
+            plasmaLauncher: false,
+            lightningGun: false,
+            stingerDrone: false
+        },
+        tiers: {
+            combatRifle: 1,
+            scattergun: 0,
+            plasmaLauncher: 0,
+            lightningGun: 0,
+            stingerDrone: 0
+        },
+        ammo: {
+            scattergun: 200,
+            plasmaLauncher: 150,
+            lightningGun: 25000
+        },
+        droneCount: 0
+    }
 };
 
 // Virtual input for touch controls
@@ -393,6 +422,35 @@ function resetGameState() {
     pilotState.climbing = false;
     pilotState.vx = 0;
     pilotState.vy = 0;
+    pilotState.weaponState = {
+        selected: 'combatRifle',
+        unlocked: {
+            combatRifle: true,
+            scattergun: false,
+            plasmaLauncher: false,
+            lightningGun: false,
+            stingerDrone: false
+        },
+        temporaryUnlocks: {
+            scattergun: false,
+            plasmaLauncher: false,
+            lightningGun: false,
+            stingerDrone: false
+        },
+        tiers: {
+            combatRifle: 1,
+            scattergun: 0,
+            plasmaLauncher: 0,
+            lightningGun: 0,
+            stingerDrone: 0
+        },
+        ammo: {
+            scattergun: 200,
+            plasmaLauncher: 150,
+            lightningGun: 25000
+        },
+        droneCount: 0
+    };
 
     gameState.bossActive = false;
     gameState.battleshipActive = false;
