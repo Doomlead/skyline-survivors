@@ -148,8 +148,15 @@ function loadSection(scene, sectionIndex) {
   // Build platforms using authored layout
   buildInteriorPlatformsFromLayout(scene, section);
 
-  // Spawn initial enemies
-  spawnSectionEnemies(scene, section);
+  // Spawn initial enemies (support both direct global bindings and window-attached exports)
+  const spawnEnemies = typeof spawnSectionEnemies === 'function'
+    ? spawnSectionEnemies
+    : (typeof window !== 'undefined' && typeof window.spawnSectionEnemies === 'function'
+      ? window.spawnSectionEnemies
+      : null);
+  if (spawnEnemies) {
+    spawnEnemies(scene, section);
+  }
 
   // Initialize hazards
   const initHazards = typeof initializeHazards === 'function'
