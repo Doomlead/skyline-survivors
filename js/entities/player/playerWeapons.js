@@ -445,8 +445,11 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     const initialSpeed = proj.body ? Math.hypot(proj.body.velocity.x, proj.body.velocity.y) : Math.hypot(vx, vy);
     proj.maxRange = initialSpeed * 3;
     if (type === 'wave') {
-        proj.baseVx = proj.body.velocity.x;
-        proj.baseVy = proj.body.velocity.y;
+        const waveVelocity = proj.body && proj.body.velocity
+            ? proj.body.velocity
+            : { x: vx, y: vy };
+        proj.baseVx = waveVelocity.x;
+        proj.baseVy = waveVelocity.y;
     }
 
     // Override destroy to clean up particles
