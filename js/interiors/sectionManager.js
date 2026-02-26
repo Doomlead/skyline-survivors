@@ -137,8 +137,15 @@ function loadSection(scene, sectionIndex) {
   interiorState.activeEnemies = 0;
   interiorState.bossDefeated = sectionIndex === interiorState.sections.length - 1 ? false : true;
 
-  // Clear old hazards
-  clearInteriorHazards(scene);
+  // Clear old hazards (support both direct global bindings and window-attached exports)
+  const clearHazards = typeof clearInteriorHazards === 'function'
+    ? clearInteriorHazards
+    : (typeof window !== 'undefined' && typeof window.clearInteriorHazards === 'function'
+      ? window.clearInteriorHazards
+      : null);
+  if (clearHazards) {
+    clearHazards(scene);
+  }
 
   // Build platforms using authored layout
   buildInteriorPlatformsFromLayout(scene, section);
@@ -147,7 +154,14 @@ function loadSection(scene, sectionIndex) {
   spawnSectionEnemies(scene, section);
 
   // Initialize hazards
-  initializeHazards(scene, section.hazards || []);
+  const initHazards = typeof initializeHazards === 'function'
+    ? initializeHazards
+    : (typeof window !== 'undefined' && typeof window.initializeHazards === 'function'
+      ? window.initializeHazards
+      : null);
+  if (initHazards) {
+    initHazards(scene, section.hazards || []);
+  }
 
   // Create section gate
   createSectionGate(scene, section.gate);
