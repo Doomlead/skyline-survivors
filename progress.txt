@@ -1,324 +1,220 @@
-# Skyline Survivors: Urban Defender
-
-## 1. Core Concept
-
-**Implementation Status: 78% Complete**  
-
-### Key Themes Progress:
-
-✅ **Fully Implemented:**
-- Urban defense gameplay with district-based missions
-- Ship/foot combat transitions via pilot ejection system
-- Human rescue mechanics with landers and mutants
-- Escalating difficulty through wave systems and boss encounters
-- **Defend and Reclaim**: Districts exist in three states (Friendly/Threatened/Occupied)
-- **Squad Leader Fantasy (Core Loop):** On-foot aura, formation follow, and sacrifice/body-block behaviors
-- **Active Deployment:** Humans convert into operatives when dropped at the hangar
-- **Mothership Finale Structure:** Exterior boss breach transitions into an interior pilot-only boarding phase
-
-⚠️ **Partially Implemented:**
-- **Seamless transition (Ship/Foot):** Ejection + hangar rebuild + squad leader aura exist, but Bulwark/ground synergies and stronger UI messaging are missing.
-- **Resource vs. Score (The Rescue Loop):** Cargo collection + deployment are in place; operative overflow scaling now routes max-tier pickups into comrade buffs with HUD/FX, but deeper squad synergy feedback loops still need polish.
-- **Strategic Territory Control:** District states, timers, and prosperity investment are in; still needs tuning/balance.
-- **Operative Depth:** 4 distinct classes exist with combat behaviors (Infantry, Gunner, Medic, Saboteur); Tier Overflow scaling now boosts ground troops, but stronger fire-team coordination outside of the on-foot formation is still minimal.
-
----
-
-## 2. High-Level Structure
-
-### 2.1. System View Orbital Map
-
-**Implementation Status: 88% Complete**
-
-✅ **Fully Implemented:**
-- 3D rotating globe with selectable districts
-- **City districts** displayed as nodes with three states (Friendly, Threatened, Occupied)
-- **Battleships** roam between nodes
-- **Special node:** Mothership (Endgame)
-- Consequence system: Threatened → Occupied
-- **Victory Condition:** Complete Mothership assault
-- Threat timer-based urgency and pulsing visuals for threatened districts
-- Critical urgency logic drives spawn/reward multipliers
-- Prosperity investment loop with loss-aversion reset on occupied districts
-
-⚠️ **Partially Implemented:**
-- **The "Near-Miss" Timer:** Explicit 30s "CRITICAL" window and clutch-defense bonus are now implemented, with added map/HUD pulse FX (additional polish still possible).
-- **District Investment Levels (Dark Pattern):** Prosperity multiplier exists with stronger map/HUD feedback; still needs balance tuning and cinematic polish.
-
-### 2.2. Side-Scrolling Combat View
-
-**Implementation Status: 78% Complete**
-
-#### Defense Missions (Threatened Districts)
-**Implementation Status: 82% Complete**
-✅ **Fully Implemented:**
-- Defend districts (15 waves) / Wave tier progression
-- Mini-boss and boss encounters / Battleship encounter
-- Extraction hub hangar with landing zone rebuild pad
-- **Deployment Animation:** Dropping off cargo spawns operative squads
-
-#### Assault Missions (Occupied Districts)
-**Implementation Status: 75% Complete**
-✅ **Fully Implemented:**
-- Base core objective with HP / Shield generators / Turrets
-- Garrison defender squads
-- **Saboteur Synergy:** EMP-style disables against turrets/shields
-
-#### Mothership Finale (Endgame)
-**Implementation Status: 92% Complete**
-✅ **Fully Implemented:**
-- Exterior mothership core encounter with phase-gated shields/damage windows
-- Automatic transition into interior boarding phase after hull breach
-- Pilot-only run-and-gun gameplay with procedural platforms and ladders
-- Interior objective chain (power conduits + security nodes -> core chamber)
-
-⚠️ **Partially Implemented:**
-- Additional cinematic polish for the breach-to-interior transition
-
-❌ **Not Implemented:**
-- **Bulwark Form Synergy:** Increased effectiveness against structures
-- **Assault Rewards:** Loot drops and jackpots on base destruction
-
----
-
-## 3. Gameplay Overview & The Rescue Loop
-
-### 3.1 The Rescue & Drop-Off Loop (New v2.0 Section)
-
-**Implementation Status: 88% Complete**
-
-✅ **Fully Implemented:**
-- Basic Human Rescue (picking up a human)
-- **"Strike Force" Carry:** Multiple humans stored in cargo with HUD indicator
-- **Inertia Scaling:** Ship physics change based on cargo count
-- **Tactical Deployment:** Dropping humans at the Hangar spawns AI Comrades
-
-⚠️ **Partially Implemented:**
-- **Operative Scaling Feedback:** Squad size and power scaling lacks strong UI/FX feedback loops
-
-### 3.2 Core Loop
-
-**Implementation Status: 85% Complete**
-✅ **Fully Implemented:**
-- System Map -> Combat -> Upgrade cycle
-- Ship Destruction -> Ejection
-- Crisis Management: on-foot rebuild by holding the landing zone under the hangar
-
----
-
-## 4. Player Mechanics & Operative Systems
-
-### 4.1. Ship Forms & Movement
-
-**Implementation Status: 90% Complete**
-
-✅ **Fully Implemented:**
-- **Normal Interceptor Form:** 8-directional movement, Primary Weapon, Smart Bomb, Hyperspace
-- **Bulwark Form:** Toggle, Slowed movement, 360° aim
-
-⚠️ **Partially Implemented:**
-- **Bulwark Assault Synergy:** No structural damage or siege bonuses yet
-
-### 4.2. Operative AI & Combat Behavior ("The Comrades")
-
-**Implementation Status: 80% Complete**
-
-✅ **Fully Implemented:**
-- Operative spawning from hangar deployment
-- **Operative Classes:** Infantry, Gunner, Medic, Saboteur (Medic is live and integrated into follow/aura behaviors)
-- **Formation + Aura:** On-foot squad formation, fire-rate aura, and formation offsets
-- **Saboteur Assault Logic:** Assault targets prioritized with EMP disable
-
-⚠️ **Partially Implemented:**
-- **Fire-Team Coordination:** Patrol behaviors exist, but stronger group coordination and defensive perimeter logic are still minimal when the pilot is airborne.
-✅ **Newly Implemented:**
-- **Weapon Synergy:** Tier 3 ship overflow now upgrades ground troops with damage/fire-rate/HP buffs and HUD/FX feedback.
-
-### 4.3. On-Foot Command (Ship Destruction)
-
-**Implementation Status: 82% Complete**
-
-✅ **Fully Implemented:**
-- Ejection Sequence (Pilot sprite, basic pistol)
-- **Extraction Defense:** Hold the landing zone under the hangar for 30s to rebuild the Aegis (with UI prompt)
-- **Squad Leader Aura:** Comrades follow pilot movement in formation, boost fire rate, and re-anchor to the pilot
-- **Sacrifice Mechanic:** Operatives body-block incoming projectiles during rebuild
-
-⚠️ **Partially Implemented:**
-- **Rebuild Feedback:** Needs clearer HUD emphasis for when sacrifice behavior is active
-
-### 4.4. Power-Up System
-
-**Implementation Status: 70% Complete**
-
-✅ **Fully Implemented:**
-- Core Weapons (Laser, Spread, Missiles) - 3 Tiers
-- Defensive (Shields, Speed)
-- Utility (Smart Bombs, Multipliers)
-- Weapon Decay & Switching
-
-❌ **Not Implemented:**
-- **Assault Rewards:** Base destruction dropping specific loot
-- **Mystery Drops:** Random effects/Jackpots
-
----
-
-## 5. Enemy Design
-
-**Implementation Status: 100% Complete**
-✅ **Fully Implemented:**
-- Landers, Mutants, Bombers, Pods, Baiters, Swarmers
-- Advanced variants (Kamikaze, Turret, Shield, Seeker, etc.)
-- Bosses (Mega Lander, Titan Mutant, etc.)
-- Mothership core boss flow
-
----
-
-## 6. Game Systems
-
-### 6.1. Radar / HUD
-
-**Implementation Status: 82% Complete**
-
-✅ **Fully Implemented:**
-- Radar (Player, Enemies, Objectives)
-- Mission Objectives (Wave Count / Base HP)
-- Threat/urgency display and pulsing map indicators
-- Mothership HUD phase and core health
-
-❌ **Not Implemented:**
-- **Dark Patterns:** Additional loss-aversion presentation polish (cinematics, audio sting, global UI beat)
-
-### 6.2. Meta Progression (Shop)
-
-**Implementation Status: 88% Complete**
-
-✅ **Fully Implemented:**
-- Supply Drop Gacha (Credits, Unboxing, Loot History)
-- Pending supply drop inventory display
-- **Inventory Hot-Starts:** Supply drop items apply at mission start with HUD callout
-
----
-
-## 7. Environment Design
-
-**Implementation Status: 60% Complete**
-
-✅ **Fully Implemented:**
-- Multi-layer parallax (Sky, City, Street)
-- Extraction hub hangar with ground landing zone
-- Multiple biome background generators (industrial/cyberpunk/wasteland/mothership)
-
-❌ **Not Implemented:**
-- Dynamic Weather/Time of Day
-
----
-
-## MVP Completion
-
-- **Status:** ~84% complete (core mission loop, district strategy pressure, and mothership multi-phase finale are implemented; remaining work is mostly design-depth and reward-loop parity).
-- **Primary Blockers:** pilot unlock track compliance, assault reward/jackpot loop, Bulwark structural siege payoff, and challenge-mode surfacing.
-
-## Gap Analysis & Next Steps (Codebase + Design Document Audit)
-
-### Overall Completion Statistics
-- **Design Document Alignment:** ~82% (the combat/game-state core is strong, but design-specific progression/reward layers are still incomplete).
-- **Major Milestones Achieved:** district-state campaign with threatened→critical→occupied pressure, prosperity/loss-aversion reset loop, rescue cargo inertia + hangar deployment into classed operatives, ship destruction -> pilot rebuild flow, supply-drop meta economy with persistent history/pending drops, assault + mothership interior objective chain, and broad defensive automated tests for combat edge cases.
-- **Immediate Next Steps (Recommended Order):** (1) pilot progression compliance package, (2) assault rewards + jackpot identity, (3) Bulwark siege role implementation, (4) challenge-mode productization (Last Stand / Assault Only), (5) world-reactivity pass (weather + district destruction readability).
-- **Estimated Remaining Work:** ~8-12 dev days to hit MVP-quality design compliance; ~3-5 additional weeks for full v2.0 depth + polish.
-- **Post-MVP Polish (Optional):** adaptive music intensity layers, cinematic district transition stingers, richer deployment VO/SFX, deeper autonomous fire-team tactics, biome hazard variants, and broader replay mutators.
-- **MVP Completion:** ~84%
-- **Critical Missing Features for Design Document Compliance:** persistent pilot unlock catalog/ribbon loop, assault base-clear jackpots + mystery outcomes, Bulwark structural DPS identity, fully surfaced challenge modes with score persistence, and weather/reactive world-state presentation.
-
-### Design Document Alignment
-**Aligned / Implemented**
-- Strategic district map loop with Friendly/Threatened/Critical/Occupied progression and mission routing.
-- Prosperity investment + explicit loss-on-occupation behavior.
-- Rescue/carry/deploy loop with cargo-weight inertia and hangar conversion into operatives.
-- On-foot recovery loop (pilot ejection + rebuild pressure) and operative class support roles (including medic/saboteur behavior).
-- Mothership assault arc with exterior phase and pilot-only interior objective progression.
-- Supply-drop purchase/unboxing/pending inventory flow and mission-start hot-start application.
-
-**Partially Aligned**
-- Pilot combat systems exist (multiple weapon behaviors, ammo state objects, power-up decay), but design-doc persistent pilot unlock track/ribbon clarity is not fully surfaced.
-- Bulwark exists as a mode/handling identity, but structural siege payoff and clear assault-specific messaging are still missing.
-- Interior mission framework is live, but design-doc authored interior encounter flavor/readability can still be expanded.
-- Environment variety is broad (multiple biomes/interior generators), but weather/time-of-day reactivity is not implemented.
-
-**Not Yet Aligned (Major Gaps)**
-- Assault clear rewards/jackpot loop (including stronger post-clear reward presentation).
-- Full challenge-mode surfacing and dedicated score persistence UX.
-- Weather + destruction-state reactivity layer.
-
-### Major Milestones Achieved
-- District campaign state machine, urgency timers, and critical window handling.
-- Defense/assault mission scaffolding with objective-based progression.
-- Mothership exterior->interior transition and interior objective chain.
-- Operative deployment ecosystem (spawn classes, support behavior, follow/aura hooks).
-- Supply-drop economy/state persistence and shop integration.
-- Regression safety net of 40 passing automated tests around weapon/projectile/interior/enemy edge cases.
-
-### Critical Missing Features for Design Document Compliance
-1. **Pilot Progression Compliance:** Persistent pilot unlock offers and district-layer progression signaling (including clearer HUD identity for pilot weapon ownership/tier).
-2. **Assault Rewards & Mystery/Jackpot Outcomes:** Base-clear loot/jackpot outcomes tied to assault completion with visible reward callouts.
-3. **Bulwark Assault Synergy:** Structural damage bonus/interaction rules and live UI/FX confirmation while active.
-4. **Challenge Mode Productization:** Last Stand and Assault Only as first-class menu options with score tracking/reporting.
-5. **World Reactivity Layer:** Weather/time-of-day and stronger district destruction-state presentation beats.
-
-### Immediate Next Steps (Recommended Order)
-1. **Pilot progression completion sprint (2-3 days)**  
-   - Add persistent pilot unlock catalog + district-facing progression indicator.  
-   - Finish pilot weapon HUD/readability loop and ensure mission-level reinforcement behavior is explicit.
-
-2. **Assault reward identity sprint (2 days)**  
-   - Implement base-clear reward/jackpot tables and clear payout presentation (mission summary + in-run callout).
-
-3. **Bulwark siege pass (1-2 days)**  
-   - Add structural DPS/siege interactions and mode-active visual telemetry.
-
-4. **Challenge mode surfacing sprint (2 days)**  
-   - Ship Last Stand / Assault Only selectors and score persistence/reporting.
-
-5. **World-reactivity pass (2-3 days)**  
-   - Introduce weather/time-of-day hooks and occupied-district destruction readability polish.
-
-### Estimated Remaining Work
-
-### MVP Completion
-- **Current Progress:** ~84%
-- **Remaining Critical Work:**
-  - Pilot progression compliance: 2-3 days
-  - Assault rewards + jackpot outcomes: 2 days
-  - Bulwark siege synergy + HUD/FX feedback: 1-2 days
-  - Challenge mode surfacing + score persistence: 2 days
-- **Total to MVP target:** ~8-12 days (including QA/balance buffer)
-
-### Full Design Document
-- **High Priority Remaining:** ~16%
-  - Pilot progression package and on-foot identity clarity
-  - Assault reward economy and Bulwark assault identity
-  - Challenge-mode experience surfacing
-- **Medium Priority Remaining:** ~35%
-  - Weather/destruction reactivity systems
-  - Adaptive audio and cinematic urgency polish
-  - Deeper autonomous fire-team coordination
-- **Low Priority Remaining:** ~65%
-  - Leaderboard/mutator expansion
-  - District archetype and long-tail replay content growth
-
-### Post-MVP Polish (Optional)
-- Adaptive music layers tied to urgency and encounter phase changes.
-- Cinematic transition stingers for district fail/recover/liberate states.
-- Expanded deployment feedback (radio chatter sets, class-specific VO/SFX).
-- Challenge mutators and richer leaderboard segmentation.
-- Biome-specific hazards and replay-variance events.
-
-### What We Should Work On Next (Recommended Focus)
-The next best move is to **ship the pilot progression compliance package first**, because it closes the largest design-doc identity gap while leveraging systems that already exist (weapons, ammo state, district urgency, and shop/meta persistence).
-
-**Recommended execution order:**
-1. Pilot progression + pilot HUD clarity.
-2. Assault clear rewards/jackpot emotional payoff.
-3. Bulwark structural siege identity.
-4. Challenge mode surfacing with score persistence.
-5. Weather/reactivity presentation layer.
+SKYLINE SURVIVORS - INTERIOR SYSTEM IMPLEMENTATION
+Progress Report - 2026-02-25
+
+STATUS: COMPLETE ✅
+
+================================================================================
+FILES CREATED (15 TOTAL)
+================================================================================
+
+SECTION LAYOUTS (8 JSON files):
+--------------------------------
+1. js/interiors/sectionLayouts/assault/securityHub.json
+   - Security Hub section with laser grids, locked doors
+   - Platform positions, ladders, spawn points
+   - Base Troopers, Turret Sentries, Shock Drones
+
+2. js/interiors/sectionLayouts/assault/powerGeneration.json
+   - Power Generation section with steam vents, falling debris
+   - Moving platforms, high platforms
+   - Heavy Mechs, Electro-Shockers, Swarm Bots
+
+3. js/interiors/sectionLayouts/assault/reactorCore.json
+   - Reactor Core final section
+   - Radiation zones, Reactor Guardian boss
+   - Boss platform with phase-based attacks
+
+4. js/interiors/sectionLayouts/mothership/hangarBay.json
+   - Hangar Bay deck with landing clamps, emergency bulkheads
+   - Mothership Grunts, Hover Mines, Turret Sentries
+   - Cycling bulkhead hazards
+
+5. js/interiors/sectionLayouts/mothership/bioLabs.json
+   - Bio-Labs deck with toxic spores, containment breaches
+   - Mutant Test Subjects, Bio-Tanks
+   - Spawning breach hazards
+
+6. js/interiors/sectionLayouts/mothership/engineRoom.json
+   - Engine Room deck with steam jets, overloaded wires
+   - Repair Bots, Hover Mines
+   - Electrical arc hazards
+
+7. js/interiors/sectionLayouts/mothership/shieldControl.json
+   - Shield Control deck with rotating barriers
+   - Shield Operators, Assault Drones
+   - Saboteur-disableable barriers
+
+8. js/interiors/sectionLayouts/mothership/centralCore.json
+   - Central Intelligence Core final deck
+   - Core energy pulses, The Overseer boss
+   - Multi-phase boss encounter
+
+CORE SYSTEMS (5 JS files):
+--------------------------
+9. js/interiors/sectionManager.js
+   - Section loading from JSON
+   - Gate management (locked/open states)
+   - Section progression logic
+   - Reinforcement spawning timers
+   - Mission completion tracking
+
+10. js/interiors/hazardSystems.js
+    - Laser grids (periodic damage beams)
+    - Steam vents (warning + active phases)
+    - Radiation zones (continuous DoT)
+    - Falling debris (spawn-based)
+    - Shield barriers (destructible + regenerating)
+    - Locked doors (key drops)
+    - Platform collision setup
+
+11. js/interiors/interiorEnemyConfig.js
+    - 13 enemy type definitions:
+      * baseTrooper: patrol rifle infantry
+      * turretSentry: ceiling spread volleys
+      * shockDrone: EMP charge droppers
+      * heavyMech: slow walker with weak spot
+      * electroShocker: rush + shockwave
+      * swarmBot: pack hunters
+      * mothershipGrunt: reactive shield infantry
+      * hoverMine: proximity mines
+      * mutantTestSubject: splits on death
+      * bioTank: stationary spawner
+      * repairBot: support/healer
+      * shieldOperator: console-linked barriers
+      * reactorGuardian: mini-boss
+      * theOverseer: final boss
+
+12. js/interiors/interiorSpawner.js
+    - Interior enemy spawning from authored layouts
+    - AI behavior systems:
+      * Patrol behavior
+      * Turret/burst fire
+      * Hover/drop patterns
+      * Walker weak spot targeting
+      * Rusher charge attacks
+      * Swarm separation
+      * Spawner intervals
+      * Support healing
+      * Console operator
+      * Proximity mine detonation
+    - Boss phase management
+    - Drop tables (ammo, health, keys)
+
+13. js/interiors/platformLayoutBuilder.js
+    - Build platforms from authored JSON
+    - Moving platform tweens
+    - Ladder placement
+    - Ground collision setup
+    - World bounds configuration
+
+THEME & DOCUMENTATION (2 files):
+--------------------------------
+14. css/interior-theme.css
+    - Pilot weapon HUD styling
+    - Section progress indicators (dots)
+    - Hazard warning banners
+    - Gate status indicators
+    - Status effect banners (poison, radiation, EMP)
+    - Animations for warnings
+
+15. js/interiors/INTEGRATION.md
+    - Integration instructions
+    - HTML loading order
+    - Section data format reference
+    - Testing checklist
+
+================================================================================
+FILES MODIFIED (2 TOTAL)
+================================================================================
+
+16. index.html
+    ADDED:
+    + <link rel="stylesheet" href="css/interior-theme.css">
+    + <script src="js/interiors/sectionManager.js"></script>
+    + <script src="js/interiors/hazardSystems.js"></script>
+    + <script src="js/interiors/interiorEnemyConfig.js"></script>
+    + <script src="js/interiors/interiorSpawner.js"></script>
+    + <script src="js/interiors/platformLayoutBuilder.js"></script>
+    
+    REMOVED (commented out):
+    - backgroundGeneratorMothershipInterior.js
+    - backgroundGeneratorRaiderInterior.js
+    - backgroundGeneratorCarrierInterior.js
+    - backgroundGeneratorNovaInterior.js
+    - backgroundGeneratorSiegeInterior.js
+    - backgroundGeneratorDreadnoughtInterior.js
+
+17. js/entities/assault/assaultBaseCore.js
+    MODIFIED: beginAssaultBaseInterior() function
+    - Replaced: buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337)
+    - With: buildInteriorPlatformsFromLayout(scene, section)
+    - Added: initInteriorMission, initializeHazards, initInteriorSpawners, spawnSectionEnemies
+
+18. js/entities/bosses/mothershipCore.js
+    MODIFIED: beginMothershipInterior() function
+    - Replaced: buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337)
+    - With: buildInteriorPlatformsFromLayout(scene, section)
+    - Added: initInteriorMission, initializeHazards, initInteriorSpawners, spawnSectionEnemies
+
+================================================================================
+FILES DELETED (6 TOTAL)
+================================================================================
+
+19. js/graphics/levelgenerator/backgroundGeneratorCarrierInterior.js
+20. js/graphics/levelgenerator/backgroundGeneratorDreadnoughtInterior.js
+21. js/graphics/levelgenerator/backgroundGeneratorMothershipInterior.js
+22. js/graphics/levelgenerator/backgroundGeneratorNovaInterior.js
+23. js/graphics/levelgenerator/backgroundGeneratorRaiderInterior.js
+24. js/graphics/levelgenerator/backgroundGeneratorSiegeInterior.js
+
+(All replaced by authored layout system)
+
+================================================================================
+SYSTEM FEATURES IMPLEMENTED
+================================================================================
+
+PLATFORM SYSTEM:
+- Static platforms from authored coordinates
+- Moving platforms with tweens
+- Ladders with climb zones
+- Ground collision
+
+HAZARD SYSTEM:
+- Laser grids (periodic activation)
+- Steam vents (warning phase + active phase)
+- Radiation zones (continuous damage)
+- Falling debris (spawn-based projectiles)
+- Shield barriers (destructible + regenerating)
+- Locked doors (key drops from enemies)
+- Landing clamps (grab/crush)
+- Emergency bulkheads (cycling open/close)
+- Toxic spores (poison clouds)
+- Containment breaches (enemy spawners)
+- Overloaded wires (electrical arcs)
+- Rotating shields (moving barriers)
+- Core energy pulses (boss arena AoE)
+
+ENEMY AI BEHAVIORS:
+- Patrolling with direction changes
+- Turret burst fire with spread
+- Hovering with dropping attacks
+- Walking with weak spot targeting
+- Rushing with charge-up
+- Swarming with separation
+- Spawning minions
+- Support/healing allies
+- Console operation (barrier control)
+- Proximity mine arming
+
+BOSS SYSTEMS:
+- Reactor Guardian (Assault final boss)
+  * Phase-based behavior
+  * Missile spread
+  * Shockwave attacks
+  * Minion spawning
+  * Shield regeneration
+
+- The Overseer (Mothership final boss)
+  * 3 phase progression
+  * Core energy pulses (every 10s)
+  * Missile

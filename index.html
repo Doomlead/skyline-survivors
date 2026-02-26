@@ -1,199 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Skyline Survivors - Defender/Stargate Evolution</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.0/dist/phaser.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/game-layout.css">
-    <link rel="stylesheet" href="css/district-layout.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skyline Survivors - Defender/Stargate Evolution</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.0/dist/phaser.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/game-layout.css">
+  <link rel="stylesheet" href="css/district-layout.css">
+  <link rel="stylesheet" href="css/interior-theme.css">
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center overflow-hidden">
-    <div id="page-shell" class="w-full max-w-6xl px-4 flex flex-col items-center gap-2">
-        <!-- Partials will be loaded here directly -->
+
+<div id="page-shell" class="w-full max-w-6xl px-4 flex flex-col items-center gap-2">
+  <!-- Partials will be loaded here directly -->
+</div>
+
+<script>
+  // Load partials directly into page-shell
+  const loadPartial = (url) => {
+    const shell = document.getElementById('page-shell');
+    if (!shell) return;
+    const request = new XMLHttpRequest();
+    request.open('GET', url, false);
+    request.send(null);
+    if (request.status >= 200 && request.status < 400) {
+      const temp = document.createElement('div');
+      temp.innerHTML = request.responseText;
+      while (temp.firstChild) {
+        shell.appendChild(temp.firstChild);
+      }
+    } else {
+      console.error(`Failed to load partial: ${url} (${request.status})`);
+    }
+  };
+  loadPartial('partials/game-layout.html');
+  loadPartial('partials/district-layout.html');
+</script>
+
+<!-- Title Briefing Overlay -->
+<div id="title-overlay" aria-hidden="true">
+  <div class="terminal-briefing" role="dialog" aria-label="Mission briefing">
+    <button class="terminal-button terminal-skip" data-skip type="button">Skip</button>
+    <div class="terminal-screen">
+      <pre data-briefing-text></pre><span class="terminal-cursor" data-cursor>█</span>
     </div>
-    
-    <script>
-        // Load partials directly into page-shell
-        const loadPartial = (url) => {
-            const shell = document.getElementById('page-shell');
-            if (!shell) return;
-            const request = new XMLHttpRequest();
-            request.open('GET', url, false);
-            request.send(null);
-            if (request.status >= 200 && request.status < 400) {
-                const temp = document.createElement('div');
-                temp.innerHTML = request.responseText;
-                while (temp.firstChild) {
-                    shell.appendChild(temp.firstChild);
-                }
-            } else {
-                console.error(`Failed to load partial: ${url} (${request.status})`);
-            }
-        };
+    <div class="terminal-actions">
+      <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400">Press Space/Enter to continue</span>
+      <button class="terminal-button" data-authorize type="button">Authorize Launch</button>
+    </div>
+  </div>
+</div>
 
-        loadPartial('partials/game-layout.html');
-        loadPartial('partials/district-layout.html');
-    </script>
-
-    <!-- Title Briefing Overlay -->
-    <div id="title-overlay" aria-hidden="true">
-        <div class="terminal-briefing" role="dialog" aria-label="Mission briefing">
-            <button class="terminal-button terminal-skip" data-skip type="button">Skip</button>
-            <div class="terminal-screen">
-                <pre data-briefing-text></pre><span class="terminal-cursor" data-cursor>█</span>
-            </div>
-            <div class="terminal-actions">
-                <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400">Press Space/Enter to continue</span>
-                <button class="terminal-button" data-authorize type="button">Authorize Launch</button>
-            </div>
+<!-- Main Menu Overlay (Settings) -->
+<div id="menu-overlay" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+  <div class="bg-slate-900/90 border border-cyan-400 rounded-lg px-6 py-6 max-w-md w-[90%] text-center shadow-2xl">
+    <h2 class="text-2xl font-semibold tracking-[0.25em] text-cyan-300 uppercase mb-3">Settings Deck</h2>
+    <p class="text-xs text-slate-300 leading-relaxed mb-4">
+      Configure audio and accessibility, then hop back to the district map or build/shop layer.
+    </p>
+    <div class="flex flex-col gap-2 mb-4">
+      <button onclick="enterDistrictMap(true)" class="w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 border border-emerald-300 text-xs font-semibold tracking-widest uppercase">
+        Return to District Map
+      </button>
+      <button onclick="closeSettingsToGame()" class="w-full py-2 rounded bg-indigo-700 hover:bg-indigo-600 border border-indigo-400 text-xs font-semibold tracking-widest uppercase">
+        Resume Game
+      </button>
+    </div>
+    <div class="bg-slate-900/60 border border-slate-700 rounded-lg p-3 text-left mb-4 flex flex-col gap-3">
+      <div class="flex items-center justify-between text-[11px] text-slate-200">
+        <span class="text-cyan-300 font-semibold uppercase tracking-wide">Music Volume</span>
+        <span id="music-volume-value" class="text-[11px] text-slate-300">60%</span>
+      </div>
+      <input id="music-volume-slider" type="range" min="0" max="100" step="1" value="60" class="w-full accent-cyan-400 cursor-pointer">
+      <div class="flex items-center justify-between text-[11px] text-slate-200">
+        <span class="text-cyan-300 font-semibold uppercase tracking-wide">SFX Volume</span>
+        <span id="sfx-volume-value" class="text-[11px] text-slate-300">70%</span>
+      </div>
+      <input id="sfx-volume-slider" type="range" min="0" max="100" step="1" value="70" class="w-full accent-emerald-400 cursor-pointer">
+      <label for="reduce-flash-toggle" class="flex items-center justify-between text-[11px] text-slate-200 mt-1">
+        <span class="text-cyan-300 font-semibold uppercase tracking-wide">Reduce Screen Flashes</span>
+        <div class="flex items-center gap-2">
+          <span id="reduce-flash-label" class="text-[11px] text-slate-300">Off</span>
+          <input id="reduce-flash-toggle" type="checkbox" class="accent-cyan-400 h-4 w-4">
         </div>
+      </label>
     </div>
-
-    <!-- Main Menu Overlay (Settings) -->
-    <div id="menu-overlay" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-        <div class="bg-slate-900/90 border border-cyan-400 rounded-lg px-6 py-6 max-w-md w-[90%] text-center shadow-2xl">
-            <h2 class="text-2xl font-semibold tracking-[0.25em] text-cyan-300 uppercase mb-3">Settings Deck</h2>
-            <p class="text-xs text-slate-300 leading-relaxed mb-4">
-                Configure audio and accessibility, then hop back to the district map or build/shop layer.
-            </p>
-
-            <div class="flex flex-col gap-2 mb-4">
-                <button onclick="enterDistrictMap(true)" class="w-full py-2 rounded bg-emerald-600 hover:bg-emerald-500 border border-emerald-300 text-xs font-semibold tracking-widest uppercase">
-                    Return to District Map
-                </button>
-                <button onclick="closeSettingsToGame()" class="w-full py-2 rounded bg-indigo-700 hover:bg-indigo-600 border border-indigo-400 text-xs font-semibold tracking-widest uppercase">
-                    Resume Game
-                </button>
-            </div>
-
-            <div class="bg-slate-900/60 border border-slate-700 rounded-lg p-3 text-left mb-4 flex flex-col gap-3">
-                <div class="flex items-center justify-between text-[11px] text-slate-200">
-                    <span class="text-cyan-300 font-semibold uppercase tracking-wide">Music Volume</span>
-                    <span id="music-volume-value" class="text-[11px] text-slate-300">60%</span>
-                </div>
-                <input id="music-volume-slider" type="range" min="0" max="100" step="1" value="60" class="w-full accent-cyan-400 cursor-pointer">
-
-                <div class="flex items-center justify-between text-[11px] text-slate-200">
-                    <span class="text-cyan-300 font-semibold uppercase tracking-wide">SFX Volume</span>
-                    <span id="sfx-volume-value" class="text-[11px] text-slate-300">70%</span>
-                </div>
-                <input id="sfx-volume-slider" type="range" min="0" max="100" step="1" value="70" class="w-full accent-emerald-400 cursor-pointer">
-
-                <label for="reduce-flash-toggle" class="flex items-center justify-between text-[11px] text-slate-200 mt-1">
-                    <span class="text-cyan-300 font-semibold uppercase tracking-wide">Reduce Screen Flashes</span>
-                    <div class="flex items-center gap-2">
-                        <span id="reduce-flash-label" class="text-[11px] text-slate-300">Off</span>
-                        <input id="reduce-flash-toggle" type="checkbox" class="accent-cyan-400 h-4 w-4">
-                    </div>
-                </label>
-            </div>
-
-            <div class="flex items-center justify-between text-[10px] text-slate-400 mb-2">
-                <span>Press <span class="text-cyan-300">R</span> anytime on Game Over to restart.</span>
-                <button id="mute-toggle" class="px-2 py-1 border border-slate-600 rounded text-[10px] hover:border-cyan-400">
-                    Mute
-                </button>
-            </div>
-        </div>
+    <div class="flex items-center justify-between text-[10px] text-slate-400 mb-2">
+      <span>Press <span class="text-cyan-300">R</span> anytime on Game Over to restart.</span>
+      <button id="mute-toggle" class="px-2 py-1 border border-slate-600 rounded text-[10px] hover:border-cyan-400">
+        Mute
+      </button>
     </div>
+  </div>
+</div>
 
-    <!-- JavaScript Modules -->
-    <script src="js/config/config.js"></script>
-    <script src="js/config/metaProgression.js"></script>
-    <script src="js/audio/audio.js"></script>
-    <script src="js/core/utility.js"></script>
-    <script src="js/core/gameWrap.js"></script>
-    <script src="js/graphics/entities/graphicsPlayer.js"></script>
-    <script src="js/graphics/projectiles/graphicsPlayerProjectiles.js"></script>
-    <script src="js/graphics/projectiles/graphicsPilotProjectiles.js"></script>
-    <script src="js/graphics/projectiles/graphicsEnemyProjectiles.js"></script>
-    <script src="js/graphics/enemies/original/landerMutant.js"></script>
-    <script src="js/graphics/enemies/original/droneBomber.js"></script>
-    <script src="js/graphics/enemies/original/swarmerPod.js"></script>
-    <script src="js/graphics/enemies/original/baiter.js"></script>
-    <script src="js/graphics/enemies/new/kamikazeTurret.js"></script>
-    <script src="js/graphics/enemies/new/shieldSeeker.js"></script>
-    <script src="js/graphics/enemies/new/spawnerShielder.js"></script>
-    <script src="js/graphics/enemies/new/bouncerSniper.js"></script>
-    <script src="js/graphics/enemies/new/swarmLeaderRegenerator.js"></script>
-    <script src="js/graphics/entities/graphicsEnemies.js"></script>
-    <script src="js/graphics/entities/graphicgarrisondefenders.js"></script>
-    <script src="js/graphics/entities/friendlies/graphicsOperatives.js"></script>
-    <script src="js/graphics/entities/graphicsBosses.js"></script>
-    <script src="js/graphics/entities/graphicsMothership.js"></script>
-    <script src="js/graphics/entities/graphicbattleships.js"></script>
-    <script src="js/graphics/entities/graphicMapIcons.js"></script>
-    <script src="js/graphics/entities/graphicAssaultBase.js"></script>
-    <script src="js/graphics/entities/graphicsHangar.js"></script>
-    <script src="js/graphics/entities/graphicsLandingZone.js"></script>
-    <script src="js/graphics/graphicsUtils.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundConfig.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGenerator.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorCyberpunk.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorWasteland.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorWasteland2.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorIndustrial.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorDestroyedIndustrial.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorMothershipExterior.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorMothershipInterior.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorRaiderInterior.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorCarrierInterior.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorNovaInterior.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorSiegeInterior.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundGeneratorDreadnoughtInterior.js"></script>
-    <script src="js/graphics/parallaxManager.js"></script>
-    <script src="js/graphics/levelgenerator/backgroundManager.js"></script>
-    <script src="js/graphics/levelgenerator/graphicsPlatformLadders.js"></script>
-    <script src="js/ui/uiState.js"></script>
-    <script src="js/ui/uiHud.js"></script>
-    <script src="js/ui/uiFullscreen.js"></script>
-    <script src="js/ui/uiRadar.js"></script>
-    <script src="js/ui/uiOverlays.js"></script>
-    <script src="js/ui/uiPauseMenu.js"></script>
-    <script src="js/ui/missionPlanner.js"></script>
-    <script src="js/ui/titleScene.js"></script>
-    <script src="js/ui/mainMenuScene.js"></script>
-    <script src="js/ui/map/worldData.js"></script>
-    <script src="js/ui/map/buildMapView.js"></script>
-    <script src="js/ui/supplyDropUnboxing.js"></script>
-    <script src="js/ui/districtShop.js"></script>
-    <script src="js/ui/districtLayoutManager.js"></script>
-    <script src="js/ui/mission/buildMissionUi.js"></script>
-    <script src="js/ui/buildScene.js"></script>
-    <script src="js/entities/items/powerups.js"></script>
-    <script src="js/entities/player/shipController.js"></script>
-    <script src="js/entities/player/playerCore.js"></script>
-    <script src="js/entities/player/playerWeapons.js"></script>
-    <script src="js/entities/player/buildInteriorPlatforms.js"></script>
-    <script src="js/entities/player/playerControls.js"></script>
-    <script src="js/entities/player/playerCollisions.js"></script>
-    <script src="js/entities/player/playerSupport.js"></script>
-    <script src="js/entities/player/playerHumans.js"></script>
-    <script src="js/config/enemyConfig.js"></script>
-    <script src="js/config/bossConfig.js"></script>
-    <script src="js/entities/enemies/enemyBehaviors.js"></script>
-    <script src="js/entities/phases/shieldPhaseSystem.js"></script>
-    <script src="js/entities/garrison/garrisondefendersBehavior.js"></script>
-    <script src="js/entities/bosses/mothershipCore.js"></script>
-    <script src="js/entities/bosses/mothershipBehavior.js"></script>
-    <script src="js/entities/bosses/bossBehavior.js"></script>
-    <script src="js/entities/battleships/battleshipBehavior.js"></script>
-    <script src="js/entities/assault/assaultBaseCore.js"></script>
-    <script src="js/entities/assault/assaultBaseBehavior.js"></script>
-    <script src="js/entities/friendlies/hangarCore.js"></script>
-    <script src="js/entities/friendlies/hangarBehavior.js"></script>
-    <script src="js/entities/friendlies/operativeBehavior.js"></script>
-    <script src="js/entities/bosses/bossCore.js"></script>
-    <script src="js/entities/battleships/battleshipCore.js"></script>
-    <script src="js/entities/enemies/enemyCore.js"></script>
-    <script src="js/entities/garrison/garrisondefendersCore.js"></script>
-    <script src="js/graphics/particleControl.js"></script>
-    <script src="js/graphics/particleManager.js"></script>
-    <script src="js/core/game.js"></script>
-    <script src="js/core/gameBootstrap.js"></script>
-    <script src="js/ui/accessibilityAudioControls.js"></script>
+<!-- JavaScript Modules -->
+<!-- Config & Core -->
+<script src="js/config/config.js"></script>
+<script src="js/config/metaProgression.js"></script>
+<script src="js/config/enemyConfig.js"></script>
+<script src="js/config/bossConfig.js"></script>
+
+<!-- Audio -->
+<script src="js/audio/audio.js"></script>
+
+<!-- Core Systems -->
+<script src="js/core/utility.js"></script>
+<script src="js/core/gameWrap.js"></script>
+
+<!-- Interior Systems (NEW - Authored Layouts) -->
+<script src="js/interiors/sectionManager.js"></script>
+<script src="js/interiors/hazardSystems.js"></script>
+<script src="js/interiors/interiorEnemyConfig.js"></script>
+<script src="js/interiors/interiorSpawner.js"></script>
+<script src="js/interiors/platformLayoutBuilder.js"></script>
+
+<!-- Graphics -->
+<script src="js/graphics/entities/graphicsPlayer.js"></script>
+<script src="js/graphics/projectiles/graphicsPlayerProjectiles.js"></script>
+<script src="js/graphics/projectiles/graphicsPilotProjectiles.js"></script>
+<script src="js/graphics/projectiles/graphicsEnemyProjectiles.js"></script>
+<script src="js/graphics/enemies/original/landerMutant.js"></script>
+<script src="js/graphics/enemies/original/droneBomber.js"></script>
+<script src="js/graphics/enemies/original/swarmerPod.js"></script>
+<script src="js/graphics/enemies/original/baiter.js"></script>
+<script src="js/graphics/enemies/new/kamikazeTurret.js"></script>
+<script src="js/graphics/enemies/new/shieldSeeker.js"></script>
+<script src="js/graphics/enemies/new/spawnerShielder.js"></script>
+<script src="js/graphics/enemies/new/bouncerSniper.js"></script>
+<script src="js/graphics/enemies/new/swarmLeaderRegenerator.js"></script>
+<script src="js/graphics/entities/graphicsEnemies.js"></script>
+<script src="js/graphics/entities/graphicgarrisondefenders.js"></script>
+<script src="js/graphics/entities/friendlies/graphicsOperatives.js"></script>
+<script src="js/graphics/entities/graphicsBosses.js"></script>
+<script src="js/graphics/entities/graphicsMothership.js"></script>
+<script src="js/graphics/entities/graphicbattleships.js"></script>
+<script src="js/graphics/entities/graphicMapIcons.js"></script>
+<script src="js/graphics/entities/graphicAssaultBase.js"></script>
+<script src="js/graphics/entities/graphicsHangar.js"></script>
+<script src="js/graphics/entities/graphicsLandingZone.js"></script>
+<script src="js/graphics/graphicsUtils.js"></script>
+
+<!-- Background Generators (REMOVED: Interior backgrounds now use authored layouts) -->
+<script src="js/graphics/levelgenerator/backgroundConfig.js"></script>
+<script src="js/graphics/levelgenerator/backgroundGenerator.js"></script>
+<script src="js/graphics/levelgenerator/backgroundGeneratorCyberpunk.js"></script>
+<script src="js/graphics/levelgenerator/backgroundGeneratorWasteland.js"></script>
+<script src="js/graphics/levelgenerator/backgroundGeneratorWasteland2.js"></script>
+<script src="js/graphics/levelgenerator/backgroundGeneratorIndustrial.js"></script>
+<script src="js/graphics/levelgenerator/backgroundGeneratorDestroyedIndustrial.js"></script>
+<script src="js/graphics/levelgenerator/backgroundGeneratorMothershipExterior.js"></script>
+<!-- REMOVED: Interior background generators - now use authored layouts -->
+<!-- backgroundGeneratorMothershipInterior.js removed -->
+<!-- backgroundGeneratorRaiderInterior.js removed -->
+<!-- backgroundGeneratorCarrierInterior.js removed -->
+<!-- backgroundGeneratorNovaInterior.js removed -->
+<!-- backgroundGeneratorSiegeInterior.js removed -->
+<!-- backgroundGeneratorDreadnoughtInterior.js removed -->
+<script src="js/graphics/parallaxManager.js"></script>
+<script src="js/graphics/levelgenerator/backgroundManager.js"></script>
+<script src="js/graphics/levelgenerator/graphicsPlatformLadders.js"></script>
+
+<!-- UI -->
+<script src="js/ui/uiState.js"></script>
+<script src="js/ui/uiHud.js"></script>
+<script src="js/ui/uiFullscreen.js"></script>
+<script src="js/ui/uiRadar.js"></script>
+<script src="js/ui/uiOverlays.js"></script>
+<script src="js/ui/uiPauseMenu.js"></script>
+<script src="js/ui/missionPlanner.js"></script>
+<script src="js/ui/titleScene.js"></script>
+<script src="js/ui/mainMenuScene.js"></script>
+<script src="js/ui/map/worldData.js"></script>
+<script src="js/ui/map/buildMapView.js"></script>
+<script src="js/ui/supplyDropUnboxing.js"></script>
+<script src="js/ui/districtShop.js"></script>
+<script src="js/ui/districtLayoutManager.js"></script>
+<script src="js/ui/mission/buildMissionUi.js"></script>
+<script src="js/ui/buildScene.js"></script>
+
+<!-- Entities -->
+<script src="js/entities/items/powerups.js"></script>
+<script src="js/entities/player/shipController.js"></script>
+<script src="js/entities/player/playerCore.js"></script>
+<script src="js/entities/player/playerWeapons.js"></script>
+<script src="js/entities/player/buildInteriorPlatforms.js"></script>
+<script src="js/entities/player/playerControls.js"></script>
+<script src="js/entities/player/playerCollisions.js"></script>
+<script src="js/entities/player/playerSupport.js"></script>
+<script src="js/entities/player/playerHumans.js"></script>
+<script src="js/entities/enemies/enemyBehaviors.js"></script>
+<script src="js/entities/phases/shieldPhaseSystem.js"></script>
+<script src="js/entities/garrison/garrisondefendersBehavior.js"></script>
+<script src="js/entities/bosses/mothershipCore.js"></script>
+<script src="js/entities/bosses/mothershipBehavior.js"></script>
+<script src="js/entities/bosses/bossBehavior.js"></script>
+<script src="js/entities/battleships/battleshipBehavior.js"></script>
+<script src="js/entities/assault/assaultBaseCore.js"></script>
+<script src="js/entities/assault/assaultBaseBehavior.js"></script>
+<script src="js/entities/friendlies/hangarCore.js"></script>
+<script src="js/entities/friendlies/hangarBehavior.js"></script>
+<script src="js/entities/friendlies/operativeBehavior.js"></script>
+<script src="js/entities/bosses/bossCore.js"></script>
+<script src="js/entities/battleships/battleshipCore.js"></script>
+<script src="js/entities/enemies/enemyCore.js"></script>
+<script src="js/entities/garrison/garrisondefendersCore.js"></script>
+
+<!-- Particles & Game -->
+<script src="js/graphics/particleControl.js"></script>
+<script src="js/graphics/particleManager.js"></script>
+<script src="js/core/game.js"></script>
+<script src="js/core/gameBootstrap.js"></script>
+<script src="js/ui/accessibilityAudioControls.js"></script>
+
 </body>
 </html>

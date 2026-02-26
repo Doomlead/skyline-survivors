@@ -1,0 +1,98 @@
+{
+  "sectionId": "mothership_centralCore",
+  "sectionName": "Central Intelligence Core",
+  "sectionIndex": 4,
+  "totalSections": 5,
+  "dimensions": {
+    "width": 2000,
+    "height": 600,
+    "groundY": 520
+  },
+  "platforms": [
+    {"x": 0, "y": 520, "width": 2000, "height": 40, "type": "ground"},
+    {"x": 100, "y": 460, "width": 120, "height": 16, "type": "standard"},
+    {"x": 350, "y": 420, "width": 100, "height": 16, "type": "standard"},
+    {"x": 600, "y": 380, "width": 140, "height": 16, "type": "standard"},
+    {"x": 900, "y": 340, "width": 200, "height": 16, "type": "bossPlatform"},
+    {"x": 1300, "y": 380, "width": 100, "height": 16, "type": "standard"},
+    {"x": 1600, "y": 420, "width": 120, "height": 16, "type": "standard"},
+    {"x": 1800, "y": 460, "width": 100, "height": 16, "type": "standard"},
+    {"x": 250, "y": 320, "width": 80, "height": 16, "type": "high"},
+    {"x": 500, "y": 280, "width": 100, "height": 16, "type": "high"},
+    {"x": 1100, "y": 280, "width": 100, "height": 16, "type": "high"},
+    {"x": 1500, "y": 320, "width": 80, "height": 16, "type": "high"},
+    {"x": 800, "y": 220, "width": 60, "height": 16, "type": "high"},
+    {"x": 1140, "y": 220, "width": 60, "height": 16, "type": "high"}
+  ],
+  "ladders": [
+    {"x": 110, "y": 460, "height": 60, "connectsTo": [150, 460]},
+    {"x": 360, "y": 420, "height": 100, "connectsTo": [400, 420]},
+    {"x": 610, "y": 380, "height": 140, "connectsTo": [670, 380]},
+    {"x": 1310, "y": 380, "height": 140, "connectsTo": [1350, 380]},
+    {"x": 1610, "y": 420, "height": 100, "connectsTo": [1650, 420]},
+    {"x": 1810, "y": 460, "height": 60, "connectsTo": [1850, 460]},
+    {"x": 260, "y": 320, "height": 200, "connectsTo": [300, 320]},
+    {"x": 510, "y": 280, "height": 240, "connectsTo": [550, 280]},
+    {"x": 1110, "y": 280, "height": 240, "connectsTo": [1150, 280]},
+    {"x": 1510, "y": 320, "height": 200, "connectsTo": [1550, 320]}
+  ],
+  "spawnPoints": {
+    "player": {"x": 50, "y": 480},
+    "enemies": [
+      {"x": 400, "y": 480, "type": "mothershipGrunt"},
+      {"x": 700, "y": 480, "type": "mothershipGrunt"},
+      {"x": 1500, "y": 480, "type": "mothershipGrunt"},
+      {"x": 1700, "y": 480, "type": "mothershipGrunt"}
+    ],
+    "boss": {"x": 1000, "y": 280, "type": "theOverseer", "flipX": false}
+  },
+  "hazards": [
+    {
+      "id": "coreEnergy_1",
+      "type": "coreEnergyPulse",
+      "x": 900,
+      "y": 300,
+      "width": 200,
+      "height": 200,
+      "damage": 4,
+      "interval": 10000,
+      "duration": 2000,
+      "warningTime": 2000,
+      "expansionSpeed": 2
+    },
+    {
+      "id": "radiationCore",
+      "type": "radiation",
+      "x": 850,
+      "y": 150,
+      "width": 300,
+      "height": 370,
+      "damagePerSecond": 3,
+      "visual": "coreGlow"
+    }
+  ],
+  "reinforcements": {
+    "intervalMs": 8000,
+    "maxActive": 6,
+    "spawnPool": ["mothershipGrunt", "hoverMine"]
+  },
+  "gate": {
+    "x": 1980,
+    "y": 400,
+    "width": 20,
+    "height": 120,
+    "condition": "bossDefeated"
+  },
+  "boss": {
+    "type": "theOverseer",
+    "name": "The Overseer",
+    "x": 1000,
+    "y": 280,
+    "hp": 800,
+    "shield": 300,
+    "shieldRegen": 15,
+    "attackPatterns": ["missiles", "summon", "charge"],
+    "phases": [
+      {"hpThreshold": 0.75, "behavior": "missiles", "fireRate": 1800},
+      {"hpThreshold": 0.50, "behavior": "summon", "fireRate": 2500, "summonType": "mothershipGrunt"},
+      {"hpThreshold":

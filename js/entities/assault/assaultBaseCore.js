@@ -280,7 +280,29 @@ function beginAssaultBaseInterior(scene) {
         initParallaxTracking(mainCam.scrollX, mainCam.scrollY);
     }
 
-    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337);
+    // Initialize interior mission with authored sections
+  initInteriorMission(scene, 'assault');
+
+  // Get first section data
+  const section = interiorState.sections && interiorState.sections[0] ? interiorState.sections[0] : null;
+  if (!section) {
+    console.error('No interior sections available');
+    return;
+  }
+
+  // Build platforms, hazards, enemies from authored layout
+  if (typeof buildInteriorPlatformsFromLayout === 'function') {
+    buildInteriorPlatformsFromLayout(scene, section);
+  }
+  if (typeof initializeHazards === 'function') {
+    initializeHazards(scene, section.hazards || []);
+  }
+  if (typeof initInteriorSpawners === 'function') {
+    initInteriorSpawners(scene);
+    if (typeof spawnSectionEnemies === 'function') {
+      spawnSectionEnemies(scene, section);
+    }
+  }
     forceOnFootForAssault(scene);
     spawnAssaultInteriorObjectives(scene);
 

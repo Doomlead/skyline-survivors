@@ -1,0 +1,104 @@
+{
+  "sectionId": "mothership_hangarBay",
+  "sectionName": "Hangar Bay",
+  "sectionIndex": 0,
+  "totalSections": 5,
+  "dimensions": {
+    "width": 1400,
+    "height": 600,
+    "groundY": 520
+  },
+  "platforms": [
+    {"x": 0, "y": 520, "width": 1400, "height": 40, "type": "ground"},
+    {"x": 100, "y": 450, "width": 120, "height": 16, "type": "standard"},
+    {"x": 300, "y": 400, "width": 100, "height": 16, "type": "moving", "moveX": 50, "speed": 30},
+    {"x": 500, "y": 350, "width": 140, "height": 16, "type": "standard"},
+    {"x": 800, "y": 380, "width": 120, "height": 16, "type": "standard"},
+    {"x": 1100, "y": 420, "width": 100, "height": 16, "type": "standard"},
+    {"x": 200, "y": 300, "width": 80, "height": 16, "type": "high"},
+    {"x": 450, "y": 250, "width": 100, "height": 16, "type": "high"},
+    {"x": 700, "y": 280, "width": 90, "height": 16, "type": "high"},
+    {"x": 950, "y": 320, "width": 80, "height": 16, "type": "high"},
+    {"x": 1200, "y": 360, "width": 100, "height": 16, "type": "high"}
+  ],
+  "ladders": [
+    {"x": 110, "y": 450, "height": 70, "connectsTo": [150, 450]},
+    {"x": 310, "y": 400, "height": 120, "connectsTo": [350, 400]},
+    {"x": 510, "y": 350, "height": 170, "connectsTo": [570, 350]},
+    {"x": 810, "y": 380, "height": 140, "connectsTo": [860, 380]},
+    {"x": 1110, "y": 420, "height": 100, "connectsTo": [1150, 420]},
+    {"x": 210, "y": 300, "height": 220, "connectsTo": [250, 300]},
+    {"x": 460, "y": 250, "height": 270, "connectsTo": [500, 250]}
+  ],
+  "spawnPoints": {
+    "player": {"x": 50, "y": 480},
+    "enemies": [
+      {"x": 400, "y": 480, "type": "mothershipGrunt"},
+      {"x": 600, "y": 480, "type": "mothershipGrunt"},
+      {"x": 900, "y": 480, "type": "mothershipGrunt"},
+      {"x": 250, "y": 340, "type": "turretSentry", "flipped": false},
+      {"x": 550, "y": 220, "type": "turretSentry", "flipped": false},
+      {"x": 800, "y": 240, "type": "turretSentry", "flipped": false}
+    ]
+  },
+  "hazards": [
+    {
+      "id": "landingClamp_1",
+      "type": "landingClamp",
+      "x": 250,
+      "y": 450,
+      "width": 60,
+      "height": 80,
+      "warningTime": 1500,
+      "damage": 3,
+      "grabsPlayer": true,
+      "crushTime": 2000
+    },
+    {
+      "id": "landingClamp_2",
+      "type": "landingClamp",
+      "x": 750,
+      "y": 400,
+      "width": 60,
+      "height": 80,
+      "warningTime": 1500,
+      "damage": 3,
+      "grabsPlayer": true,
+      "crushTime": 2000
+    },
+    {
+      "id": "emergencyBulkhead_1",
+      "type": "emergencyBulkhead",
+      "x": 500,
+      "y": 450,
+      "width": 20,
+      "height": 70,
+      "cycleTime": 6000,
+      "openTime": 3000,
+      "canBeForced": true
+    },
+    {
+      "id": "emergencyBulkhead_2",
+      "type": "emergencyBulkhead",
+      "x": 1000,
+      "y": 450,
+      "width": 20,
+      "height": 70,
+      "cycleTime": 7000,
+      "openTime": 3500,
+      "canBeForced": true
+    }
+  ],
+  "reinforcements": {
+    "intervalMs": 10000,
+    "maxActive": 8,
+    "spawnPool": ["mothershipGrunt", "hoverMine", "mothershipGrunt"]
+  },
+  "gate": {
+    "x": 1380,
+    "y": 400,
+    "width": 20,
+    "height": 120,
+    "condition": "enemiesCleared"
+  }
+}

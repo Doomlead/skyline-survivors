@@ -168,7 +168,27 @@ function beginMothershipInterior(scene) {
     swapToInteriorBackground(scene);
 
     // 2.5. Build interior collision platforms/ladders while keeping groundLevel compatibility
-    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337);
+    // Initialize mission first, then get section data
+  initInteriorMission(scene, 'mothership');
+
+  const section = interiorState.sections && interiorState.sections[0] ? interiorState.sections[0] : null;
+  if (!section) {
+    console.error('No mothership interior sections available');
+    return;
+  }
+
+  if (typeof buildInteriorPlatformsFromLayout === 'function') {
+    buildInteriorPlatformsFromLayout(scene, section);
+  }
+  if (typeof initializeHazards === 'function') {
+    initializeHazards(scene, section.hazards || []);
+  }
+  if (typeof initInteriorSpawners === 'function') {
+    initInteriorSpawners(scene);
+    if (typeof spawnSectionEnemies === 'function') {
+      spawnSectionEnemies(scene, section);
+    }
+  }
 
     // 3. Force pilot ejection - lock ship controls
     forceOnFoot(scene);

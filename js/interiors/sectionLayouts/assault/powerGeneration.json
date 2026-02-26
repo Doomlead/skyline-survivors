@@ -1,0 +1,104 @@
+{
+  "sectionId": "assault_powerGeneration",
+  "sectionName": "Power Generation",
+  "sectionIndex": 1,
+  "totalSections": 3,
+  "dimensions": {
+    "width": 1400,
+    "height": 600,
+    "groundY": 520
+  },
+  "platforms": [
+    {"x": 0, "y": 520, "width": 1400, "height": 40, "type": "ground"},
+    {"x": 100, "y": 450, "width": 100, "height": 16, "type": "standard"},
+    {"x": 300, "y": 420, "width": 120, "height": 16, "type": "standard"},
+    {"x": 550, "y": 380, "width": 140, "height": 16, "type": "moving", "moveX": 100, "speed": 40},
+    {"x": 850, "y": 350, "width": 120, "height": 16, "type": "standard"},
+    {"x": 1100, "y": 400, "width": 100, "height": 16, "type": "standard"},
+    {"x": 200, "y": 320, "width": 80, "height": 16, "type": "high"},
+    {"x": 450, "y": 280, "width": 100, "height": 16, "type": "high"},
+    {"x": 750, "y": 260, "width": 90, "height": 16, "type": "high"},
+    {"x": 1000, "y": 300, "width": 80, "height": 16, "type": "high"},
+    {"x": 1250, "y": 340, "width": 100, "height": 16, "type": "high"}
+  ],
+  "ladders": [
+    {"x": 110, "y": 450, "height": 70, "connectsTo": [150, 450]},
+    {"x": 310, "y": 420, "height": 100, "connectsTo": [360, 420]},
+    {"x": 560, "y": 380, "height": 140, "connectsTo": [690, 380]},
+    {"x": 860, "y": 350, "height": 170, "connectsTo": [910, 350]},
+    {"x": 1110, "y": 400, "height": 120, "connectsTo": [1200, 400]},
+    {"x": 210, "y": 320, "height": 200, "connectsTo": [280, 320]},
+    {"x": 460, "y": 280, "height": 240, "connectsTo": [500, 280]}
+  ],
+  "spawnPoints": {
+    "player": {"x": 50, "y": 480},
+    "enemies": [
+      {"x": 400, "y": 380, "type": "heavyMech"},
+      {"x": 900, "y": 310, "type": "heavyMech"},
+      {"x": 600, "y": 520, "type": "electroShocker"},
+      {"x": 1000, "y": 360, "type": "electroShocker"},
+      {"x": 300, "y": 480, "type": "swarmBot"},
+      {"x": 350, "y": 480, "type": "swarmBot"},
+      {"x": 700, "y": 480, "type": "swarmBot"},
+      {"x": 750, "y": 480, "type": "swarmBot"}
+    ]
+  },
+  "hazards": [
+    {
+      "id": "steamVent_1",
+      "type": "steamVent",
+      "x": 250,
+      "y": 500,
+      "radius": 60,
+      "damage": 1,
+      "interval": 4000,
+      "duration": 2000,
+      "warningTime": 1000
+    },
+    {
+      "id": "steamVent_2",
+      "type": "steamVent",
+      "x": 650,
+      "y": 500,
+      "radius": 60,
+      "damage": 1,
+      "interval": 3500,
+      "duration": 2000,
+      "warningTime": 1000
+    },
+    {
+      "id": "steamVent_3",
+      "type": "steamVent",
+      "x": 1050,
+      "y": 500,
+      "radius": 60,
+      "damage": 1,
+      "interval": 4500,
+      "duration": 2000,
+      "warningTime": 1000
+    },
+    {
+      "id": "debrisZone",
+      "type": "fallingDebris",
+      "x": 0,
+      "y": 0,
+      "width": 1400,
+      "height": 200,
+      "spawnRate": 3000,
+      "damage": 1,
+      "warningTime": 500
+    }
+  ],
+  "reinforcements": {
+    "intervalMs": 10000,
+    "maxActive": 8,
+    "spawnPool": ["baseTrooper", "swarmBot", "swarmBot", "electroShocker"]
+  },
+  "gate": {
+    "x": 1380,
+    "y": 400,
+    "width": 20,
+    "height": 120,
+    "condition": "enemiesCleared"
+  }
+}

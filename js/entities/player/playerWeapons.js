@@ -479,8 +479,10 @@ function updateProjectiles(scene) {
         garrisonDefenders,
         bosses,
         battleships,
+        player,
         particleManager
     } = scene;
+    if (!player) return;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     /**
      * Handles the destroyIfGrounded routine and encapsulates its core gameplay logic.

@@ -1,0 +1,86 @@
+{
+  "sectionId": "assault_securityHub",
+  "sectionName": "Security Hub",
+  "sectionIndex": 0,
+  "totalSections": 3,
+  "dimensions": {
+    "width": 1200,
+    "height": 600,
+    "groundY": 520
+  },
+  "platforms": [
+    {"x": 0, "y": 520, "width": 1200, "height": 40, "type": "ground"},
+    {"x": 150, "y": 420, "width": 120, "height": 16, "type": "standard"},
+    {"x": 350, "y": 380, "width": 100, "height": 16, "type": "standard"},
+    {"x": 550, "y": 340, "width": 140, "height": 16, "type": "standard"},
+    {"x": 750, "y": 400, "width": 120, "height": 16, "type": "standard"},
+    {"x": 950, "y": 360, "width": 100, "height": 16, "type": "standard"},
+    {"x": 200, "y": 280, "width": 80, "height": 16, "type": "high"},
+    {"x": 500, "y": 240, "width": 100, "height": 16, "type": "high"},
+    {"x": 800, "y": 300, "width": 90, "height": 16, "type": "high"}
+  ],
+  "ladders": [
+    {"x": 160, "y": 420, "height": 100, "connectsTo": [280, 420]},
+    {"x": 360, "y": 380, "height": 140, "connectsTo": [450, 380]},
+    {"x": 560, "y": 340, "height": 180, "connectsTo": [640, 340]},
+    {"x": 760, "y": 400, "height": 120, "connectsTo": [870, 400]},
+    {"x": 960, "y": 360, "height": 160, "connectsTo": [1050, 360]}
+  ],
+  "spawnPoints": {
+    "player": {"x": 100, "y": 480},
+    "enemies": [
+      {"x": 400, "y": 340, "type": "baseTrooper"},
+      {"x": 600, "y": 300, "type": "baseTrooper"},
+      {"x": 900, "y": 320, "type": "baseTrooper"},
+      {"x": 1100, "y": 480, "type": "baseTrooper"},
+      {"x": 500, "y": 200, "type": "turretSentry", "flipped": false},
+      {"x": 800, "y": 260, "type": "turretSentry", "flipped": false}
+    ]
+  },
+  "hazards": [
+    {
+      "id": "laserGrid_1",
+      "type": "laserGrid",
+      "x": 300,
+      "y": 450,
+      "width": 4,
+      "height": 70,
+      "damage": 2,
+      "interval": 2000,
+      "duration": 1500
+    },
+    {
+      "id": "laserGrid_2",
+      "type": "laserGrid",
+      "x": 700,
+      "y": 450,
+      "width": 4,
+      "height": 70,
+      "damage": 2,
+      "interval": 2500,
+      "duration": 1200
+    },
+    {
+      "id": "lockedDoor",
+      "type": "lockedDoor",
+      "x": 1150,
+      "y": 450,
+      "width": 16,
+      "height": 70,
+      "requiresKey": true,
+      "enemyDropChance": 0.25
+    }
+  ],
+  "reinforcements": {
+    "intervalMs": 8000,
+    "maxActive": 6,
+    "spawnPool": ["baseTrooper", "baseTrooper", "shockDrone"]
+  },
+  "gate": {
+    "x": 1180,
+    "y": 400,
+    "width": 20,
+    "height": 120,
+    "condition": "enemiesCleared"
+  }
+}
