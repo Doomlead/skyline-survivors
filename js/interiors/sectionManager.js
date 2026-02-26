@@ -21,7 +21,7 @@ const INTERIOR_PATHS = {
 const INTERIOR_CACHE = {};
 
 // Current runtime interior state
-let interiorState = {
+const interiorState = {
   missionType: null, // 'assault' | 'mothership'
   currentSectionIndex: 0,
   sections: [], // Loaded section data
@@ -81,19 +81,17 @@ function initInteriorMission(scene, missionType) {
   // Build sections from cache or use fallback
   const sections = paths.map(path => INTERIOR_CACHE[path] || getFallbackSection());
 
-  interiorState = {
-    missionType,
-    currentSectionIndex: 0,
-    sections: sections,
-    enemiesKilled: 0,
-    enemiesSpawned: 0,
-    activeEnemies: 0,
-    bossDefeated: false,
-    sectionCleared: false,
-    gates: [],
-    hazards: [],
-    reinforcements: { timer: 0, active: false }
-  };
+  interiorState.missionType = missionType;
+  interiorState.currentSectionIndex = 0;
+  interiorState.sections = sections;
+  interiorState.enemiesKilled = 0;
+  interiorState.enemiesSpawned = 0;
+  interiorState.activeEnemies = 0;
+  interiorState.bossDefeated = false;
+  interiorState.sectionCleared = false;
+  interiorState.gates = [];
+  interiorState.hazards = [];
+  interiorState.reinforcements = { timer: 0, active: false };
 
   if (interiorState.sections.length === 0) {
     console.error('No interior sections loaded');
