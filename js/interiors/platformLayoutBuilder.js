@@ -56,7 +56,7 @@ function buildInteriorPlatformsFromLayout(scene, section) {
     );
     platform.setDepth(FG_DEPTH_BASE - 1);
     scene.physics.add.existing(platform, true);
-    if (platform.body) {
+    if (platform.body && typeof platform.body.setImmovable === 'function') {
       platform.body.setImmovable(true);
     }
     scene.platforms.add(platform);
