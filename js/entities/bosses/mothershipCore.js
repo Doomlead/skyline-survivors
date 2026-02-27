@@ -53,6 +53,17 @@ function setupMothershipEncounter(scene) {
     objective.interiorReinforcementTimer = 0;
     objective.shipLocked = false;
     objective.transitionTimer = 0;
+    objective.currentSectionIndex = 0;
+    objective.activeSectionId = objective.sectionGraph?.[0]?.id || null;
+    if (Array.isArray(objective.sectionProgress)) {
+        objective.sectionProgress = objective.sectionProgress.map((sectionProgress, index) => ({
+            ...sectionProgress,
+            sectionState: index === 0 ? 'active' : 'pending',
+            started: index === 0,
+            cleared: false,
+            checkpointReached: false
+        }));
+    }
 
     const breachPosition = getMothershipBreachPosition(scene);
     const spawnX = breachPosition.x;
@@ -168,7 +179,7 @@ function beginMothershipInterior(scene) {
     swapToInteriorBackground(scene);
 
     // 2.5. Build interior collision platforms/ladders while keeping groundLevel compatibility
-    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337);
+    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337, objective.sectionGraph?.[objective.currentSectionIndex || 0] || objective.activeSectionId);
 
     // 3. Force pilot ejection - lock ship controls
     forceOnFoot(scene);
@@ -303,13 +314,95 @@ function forceOnFoot(scene) {
     }
 }
 
+// Returns the currently active mothership interior section definition.
+function getActiveMothershipInteriorSection(objective) {
+    if (!objective) return null;
+    const index = objective.currentSectionIndex || 0;
+    if (Array.isArray(objective.sectionGraph) && objective.sectionGraph[index]) {
+        return objective.sectionGraph[index];
+    }
+    return null;
+}
+
+// Updates section progression state for the mothership interior objective.
+function setMothershipSectionState(objective, index, state, patch = {}) {
+    const progress = objective?.sectionProgress;
+    if (!Array.isArray(progress) || !progress[index]) return;
+    progress[index] = {
+        ...progress[index],
+        sectionState: state,
+        ...patch
+    };
+}
+
+// Advances mothership interior section and rebuilds section-aware geometry/objectives.
+function advanceMothershipInteriorSection(scene) {
+    const objective = gameState.mothershipObjective;
+    if (!objective) return false;
+
+    const currentIndex = objective.currentSectionIndex || 0;
+    setMothershipSectionState(objective, currentIndex, 'cleared', {
+        cleared: true,
+        checkpointReached: true
+    });
+
+    const nextIndex = currentIndex + 1;
+    if (!Array.isArray(objective.sectionGraph) || nextIndex >= objective.sectionGraph.length) {
+        return false;
+    }
+
+    objective.currentSectionIndex = nextIndex;
+    const nextSection = objective.sectionGraph[nextIndex] || null;
+    objective.activeSectionId = nextSection ? nextSection.id : null;
+    setMothershipSectionState(objective, nextIndex, 'active', { started: true });
+
+    const interiorTargets = scene.assaultTargets?.children?.entries;
+    if (Array.isArray(interiorTargets)) {
+        interiorTargets.forEach((target) => {
+            if (target?.active && target.interiorTarget) target.destroy();
+        });
+    }
+
+    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337, nextSection || objective.activeSectionId);
+    spawnInteriorObjectives(scene);
+
+    const sectionTheme = nextSection?.theme ? nextSection.theme.toUpperCase() : 'NEXT DECK';
+    showRebuildObjectiveBanner(scene, `CHECKPOINT REACHED\n${sectionTheme}`, '#00ffcc');
+    return true;
+}
+
 // Spawns interior conduits/security nodes and seeds initial defender waves.
 function spawnInteriorObjectives(scene) {
     const objective = gameState.mothershipObjective;
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
+    const section = getActiveMothershipInteriorSection(objective);
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
 
-    // Reset interior objective counts
+    const sectionProgress = objective.sectionProgress?.[objective.currentSectionIndex || 0];
+    if (sectionProgress) {
+        sectionProgress.started = true;
+        sectionProgress.sectionState = 'active';
+    }
+
+    if (typeof setupInteriorHazards === 'function') {
+        setupInteriorHazards(scene, objective);
+    }
+
+    const isFinalSection = (objective.currentSectionIndex || 0) >= ((objective.sectionCount || 0) - 1);
+    if (isFinalSection) {
+        objective.powerConduitsTotal = 0;
+        objective.powerConduitsRemaining = 0;
+        objective.securityNodesTotal = 0;
+        objective.securityNodesRemaining = 0;
+        objective.coreChamberOpen = true;
+        objective.coreChamberActive = false;
+        objective.coreChamberHp = 0;
+        objective.coreChamberHpMax = cfg.coreChamberHp;
+        objective.interiorReinforcementTimer = 0;
+        spawnCoreChamber(scene);
+        return;
+    }
+
     objective.powerConduitsTotal = cfg.powerConduitCount;
     objective.powerConduitsRemaining = cfg.powerConduitCount;
     objective.securityNodesTotal = cfg.securityNodeCount;
@@ -320,7 +413,6 @@ function spawnInteriorObjectives(scene) {
     objective.coreChamberHpMax = cfg.coreChamberHp;
     objective.interiorReinforcementTimer = 0;
 
-    // Spread power conduits across the world width
     const conduitSpacing = CONFIG.worldWidth / (cfg.powerConduitCount + 1);
     for (let i = 0; i < cfg.powerConduitCount; i++) {
         const cx = conduitSpacing * (i + 1) + (Math.random() - 0.5) * 100;
@@ -330,14 +422,13 @@ function spawnInteriorObjectives(scene) {
 
         const conduit = createInteriorComponent(
             scene, cx, cy,
-            'assaultTurret',       // reuse turret texture for conduit
+            'assaultTurret',
             'power_conduit',
             cfg.powerConduitHp
         );
-        conduit.setTint(0x00ffff); // Cyan tint to distinguish
+        conduit.setTint(0x00ffff);
     }
 
-    // Spread security nodes across the world
     const nodeSpacing = CONFIG.worldWidth / (cfg.securityNodeCount + 1);
     for (let i = 0; i < cfg.securityNodeCount; i++) {
         const nx = nodeSpacing * (i + 1) + (Math.random() - 0.5) * 150;
@@ -347,14 +438,17 @@ function spawnInteriorObjectives(scene) {
 
         const node = createInteriorComponent(
             scene, nx, ny,
-            'assaultShieldGen',    // reuse shield gen texture for node
+            'assaultShieldGen',
             'security_node',
             cfg.securityNodeHp
         );
-        node.setTint(0xff00ff);   // Magenta tint to distinguish
+        node.setTint(0xff00ff);
     }
 
-    // Spawn initial interior defenders
+    objective.phaseLabel = `PHASE 2 - ${section?.theme || 'INTERIOR'}`;
+    objective.gateLabel = section?.gateRule?.type ? `Gate: ${section.gateRule.type.replace(/_/g, ' ')}` : 'Clear the section gate';
+    objective.gateColor = '#ff00ff';
+
     spawnInteriorDefenders(scene, 4);
 }
 
@@ -425,10 +519,8 @@ function updateMothershipInterior(scene, delta) {
     const objective = gameState.mothershipObjective;
     if (!objective || !objective.interiorPhase) return;
 
-    // Wait for interior to be fully initialized
     if (!objective.interiorStarted) return;
 
-    // Enforce ship lock: prevent rebuild during Phase 2
     if (gameState.rebuildObjective && gameState.rebuildObjective.active) {
         if (objective.shipLocked) {
             gameState.rebuildObjective.active = false;
@@ -436,7 +528,6 @@ function updateMothershipInterior(scene, delta) {
         }
     }
 
-    // Prevent re-entering the Aegis during Phase 2
     if (objective.shipLocked && aegisState.active) {
         ejectPilot(scene);
         aegisState.destroyed = true;
@@ -447,51 +538,55 @@ function updateMothershipInterior(scene, delta) {
         syncActivePlayer(scene);
     }
 
-    // Update HUD
-    if (!objective.coreChamberOpen) {
-        const totalGates = objective.powerConduitsTotal + objective.securityNodesTotal;
-        const remaining = objective.powerConduitsRemaining + objective.securityNodesRemaining;
-        objective.phaseLabel = 'PHASE 2 - INTERIOR';
-        objective.gateLabel = `Targets: ${remaining}/${totalGates} remaining`;
-        objective.gateColor = remaining > 0 ? '#ff00ff' : '#00ff00';
-        objective.bossHp = remaining;
-        objective.bossHpMax = totalGates;
-    } else if (objective.coreChamberActive) {
-        objective.phaseLabel = 'PHASE 2 - CORE CHAMBER';
+    const section = getActiveMothershipInteriorSection(objective);
+    const isFinalSection = (objective.currentSectionIndex || 0) >= ((objective.sectionCount || 0) - 1);
+
+    if (isFinalSection && objective.coreChamberActive) {
+        objective.phaseLabel = `PHASE 2 - ${section?.theme || 'CORE CHAMBER'}`;
         objective.gateLabel = 'Destroy the reactor core!';
         objective.gateColor = '#ffaa00';
         objective.bossHp = objective.coreChamberHp;
         objective.bossHpMax = objective.coreChamberHpMax;
+    } else {
+        const totalGates = objective.powerConduitsTotal + objective.securityNodesTotal;
+        const remaining = objective.powerConduitsRemaining + objective.securityNodesRemaining;
+        objective.phaseLabel = `PHASE 2 - ${section?.theme || 'INTERIOR'}`;
+        objective.gateLabel = `Section ${Math.min((objective.currentSectionIndex || 0) + 1, objective.sectionCount || 1)}/${objective.sectionCount || 1} Targets: ${remaining}/${totalGates}`;
+        objective.gateColor = remaining > 0 ? '#ff00ff' : '#00ff00';
+        objective.bossHp = remaining;
+        objective.bossHpMax = totalGates;
+
+        if (totalGates > 0 && remaining <= 0) {
+            const advanced = advanceMothershipInteriorSection(scene);
+            if (!advanced) {
+                objective.coreChamberOpen = true;
+                spawnCoreChamber(scene);
+            }
+            return;
+        }
     }
 
-    // Check if all conduits and nodes are destroyed -> open core chamber
-    if (!objective.coreChamberOpen
-        && objective.powerConduitsRemaining <= 0
-        && objective.securityNodesRemaining <= 0) {
-        objective.coreChamberOpen = true;
-        spawnCoreChamber(scene);
+    if (typeof updateInteriorHazards === 'function') {
+        updateInteriorHazards(scene, delta, objective);
     }
 
-    // Interior reinforcements
     objective.interiorReinforcementTimer += delta;
     const reinforceInterval = MOTHERSHIP_INTERIOR_CONFIG.reinforcementInterval;
     if (objective.interiorReinforcementTimer >= reinforceInterval) {
         objective.interiorReinforcementTimer = 0;
 
-        // Only spawn if not too many enemies active
         const activeEnemies = scene.enemies ? scene.enemies.countActive(true) : 0;
         if (activeEnemies < 8) {
             spawnInteriorDefenders(scene, MOTHERSHIP_INTERIOR_CONFIG.reinforcementBatch);
         }
     }
 
-    // Interior turret fire from conduits/nodes (reuse existing turret fire pattern)
     const interiorTargets = scene.assaultTargets?.children?.entries;
     if (Array.isArray(interiorTargets)) {
         const now = scene.time?.now || 0;
         interiorTargets.forEach(target => {
             if (!target || !target.active || !target.interiorTarget) return;
-            if (target.assaultRole === 'interior_core') return; // Core doesn't shoot
+            if (target.assaultRole === 'interior_core') return;
 
             if (now >= (target.nextShot || 0)) {
                 fireInteriorTurret(scene, target);
@@ -587,6 +682,9 @@ function hitInteriorTarget(projectile, target) {
             target.destroy();
             objective.active = false;
             objective.interiorPhase = false;
+            if (typeof clearInteriorHazards === 'function') {
+                clearInteriorHazards(scene);
+            }
 
             showRebuildObjectiveBanner(scene, 'REACTOR CORE DESTROYED\nMOTHERSHIP ELIMINATED!', '#00ff00');
 
