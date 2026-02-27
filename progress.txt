@@ -322,3 +322,84 @@ The next best move is to **ship the pilot progression compliance package first**
 3. Bulwark structural siege identity.
 4. Challenge mode surfacing with score persistence.
 5. Weather/reactivity presentation layer.
+
+---
+
+## Thread Implementation Update (Interior Alignment Pass)
+
+### Completed in this thread
+
+1. **Section-Graph Data Model Added**
+   - Added declarative interior section graphs for both mission types:
+     - `ASSAULT_INTERIOR_SECTIONS` (3 sections).
+     - `MOTHERSHIP_INTERIOR_SECTIONS` (5 sections).
+   - Each section now carries explicit fields for:
+     - `id`, `theme`, `length`, `checkpoint`,
+     - `hazardSpawners[]`, `enemyPool[]`,
+     - `gateRule`, `completionRule`,
+     - optional `bossEncounter`.
+   - Added section-state creation/initialization plumbing so objective state always includes current section identity and per-section progress metadata.
+
+2. **Section-Aware Interior Generator Introduced**
+   - Extended platform generation signature to support section templates:
+     - `buildInteriorPlatforms(scene, seed, sectionTemplate)`.
+   - Added archetype/template handling for:
+     - Assault interiors: Security Hub, Power Generation, Reactor Core.
+     - Mothership interiors: Hangar Bay, Bio-Labs, Engine Room, Shield Control, Central Intelligence Core.
+   - Added section-specific gate/checkpoint/hazard anchor support while preserving seeded replay variation.
+   - Ensured resize/rebuild flows preserve active section template.
+
+3. **Interior Objective Loop Replaced with Section FSM**
+   - Reworked assault + mothership interior update flows from flat conduit/node completion logic into section progression state machines.
+   - Added explicit per-section lifecycle states (`active`, `cleared`, `checkpointed` style progression data).
+   - Added section advancement functions that:
+     - mark current section complete,
+     - advance `currentSectionIndex`,
+     - rebuild geometry/objectives for the new active section,
+     - only run final core encounter rules in the final section.
+   - End conditions now align with intended section counts:
+     - Assault ends after section 3 reactor objective.
+     - Mothership ends after section 5 central core objective.
+
+4. **Modular Section-Specific Hazard System Implemented**
+   - Implemented hazard controllers bound by section config instead of hardcoded mission logic.
+   - Initial hazard set implemented:
+     - `LaserGridHazard`,
+     - `LockedDoorHazard`,
+     - `SteamVentHazard`,
+     - `RadiationZoneHazard` (plus aliases used by section configs).
+   - Added hazard lifecycle integration points:
+     - setup on section objective spawn,
+     - per-frame updates during interior phase,
+     - cleanup on encounter completion.
+
+5. **Hazards Fully Split into Graphics/Core/Behavior Modules**
+   - Refactored monolithic hazard logic into:
+     - graphics module,
+     - behavior module,
+     - core/factory module,
+     - lightweight lifecycle facade.
+   - Updated script loading order to ensure modular hazard stack initializes correctly.
+
+6. **Mission-Specific Interior Enemy Pools + Spawn Directors Added**
+   - Replaced generic interior enemy list usage with active-section enemy pools.
+   - Assault section pools now map to: Trooper, Sentry, Drone, Mech, Shocker, Swarm-bot.
+   - Mothership section pools now map to: Grunt, Hover-mine, Mutant, Bio-tank, Repair-bot, Shield-operator.
+   - Updated defender spawn directors to choose from section-configured pools at runtime.
+
+7. **Interior Enemy Modularization + Assets + Drops Added**
+   - Added modular interior enemy stack split by definitions, behaviors, and core selection/drop logic.
+   - Added graphics generation/registration for all interior enemy units and pilot weapon drop visuals.
+   - Added pilot-specific random weapon drops from interior enemies that:
+     - spawn to the floor,
+     - do not float,
+     - integrate with pilot pickup/weapon progression behavior.
+
+### Net Effect on Design Alignment
+- Interior missions now have a real section-driven runtime model rather than only flat objective counters.
+- Geometry, hazards, and enemy composition are now section-bound and mission-specific.
+- Hazard and enemy systems were modularized to avoid monolithic mission files and support further expansion.
+
+### Remaining Follow-Up
+- Balance/tuning pass for section pacing, hazard cadence, and enemy composition intensity.
+- Additional interior cinematic/readability polish and broader mission reward parity (assault jackpots, etc.).
