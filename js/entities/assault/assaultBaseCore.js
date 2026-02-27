@@ -268,8 +268,14 @@ function beginAssaultBaseInterior(scene) {
 
     objective.interiorStarted = true;
 
+    if (typeof logInteriorTransitionReadiness === 'function') {
+        logInteriorTransitionReadiness(scene, 'beginAssaultBaseInterior');
+    }
+
     if (typeof clearExteriorEntities === 'function') {
         clearExteriorEntities(scene);
+    } else {
+        console.warn('[AssaultInterior] clearExteriorEntities is unavailable; continuing without exterior cleanup.');
     }
 
     const interiorStyle = ASSAULT_INTERIOR_STYLE_BY_BASE[objective.baseVariant] || 'raider_interior';
@@ -280,29 +286,12 @@ function beginAssaultBaseInterior(scene) {
         initParallaxTracking(mainCam.scrollX, mainCam.scrollY);
     }
 
-    // Initialize interior mission with authored sections
-  initInteriorMission(scene, 'assault');
-
-  // Get first section data
-  const section = interiorState.sections && interiorState.sections[0] ? interiorState.sections[0] : null;
-  if (!section) {
-    console.error('No interior sections available');
-    return;
-  }
-
-  // Build platforms, hazards, enemies from authored layout
-  if (typeof buildInteriorPlatformsFromLayout === 'function') {
-    buildInteriorPlatformsFromLayout(scene, section);
-  }
-  if (typeof initializeHazards === 'function') {
-    initializeHazards(scene, section.hazards || []);
-  }
-  if (typeof initInteriorSpawners === 'function') {
-    initInteriorSpawners(scene);
-    if (typeof spawnSectionEnemies === 'function') {
-      spawnSectionEnemies(scene, section);
+    // Initialize interior mission with authored sections (sectionManager owns section setup)
+    const started = typeof initInteriorMission === 'function' ? initInteriorMission(scene, 'assault') : false;
+    if (!started) {
+        console.error('[AssaultInterior] Failed to initialize interior mission.');
+        return;
     }
-  }
     forceOnFootForAssault(scene);
     spawnAssaultInteriorObjectives(scene);
 

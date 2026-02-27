@@ -19,6 +19,7 @@ const INTERIOR_PATHS = {
 };
 
 const INTERIOR_CACHE = {};
+let hasWarnedMissingInteriorUI = false;
 
 // Current runtime interior state
 const interiorState = {
@@ -148,6 +149,16 @@ function loadSection(scene, sectionIndex) {
   // Build platforms using authored layout
   buildInteriorPlatformsFromLayout(scene, section);
 
+  // Initialize spawners before enemy spawn (support both direct global bindings and window-attached exports)
+  const initSpawners = typeof initInteriorSpawners === 'function'
+    ? initInteriorSpawners
+    : (typeof window !== 'undefined' && typeof window.initInteriorSpawners === 'function'
+      ? window.initInteriorSpawners
+      : null);
+  if (initSpawners) {
+    initSpawners(scene);
+  }
+
   // Spawn initial enemies (support both direct global bindings and window-attached exports)
   const spawnEnemies = typeof spawnSectionEnemies === 'function'
     ? spawnSectionEnemies
@@ -182,8 +193,19 @@ function loadSection(scene, sectionIndex) {
     }
   }
 
-  // Update UI
-  updateInteriorUI(section);
+  // Update UI (support both direct global bindings and window-attached exports)
+  const updateUI = typeof updateInteriorUI === 'function'
+    ? updateInteriorUI
+    : (typeof window !== 'undefined' && typeof window.updateInteriorUI === 'function'
+      ? window.updateInteriorUI
+      : null);
+
+  if (updateUI) {
+    updateUI(section, interiorState, scene);
+  } else if (!hasWarnedMissingInteriorUI) {
+    hasWarnedMissingInteriorUI = true;
+    console.warn('[Interior] updateInteriorUI is not defined; section UI updates are being skipped.');
+  }
 
   return true;
 }

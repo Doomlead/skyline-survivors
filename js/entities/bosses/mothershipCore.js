@@ -161,34 +161,26 @@ function beginMothershipInterior(scene) {
 
     objective.interiorStarted = true;
 
+    if (typeof logInteriorTransitionReadiness === 'function') {
+        logInteriorTransitionReadiness(scene, 'beginMothershipInterior');
+    }
+
     // 1. Clear remaining exterior enemies and projectiles
-    clearExteriorEntities(scene);
+    if (typeof clearExteriorEntities === 'function') {
+        clearExteriorEntities(scene);
+    } else {
+        console.warn('[MothershipInterior] clearExteriorEntities is unavailable; continuing without exterior cleanup.');
+    }
 
     // 2. Swap background to interior
     swapToInteriorBackground(scene);
 
-    // 2.5. Build interior collision platforms/ladders while keeping groundLevel compatibility
-    // Initialize mission first, then get section data
-  initInteriorMission(scene, 'mothership');
-
-  const section = interiorState.sections && interiorState.sections[0] ? interiorState.sections[0] : null;
-  if (!section) {
-    console.error('No mothership interior sections available');
-    return;
-  }
-
-  if (typeof buildInteriorPlatformsFromLayout === 'function') {
-    buildInteriorPlatformsFromLayout(scene, section);
-  }
-  if (typeof initializeHazards === 'function') {
-    initializeHazards(scene, section.hazards || []);
-  }
-  if (typeof initInteriorSpawners === 'function') {
-    initInteriorSpawners(scene);
-    if (typeof spawnSectionEnemies === 'function') {
-      spawnSectionEnemies(scene, section);
+    // 2.5. Initialize interior mission (sectionManager owns section setup)
+    const started = typeof initInteriorMission === 'function' ? initInteriorMission(scene, 'mothership') : false;
+    if (!started) {
+        console.error('[MothershipInterior] Failed to initialize interior mission.');
+        return;
     }
-  }
 
     // 3. Force pilot ejection - lock ship controls
     forceOnFoot(scene);
@@ -202,60 +194,6 @@ function beginMothershipInterior(scene) {
     objective.gateColor = '#ff00ff';
 
     showRebuildObjectiveBanner(scene, 'INTERIOR BREACH\nDestroy all power conduits and security nodes', '#ff00ff');
-}
-
-// Removes exterior enemies/projectiles/objects before entering mothership interior phase.
-function clearExteriorEntities(scene) {
-    // Destroy all active enemies
-    if (scene.enemies) {
-        scene.enemies.children.entries.slice().forEach(enemy => {
-            if (enemy && enemy.active) {
-                enemy.destroy();
-            }
-        });
-    }
-
-    // Clear enemy projectiles
-    if (scene.enemyProjectiles) {
-        scene.enemyProjectiles.children.entries.slice().forEach(proj => {
-            if (proj && proj.active) proj.destroy();
-        });
-    }
-
-    // Clear player projectiles
-    if (scene.projectiles) {
-        scene.projectiles.children.entries.slice().forEach(proj => {
-            if (proj && proj.active) proj.destroy();
-        });
-    }
-
-    // Clear assault targets from Phase 1
-    if (scene.assaultTargets) {
-        scene.assaultTargets.children.entries.slice().forEach(target => {
-            if (target && target.active) target.destroy();
-        });
-    }
-
-    // Clear garrison defenders
-    if (scene.garrisonDefenders) {
-        scene.garrisonDefenders.children.entries.slice().forEach(def => {
-            if (def && def.active) def.destroy();
-        });
-    }
-
-    // Clear remaining bosses
-    if (scene.bosses) {
-        scene.bosses.children.entries.slice().forEach(boss => {
-            if (boss && boss.active) boss.destroy();
-        });
-    }
-
-    // Clear battleships
-    if (scene.battleships) {
-        scene.battleships.children.entries.slice().forEach(bs => {
-            if (bs && bs.active) bs.destroy();
-        });
-    }
 }
 
 // Rebuilds parallax/background layers for mothership interior presentation.
@@ -519,42 +457,6 @@ function updateMothershipInterior(scene, delta) {
             }
         });
     }
-}
-
-// Fires one aimed projectile from an interior target turret toward the active player.
-function fireInteriorTurret(scene, turret) {
-    if (!scene || !turret || !turret.active) return;
-    const projectileGroup = scene.enemyProjectiles;
-    if (!projectileGroup || typeof projectileGroup.create !== 'function') return;
-
-    const player = getActivePlayer(scene);
-    if (!player || !player.active) return;
-
-    const angle = Phaser.Math.Angle.Between(turret.x, turret.y, player.x, player.y);
-    const speed = 180;
-    const vx = Math.cos(angle) * speed;
-    const vy = Math.sin(angle) * speed;
-
-    const proj = projectileGroup.create(turret.x, turret.y, 'enemyProjectile');
-    if (!proj) return;
-    proj.setDepth(FG_DEPTH_BASE + 1);
-    if (proj.body) {
-        proj.body.setAllowGravity(false);
-    }
-    proj.setVelocity(vx, vy);
-    proj.damage = 1;
-
-    // Tint based on turret type
-    if (turret.assaultRole === 'power_conduit') {
-        proj.setTint(0x00ffff);
-    } else if (turret.assaultRole === 'security_node') {
-        proj.setTint(0xff00ff);
-    }
-
-    // Auto-destroy after 4 seconds
-    scene.time.delayedCall(4000, () => {
-        if (proj && proj.active) proj.destroy();
-    });
 }
 
 // Handles damage/destruction logic for interior targets and win condition on core kill.
