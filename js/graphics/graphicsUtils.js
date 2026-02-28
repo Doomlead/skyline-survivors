@@ -318,7 +318,16 @@ function createGraphics(scene) {
     // Boss sprites for boss waves
     createBossGraphics(scene);
     createMothershipGraphics(scene);
-    
+
+    createInteriorSecurityHubGraphics(scene);
+    createInteriorPowerGenerationGraphics(scene);
+    createInteriorReactorCoreGraphics(scene);
+    createInteriorHangarBayGraphics(scene);
+    createInteriorBioLabsGraphics(scene);
+    createInteriorEngineRoomGraphics(scene);
+    createInteriorShieldControlGraphics(scene);
+    createInteriorCentralIntelligenceCoreGraphics(scene);
+
     createHumanGraphics(scene);
     createPowerUpGraphics(scene);
     createUtilityGraphics(scene);
