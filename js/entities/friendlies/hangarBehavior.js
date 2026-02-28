@@ -8,7 +8,7 @@ const HANGAR_DROP_OFF_CONFIG = {
     botSpawnOffset: 70
 };
 const HANGAR_REBUILD_CONFIG = {
-    durationMs: 30000,
+    durationMs: 12000,
     pulseBaseAlpha: 0.75,
     pulseRange: 0.2
 };
