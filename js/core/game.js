@@ -489,26 +489,40 @@ function update(time, delta) {
 
     const activePlayer = getActivePlayer(this);
 
-    // Wrap aegis + pilot to canonical positions
-    if (this.aegis && this.aegis.active) {
-        this.aegis.x = wrapValue(this.aegis.x, CONFIG.worldWidth);
-    }
-    if (this.pilot && this.pilot.active) {
-        this.pilot.x = wrapValue(this.pilot.x, CONFIG.worldWidth);
+    const interiorLinearTraversal = Boolean(this.interiorPlatformsActive);
+
+    if (interiorLinearTraversal) {
+        if (this.aegis && this.aegis.active) {
+            this.aegis.x = Phaser.Math.Clamp(this.aegis.x, 0, CONFIG.worldWidth);
+        }
+        if (this.pilot && this.pilot.active) {
+            this.pilot.x = Phaser.Math.Clamp(this.pilot.x, 0, CONFIG.worldWidth);
+        }
+    } else {
+        // Wrap aegis + pilot to canonical positions
+        if (this.aegis && this.aegis.active) {
+            this.aegis.x = wrapValue(this.aegis.x, CONFIG.worldWidth);
+        }
+        if (this.pilot && this.pilot.active) {
+            this.pilot.x = wrapValue(this.pilot.x, CONFIG.worldWidth);
+        }
     }
 
-    // === CAMERA X POSITIONING (horizontal with wrap-around) ===
+    // === CAMERA X POSITIONING ===
     let desiredScrollX = activePlayer.x - mainCam.width / 2;
-    
-    const maxScrollX = CONFIG.worldWidth - mainCam.width;
-    
-    // Handle wrap-around camera positioning
-    if (desiredScrollX < 0) {
-        desiredScrollX = CONFIG.worldWidth + desiredScrollX;
-    } else if (desiredScrollX > maxScrollX) {
-        desiredScrollX = desiredScrollX - CONFIG.worldWidth;
+    const maxScrollX = Math.max(0, CONFIG.worldWidth - mainCam.width);
+
+    if (interiorLinearTraversal) {
+        desiredScrollX = Phaser.Math.Clamp(desiredScrollX, 0, maxScrollX);
+    } else {
+        // Horizontal wrap-around camera positioning
+        if (desiredScrollX < 0) {
+            desiredScrollX = CONFIG.worldWidth + desiredScrollX;
+        } else if (desiredScrollX > maxScrollX) {
+            desiredScrollX = desiredScrollX - CONFIG.worldWidth;
+        }
     }
-    
+
     mainCam.scrollX = desiredScrollX;
 
     // === CAMERA Y POSITIONING (vertical following) ===
@@ -526,8 +540,12 @@ function update(time, delta) {
     
     mainCam.scrollY = desiredScrollY;
 
-    // Wrap all entities and create ghosts for boundary visibility
-    updateEntityWrapping(this);
+    // Wrap all entities and create ghosts for boundary visibility (disabled in interior linear traversal)
+    if (!interiorLinearTraversal) {
+        updateEntityWrapping(this);
+    } else {
+        destroyAllGhosts(this);
+    }
 
     // Update parallax backgrounds
     updateParallax(mainCam.scrollX, mainCam.scrollY);

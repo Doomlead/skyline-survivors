@@ -3,7 +3,7 @@
 // ------------------------
 
 // Builds procedural interior encounter platforms and ladder trigger zones.
-function buildInteriorPlatforms(scene, seed) {
+function buildInteriorPlatforms(scene, seed, sectionTemplate) {
     if (!scene || !scene.physics) return null;
 
     if (typeof ensurePlatformLadderGraphics === 'function') ensurePlatformLadderGraphics(scene);
@@ -33,6 +33,9 @@ function buildInteriorPlatforms(scene, seed) {
     const ceilingY = 80;
 
     const rng = createInteriorRNG(seed || 1337);
+    const resolvedTemplate = resolveInteriorSectionTemplate(sectionTemplate);
+    const traversalDirection = resolveInteriorTraversalDirection(sectionTemplate);
+    const templateConfig = getInteriorTemplateConfig(resolvedTemplate, groundY, worldWidth, rng);
     const platformAnchors = [];
 
     const groundPlatform = createInteriorPlatform(scene, {
@@ -45,23 +48,21 @@ function buildInteriorPlatforms(scene, seed) {
     scene.platforms.add(groundPlatform);
     platformAnchors.push({ x: worldWidth * 0.5, y: groundY, width: worldWidth, height: 20, type: 'ground' });
 
-    const platformConfig = [
-        { minX: 0.1, maxX: 0.3, baseY: groundY - 100, count: 2 },
-        { minX: 0.4, maxX: 0.6, baseY: groundY - 100, count: 2 },
-        { minX: 0.7, maxX: 0.9, baseY: groundY - 100, count: 2 },
-        { minX: 0.15, maxX: 0.35, baseY: groundY - 200, count: 1 },
-        { minX: 0.5, maxX: 0.7, baseY: groundY - 200, count: 1 },
-        { minX: 0.2, maxX: 0.4, baseY: groundY - 300, count: 1 },
-        { minX: 0.6, maxX: 0.8, baseY: groundY - 300, count: 1 }
-    ];
-
     const generatedPlatforms = [];
 
-    platformConfig.forEach(function(tier) {
+    templateConfig.platformConfig.forEach(function(tier) {
+        const tierMin = applyInteriorTraversalToRatio(tier.minX, traversalDirection);
+        const tierMax = applyInteriorTraversalToRatio(tier.maxX, traversalDirection);
+        const minRatio = Math.min(tierMin, tierMax);
+        const maxRatio = Math.max(tierMin, tierMax);
+
         for (let i = 0; i < tier.count; i++) {
-            const px = (tier.minX + rng() * (tier.maxX - tier.minX)) * worldWidth;
-            const pw = 80 + rng() * 120;
-            const py = tier.baseY + (rng() * 40 - 20);
+            const px = (minRatio + rng() * (maxRatio - minRatio)) * worldWidth;
+            const widthVariance = typeof tier.widthVariance === 'number' ? tier.widthVariance : 120;
+            const baseWidth = typeof tier.baseWidth === 'number' ? tier.baseWidth : 80;
+            const pw = baseWidth + rng() * widthVariance;
+            const jitter = typeof tier.jitterY === 'number' ? tier.jitterY : 20;
+            const py = tier.baseY + (rng() * (jitter * 2) - jitter);
 
             const platform = createInteriorPlatform(scene, {
                 x: px,
@@ -81,7 +82,7 @@ function buildInteriorPlatforms(scene, seed) {
     const sortedPlatforms = generatedPlatforms.slice().sort(function(a, b) { return b.y - a.y; });
 
     generatedPlatforms.forEach(function(platform) {
-        if (platform.y > groundY - 150 && rng() > 0.3) {
+        if (platform.y > groundY - templateConfig.groundLadderThreshold && rng() > templateConfig.groundLadderChanceFloor) {
             scene.ladders.add(createInteriorLadder(scene, {
                 x: platform.x,
                 topY: platform.y,
@@ -97,7 +98,10 @@ function buildInteriorPlatforms(scene, seed) {
         const horizontalDist = Math.abs(upper.x - lower.x);
         const verticalDist = Math.abs(upper.y - lower.y);
 
-        if (horizontalDist < 150 && verticalDist > 60 && verticalDist < 250 && rng() > 0.4) {
+        if (horizontalDist < templateConfig.connectorHorizontalMax
+            && verticalDist > templateConfig.connectorVerticalMin
+            && verticalDist < templateConfig.connectorVerticalMax
+            && rng() > templateConfig.connectorChanceFloor) {
             scene.ladders.add(createInteriorLadder(scene, {
                 x: (upper.x + lower.x) * 0.5,
                 topY: upper.y,
@@ -107,9 +111,10 @@ function buildInteriorPlatforms(scene, seed) {
         }
     }
 
-    for (let i = 0; i < 3; i++) {
-        const lx = (0.2 + rng() * 0.6) * worldWidth;
-        const dropLength = 100 + rng() * 150;
+    for (let i = 0; i < templateConfig.hangingLadders; i++) {
+        const lxRatio = applyInteriorTraversalToRatio(0.12 + rng() * 0.76, traversalDirection);
+        const lx = lxRatio * worldWidth;
+        const dropLength = templateConfig.hangingDropMin + rng() * (templateConfig.hangingDropMax - templateConfig.hangingDropMin);
         scene.ladders.add(createInteriorLadder(scene, {
             x: lx,
             topY: ceilingY,
@@ -118,6 +123,26 @@ function buildInteriorPlatforms(scene, seed) {
             type: 'hanging'
         }));
     }
+
+    scene.interiorGateAnchors = (templateConfig.gateAnchors || []).map(function(anchorXRatio, idx) {
+        return {
+            id: resolvedTemplate + '_gate_' + idx,
+            x: applyInteriorTraversalToRatio(anchorXRatio, traversalDirection) * worldWidth,
+            y: groundY - 24,
+            type: 'gate_anchor'
+        };
+    }).sort(function(a, b) {
+        return traversalDirection === 'rtl' ? b.x - a.x : a.x - b.x;
+    });
+    scene.interiorHazardLanes = (templateConfig.hazardLanes || []).map(function(laneXRatio, idx) {
+        return {
+            id: resolvedTemplate + '_hazard_lane_' + idx,
+            x: applyInteriorTraversalToRatio(laneXRatio, traversalDirection) * worldWidth,
+            yTop: ceilingY,
+            yBottom: groundY,
+            type: 'hazard_lane'
+        };
+    });
 
     if (scene.pilot && scene.pilot.body) {
         if (scene.pilotPlatformCollider) scene.pilotPlatformCollider.destroy();
@@ -134,21 +159,198 @@ function buildInteriorPlatforms(scene, seed) {
     scene.interiorPlatformsActive = true;
     scene.interiorPlatformSeed = seed || 1337;
     scene.interiorPlatformAnchors = platformAnchors;
+    scene.interiorSectionTemplate = resolvedTemplate;
+    scene.interiorTraversalDirection = traversalDirection;
     scene.groundLevel = groundY;
 
     repositionInteriorObjectivesToPlatforms(scene);
 
-    console.log('[InteriorPlatforms] Created ' + scene.platforms.getLength() + ' platforms, ' + scene.ladders.getLength() + ' ladders');
+    console.log('[InteriorPlatforms] Created ' + scene.platforms.getLength() + ' platforms, ' + scene.ladders.getLength() + ' ladders for template ' + resolvedTemplate);
 
     return {
         platforms: scene.platforms,
         ladders: scene.ladders,
         anchors: platformAnchors,
-        groundLevel: groundY
+        groundLevel: groundY,
+        sectionTemplate: resolvedTemplate,
+        traversalDirection: traversalDirection,
+        gateAnchors: scene.interiorGateAnchors,
+        hazardLanes: scene.interiorHazardLanes
     };
 }
 
+function resolveInteriorSectionTemplate(sectionTemplate) {
+    if (!sectionTemplate) return 'generic';
+    if (typeof sectionTemplate === 'string') return sectionTemplate;
+    if (typeof sectionTemplate.id === 'string' && sectionTemplate.id) return sectionTemplate.id;
+    return 'generic';
+}
+
+
+function resolveInteriorTraversalDirection(sectionTemplate) {
+    const rawDirection = typeof sectionTemplate === 'object' && sectionTemplate
+        ? sectionTemplate.traversalDirection
+        : null;
+    return rawDirection === 'rtl' ? 'rtl' : 'ltr';
+}
+
+function applyInteriorTraversalToRatio(ratio, traversalDirection) {
+    const clamped = Phaser.Math.Clamp(typeof ratio === 'number' ? ratio : 0.5, 0, 1);
+    return traversalDirection === 'rtl' ? 1 - clamped : clamped;
+}
+
+function getInteriorTemplateConfig(templateId, groundY, worldWidth, rng) {
+    const defaults = {
+        platformConfig: [
+            { minX: 0.1, maxX: 0.3, baseY: groundY - 100, count: 2 },
+            { minX: 0.4, maxX: 0.6, baseY: groundY - 100, count: 2 },
+            { minX: 0.7, maxX: 0.9, baseY: groundY - 100, count: 2 },
+            { minX: 0.15, maxX: 0.35, baseY: groundY - 200, count: 1 },
+            { minX: 0.5, maxX: 0.7, baseY: groundY - 200, count: 1 },
+            { minX: 0.2, maxX: 0.4, baseY: groundY - 300, count: 1 },
+            { minX: 0.6, maxX: 0.8, baseY: groundY - 300, count: 1 }
+        ],
+        hangingLadders: 3,
+        hangingDropMin: 100,
+        hangingDropMax: 250,
+        groundLadderThreshold: 150,
+        groundLadderChanceFloor: 0.3,
+        connectorHorizontalMax: 150,
+        connectorVerticalMin: 60,
+        connectorVerticalMax: 250,
+        connectorChanceFloor: 0.4,
+        gateAnchors: [0.33, 0.66],
+        hazardLanes: [0.25, 0.5, 0.75]
+    };
+
+    const templates = {
+        security_hub: {
+            platformConfig: [
+                { minX: 0.1, maxX: 0.26, baseY: groundY - 80, count: 2, baseWidth: 120, widthVariance: 80, jitterY: 10 },
+                { minX: 0.32, maxX: 0.48, baseY: groundY - 130, count: 2, baseWidth: 100, widthVariance: 70, jitterY: 12 },
+                { minX: 0.52, maxX: 0.68, baseY: groundY - 120, count: 2, baseWidth: 110, widthVariance: 70, jitterY: 12 },
+                { minX: 0.74, maxX: 0.9, baseY: groundY - 85, count: 2, baseWidth: 120, widthVariance: 80, jitterY: 10 }
+            ],
+            hangingLadders: 1,
+            gateAnchors: [0.25, 0.5, 0.75],
+            hazardLanes: [0.3, 0.7]
+        },
+        power_generation: {
+            platformConfig: [
+                { minX: 0.1, maxX: 0.3, baseY: groundY - 90, count: 2, baseWidth: 100, widthVariance: 110, jitterY: 18 },
+                { minX: 0.35, maxX: 0.55, baseY: groundY - 220, count: 2, baseWidth: 110, widthVariance: 120, jitterY: 28 },
+                { minX: 0.6, maxX: 0.9, baseY: groundY - 330, count: 2, baseWidth: 120, widthVariance: 120, jitterY: 32 },
+                { minX: 0.2, maxX: 0.42, baseY: groundY - 410, count: 1, baseWidth: 130, widthVariance: 90, jitterY: 26 }
+            ],
+            hangingLadders: 4,
+            hangingDropMin: 140,
+            hangingDropMax: 300,
+            connectorHorizontalMax: 210,
+            connectorVerticalMax: 320,
+            gateAnchors: [0.4, 0.82],
+            hazardLanes: [0.2, 0.45, 0.68, 0.86]
+        },
+        reactor_core: {
+            platformConfig: [
+                { minX: 0.18, maxX: 0.35, baseY: groundY - 180, count: 1, baseWidth: 180, widthVariance: 80, jitterY: 10 },
+                { minX: 0.4, maxX: 0.6, baseY: groundY - 280, count: 2, baseWidth: 170, widthVariance: 110, jitterY: 12 },
+                { minX: 0.65, maxX: 0.82, baseY: groundY - 180, count: 1, baseWidth: 180, widthVariance: 80, jitterY: 10 }
+            ],
+            hangingLadders: 2,
+            connectorHorizontalMax: 240,
+            gateAnchors: [0.5],
+            hazardLanes: [0.4, 0.6]
+        },
+        hangar_bay: {
+            platformConfig: [
+                { minX: 0.1, maxX: 0.3, baseY: groundY - 90, count: 2, baseWidth: 120, widthVariance: 100, jitterY: 14 },
+                { minX: 0.38, maxX: 0.62, baseY: groundY - 170, count: 2, baseWidth: 120, widthVariance: 100, jitterY: 16 },
+                { minX: 0.7, maxX: 0.9, baseY: groundY - 100, count: 2, baseWidth: 120, widthVariance: 100, jitterY: 14 }
+            ],
+            hangingLadders: 3,
+            gateAnchors: [0.3, 0.6, 0.85],
+            hazardLanes: [0.2, 0.5, 0.8]
+        },
+        bio_labs: {
+            platformConfig: [
+                { minX: 0.1, maxX: 0.27, baseY: groundY - 120, count: 2, baseWidth: 95, widthVariance: 95, jitterY: 20 },
+                { minX: 0.32, maxX: 0.5, baseY: groundY - 210, count: 2, baseWidth: 100, widthVariance: 100, jitterY: 22 },
+                { minX: 0.56, maxX: 0.74, baseY: groundY - 280, count: 2, baseWidth: 90, widthVariance: 95, jitterY: 24 },
+                { minX: 0.78, maxX: 0.92, baseY: groundY - 190, count: 1, baseWidth: 120, widthVariance: 85, jitterY: 18 }
+            ],
+            hangingLadders: 4,
+            gateAnchors: [0.24, 0.5, 0.76],
+            hazardLanes: [0.15, 0.35, 0.55, 0.75]
+        },
+        engine_room: {
+            platformConfig: [
+                { minX: 0.1, maxX: 0.28, baseY: groundY - 80, count: 2, baseWidth: 110, widthVariance: 110, jitterY: 16 },
+                { minX: 0.34, maxX: 0.52, baseY: groundY - 220, count: 2, baseWidth: 100, widthVariance: 110, jitterY: 26 },
+                { minX: 0.58, maxX: 0.76, baseY: groundY - 320, count: 2, baseWidth: 100, widthVariance: 120, jitterY: 30 },
+                { minX: 0.78, maxX: 0.92, baseY: groundY - 180, count: 1, baseWidth: 130, widthVariance: 90, jitterY: 18 }
+            ],
+            hangingLadders: 3,
+            hangingDropMin: 120,
+            hangingDropMax: 280,
+            connectorHorizontalMax: 190,
+            gateAnchors: [0.42, 0.84],
+            hazardLanes: [0.22, 0.44, 0.68, 0.88]
+        },
+        shield_control: {
+            platformConfig: [
+                { minX: 0.12, maxX: 0.3, baseY: groundY - 120, count: 2, baseWidth: 120, widthVariance: 90, jitterY: 14 },
+                { minX: 0.38, maxX: 0.62, baseY: groundY - 220, count: 2, baseWidth: 110, widthVariance: 90, jitterY: 16 },
+                { minX: 0.7, maxX: 0.88, baseY: groundY - 120, count: 2, baseWidth: 120, widthVariance: 90, jitterY: 14 }
+            ],
+            hangingLadders: 2,
+            gateAnchors: [0.5],
+            hazardLanes: [0.26, 0.5, 0.74]
+        },
+        central_intelligence_core: {
+            platformConfig: [
+                { minX: 0.15, maxX: 0.35, baseY: groundY - 160, count: 1, baseWidth: 200, widthVariance: 80, jitterY: 10 },
+                { minX: 0.38, maxX: 0.62, baseY: groundY - 300, count: 2, baseWidth: 180, widthVariance: 90, jitterY: 12 },
+                { minX: 0.65, maxX: 0.85, baseY: groundY - 160, count: 1, baseWidth: 200, widthVariance: 80, jitterY: 10 }
+            ],
+            hangingLadders: 2,
+            connectorHorizontalMax: 250,
+            gateAnchors: [0.5],
+            hazardLanes: [0.33, 0.5, 0.67]
+        }
+    };
+
+    const base = Object.assign({}, defaults, templates[templateId] || {});
+    if (!templates[templateId] && templateId && templateId !== 'generic') {
+        const variant = rng();
+        if (variant > 0.66) {
+            base.hangingLadders = Math.max(2, base.hangingLadders - 1);
+        } else if (variant < 0.33) {
+            base.hangingLadders = base.hangingLadders + 1;
+        }
+    }
+    return base;
+}
+
+
 // Finds closest viable platform top for interior objective placement.
+
+function resolveInteriorSceneTraversalDirection(scene) {
+    if (!scene) return 'ltr';
+    return scene.interiorTraversalDirection === 'rtl' ? 'rtl' : 'ltr';
+}
+
+function toInteriorDirectionalX(scene, x) {
+    const worldWidth = CONFIG.worldWidth || 0;
+    const normalizedX = Phaser.Math.Clamp(
+        typeof x === 'number' ? x : worldWidth * 0.5,
+        0,
+        worldWidth
+    );
+    return resolveInteriorSceneTraversalDirection(scene) === 'rtl'
+        ? worldWidth - normalizedX
+        : normalizedX;
+}
+
 function getInteriorAnchorY(scene, x, fallbackY, clearance) {
     if (!scene || !Array.isArray(scene.interiorPlatformAnchors) || scene.interiorPlatformAnchors.length === 0) {
         return fallbackY;
@@ -344,5 +546,5 @@ function repositionInteriorObjectivesToPlatforms(scene) {
 function rebuildInteriorPlatformsOnResize(scene) {
     if (!scene || !scene.interiorPlatformsActive) return;
     const seed = scene.interiorPlatformSeed || CONFIG.backgroundSeed || 1337;
-    buildInteriorPlatforms(scene, seed);
+    buildInteriorPlatforms(scene, seed, scene.interiorSectionTemplate || (scene.currentInteriorSection && scene.currentInteriorSection.id));
 }

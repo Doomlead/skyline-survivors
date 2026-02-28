@@ -130,6 +130,17 @@ function setupAssaultObjective(scene) {
     objective.interiorReinforcementTimer = 0;
     objective.shipLocked = false;
     objective.transitionTimer = 0;
+    objective.currentSectionIndex = 0;
+    objective.activeSectionId = objective.sectionGraph?.[0]?.id || null;
+    if (Array.isArray(objective.sectionProgress)) {
+        objective.sectionProgress = objective.sectionProgress.map((sectionProgress, index) => ({
+            ...sectionProgress,
+            sectionState: index === 0 ? 'active' : 'pending',
+            started: index === 0,
+            cleared: false,
+            checkpointReached: false
+        }));
+    }
     const scaledHp = Math.round(ASSAULT_BASE_CONFIG.baseHp * (gameState.spawnMultiplier || 1));
     objective.baseHpMax = scaledHp;
     objective.baseHp = scaledHp;
@@ -280,7 +291,7 @@ function beginAssaultBaseInterior(scene) {
         initParallaxTracking(mainCam.scrollX, mainCam.scrollY);
     }
 
-    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337);
+    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337, objective.sectionGraph?.[objective.currentSectionIndex || 0] || objective.activeSectionId);
     forceOnFootForAssault(scene);
     spawnAssaultInteriorObjectives(scene);
 
@@ -332,11 +343,94 @@ function forceOnFootForAssault(scene) {
     }
 }
 
+// Returns the active declarative interior section, if available.
+function getActiveAssaultInteriorSection(objective) {
+    if (!objective) return null;
+    const index = objective.currentSectionIndex || 0;
+    if (Array.isArray(objective.sectionGraph) && objective.sectionGraph[index]) {
+        return objective.sectionGraph[index];
+    }
+    return null;
+}
+
+// Marks section state in the objective progress tracker.
+function setAssaultSectionState(objective, index, state, patch = {}) {
+    const progress = objective?.sectionProgress;
+    if (!Array.isArray(progress) || !progress[index]) return;
+    progress[index] = {
+        ...progress[index],
+        sectionState: state,
+        ...patch
+    };
+}
+
+// Advances assault interior progression to the next section and rebuilds section layout.
+function advanceAssaultInteriorSection(scene) {
+    const objective = gameState.assaultObjective;
+    if (!objective) return false;
+
+    const currentIndex = objective.currentSectionIndex || 0;
+    setAssaultSectionState(objective, currentIndex, 'cleared', {
+        cleared: true,
+        checkpointReached: true
+    });
+
+    const nextIndex = currentIndex + 1;
+    if (!Array.isArray(objective.sectionGraph) || nextIndex >= objective.sectionGraph.length) {
+        return false;
+    }
+
+    objective.currentSectionIndex = nextIndex;
+    const nextSection = objective.sectionGraph[nextIndex] || null;
+    objective.activeSectionId = nextSection ? nextSection.id : null;
+    setAssaultSectionState(objective, nextIndex, 'active', { started: true });
+
+    const interiorTargets = scene.assaultTargets?.children?.entries;
+    if (Array.isArray(interiorTargets)) {
+        interiorTargets.forEach((target) => {
+            if (target?.active && target.interiorTarget) target.destroy();
+        });
+    }
+
+    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337, nextSection || objective.activeSectionId);
+    spawnAssaultInteriorObjectives(scene);
+
+    const sectionTheme = nextSection?.theme ? nextSection.theme.toUpperCase() : 'NEXT SECTION';
+    showRebuildObjectiveBanner(scene, `CHECKPOINT REACHED\n${sectionTheme}`, '#00ffcc');
+    return true;
+}
+
 // Spawns interior objectives for the assault-base phase.
 function spawnAssaultInteriorObjectives(scene) {
     const objective = gameState.assaultObjective;
     const cfg = ASSAULT_INTERIOR_CONFIG;
+    const section = getActiveAssaultInteriorSection(objective);
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+
+    const sectionProgress = objective.sectionProgress?.[objective.currentSectionIndex || 0];
+    if (sectionProgress) {
+        sectionProgress.started = true;
+        sectionProgress.sectionState = 'active';
+    }
+
+    if (typeof setupInteriorHazards === 'function') {
+        setupInteriorHazards(scene, objective);
+    }
+
+    const isFinalSection = (objective.currentSectionIndex || 0) >= ((objective.sectionCount || 0) - 1);
+    if (isFinalSection) {
+        objective.powerConduitsTotal = 0;
+        objective.powerConduitsRemaining = 0;
+        objective.securityNodesTotal = 0;
+        objective.securityNodesRemaining = 0;
+        objective.coreChamberOpen = true;
+        objective.coreChamberActive = false;
+        objective.coreChamberHp = 0;
+        objective.coreChamberHpMax = cfg.coreChamberHp;
+        objective.interiorReinforcementTimer = 0;
+        spawnAssaultCoreChamber(scene);
+        return;
+    }
 
     objective.powerConduitsTotal = cfg.powerConduitCount;
     objective.powerConduitsRemaining = cfg.powerConduitCount;
@@ -350,7 +444,8 @@ function spawnAssaultInteriorObjectives(scene) {
 
     const conduitSpacing = CONFIG.worldWidth / (cfg.powerConduitCount + 1);
     for (let i = 0; i < cfg.powerConduitCount; i++) {
-        const cx = conduitSpacing * (i + 1) + (Math.random() - 0.5) * 100;
+        const cxBase = conduitSpacing * (i + 1) + (Math.random() - 0.5) * 100;
+        const cx = typeof toInteriorDirectionalX === 'function' ? toInteriorDirectionalX(scene, cxBase) : cxBase;
         const terrainVar = Math.sin(cx / 200) * 30;
         const fallbackY = Math.max(120, groundLevel - terrainVar - 20);
         const cy = getInteriorAnchorY(scene, cx, fallbackY, 20);
@@ -361,7 +456,8 @@ function spawnAssaultInteriorObjectives(scene) {
 
     const nodeSpacing = CONFIG.worldWidth / (cfg.securityNodeCount + 1);
     for (let i = 0; i < cfg.securityNodeCount; i++) {
-        const nx = nodeSpacing * (i + 1) + (Math.random() - 0.5) * 150;
+        const nxBase = nodeSpacing * (i + 1) + (Math.random() - 0.5) * 150;
+        const nx = typeof toInteriorDirectionalX === 'function' ? toInteriorDirectionalX(scene, nxBase) : nxBase;
         const terrainVar = Math.sin(nx / 200) * 30;
         const fallbackY = Math.max(100, groundLevel - terrainVar - 40);
         const ny = getInteriorAnchorY(scene, nx, fallbackY, 40);
@@ -369,6 +465,10 @@ function spawnAssaultInteriorObjectives(scene) {
         const node = createAssaultInteriorComponent(scene, nx, ny, 'assaultShieldGen', 'security_node', cfg.securityNodeHp);
         node.setTint(0xff00ff);
     }
+
+    objective.phaseLabel = `PHASE 2 - ${section?.theme || 'INTERIOR'}`;
+    objective.gateLabel = section?.gateRule?.type ? `Gate: ${section.gateRule.type.replace(/_/g, ' ')}` : 'Clear the section gate';
+    objective.gateColor = '#ff00ff';
 
     spawnAssaultInteriorDefenders(scene, 4);
 }
@@ -392,10 +492,17 @@ function createAssaultInteriorComponent(scene, x, y, texture, role, hp) {
 function spawnAssaultInteriorDefenders(scene, count) {
     const cfg = ASSAULT_INTERIOR_CONFIG;
     const camX = scene.cameras.main ? scene.cameras.main.scrollX : 0;
+    const direction = scene.interiorTraversalDirection === 'rtl' ? 'rtl' : 'ltr';
+    const aheadMin = CONFIG.width * 0.25;
+    const aheadMax = CONFIG.width * 0.65;
 
     for (let i = 0; i < count; i++) {
         const type = Phaser.Utils.Array.GetRandom(cfg.interiorEnemyTypes);
-        const spawnX = wrapValue(camX + CONFIG.width * 0.3 + Math.random() * CONFIG.width * 0.4, CONFIG.worldWidth);
+        const ahead = aheadMin + Math.random() * (aheadMax - aheadMin);
+        const spawnXRaw = direction === 'rtl'
+            ? camX + CONFIG.width - ahead
+            : camX + ahead;
+        const spawnX = Phaser.Math.Clamp(spawnXRaw, 40, Math.max(40, CONFIG.worldWidth - 40));
         const spawnY = CONFIG.height * 0.2 + Math.random() * CONFIG.height * 0.5;
         spawnEnemy(scene, type, spawnX, spawnY, false);
     }
@@ -407,7 +514,8 @@ function spawnAssaultCoreChamber(scene) {
     const cfg = ASSAULT_INTERIOR_CONFIG;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
 
-    const coreX = CONFIG.worldWidth * 0.5;
+    const coreXBase = CONFIG.worldWidth * 0.5;
+    const coreX = typeof toInteriorDirectionalX === 'function' ? toInteriorDirectionalX(scene, coreXBase) : coreXBase;
     const terrainVar = Math.sin(coreX / 200) * 30;
     const fallbackY = Math.max(140, groundLevel - terrainVar - 30);
     const coreY = getInteriorAnchorY(scene, coreX, fallbackY, 30);
@@ -434,25 +542,36 @@ function updateAssaultInterior(scene, delta) {
         gameState.rebuildObjective.stage = null;
     }
 
-    if (!objective.coreChamberOpen) {
-        const totalGates = objective.powerConduitsTotal + objective.securityNodesTotal;
-        const remaining = objective.powerConduitsRemaining + objective.securityNodesRemaining;
-        objective.phaseLabel = 'PHASE 2 - INTERIOR';
-        objective.gateLabel = `Targets: ${remaining}/${totalGates} remaining`;
-        objective.gateColor = remaining > 0 ? '#ff00ff' : '#00ff00';
-        objective.baseHp = remaining;
-        objective.baseHpMax = totalGates;
-    } else if (objective.coreChamberActive) {
-        objective.phaseLabel = 'PHASE 2 - CORE CHAMBER';
+    const section = getActiveAssaultInteriorSection(objective);
+    const isFinalSection = (objective.currentSectionIndex || 0) >= ((objective.sectionCount || 0) - 1);
+
+    if (isFinalSection && objective.coreChamberActive) {
+        objective.phaseLabel = `PHASE 2 - ${section?.theme || 'REACTOR CORE'}`;
         objective.gateLabel = 'Destroy the reactor core!';
         objective.gateColor = '#ffaa00';
         objective.baseHp = objective.coreChamberHp;
         objective.baseHpMax = objective.coreChamberHpMax;
+    } else {
+        const totalGates = objective.powerConduitsTotal + objective.securityNodesTotal;
+        const remaining = objective.powerConduitsRemaining + objective.securityNodesRemaining;
+        objective.phaseLabel = `PHASE 2 - ${section?.theme || 'INTERIOR'}`;
+        objective.gateLabel = `Section ${Math.min((objective.currentSectionIndex || 0) + 1, objective.sectionCount || 1)}/${objective.sectionCount || 1} Targets: ${remaining}/${totalGates}`;
+        objective.gateColor = remaining > 0 ? '#ff00ff' : '#00ff00';
+        objective.baseHp = remaining;
+        objective.baseHpMax = totalGates;
+
+        if (totalGates > 0 && remaining <= 0) {
+            const advanced = advanceAssaultInteriorSection(scene);
+            if (!advanced) {
+                objective.coreChamberOpen = true;
+                spawnAssaultCoreChamber(scene);
+            }
+            return;
+        }
     }
 
-    if (!objective.coreChamberOpen && objective.powerConduitsRemaining <= 0 && objective.securityNodesRemaining <= 0) {
-        objective.coreChamberOpen = true;
-        spawnAssaultCoreChamber(scene);
+    if (typeof updateInteriorHazards === 'function') {
+        updateInteriorHazards(scene, delta, objective);
     }
 
     objective.interiorReinforcementTimer += delta;
@@ -523,6 +642,9 @@ function hitAssaultInteriorTarget(projectile, target) {
             objective.active = false;
             objective.interiorPhase = false;
             objective.shipLocked = false;
+            if (typeof clearInteriorHazards === 'function') {
+                clearInteriorHazards(scene);
+            }
 
             showRebuildObjectiveBanner(scene, 'ASSAULT BASE CORE DESTROYED\nTARGET ELIMINATED!', '#00ff00');
             scene.time.delayedCall(2000, () => {
