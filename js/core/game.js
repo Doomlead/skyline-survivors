@@ -180,13 +180,14 @@ function updateHangarRebuildUi(scene) {
         : 30000;
     const remainingMs = Math.max(0, durationMs - (objective.hangarRebuildTimer || 0));
     const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+    const durationSec = Math.max(1, Math.ceil(durationMs / 1000));
     const isOnZone = typeof isPlayerOnLandingZone === 'function'
         ? isPlayerOnLandingZone(scene, landingZone)
         : false;
     const statusLine = isOnZone
         ? `Hold position: ${remainingSec}s remaining`
         : 'Return to the landing zone to resume the rebuild timer';
-    const message = `REBUILD PROTOCOL\nStand on the landing zone under the hangar for 30s to respawn an AEGIS.\n${statusLine}`;
+    const message = `REBUILD PROTOCOL\nStand on the landing zone under the hangar for ${durationSec}s to respawn an AEGIS.\n${statusLine}`;
 
     ui.text.setText(message);
     ui.text.setFontSize(`${Math.round(20 * scale)}px`);
