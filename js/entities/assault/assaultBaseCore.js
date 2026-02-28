@@ -491,13 +491,18 @@ function createAssaultInteriorComponent(scene, x, y, texture, role, hp) {
 // Spawns interior defenders near the camera location.
 function spawnAssaultInteriorDefenders(scene, count) {
     const cfg = ASSAULT_INTERIOR_CONFIG;
+    const objective = gameState.assaultObjective;
+    const section = getActiveAssaultInteriorSection(objective);
+    const sectionPool = Array.isArray(section?.enemyPool) && section.enemyPool.length
+        ? section.enemyPool
+        : cfg.interiorEnemyTypes;
     const camX = scene.cameras.main ? scene.cameras.main.scrollX : 0;
     const direction = scene.interiorTraversalDirection === 'rtl' ? 'rtl' : 'ltr';
     const aheadMin = CONFIG.width * 0.25;
     const aheadMax = CONFIG.width * 0.65;
 
     for (let i = 0; i < count; i++) {
-        const type = Phaser.Utils.Array.GetRandom(cfg.interiorEnemyTypes);
+        const type = Phaser.Utils.Array.GetRandom(sectionPool);
         const ahead = aheadMin + Math.random() * (aheadMax - aheadMin);
         const spawnXRaw = direction === 'rtl'
             ? camX + CONFIG.width - ahead
