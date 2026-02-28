@@ -34,6 +34,7 @@ function buildInteriorPlatforms(scene, seed, sectionTemplate) {
 
     const rng = createInteriorRNG(seed || 1337);
     const resolvedTemplate = resolveInteriorSectionTemplate(sectionTemplate);
+    const traversalDirection = resolveInteriorTraversalDirection(sectionTemplate);
     const templateConfig = getInteriorTemplateConfig(resolvedTemplate, groundY, worldWidth, rng);
     const platformAnchors = [];
 
@@ -50,8 +51,13 @@ function buildInteriorPlatforms(scene, seed, sectionTemplate) {
     const generatedPlatforms = [];
 
     templateConfig.platformConfig.forEach(function(tier) {
+        const tierMin = applyInteriorTraversalToRatio(tier.minX, traversalDirection);
+        const tierMax = applyInteriorTraversalToRatio(tier.maxX, traversalDirection);
+        const minRatio = Math.min(tierMin, tierMax);
+        const maxRatio = Math.max(tierMin, tierMax);
+
         for (let i = 0; i < tier.count; i++) {
-            const px = (tier.minX + rng() * (tier.maxX - tier.minX)) * worldWidth;
+            const px = (minRatio + rng() * (maxRatio - minRatio)) * worldWidth;
             const widthVariance = typeof tier.widthVariance === 'number' ? tier.widthVariance : 120;
             const baseWidth = typeof tier.baseWidth === 'number' ? tier.baseWidth : 80;
             const pw = baseWidth + rng() * widthVariance;
@@ -106,7 +112,8 @@ function buildInteriorPlatforms(scene, seed, sectionTemplate) {
     }
 
     for (let i = 0; i < templateConfig.hangingLadders; i++) {
-        const lx = (0.12 + rng() * 0.76) * worldWidth;
+        const lxRatio = applyInteriorTraversalToRatio(0.12 + rng() * 0.76, traversalDirection);
+        const lx = lxRatio * worldWidth;
         const dropLength = templateConfig.hangingDropMin + rng() * (templateConfig.hangingDropMax - templateConfig.hangingDropMin);
         scene.ladders.add(createInteriorLadder(scene, {
             x: lx,
@@ -120,15 +127,17 @@ function buildInteriorPlatforms(scene, seed, sectionTemplate) {
     scene.interiorGateAnchors = (templateConfig.gateAnchors || []).map(function(anchorXRatio, idx) {
         return {
             id: resolvedTemplate + '_gate_' + idx,
-            x: anchorXRatio * worldWidth,
+            x: applyInteriorTraversalToRatio(anchorXRatio, traversalDirection) * worldWidth,
             y: groundY - 24,
             type: 'gate_anchor'
         };
+    }).sort(function(a, b) {
+        return traversalDirection === 'rtl' ? b.x - a.x : a.x - b.x;
     });
     scene.interiorHazardLanes = (templateConfig.hazardLanes || []).map(function(laneXRatio, idx) {
         return {
             id: resolvedTemplate + '_hazard_lane_' + idx,
-            x: laneXRatio * worldWidth,
+            x: applyInteriorTraversalToRatio(laneXRatio, traversalDirection) * worldWidth,
             yTop: ceilingY,
             yBottom: groundY,
             type: 'hazard_lane'
@@ -151,6 +160,7 @@ function buildInteriorPlatforms(scene, seed, sectionTemplate) {
     scene.interiorPlatformSeed = seed || 1337;
     scene.interiorPlatformAnchors = platformAnchors;
     scene.interiorSectionTemplate = resolvedTemplate;
+    scene.interiorTraversalDirection = traversalDirection;
     scene.groundLevel = groundY;
 
     repositionInteriorObjectivesToPlatforms(scene);
@@ -163,6 +173,7 @@ function buildInteriorPlatforms(scene, seed, sectionTemplate) {
         anchors: platformAnchors,
         groundLevel: groundY,
         sectionTemplate: resolvedTemplate,
+        traversalDirection: traversalDirection,
         gateAnchors: scene.interiorGateAnchors,
         hazardLanes: scene.interiorHazardLanes
     };
@@ -173,6 +184,19 @@ function resolveInteriorSectionTemplate(sectionTemplate) {
     if (typeof sectionTemplate === 'string') return sectionTemplate;
     if (typeof sectionTemplate.id === 'string' && sectionTemplate.id) return sectionTemplate.id;
     return 'generic';
+}
+
+
+function resolveInteriorTraversalDirection(sectionTemplate) {
+    const rawDirection = typeof sectionTemplate === 'object' && sectionTemplate
+        ? sectionTemplate.traversalDirection
+        : null;
+    return rawDirection === 'rtl' ? 'rtl' : 'ltr';
+}
+
+function applyInteriorTraversalToRatio(ratio, traversalDirection) {
+    const clamped = Phaser.Math.Clamp(typeof ratio === 'number' ? ratio : 0.5, 0, 1);
+    return traversalDirection === 'rtl' ? 1 - clamped : clamped;
 }
 
 function getInteriorTemplateConfig(templateId, groundY, worldWidth, rng) {
@@ -309,6 +333,24 @@ function getInteriorTemplateConfig(templateId, groundY, worldWidth, rng) {
 
 
 // Finds closest viable platform top for interior objective placement.
+
+function resolveInteriorSceneTraversalDirection(scene) {
+    if (!scene) return 'ltr';
+    return scene.interiorTraversalDirection === 'rtl' ? 'rtl' : 'ltr';
+}
+
+function toInteriorDirectionalX(scene, x) {
+    const worldWidth = CONFIG.worldWidth || 0;
+    const normalizedX = Phaser.Math.Clamp(
+        typeof x === 'number' ? x : worldWidth * 0.5,
+        0,
+        worldWidth
+    );
+    return resolveInteriorSceneTraversalDirection(scene) === 'rtl'
+        ? worldWidth - normalizedX
+        : normalizedX;
+}
+
 function getInteriorAnchorY(scene, x, fallbackY, clearance) {
     if (!scene || !Array.isArray(scene.interiorPlatformAnchors) || scene.interiorPlatformAnchors.length === 0) {
         return fallbackY;

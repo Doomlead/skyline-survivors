@@ -415,7 +415,8 @@ function spawnInteriorObjectives(scene) {
 
     const conduitSpacing = CONFIG.worldWidth / (cfg.powerConduitCount + 1);
     for (let i = 0; i < cfg.powerConduitCount; i++) {
-        const cx = conduitSpacing * (i + 1) + (Math.random() - 0.5) * 100;
+        const cxBase = conduitSpacing * (i + 1) + (Math.random() - 0.5) * 100;
+        const cx = typeof toInteriorDirectionalX === 'function' ? toInteriorDirectionalX(scene, cxBase) : cxBase;
         const terrainVar = Math.sin(cx / 200) * 30;
         const fallbackY = Math.max(120, groundLevel - terrainVar - 20);
         const cy = getInteriorAnchorY(scene, cx, fallbackY, 20);
@@ -431,7 +432,8 @@ function spawnInteriorObjectives(scene) {
 
     const nodeSpacing = CONFIG.worldWidth / (cfg.securityNodeCount + 1);
     for (let i = 0; i < cfg.securityNodeCount; i++) {
-        const nx = nodeSpacing * (i + 1) + (Math.random() - 0.5) * 150;
+        const nxBase = nodeSpacing * (i + 1) + (Math.random() - 0.5) * 150;
+        const nx = typeof toInteriorDirectionalX === 'function' ? toInteriorDirectionalX(scene, nxBase) : nxBase;
         const terrainVar = Math.sin(nx / 200) * 30;
         const fallbackY = Math.max(100, groundLevel - terrainVar - 40);
         const ny = getInteriorAnchorY(scene, nx, fallbackY, 40);
@@ -471,13 +473,17 @@ function createInteriorComponent(scene, x, y, texture, role, hp) {
 function spawnInteriorDefenders(scene, count) {
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
     const camX = scene.cameras.main ? scene.cameras.main.scrollX : 0;
+    const direction = scene.interiorTraversalDirection === 'rtl' ? 'rtl' : 'ltr';
+    const aheadMin = CONFIG.width * 0.25;
+    const aheadMax = CONFIG.width * 0.65;
 
     for (let i = 0; i < count; i++) {
         const type = Phaser.Utils.Array.GetRandom(cfg.interiorEnemyTypes);
-        const spawnX = wrapValue(
-            camX + CONFIG.width * 0.3 + Math.random() * CONFIG.width * 0.4,
-            CONFIG.worldWidth
-        );
+        const ahead = aheadMin + Math.random() * (aheadMax - aheadMin);
+        const spawnXRaw = direction === 'rtl'
+            ? camX + CONFIG.width - ahead
+            : camX + ahead;
+        const spawnX = Phaser.Math.Clamp(spawnXRaw, 40, Math.max(40, CONFIG.worldWidth - 40));
         const spawnY = CONFIG.height * 0.2 + Math.random() * CONFIG.height * 0.5;
         spawnEnemy(scene, type, spawnX, spawnY, false);
     }
@@ -490,7 +496,8 @@ function spawnCoreChamber(scene) {
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
 
     // Place core chamber at center of world
-    const coreX = CONFIG.worldWidth * 0.5;
+    const coreXBase = CONFIG.worldWidth * 0.5;
+    const coreX = typeof toInteriorDirectionalX === 'function' ? toInteriorDirectionalX(scene, coreXBase) : coreXBase;
     const terrainVar = Math.sin(coreX / 200) * 30;
     const fallbackY = Math.max(140, groundLevel - terrainVar - 30);
     const coreY = getInteriorAnchorY(scene, coreX, fallbackY, 30);
