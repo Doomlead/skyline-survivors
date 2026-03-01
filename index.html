@@ -17,25 +17,51 @@
     
     <script>
         // Load partials directly into page-shell
-        const loadPartial = (url) => {
-            const shell = document.getElementById('page-shell');
-            if (!shell) return;
-            const request = new XMLHttpRequest();
-            request.open('GET', url, false);
-            request.send(null);
-            if (request.status >= 200 && request.status < 400) {
-                const temp = document.createElement('div');
-                temp.innerHTML = request.responseText;
-                while (temp.firstChild) {
-                    shell.appendChild(temp.firstChild);
-                }
-            } else {
-                console.error(`Failed to load partial: ${url} (${request.status})`);
+        const loadPartial = async (url) => {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.text();
+        };
+
+        const appendPartial = (shell, content) => {
+            const temp = document.createElement('div');
+            temp.innerHTML = content;
+            while (temp.firstChild) {
+                shell.appendChild(temp.firstChild);
             }
         };
 
-        loadPartial('partials/game-layout.html');
-        loadPartial('partials/district-layout.html');
+        const initializePartials = async () => {
+            const shell = document.getElementById('page-shell');
+            if (!shell) return;
+
+            const partialUrls = [
+                'partials/game-layout.html',
+                'partials/district-layout.html',
+            ];
+
+            const partialResults = await Promise.all(
+                partialUrls.map(async (url) => {
+                    try {
+                        const content = await loadPartial(url);
+                        return { url, content };
+                    } catch (error) {
+                        console.error(`Failed to load partial: ${url}`, error);
+                        return { url, content: '' };
+                    }
+                })
+            );
+
+            partialResults.forEach(({ content }) => {
+                if (content) {
+                    appendPartial(shell, content);
+                }
+            });
+        };
+
+        initializePartials();
     </script>
 
     <!-- Title Briefing Overlay -->
