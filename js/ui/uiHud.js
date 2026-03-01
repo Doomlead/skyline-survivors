@@ -200,30 +200,54 @@ function updateUI(scene) {
 
     let powerUpText = '';
     const p = playerState.powerUps;
-    if (p.laser > 0) {
-        const laserTypes = ['', 'PIERCE', 'WAVE'];
-        powerUpText += `[${laserTypes[p.laser]}] `;
+    const pilotActive = typeof pilotState !== 'undefined' && pilotState?.active;
+    if (pilotActive && pilotState?.weaponState) {
+        const state = pilotState.weaponState;
+        const weapon = state.selected || 'combatRifle';
+        const names = {
+            combatRifle: 'Combat Rifle',
+            scattergun: 'Scattergun',
+            plasmaLauncher: 'Plasma Launcher',
+            lightningGun: 'Lightning Gun',
+            stingerDrone: 'Stinger Drone'
+        };
+        const tier = Math.max(1, state.tiers?.[weapon] || 1);
+        const isTemp = Boolean(state.temporaryUnlocks?.[weapon] && !state.unlocked?.[weapon]);
+        const ammoVal = state.ammo?.[weapon];
+        const ammoText = Number.isFinite(ammoVal) ? `${Math.max(0, Math.ceil(ammoVal))}` : '∞';
+        const switchHint = getPilotWeaponOrder
+            ? (getPilotWeaponOrder().filter((entry) => state.unlocked?.[entry] || state.temporaryUnlocks?.[entry]).length > 1 ? ' · TAB SWAP' : '')
+            : '';
+        const tempTag = isTemp ? ' · TEMP' : '';
+        const droneTag = weapon === 'stingerDrone' ? ` · DRONES:${state.droneCount || 0}` : '';
+        powerUpText = `[PILOT ${names[weapon] || weapon}] [T${tier}] [AMMO:${ammoText}]${droneTag}${tempTag}${switchHint}`;
     }
-    if (p.drone > 0) powerUpText += `[DRONES:${p.drone}] `;
-    if (p.shield > 0) powerUpText += `[SHIELD] `;
-    if (p.missile > 0) {
-        const missileTypes = ['', 'STRAIGHT', 'HOMING', 'CLUSTER'];
-        powerUpText += `[${missileTypes[p.missile]}] `;
+    if (!pilotActive) {
+        if (p.laser > 0) {
+            const laserTypes = ['', 'PIERCE', 'WAVE'];
+            powerUpText += `[${laserTypes[p.laser]}] `;
+        }
+        if (p.drone > 0) powerUpText += `[DRONES:${p.drone}] `;
+        if (p.shield > 0) powerUpText += `[SHIELD] `;
+        if (p.missile > 0) {
+            const missileTypes = ['', 'STRAIGHT', 'HOMING', 'CLUSTER'];
+            powerUpText += `[${missileTypes[p.missile]}] `;
+        }
+        if (p.overdrive > 0) powerUpText += `[OVERDRIVE:${Math.ceil(p.overdrive/1000)}s] `;
+        if (p.rapid > 0) powerUpText += `[RAPID:${Math.ceil(p.rapid/1000)}s] `;
+        if (p.multiShot > 0) {
+            const shotTypes = ['', 'TWIN', 'SPREAD', 'MULTI'];
+            powerUpText += `[${shotTypes[p.multiShot]}] `;
+        }
+        if (p.coverage > 0) powerUpText += '[REAR] ';
+        if (p.coverage > 1) powerUpText += '[SIDE] ';
+        if (p.piercing > 0) powerUpText += '[PIERCING] ';
+        if (p.speed > 0) powerUpText += `[SPEED:${Math.ceil(p.speed/1000)}s] `;
+        if (p.magnet > 0) powerUpText += `[MAGNET:${Math.ceil(p.magnet/1000)}s] `;
+        if (p.double > 0) powerUpText += `[2X DMG:${Math.ceil(p.double/1000)}s] `;
+        if (p.invincibility > 0) powerUpText += `[INVINCIBLE:${Math.ceil(p.invincibility/1000)}s] `;
+        if (p.timeSlow > 0) powerUpText += `[SLOW:${Math.ceil(p.timeSlow/1000)}s] `;
     }
-    if (p.overdrive > 0) powerUpText += `[OVERDRIVE:${Math.ceil(p.overdrive/1000)}s] `;
-    if (p.rapid > 0) powerUpText += `[RAPID:${Math.ceil(p.rapid/1000)}s] `;
-    if (p.multiShot > 0) {
-        const shotTypes = ['', 'TWIN', 'SPREAD', 'MULTI'];
-        powerUpText += `[${shotTypes[p.multiShot]}] `;
-    }
-    if (p.coverage > 0) powerUpText += '[REAR] ';
-    if (p.coverage > 1) powerUpText += '[SIDE] ';
-    if (p.piercing > 0) powerUpText += '[PIERCING] ';
-    if (p.speed > 0) powerUpText += `[SPEED:${Math.ceil(p.speed/1000)}s] `;
-    if (p.magnet > 0) powerUpText += `[MAGNET:${Math.ceil(p.magnet/1000)}s] `;
-    if (p.double > 0) powerUpText += `[2X DMG:${Math.ceil(p.double/1000)}s] `;
-    if (p.invincibility > 0) powerUpText += `[INVINCIBLE:${Math.ceil(p.invincibility/1000)}s] `;
-    if (p.timeSlow > 0) powerUpText += `[SLOW:${Math.ceil(p.timeSlow/1000)}s] `;
 
     powerupsEl.innerText = powerUpText || '[NORMAL FIRE]';
 

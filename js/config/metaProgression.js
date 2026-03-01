@@ -64,10 +64,75 @@ const DEFAULT_META_STATE = {
     runHistory: [],
     lastRun: null,
     totalDropsPurchased: 0,
-    lootHistory: [] // Last 5 drops for "history" display
+    lootHistory: [], // Last 5 drops for "history" display
+    pilotWeapons: {
+        unlocked: {
+            combatRifle: true,
+            scattergun: false,
+            plasmaLauncher: false,
+            lightningGun: false,
+            stingerDrone: false
+        },
+        tiers: {
+            combatRifle: 1,
+            scattergun: 0,
+            plasmaLauncher: 0,
+            lightningGun: 0,
+            stingerDrone: 0
+        }
+    }
 };
 
 let metaState = null;
+
+const PILOT_WEAPON_SHOP = {
+    scattergun: { cost: 120, name: 'Scattergun Unlock' },
+    plasmaLauncher: { cost: 150, name: 'Plasma Launcher Unlock' },
+    lightningGun: { cost: 180, name: 'Lightning Gun Unlock' },
+    stingerDrone: { cost: 220, name: 'Stinger Drone Unlock' }
+};
+
+function createDefaultPilotWeaponProfile() {
+    return {
+        unlocked: {
+            combatRifle: true,
+            scattergun: false,
+            plasmaLauncher: false,
+            lightningGun: false,
+            stingerDrone: false
+        },
+        tiers: {
+            combatRifle: 1,
+            scattergun: 0,
+            plasmaLauncher: 0,
+            lightningGun: 0,
+            stingerDrone: 0
+        }
+    };
+}
+
+function normalizePilotWeaponProfile(raw) {
+    const fallback = createDefaultPilotWeaponProfile();
+    const source = raw && typeof raw === 'object' ? raw : {};
+    const unlocked = source.unlocked && typeof source.unlocked === 'object' ? source.unlocked : {};
+    const tiers = source.tiers && typeof source.tiers === 'object' ? source.tiers : {};
+    const out = {
+        unlocked: { ...fallback.unlocked },
+        tiers: { ...fallback.tiers }
+    };
+    Object.keys(out.unlocked).forEach((weapon) => {
+        if (weapon !== 'combatRifle') {
+            out.unlocked[weapon] = Boolean(unlocked[weapon]);
+        }
+        const rawTier = Number.isFinite(tiers[weapon]) ? tiers[weapon] : out.tiers[weapon];
+        const minTier = weapon === 'combatRifle' ? 1 : 0;
+        out.tiers[weapon] = Math.max(minTier, Math.min(3, Math.round(rawTier || 0)));
+        if (weapon !== 'combatRifle' && out.unlocked[weapon] && out.tiers[weapon] <= 0) {
+            out.tiers[weapon] = 1;
+        }
+    });
+    return out;
+}
 
 // Loads and initializes persistent meta-progression state from local storage.
 function loadMetaProgression() {
@@ -86,6 +151,7 @@ function loadMetaProgression() {
                 runHistory: Array.isArray(stored.runHistory) ? stored.runHistory.slice(-8) : [],
                 lootHistory: Array.isArray(stored.lootHistory) ? stored.lootHistory.slice(-5) : []
             };
+            metaState.pilotWeapons = normalizePilotWeaponProfile(stored.pilotWeapons);
         }
     } catch (err) {
         metaState = { ...DEFAULT_META_STATE };
@@ -110,7 +176,105 @@ function getMetaState() {
         ...state,
         pendingDrop: state.pendingDrop ? { ...state.pendingDrop } : null,
         runHistory: [...state.runHistory],
-        lootHistory: [...state.lootHistory]
+        lootHistory: [...state.lootHistory],
+        pilotWeapons: normalizePilotWeaponProfile(state.pilotWeapons)
+    };
+}
+
+function getPilotWeaponProfile() {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    persistMetaProgression();
+    return normalizePilotWeaponProfile(state.pilotWeapons);
+}
+
+function purchasePilotWeapon(weaponId) {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    if (!PILOT_WEAPON_SHOP[weaponId]) return { success: false, reason: 'invalid_weapon' };
+    if (state.pilotWeapons.unlocked[weaponId]) return { success: false, reason: 'already_owned' };
+    if (!spendCredits(PILOT_WEAPON_SHOP[weaponId].cost)) return { success: false, reason: 'insufficient_funds' };
+    state.pilotWeapons.unlocked[weaponId] = true;
+    state.pilotWeapons.tiers[weaponId] = Math.max(1, state.pilotWeapons.tiers[weaponId] || 1);
+    persistMetaProgression();
+    return { success: true, weaponId, profile: normalizePilotWeaponProfile(state.pilotWeapons) };
+}
+
+function upgradePilotWeaponTierMeta(weaponId) {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    if (!Object.prototype.hasOwnProperty.call(state.pilotWeapons.tiers, weaponId)) {
+        return { success: false, reason: 'invalid_weapon' };
+    }
+    if (weaponId !== 'combatRifle' && !state.pilotWeapons.unlocked[weaponId]) {
+        return { success: false, reason: 'not_unlocked' };
+    }
+    const minTier = weaponId === 'combatRifle' ? 1 : 0;
+    const nextTier = Math.max(minTier, Math.min(3, (state.pilotWeapons.tiers[weaponId] || minTier) + 1));
+    state.pilotWeapons.tiers[weaponId] = nextTier;
+    persistMetaProgression();
+    return { success: true, weaponId, tier: nextTier, profile: normalizePilotWeaponProfile(state.pilotWeapons) };
+}
+
+function applyLoadoutEffects(gameState, playerState) {
+    const profile = getPilotWeaponProfile();
+    const runtimePilotState = typeof pilotState !== 'undefined' ? pilotState : null;
+    const weaponState = playerState?.pilotState?.weaponState || runtimePilotState?.weaponState;
+    if (!weaponState) {
+        return { applied: false, reason: 'pilot_state_unavailable' };
+    }
+    Object.keys(profile.unlocked).forEach((weapon) => {
+        weaponState.unlocked[weapon] = Boolean(profile.unlocked[weapon]);
+        const tierValue = profile.tiers[weapon] || 0;
+        const minTier = weapon === 'combatRifle' ? 1 : 0;
+        weaponState.tiers[weapon] = Math.max(minTier, tierValue);
+    });
+    weaponState.unlocked.combatRifle = true;
+    weaponState.tiers.combatRifle = Math.max(1, weaponState.tiers.combatRifle || 1);
+    weaponState.temporaryUnlocks = {
+        scattergun: false,
+        plasmaLauncher: false,
+        lightningGun: false,
+        stingerDrone: false
+    };
+    const maxAmmo = {
+        scattergun: 200,
+        plasmaLauncher: 150,
+        lightningGun: 25000
+    };
+    Object.keys(maxAmmo).forEach((weapon) => {
+        if (weaponState.unlocked[weapon]) {
+            weaponState.ammo[weapon] = maxAmmo[weapon];
+        }
+    });
+    const order = ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
+    if (!weaponState.unlocked[weaponState.selected]) {
+        weaponState.selected = order.find((weapon) => weaponState.unlocked[weapon]) || 'combatRifle';
+    }
+    return {
+        applied: true,
+        pilotWeapons: normalizePilotWeaponProfile(profile)
+    };
+}
+
+function getLoadoutOptions() {
+    const inventory = getShopInventory();
+    const profile = getPilotWeaponProfile();
+    const offense = Object.keys(PILOT_WEAPON_SHOP).map((weaponId) => ({
+        id: weaponId,
+        name: PILOT_WEAPON_SHOP[weaponId].name,
+        equipped: Boolean(profile.unlocked[weaponId]),
+        tier: profile.tiers[weaponId] || 0,
+        cost: PILOT_WEAPON_SHOP[weaponId].cost
+    }));
+    return {
+        offense,
+        defense: inventory.map((entry) => ({
+            id: entry.id,
+            name: entry.name,
+            equipped: false,
+            cost: entry.cost
+        }))
     };
 }
 
@@ -383,6 +547,12 @@ window.metaProgression = {
     recordRunOutcome,
     getLastRunSummary,
     getLootHistory,
+    getPilotWeaponProfile,
+    purchasePilotWeapon,
+    upgradePilotWeaponTier: upgradePilotWeaponTierMeta,
+    getLoadoutOptions,
+    applyLoadoutEffects,
     LOOT_TABLES,
-    POWERUP_TIERS
+    POWERUP_TIERS,
+    PILOT_WEAPON_SHOP
 };

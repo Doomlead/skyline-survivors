@@ -28,6 +28,35 @@ function spawnPowerUp(scene, x, y) {
     });
 }
 
+function spawnPilotWeaponPickup(scene, x, y, weapon) {
+    const { powerUps } = scene;
+    if (!powerUps || !weapon) return;
+    const typeMap = {
+        scattergun: 'pilot_scattergun',
+        plasmaLauncher: 'pilot_plasma',
+        lightningGun: 'pilot_lightning',
+        stingerDrone: 'pilot_stinger'
+    };
+    const textureType = typeMap[weapon];
+    if (!textureType) return;
+    const pickup = powerUps.create(x, y, 'powerup_' + textureType);
+    pickup.setScale(1.25);
+    pickup.setDepth(FG_DEPTH_BASE + 3);
+    pickup.powerUpType = textureType;
+    pickup.birthTime = scene.time.now;
+    scene.tweens.add({
+        targets: pickup,
+        y: y - 10,
+        duration: 900,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+    });
+    scene.time.delayedCall(45000, () => {
+        if (pickup && pickup.active) pickup.destroy();
+    });
+}
+
 // Refreshes the decay timer for a tracked upgrade path/tier when power-up state changes.
 function refreshDecayTimer(path, tier) {
     const duration = getDecayDurationMs(path, tier);
@@ -99,7 +128,11 @@ function collectPowerUp(playerSprite, powerUp) {
         bomb: 'SMART BOMB',
         double: 'DOUBLE DAMAGE',
         invincibility: 'INVINCIBILITY',
-        timeSlow: 'TIME SLOW'
+        timeSlow: 'TIME SLOW',
+        pilot_scattergun: 'SCATTERGUN CRATE',
+        pilot_plasma: 'PLASMA CRATE',
+        pilot_lightning: 'LIGHTNING CRATE',
+        pilot_stinger: 'STINGER DRONE CRATE'
     };
 
     const displayName = overflowUpgrade
@@ -204,6 +237,42 @@ function collectPowerUp(playerSprite, powerUp) {
         case 'timeSlow':
             p.timeSlow = 5000;
             break;
+        case 'pilot_scattergun': {
+            const result = typeof applyPilotWeaponPickup === 'function'
+                ? applyPilotWeaponPickup('scattergun')
+                : null;
+            if (result?.type === 'tier_upgrade' && typeof showSupplyDropBanner === 'function') {
+                showSupplyDropBanner(this, `PILOT WEAPON UPGRADE\nSCATTERGUN T${result.tier}`, '#f59e0b');
+            }
+            break;
+        }
+        case 'pilot_plasma': {
+            const result = typeof applyPilotWeaponPickup === 'function'
+                ? applyPilotWeaponPickup('plasmaLauncher')
+                : null;
+            if (result?.type === 'tier_upgrade' && typeof showSupplyDropBanner === 'function') {
+                showSupplyDropBanner(this, `PILOT WEAPON UPGRADE\nPLASMA T${result.tier}`, '#22d3ee');
+            }
+            break;
+        }
+        case 'pilot_lightning': {
+            const result = typeof applyPilotWeaponPickup === 'function'
+                ? applyPilotWeaponPickup('lightningGun')
+                : null;
+            if (result?.type === 'tier_upgrade' && typeof showSupplyDropBanner === 'function') {
+                showSupplyDropBanner(this, `PILOT WEAPON UPGRADE\nLIGHTNING T${result.tier}`, '#60a5fa');
+            }
+            break;
+        }
+        case 'pilot_stinger': {
+            const result = typeof applyPilotWeaponPickup === 'function'
+                ? applyPilotWeaponPickup('stingerDrone')
+                : null;
+            if (result?.type === 'tier_upgrade' && typeof showSupplyDropBanner === 'function') {
+                showSupplyDropBanner(this, `PILOT WEAPON UPGRADE\nSTINGER T${result.tier}`, '#34d399');
+            }
+            break;
+        }
     }
 
     createPowerUpCollectionEffect(this, powerUp.x, powerUp.y, powerUp.powerUpType);
