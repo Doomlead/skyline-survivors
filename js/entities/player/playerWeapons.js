@@ -177,7 +177,10 @@ function firePilotWeapon(scene, player, angleOverride) {
         case 'lightningGun': {
             const damage = tier >= 2 ? 2 : 1;
             createProjectile(scene, origin.fireX, origin.fireY, Math.cos(baseAngle) * 900, Math.sin(baseAngle) * 900, 'overdrive', damage, { piercing: true, texture: 'pilot_projectile_lightning' });
-            state.ammo.lightningGun = Math.max(0, (state.ammo.lightningGun || 0) - playerState.fireRate);
+            const fireRateCost = Number.isFinite(playerState.fireRate) && playerState.fireRate > 0
+                ? playerState.fireRate
+                : 1;
+            state.ammo.lightningGun = Math.max(0, (state.ammo.lightningGun || 0) - fireRateCost);
             break;
         }
         case 'stingerDrone': {
