@@ -64,8 +64,74 @@ const DEFAULT_META_STATE = {
     runHistory: [],
     lastRun: null,
     totalDropsPurchased: 0,
-    lootHistory: [] // Last 5 drops for "history" display
+    lootHistory: [], // Last 5 drops for "history" display
+    pilotWeapons: {
+        unlocked: {
+            combatRifle: true,
+            scattergun: false,
+            plasmaLauncher: false,
+            lightningGun: false,
+            stingerDrone: false
+        },
+        tiers: {
+            combatRifle: 1,
+            scattergun: 0,
+            plasmaLauncher: 0,
+            lightningGun: 0,
+            stingerDrone: 0
+        },
+        startAmmo: {
+            scattergun: 200,
+            plasmaLauncher: 150,
+            lightningGun: 25000
+        }
+    }
 };
+
+const PILOT_WEAPON_IDS = ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
+const PILOT_WEAPON_AMMO_IDS = ['scattergun', 'plasmaLauncher', 'lightningGun'];
+const PILOT_WEAPON_CRATE_IDS = ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
+const PILOT_WEAPON_MAX_TIER = 3;
+const PILOT_WEAPON_TEMP_AMMO_REFILL_RATIO = 0.5;
+const PILOT_WEAPON_RESCUE_REFILL_RATIO = 0.12;
+
+function getPilotWeaponProgressionApi() {
+    return typeof window !== 'undefined' ? window.pilotWeaponProgression : null;
+}
+
+function createDefaultPilotWeaponProfile() {
+    return {
+        unlocked: { ...DEFAULT_META_STATE.pilotWeapons.unlocked },
+        tiers: { ...DEFAULT_META_STATE.pilotWeapons.tiers },
+        startAmmo: { ...DEFAULT_META_STATE.pilotWeapons.startAmmo }
+    };
+}
+
+function normalizePilotWeaponProfile(profile) {
+    const normalized = createDefaultPilotWeaponProfile();
+    if (!profile || typeof profile !== 'object') return normalized;
+
+    PILOT_WEAPON_IDS.forEach((weaponId) => {
+        if (weaponId === 'combatRifle') {
+            normalized.unlocked.combatRifle = true;
+            normalized.tiers.combatRifle = Math.max(1, Math.round(profile?.tiers?.combatRifle || 1));
+            return;
+        }
+
+        normalized.unlocked[weaponId] = Boolean(profile?.unlocked?.[weaponId]);
+        const rawTier = Number.isFinite(profile?.tiers?.[weaponId]) ? Math.round(profile.tiers[weaponId]) : 0;
+        normalized.tiers[weaponId] = Math.max(0, rawTier);
+    });
+
+    PILOT_WEAPON_AMMO_IDS.forEach((weaponId) => {
+        const rawAmmo = Number.isFinite(profile?.startAmmo?.[weaponId])
+            ? Math.round(profile.startAmmo[weaponId])
+            : normalized.startAmmo[weaponId];
+        normalized.startAmmo[weaponId] = Math.max(0, rawAmmo);
+    });
+
+    return normalized;
+}
 
 let metaState = null;
 
@@ -84,7 +150,8 @@ function loadMetaProgression() {
                 ...stored,
                 pendingDrop: stored.pendingDrop || null,
                 runHistory: Array.isArray(stored.runHistory) ? stored.runHistory.slice(-8) : [],
-                lootHistory: Array.isArray(stored.lootHistory) ? stored.lootHistory.slice(-5) : []
+                lootHistory: Array.isArray(stored.lootHistory) ? stored.lootHistory.slice(-5) : [],
+                pilotWeapons: normalizePilotWeaponProfile(stored.pilotWeapons)
             };
         }
     } catch (err) {
@@ -106,12 +173,293 @@ function persistMetaProgression() {
 // Returns a defensive copy of meta-progression state for external consumers.
 function getMetaState() {
     const state = loadMetaProgression();
+    const pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
     return {
         ...state,
         pendingDrop: state.pendingDrop ? { ...state.pendingDrop } : null,
         runHistory: [...state.runHistory],
-        lootHistory: [...state.lootHistory]
+        lootHistory: [...state.lootHistory],
+        pilotWeapons
     };
+}
+
+// Returns a defensive copy of persistent pilot weapon unlock/tier/ammo progression.
+function getPilotWeaponProfile() {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    return normalizePilotWeaponProfile(state.pilotWeapons);
+}
+
+// Permanently unlocks a pilot weapon in meta progression.
+function purchasePilotWeapon(weaponId) {
+    if (!PILOT_WEAPON_IDS.includes(weaponId) || weaponId === 'combatRifle') {
+        return { success: false, reason: 'invalid_weapon' };
+    }
+
+    const state = loadMetaProgression();
+    const profile = normalizePilotWeaponProfile(state.pilotWeapons);
+    if (profile.unlocked[weaponId]) {
+        state.pilotWeapons = profile;
+        persistMetaProgression();
+        return { success: true, alreadyOwned: true, profile: normalizePilotWeaponProfile(profile) };
+    }
+
+    const progression = getPilotWeaponProgressionApi();
+    if (progression?.unlockWeapon) {
+        progression.unlockWeapon(profile, weaponId);
+    } else {
+        profile.unlocked[weaponId] = true;
+        profile.tiers[weaponId] = Math.max(1, profile.tiers[weaponId] || 0);
+    }
+    state.pilotWeapons = profile;
+    persistMetaProgression();
+    return { success: true, profile: normalizePilotWeaponProfile(profile) };
+}
+
+// Permanently upgrades a pilot weapon tier in meta progression.
+function upgradePilotWeaponTier(weaponId) {
+    if (!PILOT_WEAPON_IDS.includes(weaponId)) {
+        return { success: false, reason: 'invalid_weapon' };
+    }
+
+    const state = loadMetaProgression();
+    const profile = normalizePilotWeaponProfile(state.pilotWeapons);
+    if (weaponId !== 'combatRifle' && !profile.unlocked[weaponId]) {
+        return { success: false, reason: 'weapon_locked' };
+    }
+
+    const progression = getPilotWeaponProgressionApi();
+    if (progression?.upgradeTier) {
+        progression.upgradeTier(profile, weaponId, PILOT_WEAPON_MAX_TIER);
+    } else {
+        const currentTier = Math.max(weaponId === 'combatRifle' ? 1 : 0, profile.tiers[weaponId] || 0);
+        profile.tiers[weaponId] = Math.min(PILOT_WEAPON_MAX_TIER, currentTier + 1);
+        if (weaponId !== 'combatRifle') profile.unlocked[weaponId] = true;
+    }
+    state.pilotWeapons = profile;
+    persistMetaProgression();
+    return { success: true, newTier: profile.tiers[weaponId], profile: normalizePilotWeaponProfile(profile) };
+}
+
+function getPilotWeaponMaxAmmo(weaponId) {
+    const profile = getPilotWeaponProfile();
+    const progression = getPilotWeaponProgressionApi();
+    return Math.max(0, Math.round(profile.startAmmo?.[weaponId] || 0));
+}
+
+// Grants pilot ammo by flat amount or max-ammo percentage for one weapon.
+function grantPilotAmmo(weaponState, weaponId, amountOrPct = 0) {
+    if (!weaponState || typeof weaponState !== 'object') {
+        return { applied: false, reason: 'invalid_weapon_state' };
+    }
+    if (!PILOT_WEAPON_AMMO_IDS.includes(weaponId)) {
+        return { applied: false, reason: 'unsupported_weapon' };
+    }
+
+    const maxAmmo = getPilotWeaponMaxAmmo(weaponId);
+    const stateAmmo = weaponState.ammo && typeof weaponState.ammo === 'object'
+        ? weaponState.ammo
+        : (weaponState.ammo = {});
+    const currentAmmo = Math.max(0, Math.round(stateAmmo[weaponId] || 0));
+
+    let grantAmount = 0;
+    if (typeof amountOrPct === 'number' && amountOrPct > 0 && amountOrPct <= 1) {
+        grantAmount = Math.round(maxAmmo * amountOrPct);
+    } else if (Number.isFinite(amountOrPct)) {
+        grantAmount = Math.round(amountOrPct);
+    }
+
+    if (grantAmount <= 0 || maxAmmo <= 0) {
+        return { applied: false, reason: 'no_grant', ammo: currentAmmo, maxAmmo };
+    }
+
+    const nextAmmo = Math.min(maxAmmo, currentAmmo + grantAmount);
+    stateAmmo[weaponId] = nextAmmo;
+    return {
+        applied: nextAmmo !== currentAmmo,
+        weaponId,
+        granted: Math.max(0, nextAmmo - currentAmmo),
+        ammo: nextAmmo,
+        maxAmmo
+    };
+}
+
+// Refills currently selected pilot weapon ammo using rescue/hangar bonus rules.
+function refillCurrentPilotWeaponByRescueBonus(weaponState) {
+    if (!weaponState || typeof weaponState !== 'object') {
+        return { applied: false, reason: 'invalid_weapon_state' };
+    }
+    const selected = weaponState.selected || 'combatRifle';
+    if (!PILOT_WEAPON_AMMO_IDS.includes(selected)) {
+        return { applied: false, reason: 'current_weapon_not_limited', weaponId: selected };
+    }
+    return grantPilotAmmo(weaponState, selected, PILOT_WEAPON_RESCUE_REFILL_RATIO);
+}
+
+// Applies one temporary pilot-weapon crate pickup to mission runtime weapon state.
+function applyPilotWeaponCratePickup(weaponState, weaponId) {
+    if (!weaponState || typeof weaponState !== 'object') {
+        return { applied: false, reason: 'invalid_weapon_state' };
+    }
+    if (!PILOT_WEAPON_CRATE_IDS.includes(weaponId)) {
+        return { applied: false, reason: 'invalid_weapon' };
+    }
+
+    const profile = getPilotWeaponProfile();
+    const progression = getPilotWeaponProgressionApi();
+    const stateUnlocked = weaponState.unlocked && typeof weaponState.unlocked === 'object'
+        ? weaponState.unlocked
+        : (weaponState.unlocked = {});
+    const stateTemporary = weaponState.temporaryUnlocks && typeof weaponState.temporaryUnlocks === 'object'
+        ? weaponState.temporaryUnlocks
+        : (weaponState.temporaryUnlocks = {});
+    const stateTiers = weaponState.tiers && typeof weaponState.tiers === 'object'
+        ? weaponState.tiers
+        : (weaponState.tiers = {});
+    const stateAmmo = weaponState.ammo && typeof weaponState.ammo === 'object'
+        ? weaponState.ammo
+        : (weaponState.ammo = {});
+
+    const permanentlyOwned = Boolean(profile.unlocked?.[weaponId]);
+    const persistedTier = Math.max(0, Math.round(profile.tiers?.[weaponId] || 0));
+    const existingTier = Math.max(0, Math.round(stateTiers[weaponId] || 0));
+
+    if (permanentlyOwned) {
+        if (progression?.unlockWeapon) {
+            progression.unlockWeapon(weaponState, weaponId);
+        } else {
+            stateUnlocked[weaponId] = true;
+            stateTiers[weaponId] = Math.max(1, stateTiers[weaponId] || 0);
+        }
+        const baseTier = Math.max(1, persistedTier, existingTier, Math.round(stateTiers[weaponId] || 0));
+        stateTiers[weaponId] = Math.min(PILOT_WEAPON_MAX_TIER, baseTier + 1);
+        if (progression?.setTemporaryUnlock) {
+            progression.setTemporaryUnlock(weaponState, weaponId, false);
+        } else {
+            stateTemporary[weaponId] = false;
+        }
+    } else {
+        if (progression?.setTemporaryUnlock) {
+            progression.setTemporaryUnlock(weaponState, weaponId, true);
+        } else {
+            stateTemporary[weaponId] = true;
+        }
+        stateTiers[weaponId] = Math.max(1, existingTier);
+    }
+
+    if (PILOT_WEAPON_AMMO_IDS.includes(weaponId)) {
+        const maxAmmo = getPilotWeaponMaxAmmo(weaponId);
+        const refillAmount = permanentlyOwned
+            ? maxAmmo
+            : Math.max(1, Math.round(maxAmmo * PILOT_WEAPON_TEMP_AMMO_REFILL_RATIO));
+        stateAmmo[weaponId] = Math.min(maxAmmo, Math.max(0, Math.round(stateAmmo[weaponId] || 0)) + refillAmount);
+    }
+
+    if (!weaponState.selected || weaponState.selected === 'combatRifle') {
+        weaponState.selected = weaponId;
+    }
+
+    return {
+        applied: true,
+        weaponId,
+        permanentlyOwned,
+        tier: stateTiers[weaponId] || 1,
+        ammo: PILOT_WEAPON_AMMO_IDS.includes(weaponId) ? (stateAmmo[weaponId] || 0) : null,
+        temporaryUnlock: !permanentlyOwned
+    };
+}
+
+// Clears mission-scoped temporary pilot-weapon effects and restores persistent baseline tiers.
+function clearTemporaryPilotWeaponState(weaponState) {
+    if (!weaponState || typeof weaponState !== 'object') return weaponState;
+
+    const profile = getPilotWeaponProfile();
+    const stateUnlocked = weaponState.unlocked && typeof weaponState.unlocked === 'object'
+        ? weaponState.unlocked
+        : (weaponState.unlocked = {});
+    const stateTemporary = weaponState.temporaryUnlocks && typeof weaponState.temporaryUnlocks === 'object'
+        ? weaponState.temporaryUnlocks
+        : (weaponState.temporaryUnlocks = {});
+    const stateTiers = weaponState.tiers && typeof weaponState.tiers === 'object'
+        ? weaponState.tiers
+        : (weaponState.tiers = {});
+    const progression = getPilotWeaponProgressionApi();
+
+    PILOT_WEAPON_IDS.forEach((weaponId) => {
+        if (weaponId === 'combatRifle') {
+            stateUnlocked.combatRifle = true;
+            stateTiers.combatRifle = Math.max(1, Math.round(profile.tiers?.combatRifle || 1));
+            return;
+        }
+        if (progression?.setTemporaryUnlock) {
+            progression.setTemporaryUnlock(weaponState, weaponId, false);
+        } else {
+            stateTemporary[weaponId] = false;
+        }
+        stateUnlocked[weaponId] = Boolean(profile.unlocked?.[weaponId]);
+        const persistentTier = Math.max(0, Math.round(profile.tiers?.[weaponId] || 0));
+        stateTiers[weaponId] = stateUnlocked[weaponId] ? Math.max(1, persistentTier) : persistentTier;
+    });
+
+    if (progression?.normalizeSelection) {
+        progression.normalizeSelection(weaponState, PILOT_WEAPON_IDS);
+    } else {
+        const selected = weaponState.selected;
+        if (!selected || (!stateUnlocked[selected] && selected !== 'combatRifle')) {
+            weaponState.selected = 'combatRifle';
+        }
+    }
+
+    return weaponState;
+}
+
+
+// Merges persistent pilot profile into a runtime pilot weapon-state object for mission start.
+function hydratePilotWeaponState(weaponState) {
+    if (!weaponState || typeof weaponState !== 'object') return weaponState;
+
+    const profile = getPilotWeaponProfile();
+    const stateUnlocked = weaponState.unlocked && typeof weaponState.unlocked === 'object'
+        ? weaponState.unlocked
+        : (weaponState.unlocked = {});
+    const stateTiers = weaponState.tiers && typeof weaponState.tiers === 'object'
+        ? weaponState.tiers
+        : (weaponState.tiers = {});
+    const stateAmmo = weaponState.ammo && typeof weaponState.ammo === 'object'
+        ? weaponState.ammo
+        : (weaponState.ammo = {});
+
+    PILOT_WEAPON_IDS.forEach((weaponId) => {
+        if (weaponId === 'combatRifle') {
+            stateUnlocked.combatRifle = true;
+            stateTiers.combatRifle = Math.max(1, Math.round(stateTiers.combatRifle || 0), profile.tiers.combatRifle || 1);
+            return;
+        }
+
+        const ownedPersistently = Boolean(profile.unlocked?.[weaponId]);
+        stateUnlocked[weaponId] = Boolean(stateUnlocked[weaponId] || ownedPersistently);
+        const persistedTier = Math.max(0, Math.round(profile.tiers?.[weaponId] || 0));
+        const existingTier = Math.max(0, Math.round(stateTiers[weaponId] || 0));
+        const mergedTier = Math.max(existingTier, persistedTier);
+        stateTiers[weaponId] = stateUnlocked[weaponId] ? Math.max(1, mergedTier) : mergedTier;
+    });
+
+    PILOT_WEAPON_AMMO_IDS.forEach((weaponId) => {
+        const fullAmmo = Math.max(0, Math.round(profile.startAmmo?.[weaponId] || 0));
+        stateAmmo[weaponId] = fullAmmo;
+    });
+
+    const progression = getPilotWeaponProgressionApi();
+    if (progression?.normalizeSelection) {
+        progression.normalizeSelection(weaponState, PILOT_WEAPON_IDS);
+    } else {
+        const selected = weaponState.selected;
+        if (!selected || (!stateUnlocked[selected] && selected !== 'combatRifle')) {
+            weaponState.selected = 'combatRifle';
+        }
+    }
+
+    return weaponState;
 }
 
 // Adds (or subtracts) credits with clamping and returns the updated credit total.
@@ -372,6 +720,7 @@ function getLootHistory() {
     return state.lootHistory || [];
 }
 
+if (typeof window !== 'undefined') {
 window.metaProgression = {
     getMetaState,
     addCredits,
@@ -383,6 +732,41 @@ window.metaProgression = {
     recordRunOutcome,
     getLastRunSummary,
     getLootHistory,
+    getPilotWeaponProfile,
+    purchasePilotWeapon,
+    upgradePilotWeaponTier,
+    hydratePilotWeaponState,
+    applyPilotWeaponCratePickup,
+    clearTemporaryPilotWeaponState,
+    grantPilotAmmo,
+    refillCurrentPilotWeaponByRescueBonus,
     LOOT_TABLES,
     POWERUP_TIERS
 };
+}
+
+
+if (typeof module !== 'undefined') {
+    module.exports = {
+        getMetaState,
+        addCredits,
+        purchaseSupplyDrop,
+        getShopInventory,
+        applySupplyDropEffects,
+        getPendingDrop,
+        clearPendingDrop,
+        recordRunOutcome,
+        getLastRunSummary,
+        getLootHistory,
+        getPilotWeaponProfile,
+        purchasePilotWeapon,
+        upgradePilotWeaponTier,
+        hydratePilotWeaponState,
+        applyPilotWeaponCratePickup,
+        clearTemporaryPilotWeaponState,
+        grantPilotAmmo,
+        refillCurrentPilotWeaponByRescueBonus,
+        LOOT_TABLES,
+        POWERUP_TIERS
+    };
+}

@@ -2,6 +2,51 @@
 // Power-up system - All 16 power-up types
 // ------------------------
 
+const PILOT_CRATE_WEAPONS = ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
+const PILOT_CRATE_POWERUP_BY_WEAPON = {
+    scattergun: 'pilotCrate_S',
+    plasmaLauncher: 'pilotCrate_P',
+    lightningGun: 'pilotCrate_L',
+    stingerDrone: 'pilotCrate_D'
+};
+const PILOT_CRATE_WEAPON_BY_POWERUP = {
+    pilotCrate_S: 'scattergun',
+    pilotCrate_P: 'plasmaLauncher',
+    pilotCrate_L: 'lightningGun',
+    pilotCrate_D: 'stingerDrone'
+};
+
+function shouldUsePilotWeaponCrateDrops() {
+    const pilotActive = Boolean(typeof pilotState !== 'undefined' && pilotState?.active);
+    const aegisActive = Boolean(typeof aegisState !== 'undefined' && aegisState?.active);
+    const inInteriorObjective = Boolean(gameState?.assaultObjective?.active || gameState?.mothershipObjective?.interiorPhase);
+    return pilotActive && !aegisActive && inInteriorObjective;
+}
+
+function rollPilotCratePowerUpType() {
+    const weaponId = Phaser.Utils.Array.GetRandom(PILOT_CRATE_WEAPONS);
+    return PILOT_CRATE_POWERUP_BY_WEAPON[weaponId] || 'pilotCrate_S';
+}
+
+function shouldDropAmmoPack() {
+    return shouldUsePilotWeaponCrateDrops() && Math.random() < 0.2;
+}
+
+function getPilotCrateDisplayName(crateResult, weaponId) {
+    const labelByWeapon = {
+        scattergun: 'SCATTERGUN CRATE [S]',
+        plasmaLauncher: 'PLASMA CRATE [P]',
+        lightningGun: 'LIGHTNING CRATE [L]',
+        stingerDrone: 'STINGER CRATE [D]'
+    };
+    const base = labelByWeapon[weaponId] || 'PILOT CRATE';
+    if (!crateResult?.applied) return base;
+    if (crateResult.permanentlyOwned) {
+        return `${base} • TIER ${crateResult.tier}`;
+    }
+    return `${base} • TEMP UNLOCK`;
+}
+
 // Spawns a randomized power-up pickup at a world position with drop-rate weighting.
 function spawnPowerUp(scene, x, y) {
     const { powerUps } = scene;
@@ -9,7 +54,10 @@ function spawnPowerUp(scene, x, y) {
     const powerUpPool = [
         'laser','drone','shield','missile','overdrive','rear','side','rapid','multiShot','piercing','speed','magnet','bomb','double','invincibility','timeSlow'
     ];
-    const type = Phaser.Utils.Array.GetRandom(powerUpPool);
+    const usePilotCrate = shouldUsePilotWeaponCrateDrops() && Math.random() < 0.34;
+    const type = shouldDropAmmoPack()
+        ? 'pilotAmmoPack'
+        : (usePilotCrate ? rollPilotCratePowerUpType() : Phaser.Utils.Array.GetRandom(powerUpPool));
     const powerUp = powerUps.create(x, y, 'powerup_' + type);
     powerUp.setScale(1.25);
     powerUp.setDepth(FG_DEPTH_BASE + 3); // Keep collectibles on the gameplay layer or above
@@ -99,8 +147,84 @@ function collectPowerUp(playerSprite, powerUp) {
         bomb: 'SMART BOMB',
         double: 'DOUBLE DAMAGE',
         invincibility: 'INVINCIBILITY',
-        timeSlow: 'TIME SLOW'
+        timeSlow: 'TIME SLOW',
+        pilotCrate_S: 'SCATTERGUN CRATE [S]',
+        pilotCrate_P: 'PLASMA CRATE [P]',
+        pilotCrate_L: 'LIGHTNING CRATE [L]',
+        pilotCrate_D: 'STINGER CRATE [D]',
+        pilotAmmoPack: 'AMMO PACK'
     };
+
+    const crateWeaponId = PILOT_CRATE_WEAPON_BY_POWERUP[powerUp.powerUpType];
+    if (crateWeaponId && window.metaProgression?.applyPilotWeaponCratePickup && pilotState?.weaponState) {
+        const crateResult = window.metaProgression.applyPilotWeaponCratePickup(pilotState.weaponState, crateWeaponId);
+        const crateName = getPilotCrateDisplayName(crateResult, crateWeaponId);
+        const crateColor = crateResult?.permanentlyOwned ? '#f59e0b' : '#38bdf8';
+
+        const crateText = this.add.text(
+            powerUp.x,
+            powerUp.y - 20,
+            crateName,
+            {
+                fontSize: '14px',
+                fontFamily: 'Orbitron',
+                color: crateColor,
+                stroke: '#000000',
+                strokeThickness: 3
+            }
+        ).setOrigin(0.5);
+
+        this.tweens.add({
+            targets: crateText,
+            y: powerUp.y - 50,
+            alpha: 0,
+            duration: 1500,
+            onComplete: () => crateText.destroy()
+        });
+
+        createPowerUpCollectionEffect(this, powerUp.x, powerUp.y, powerUp.powerUpType);
+        powerUp.destroy();
+        return;
+    }
+
+    if (powerUp.powerUpType === 'pilotAmmoPack' && window.metaProgression?.grantPilotAmmo && pilotState?.weaponState) {
+        const selected = pilotState.weaponState.selected || 'combatRifle';
+        const fallbackOrder = ['scattergun', 'plasmaLauncher', 'lightningGun'];
+        const targetWeapon = fallbackOrder.includes(selected)
+            ? selected
+            : fallbackOrder.find((weaponId) => {
+                const unlocked = pilotState.weaponState.unlocked?.[weaponId];
+                const temp = pilotState.weaponState.temporaryUnlocks?.[weaponId];
+                return unlocked || temp;
+            });
+
+        if (targetWeapon) {
+            const ammoResult = window.metaProgression.grantPilotAmmo(pilotState.weaponState, targetWeapon, 0.3);
+            const ammoText = this.add.text(
+                powerUp.x,
+                powerUp.y - 20,
+                `AMMO PACK • ${targetWeapon.toUpperCase()} +${ammoResult?.granted || 0}`,
+                {
+                    fontSize: '14px',
+                    fontFamily: 'Orbitron',
+                    color: '#22d3ee',
+                    stroke: '#000000',
+                    strokeThickness: 3
+                }
+            ).setOrigin(0.5);
+            this.tweens.add({
+                targets: ammoText,
+                y: powerUp.y - 50,
+                alpha: 0,
+                duration: 1200,
+                onComplete: () => ammoText.destroy()
+            });
+        }
+
+        createPowerUpCollectionEffect(this, powerUp.x, powerUp.y, powerUp.powerUpType);
+        powerUp.destroy();
+        return;
+    }
 
     const displayName = overflowUpgrade
         ? 'COMRADE UPGRADE'

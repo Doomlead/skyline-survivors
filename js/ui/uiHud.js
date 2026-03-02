@@ -227,6 +227,10 @@ function updateUI(scene) {
 
     powerupsEl.innerText = powerUpText || '[NORMAL FIRE]';
 
+    if (typeof updatePilotWeaponHud === 'function') {
+        updatePilotWeaponHud(scene);
+    }
+
     if (comboEl) {
         const stacks = gameState.comboStacks || 0;
         const multiplier = (gameState.comboMultiplier || 1).toFixed(2);

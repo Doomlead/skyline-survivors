@@ -472,6 +472,9 @@ function formatCampaignTime(ms = 0) {
  */
 function recordMetaOutcome(success) {
     if (!window.metaProgression || gameState.metaRewardsGranted) return null;
+    if (window.metaProgression?.clearTemporaryPilotWeaponState && pilotState?.weaponState) {
+        window.metaProgression.clearTemporaryPilotWeaponState(pilotState.weaponState);
+    }
     const outcome = {
         success,
         score: gameState.score,

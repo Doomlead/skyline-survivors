@@ -121,6 +121,28 @@
                 <div id="decay-status-strip" class="flex flex-wrap gap-1 text-[9px] uppercase tracking-[0.2em] text-slate-400"></div>
             </div>
 
+
+            <div id="pilot-weapon-hud" class="hidden px-2 pb-1">
+                <div class="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-violet-200">
+                    <div class="flex items-center gap-2">
+                        <span id="pilot-weapon-icon" class="inline-flex w-4 h-4 items-center justify-center border border-violet-300/60 rounded text-[9px]">R</span>
+                        <span id="pilot-weapon-name">Combat Rifle</span>
+                        <span id="pilot-weapon-temp" class="hidden text-[9px] px-1 rounded border border-cyan-300/70 text-cyan-200">TEMP</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="pilot-weapon-tier">T1</span>
+                        <span id="pilot-weapon-drone">DRONES 0</span>
+                    </div>
+                </div>
+                <div class="relative h-2 bg-slate-900 border border-violet-400/40 rounded overflow-hidden mt-1">
+                    <div id="pilot-weapon-meter-fill" class="absolute left-0 top-0 h-full bg-violet-500" style="width:100%"></div>
+                </div>
+                <div class="flex items-center justify-between text-[9px] text-slate-300 mt-1 uppercase tracking-[0.15em]">
+                    <span id="pilot-weapon-meter-label">∞</span>
+                    <span id="pilot-weapon-tab-hint" class="hidden text-cyan-300">TAB: SWITCH WEAPON</span>
+                </div>
+            </div>
+
             <div class="text-[10px] md:text-xs text-cyan-200 font-orbitron min-h-[1.5em] text-center tracking-wider" id="powerups-el"></div>
         </div>
     </header>

@@ -49,6 +49,9 @@ function rescueHuman(playerSprite, human) {
         onComplete: () => rescueText.destroy()
     });
     createExplosion(this, human.x, human.y, 0x00ff00);
+    if (window.metaProgression?.refillCurrentPilotWeaponByRescueBonus && pilotState?.weaponState) {
+        window.metaProgression.refillCurrentPilotWeaponByRescueBonus(pilotState.weaponState);
+    }
     human.destroy();
     if (Math.random() < 0.24) spawnPowerUp(this, human.x, human.y);
 }

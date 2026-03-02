@@ -277,6 +277,9 @@ function startGame(mode = 'classic') {
     if (window.metaProgression?.applyLoadoutEffects) {
         gameState.metaAppliedLoadout = metaProgression.applyLoadoutEffects(gameState, playerState);
     }
+    if (window.metaProgression?.hydratePilotWeaponState && pilotState?.weaponState) {
+        window.metaProgression.hydratePilotWeaponState(pilotState.weaponState);
+    }
     if (effectiveMode === 'survival') gameState.timeRemaining = gameState.totalSurvivalDuration;
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';

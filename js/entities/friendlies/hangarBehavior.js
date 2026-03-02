@@ -60,6 +60,11 @@ function dropOffCargo(scene, hangar) {
         onComplete: () => dropText.destroy()
     });
     createExplosion(scene, hangar.x, hangar.y - 18, 0x38bdf8);
+    if (window.metaProgression?.refillCurrentPilotWeaponByRescueBonus && pilotState?.weaponState) {
+        for (let i = 0; i < cargoCount; i++) {
+            window.metaProgression.refillCurrentPilotWeaponByRescueBonus(pilotState.weaponState);
+        }
+    }
 
     for (let i = 0; i < cargoCount; i++) {
         const offsetX = Phaser.Math.Between(-HANGAR_DROP_OFF_CONFIG.botSpawnOffset, HANGAR_DROP_OFF_CONFIG.botSpawnOffset);

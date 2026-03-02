@@ -86,6 +86,10 @@ function fireWeapon(scene, angleOverride = null) {
     });
 }
 
+function getPilotWeaponProgressionApi() {
+    return typeof window !== 'undefined' ? window.pilotWeaponProgression : null;
+}
+
 function getPilotWeaponOrder() {
     return ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
 }
@@ -110,6 +114,11 @@ function normalizePilotWeaponSelection() {
     if (typeof pilotState === 'undefined' || !pilotState) return;
     const state = pilotState.weaponState;
     if (!state) return;
+    const progression = getPilotWeaponProgressionApi();
+    if (progression?.normalizeSelection) {
+        progression.normalizeSelection(state, getPilotWeaponOrder());
+        return;
+    }
     const order = getPilotWeaponOrder();
     const canUse = (weapon) => Boolean(state.unlocked?.[weapon] || state.temporaryUnlocks?.[weapon]);
     if (!canUse(state.selected)) {
@@ -127,7 +136,11 @@ function cyclePilotWeapon() {
     const currentIndex = Math.max(0, order.indexOf(state.selected));
     for (let step = 1; step <= order.length; step++) {
         const next = order[(currentIndex + step) % order.length];
-        if (state.unlocked?.[next] || state.temporaryUnlocks?.[next]) {
+        const progression = getPilotWeaponProgressionApi();
+        const usable = progression?.isWeaponUsable
+            ? progression.isWeaponUsable(state, next)
+            : (state.unlocked?.[next] || state.temporaryUnlocks?.[next]);
+        if (usable) {
             state.selected = next;
             return;
         }
@@ -165,13 +178,17 @@ function firePilotWeapon(scene, player, angleOverride) {
                 const angle = baseAngle + offset;
                 createProjectile(scene, origin.fireX, origin.fireY, Math.cos(angle) * 680, Math.sin(angle) * 680, 'normal', damage, { texture: 'pilot_projectile_scatter' });
             }
-            state.ammo.scattergun = Math.max(0, (state.ammo.scattergun || 0) - 1);
+            const progression = getPilotWeaponProgressionApi();
+            if (!progression?.consumeAmmo) state.ammo.scattergun = Math.max(0, (state.ammo.scattergun || 0) - 1);
+            else progression.consumeAmmo(state, 'scattergun', 1);
             break;
         }
         case 'plasmaLauncher': {
             const damage = tier >= 2 ? 2 : 1;
             createProjectile(scene, origin.fireX, origin.fireY, Math.cos(baseAngle) * 480, Math.sin(baseAngle) * 480, 'wave', damage, { piercing: tier >= 3, texture: 'pilot_projectile_plasma' });
-            state.ammo.plasmaLauncher = Math.max(0, (state.ammo.plasmaLauncher || 0) - 1);
+            const progression = getPilotWeaponProgressionApi();
+            if (!progression?.consumeAmmo) state.ammo.plasmaLauncher = Math.max(0, (state.ammo.plasmaLauncher || 0) - 1);
+            else progression.consumeAmmo(state, 'plasmaLauncher', 1);
             break;
         }
         case 'lightningGun': {
@@ -180,7 +197,9 @@ function firePilotWeapon(scene, player, angleOverride) {
             const fireRateCost = Number.isFinite(playerState.fireRate) && playerState.fireRate > 0
                 ? playerState.fireRate
                 : 1;
-            state.ammo.lightningGun = Math.max(0, (state.ammo.lightningGun || 0) - fireRateCost);
+            const progression = getPilotWeaponProgressionApi();
+            if (!progression?.consumeAmmo) state.ammo.lightningGun = Math.max(0, (state.ammo.lightningGun || 0) - fireRateCost);
+            else progression.consumeAmmo(state, 'lightningGun', fireRateCost);
             break;
         }
         case 'stingerDrone': {
@@ -601,6 +620,7 @@ if (typeof module !== 'undefined') {
         getClusterTargets,
         spawnClusterMissiles,
         updateProjectiles,
-        fireWeapon
+        fireWeapon,
+        cyclePilotWeapon
     };
 }

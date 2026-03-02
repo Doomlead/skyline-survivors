@@ -469,6 +469,12 @@ const pilotState = {
     }
 };
 
+function applyMetaPilotWeaponProfile() {
+    if (typeof pilotState === 'undefined' || !pilotState || !pilotState.weaponState) return;
+    if (!window.metaProgression?.hydratePilotWeaponState) return;
+    window.metaProgression.hydratePilotWeaponState(pilotState.weaponState);
+}
+
 // Virtual input for touch controls
 window.virtualInput = {
     left: false,
@@ -576,6 +582,7 @@ function resetGameState() {
         },
         droneCount: 0
     };
+    applyMetaPilotWeaponProfile();
 
     gameState.bossActive = false;
     gameState.battleshipActive = false;

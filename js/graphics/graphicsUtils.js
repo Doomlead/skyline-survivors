@@ -62,7 +62,12 @@ function createPowerUpGraphics(scene) {
         bomb:       0xFFD700,
         double:     0xA8FF00,
         invincibility: 0xD4D4D4,
-        timeSlow:   0x007F6E
+        timeSlow:   0x007F6E,
+        pilotCrate_S: 0xf59e0b,
+        pilotCrate_P: 0xa855f7,
+        pilotCrate_L: 0x22d3ee,
+        pilotCrate_D: 0x10b981,
+        pilotAmmoPack: 0x0ea5e9
     };
 
     // Size 24x24 for detail
