@@ -10,7 +10,7 @@ function updateInteriorCentralIntelligenceBehaviors(scene, time, delta) {
     entries.forEach(enemy => {
         if (!enemy || !enemy.active) return;
         if (enemy.interiorSection !== 'central_intelligence_core') return;
-        const fn = interiorBehaviorDispatch[enemy.enemyType];
+        const fn = INTERIOR_BEHAVIOR_DISPATCH_INTERIORCENTRALINTELLIGENCE[enemy.enemyType];
         if (typeof fn === 'function') fn(scene, enemy, time, delta, timeSlowMultiplier);
     });
 }
@@ -38,7 +38,7 @@ function updateAssaultDrone(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
-const interiorBehaviorDispatch = {
+const INTERIOR_BEHAVIOR_DISPATCH_INTERIORCENTRALINTELLIGENCE = {
     'the_overseer': updateTheOverseer,
     'assault_drone': updateAssaultDrone,
 };

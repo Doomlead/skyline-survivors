@@ -10,7 +10,7 @@ function updateInteriorShieldControlBehaviors(scene, time, delta) {
     entries.forEach(enemy => {
         if (!enemy || !enemy.active) return;
         if (enemy.interiorSection !== 'shield_control') return;
-        const fn = interiorBehaviorDispatch[enemy.enemyType];
+        const fn = INTERIOR_BEHAVIOR_DISPATCH_INTERIORSHIELDCONTROL[enemy.enemyType];
         if (typeof fn === 'function') fn(scene, enemy, time, delta, timeSlowMultiplier);
     });
 }
@@ -45,7 +45,7 @@ function updateSniperNestUnit(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
-const interiorBehaviorDispatch = {
+const INTERIOR_BEHAVIOR_DISPATCH_INTERIORSHIELDCONTROL = {
     'shield_operator': updateShieldOperator,
     'assault_drone': updateAssaultDrone,
     'sniper_nest_unit': updateSniperNestUnit,

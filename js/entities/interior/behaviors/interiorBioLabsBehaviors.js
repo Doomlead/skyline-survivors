@@ -10,7 +10,7 @@ function updateInteriorBioLabsBehaviors(scene, time, delta) {
     entries.forEach(enemy => {
         if (!enemy || !enemy.active) return;
         if (enemy.interiorSection !== 'bio_labs') return;
-        const fn = interiorBehaviorDispatch[enemy.enemyType];
+        const fn = INTERIOR_BEHAVIOR_DISPATCH_INTERIORBIOLABS[enemy.enemyType];
         if (typeof fn === 'function') fn(scene, enemy, time, delta, timeSlowMultiplier);
     });
 }
@@ -47,7 +47,7 @@ function updateSecurityChief(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
-const interiorBehaviorDispatch = {
+const INTERIOR_BEHAVIOR_DISPATCH_INTERIORBIOLABS = {
     'mutant_test_subject': updateMutantTestSubject,
     'bio_tank': updateBioTank,
     'security_chief': updateSecurityChief,

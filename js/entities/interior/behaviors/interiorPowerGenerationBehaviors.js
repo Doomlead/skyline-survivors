@@ -10,7 +10,7 @@ function updateInteriorPowerGenerationBehaviors(scene, time, delta) {
     entries.forEach(enemy => {
         if (!enemy || !enemy.active) return;
         if (enemy.interiorSection !== 'power_generation') return;
-        const fn = interiorBehaviorDispatch[enemy.enemyType];
+        const fn = INTERIOR_BEHAVIOR_DISPATCH_INTERIORPOWERGENERATION[enemy.enemyType];
         if (typeof fn === 'function') fn(scene, enemy, time, delta, timeSlowMultiplier);
     });
 }
@@ -48,7 +48,7 @@ function updateSwarmBot(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
-const interiorBehaviorDispatch = {
+const INTERIOR_BEHAVIOR_DISPATCH_INTERIORPOWERGENERATION = {
     'heavy_mech': updateHeavyMech,
     'electro_shocker': updateElectroShocker,
     'swarm_bot': updateSwarmBot,

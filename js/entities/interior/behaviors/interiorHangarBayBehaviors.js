@@ -10,7 +10,7 @@ function updateInteriorHangarBayBehaviors(scene, time, delta) {
     entries.forEach(enemy => {
         if (!enemy || !enemy.active) return;
         if (enemy.interiorSection !== 'hangar_bay') return;
-        const fn = interiorBehaviorDispatch[enemy.enemyType];
+        const fn = INTERIOR_BEHAVIOR_DISPATCH_INTERIORHANGARBAY[enemy.enemyType];
         if (typeof fn === 'function') fn(scene, enemy, time, delta, timeSlowMultiplier);
     });
 }
@@ -39,7 +39,7 @@ function updateLaserTurret(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
-const interiorBehaviorDispatch = {
+const INTERIOR_BEHAVIOR_DISPATCH_INTERIORHANGARBAY = {
     'mothership_grunt': updateMothershipGrunt,
     'hover_mine': updateHoverMine,
     'laser_turret': updateLaserTurret,

@@ -10,7 +10,7 @@ function updateInteriorSecurityHubBehaviors(scene, time, delta) {
     entries.forEach(enemy => {
         if (!enemy || !enemy.active) return;
         if (enemy.interiorSection !== 'security_hub') return;
-        const fn = interiorBehaviorDispatch[enemy.enemyType];
+        const fn = INTERIOR_BEHAVIOR_DISPATCH_INTERIORSECURITYHUB[enemy.enemyType];
         if (typeof fn === 'function') fn(scene, enemy, time, delta, timeSlowMultiplier);
     });
 }
@@ -45,7 +45,7 @@ function updateShockDrone(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
-const interiorBehaviorDispatch = {
+const INTERIOR_BEHAVIOR_DISPATCH_INTERIORSECURITYHUB = {
     'base_trooper': updateBaseTrooper,
     'turret_sentry': updateTurretSentry,
     'shock_drone': updateShockDrone,

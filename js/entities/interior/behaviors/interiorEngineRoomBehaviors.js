@@ -10,7 +10,7 @@ function updateInteriorEngineRoomBehaviors(scene, time, delta) {
     entries.forEach(enemy => {
         if (!enemy || !enemy.active) return;
         if (enemy.interiorSection !== 'engine_room') return;
-        const fn = interiorBehaviorDispatch[enemy.enemyType];
+        const fn = INTERIOR_BEHAVIOR_DISPATCH_INTERIORENGINEROOM[enemy.enemyType];
         if (typeof fn === 'function') fn(scene, enemy, time, delta, timeSlowMultiplier);
     });
 }
@@ -47,7 +47,7 @@ function updateEliteEngineer(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
-const interiorBehaviorDispatch = {
+const INTERIOR_BEHAVIOR_DISPATCH_INTERIORENGINEROOM = {
     'repair_bot': updateRepairBot,
     'plasma_fodder': updatePlasmaFodder,
     'elite_engineer': updateEliteEngineer,
