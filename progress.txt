@@ -222,13 +222,13 @@
 ## Gap Analysis & Next Steps (Codebase + Design Document Audit)
 
 ### Overall Completion Statistics
-- **Design Document Alignment:** ~82% (the combat/game-state core is strong, but design-specific progression/reward layers are still incomplete).
-- **Major Milestones Achieved:** district-state campaign with threatened→critical→occupied pressure, prosperity/loss-aversion reset loop, rescue cargo inertia + hangar deployment into classed operatives, ship destruction -> pilot rebuild flow, supply-drop meta economy with persistent history/pending drops, assault + mothership interior objective chain, and broad defensive automated tests for combat edge cases.
-- **Immediate Next Steps (Recommended Order):** (1) pilot progression compliance package, (2) assault rewards + jackpot identity, (3) Bulwark siege role implementation, (4) challenge-mode productization (Last Stand / Assault Only), (5) world-reactivity pass (weather + district destruction readability).
-- **Estimated Remaining Work:** ~8-12 dev days to hit MVP-quality design compliance; ~3-5 additional weeks for full v2.0 depth + polish.
-- **Post-MVP Polish (Optional):** adaptive music intensity layers, cinematic district transition stingers, richer deployment VO/SFX, deeper autonomous fire-team tactics, biome hazard variants, and broader replay mutators.
-- **MVP Completion:** ~84%
-- **Critical Missing Features for Design Document Compliance:** persistent pilot unlock catalog/ribbon loop, assault base-clear jackpots + mystery outcomes, Bulwark structural DPS identity, fully surfaced challenge modes with score persistence, and weather/reactive world-state presentation.
+- **Design Document Alignment:** ~83% (combat, map pressure, rescue/deploy, and interior section architecture are aligned; the remaining deltas are mostly progression surfacing + reward presentation layers).
+- **Major Milestones Achieved:** district threatened→critical→occupied campaign logic, prosperity/loss-aversion economy pressure, cargo-weight rescue loop with hangar deployment into class-based operatives, ship destruction -> pilot rebuild flow, persistent supply-drop + pilot-weapon unlock foundation, mothership exterior->interior multi-section flow, and a large regression suite covering projectile/AI/interior edge cases.
+- **Immediate Next Steps (Recommended Order):** (1) district-layer Pilot Intel ribbon + reward milestones, (2) assault clear rewards (loot/jackpot/mystery), (3) Bulwark structural siege bonuses + telegraphing, (4) challenge-mode productization (Last Stand / Assault Only + score persistence), (5) weather/time-of-day + destruction readability pass.
+- **Estimated Remaining Work:** ~7-10 focused dev days to reach MVP-level design compliance; ~3-4 additional polish weeks for full v2.0 presentation depth.
+- **Post-MVP Polish (Optional):** adaptive music intensity layering, district transition stingers, richer deployment VO/SFX, stronger autonomous fire-team behaviors when pilot is airborne, biome hazard modifiers, and replay mutators/leaderboard slices.
+- **MVP Completion:** ~85%
+- **Critical Missing Features for Design Document Compliance:** district Pilot Intel ribbon UX + milestone payout loop, assault base-clear jackpot/mystery outcome pipeline, Bulwark siege identity against structures, fully surfaced challenge-mode menu/reporting flow, and weather/reactive world-state visuals.
 
 ### Design Document Alignment
 **Aligned / Implemented**
@@ -314,7 +314,7 @@
 - Biome-specific hazards and replay-variance events.
 
 ### What We Should Work On Next (Recommended Focus)
-The next best move is to **ship the pilot progression compliance package first**, because it closes the largest design-doc identity gap while leveraging systems that already exist (weapons, ammo state, district urgency, and shop/meta persistence).
+The next best move is to **ship the district-layer pilot progression compliance package first**, because it closes the largest design-doc identity gap while leveraging systems that already exist (pilot weapons, unlock persistence, district urgency, and existing HUD/map rendering paths).
 
 **Recommended execution order:**
 1. Pilot progression + pilot HUD clarity.
@@ -322,6 +322,22 @@ The next best move is to **ship the pilot progression compliance package first**
 3. Bulwark structural siege identity.
 4. Challenge mode surfacing with score persistence.
 5. Weather/reactivity presentation layer.
+
+### Proposed Next Task (Single Sprint Target)
+**Task:** Implement the **Pilot Intel + District Ribbon** loop end-to-end.
+
+**Why this first:** It unlocks the biggest remaining design-document requirement while creating a clear connective tissue between map decisions, mission outcomes, and pilot build identity.
+
+**Definition of done (recommended):**
+1. Add per-district Pilot Intel state and milestone thresholds (including CRITICAL +50% bonus handling).
+2. Render ribbon progress + next reward tooltip on district nodes.
+3. Award rewards on milestone hit (unlock, tier token, or mission ammo-cap bonus).
+4. Persist progression in meta state and expose it in mission start summary/HUD.
+5. Add regression tests for award routing, persistence, and occupied-district suppression behavior.
+
+**Expected impact:**
+- Raises design-doc compliance more than any other single feature currently missing.
+- De-risks follow-up work for challenge modes and assault rewards by clarifying progression telemetry first.
 
 ---
 
