@@ -122,6 +122,12 @@ function playerDie(scene) {
     if (gameState.lives <= 0) {
         gameOver(scene);
     } else {
+        if (typeof applyPilotWeaponDeathPenalty === 'function') {
+            applyPilotWeaponDeathPenalty();
+        }
+        if (typeof clearTemporaryPilotWeaponUnlocks === 'function') {
+            clearTemporaryPilotWeaponUnlocks();
+        }
         scene._isRespawning = true;
         player.setActive(false).setVisible(false);
         player.body.enable = false;

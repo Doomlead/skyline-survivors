@@ -62,7 +62,11 @@ function createPowerUpGraphics(scene) {
         bomb:       0xFFD700,
         double:     0xA8FF00,
         invincibility: 0xD4D4D4,
-        timeSlow:   0x007F6E
+        timeSlow:   0x007F6E,
+        pilot_scattergun: 0xf59e0b,
+        pilot_plasma: 0x22d3ee,
+        pilot_lightning: 0x60a5fa,
+        pilot_stinger: 0x34d399
     };
 
     // Size 24x24 for detail
@@ -89,10 +93,36 @@ function createPowerUpGraphics(scene) {
         g.fillStyle(0xffffff, 0.3);
         g.fillCircle(center, center, 5);
 
-        // 5. Identification Symbol (Generic Core Shape)
+        // 5. Identification Symbol
         g.fillStyle(0xffffff, 1);
-        g.fillRect(center - 2, center - 4, 4, 8); // Vertical bar
-        g.fillRect(center - 4, center - 2, 8, 4); // Horizontal bar
+        if (type.startsWith('pilot_')) {
+            g.fillStyle(0x111827, 0.95);
+            g.fillCircle(center, center, 5.6);
+            g.fillStyle(0xffffff, 1);
+            if (type === 'pilot_scattergun') {
+                g.fillRect(center - 2.8, center - 3.2, 5.6, 1.4);
+                g.fillRect(center - 2.8, center - 0.6, 5.6, 1.4);
+                g.fillRect(center - 2.8, center + 2.0, 5.6, 1.4);
+                g.fillRect(center - 2.8, center - 3.2, 1.4, 4.0);
+                g.fillRect(center + 1.4, center - 0.6, 1.4, 4.0);
+            } else if (type === 'pilot_plasma') {
+                g.fillRect(center - 2.8, center - 3.2, 1.4, 6.8);
+                g.fillRect(center - 2.8, center - 3.2, 4.8, 1.4);
+                g.fillRect(center + 0.6, center - 1.8, 1.4, 2.6);
+                g.fillRect(center - 2.8, center - 0.2, 4.8, 1.4);
+            } else if (type === 'pilot_lightning') {
+                g.fillRect(center - 2.8, center - 3.2, 1.4, 6.8);
+                g.fillRect(center - 2.8, center + 2.2, 5.6, 1.4);
+            } else if (type === 'pilot_stinger') {
+                g.fillRect(center - 2.8, center - 3.2, 1.4, 6.8);
+                g.fillRect(center - 2.8, center - 3.2, 3.8, 1.4);
+                g.fillRect(center + 1.0, center - 1.8, 1.4, 4.0);
+                g.fillRect(center - 2.8, center + 2.2, 3.8, 1.4);
+            }
+        } else {
+            g.fillRect(center - 2, center - 4, 4, 8); // Vertical bar
+            g.fillRect(center - 4, center - 2, 8, 4); // Horizontal bar
+        }
 
         // 6. Glass Dome Reflection (Glossy look)
         g.fillStyle(0xffffff, 0.5);

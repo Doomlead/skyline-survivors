@@ -90,6 +90,12 @@ function getPilotWeaponOrder() {
     return ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
 }
 
+function getPilotWeaponMaxAmmo(weapon) {
+    const cfg = getPilotWeaponConfig(weapon);
+    if (!cfg || cfg.infinite) return Infinity;
+    return Number.isFinite(cfg.maxAmmo) ? cfg.maxAmmo : 0;
+}
+
 function getPilotWeaponConfig(weapon) {
     switch (weapon) {
         case 'scattergun':
@@ -116,6 +122,104 @@ function normalizePilotWeaponSelection() {
         const fallback = order.find(canUse) || 'combatRifle';
         state.selected = fallback;
     }
+}
+
+function unlockPilotWeapon(weapon, options = {}) {
+    if (typeof pilotState === 'undefined' || !pilotState) return false;
+    const state = pilotState.weaponState;
+    if (!state || !weapon || !getPilotWeaponOrder().includes(weapon)) return false;
+    const temporary = Boolean(options.temporary);
+    if (temporary) {
+        state.temporaryUnlocks[weapon] = true;
+    } else {
+        state.unlocked[weapon] = true;
+    }
+    const nextTier = Math.max(1, Math.min(3, options.tier || state.tiers?.[weapon] || 1));
+    state.tiers[weapon] = nextTier;
+    const maxAmmo = getPilotWeaponMaxAmmo(weapon);
+    if (Number.isFinite(maxAmmo) && options.refill !== false) {
+        state.ammo[weapon] = maxAmmo;
+    }
+    normalizePilotWeaponSelection();
+    return true;
+}
+
+function upgradePilotWeaponTier(weapon, amount = 1) {
+    if (typeof pilotState === 'undefined' || !pilotState) return 0;
+    const state = pilotState.weaponState;
+    if (!state || !weapon || !getPilotWeaponOrder().includes(weapon)) return 0;
+    unlockPilotWeapon(weapon, { temporary: false, tier: state.tiers?.[weapon] || 1, refill: false });
+    const current = Math.max(1, state.tiers?.[weapon] || 1);
+    const next = Math.max(1, Math.min(3, current + (Number.isFinite(amount) ? amount : 0)));
+    state.tiers[weapon] = next;
+    return next;
+}
+
+function grantPilotAmmo(weapon, amount, options = {}) {
+    if (typeof pilotState === 'undefined' || !pilotState) return 0;
+    const state = pilotState.weaponState;
+    if (!state || !weapon || !getPilotWeaponOrder().includes(weapon)) return 0;
+    const maxAmmo = getPilotWeaponMaxAmmo(weapon);
+    if (!Number.isFinite(maxAmmo)) return Infinity;
+    const rawAmount = Number.isFinite(amount) ? amount : 0;
+    const add = options.percent ? Math.round(maxAmmo * Math.max(0, rawAmount)) : rawAmount;
+    const current = Math.max(0, state.ammo?.[weapon] || 0);
+    const next = Math.max(0, Math.min(maxAmmo, current + add));
+    state.ammo[weapon] = next;
+    return next;
+}
+
+function refillCurrentPilotWeaponByRescueBonus() {
+    if (typeof pilotState === 'undefined' || !pilotState?.active) return;
+    const state = pilotState.weaponState;
+    if (!state) return;
+    const weapon = state.selected || 'combatRifle';
+    grantPilotAmmo(weapon, 2);
+}
+
+function clearTemporaryPilotWeaponUnlocks() {
+    if (typeof pilotState === 'undefined' || !pilotState) return;
+    const state = pilotState.weaponState;
+    if (!state?.temporaryUnlocks) return;
+    Object.keys(state.temporaryUnlocks).forEach((weapon) => {
+        state.temporaryUnlocks[weapon] = false;
+    });
+    normalizePilotWeaponSelection();
+}
+
+function applyPilotWeaponDeathPenalty() {
+    if (typeof pilotState === 'undefined' || !pilotState) return;
+    const state = pilotState.weaponState;
+    if (!state) return;
+    const selected = state.selected || 'combatRifle';
+    if (selected === 'combatRifle') return;
+    const owned = Boolean(state.unlocked?.[selected]);
+    const currentTier = Math.max(1, state.tiers?.[selected] || 1);
+    if (owned) {
+        state.tiers[selected] = Math.max(1, currentTier - 1);
+    } else {
+        state.tiers[selected] = Math.max(0, currentTier - 1);
+        state.temporaryUnlocks[selected] = false;
+        state.selected = 'combatRifle';
+    }
+    normalizePilotWeaponSelection();
+}
+
+function applyPilotWeaponPickup(weapon) {
+    if (typeof pilotState === 'undefined' || !pilotState || !weapon) return null;
+    const state = pilotState.weaponState;
+    if (!state || !getPilotWeaponOrder().includes(weapon)) return null;
+    const owned = Boolean(state.unlocked?.[weapon]);
+    if (owned) {
+        const tier = upgradePilotWeaponTier(weapon, 1);
+        const maxAmmo = getPilotWeaponMaxAmmo(weapon);
+        if (Number.isFinite(maxAmmo)) state.ammo[weapon] = maxAmmo;
+        state.selected = weapon;
+        return { type: 'tier_upgrade', weapon, tier };
+    }
+    unlockPilotWeapon(weapon, { temporary: true, tier: Math.max(1, state.tiers?.[weapon] || 1), refill: true });
+    state.selected = weapon;
+    return { type: 'temporary_unlock', weapon, tier: state.tiers?.[weapon] || 1 };
 }
 
 function cyclePilotWeapon() {

@@ -29,6 +29,9 @@ function rescueHuman(playerSprite, human) {
     const rescueScore = getCombatScaledReward(HUMAN_RESCUE_SCORE);
     gameState.score += rescueScore;
     if (audioManager) audioManager.playSound('humanRescued');
+    if (typeof pilotState !== 'undefined' && pilotState?.active && typeof refillCurrentPilotWeaponByRescueBonus === 'function') {
+        refillCurrentPilotWeaponByRescueBonus();
+    }
     const rescueText = this.add.text(
         human.x,
         human.y - 20,
