@@ -30,12 +30,18 @@ function spawnInteriorReactorCoreWave(scene, count = 3) {
 }
 
 // Delegates runtime updates for enemies tagged to this interior section.
-function runInteriorReactorCoreCore(scene, time, delta) {
+function runInteriorReactorCore(scene, time, delta) {
     if (typeof updateInteriorReactorCoreBehaviors === 'function') {
         updateInteriorReactorCoreBehaviors(scene, time, delta);
     }
 }
 
 if (typeof module !== 'undefined') {
-    module.exports = { spawnInteriorReactorCoreEnemy, spawnInteriorReactorCoreWave, runInteriorReactorCoreCore };
+    module.exports = {
+        spawnInteriorReactorCoreEnemy,
+        spawnInteriorReactorCoreWave,
+        runInteriorReactorCore,
+        // Backward-compatible alias for older callers.
+        runInteriorReactorCoreCore: runInteriorReactorCore
+    };
 }
