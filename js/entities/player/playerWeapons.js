@@ -597,8 +597,11 @@ function updateProjectiles(scene) {
      * Returns: value defined by the surrounding game flow.
      */
     const destroyIfGrounded = (proj) => {
-        const terrainVariation = Math.sin(proj.x / 200) * 30;
-        const groundY = groundLevel - terrainVariation - 15;
+        const interiorGroundActive = Boolean(scene.interiorPlatformsActive && scene.platforms);
+        const terrainVariation = interiorGroundActive ? 0 : Math.sin(proj.x / 200) * 30;
+        const groundY = interiorGroundActive
+            ? groundLevel - 10
+            : groundLevel - terrainVariation - 15;
         if (proj.y >= groundY) {
             if (proj.projectileType === 'homing' && particleManager) {
                 particleManager.bulletExplosion(proj.x, proj.y);
