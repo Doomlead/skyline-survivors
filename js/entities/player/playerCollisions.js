@@ -43,13 +43,6 @@ function playerHitProjectile(playerSprite, projectile) {
 function droneHitEnemy(drone, enemy) {
     if (!drone || !drone.active) return;
     createExplosion(this, drone.x, drone.y, 0x22d3ee);
-    if (enemy && enemy.active) {
-        if (typeof destroyEnemy === 'function') {
-            destroyEnemy(this, enemy);
-        } else if (typeof enemy.destroy === 'function') {
-            enemy.destroy();
-        }
-    }
     drone.destroy();
     playerState.powerUps.drone = Math.max((playerState.powerUps.drone || 0) - 1, 0);
 }
@@ -95,14 +88,4 @@ function operativeHitProjectile(operative, projectile) {
         if (scene.audioManager) scene.audioManager.playSound('explosion');
         operative.destroy();
     }
-}
-
-if (typeof module !== 'undefined') {
-    module.exports = {
-        playerHitEnemy,
-        playerHitProjectile,
-        droneHitEnemy,
-        droneHitProjectile,
-        operativeHitProjectile
-    };
 }

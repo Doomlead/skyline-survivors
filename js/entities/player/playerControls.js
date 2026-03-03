@@ -201,16 +201,6 @@ function updatePlayer(scene, time, delta) {
                 if (pilot.y < minY) pilot.y = minY;
                 pilotState.grounded = Boolean((pilot.body && pilot.body.blocked && pilot.body.blocked.down) || (pilot.body && pilot.body.touching && pilot.body.touching.down));
 
-                if (!pilotState.grounded) {
-                    pilotState.grounded = clampPilotToInteriorPlatforms(scene, pilot, pilot.y - (pilotState.vy * (delta / 1000)));
-                    if (pilotState.grounded) {
-                        pilotState.vy = 0;
-                        if (pilot.body && typeof pilot.body.setVelocityY === 'function') {
-                            pilot.body.setVelocityY(0);
-                        }
-                    }
-                }
-
                 var interiorFloorY = getInteriorGroundClampY(scene, pilot);
                 if (!pilotState.grounded && pilot.y > interiorFloorY) {
                     pilot.y = interiorFloorY;
@@ -341,37 +331,6 @@ function getInteriorGroundClampY(scene, pilot) {
         ? pilot.body.halfHeight
         : ((pilot && pilot.body && typeof pilot.body.height === 'number') ? pilot.body.height * 0.5 : 9);
     return groundTopY - halfHeight;
-}
-
-
-// Clamps descending pilot onto interior platform tops to keep one-way platform landings consistent.
-function clampPilotToInteriorPlatforms(scene, pilot, previousY) {
-    if (!scene || !scene.platforms || !scene.platforms.children || !pilot) return false;
-    const entries = scene.platforms.children.entries || [];
-    const pilotHalfHeight = (pilot.body && typeof pilot.body.halfHeight === 'number')
-        ? pilot.body.halfHeight
-        : ((pilot.body && typeof pilot.body.height === 'number') ? pilot.body.height * 0.5 : 9);
-    const currentFeetY = pilot.y + pilotHalfHeight;
-    const previousFeetY = (typeof previousY === 'number' ? previousY : pilot.y) + pilotHalfHeight;
-
-    let landingTopY = null;
-    for (let i = 0; i < entries.length; i++) {
-        const platform = entries[i];
-        if (!platform || !platform.active) continue;
-        const halfWidth = (platform.width || platform.displayWidth || 0) * 0.5;
-        const halfHeight = (platform.height || platform.displayHeight || 0) * 0.5;
-        const topY = platform.y - halfHeight;
-        if (Math.abs(pilot.x - platform.x) > halfWidth + 4) continue;
-        const crossedTop = previousFeetY <= topY + 2 && currentFeetY >= topY;
-        if (!crossedTop) continue;
-        if (landingTopY === null || topY < landingTopY) {
-            landingTopY = topY;
-        }
-    }
-
-    if (landingTopY === null) return false;
-    pilot.y = landingTopY - pilotHalfHeight;
-    return true;
 }
 
 // Computes pilot aim direction from movement inputs and grounded state.

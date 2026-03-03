@@ -546,9 +546,5 @@ function repositionInteriorObjectivesToPlatforms(scene) {
 function rebuildInteriorPlatformsOnResize(scene) {
     if (!scene || !scene.interiorPlatformsActive) return;
     const seed = scene.interiorPlatformSeed || CONFIG.backgroundSeed || 1337;
-    const sectionId = scene.interiorSectionTemplate || (scene.currentInteriorSection && scene.currentInteriorSection.id);
-    const sectionTemplate = sectionId
-        ? { id: sectionId, traversalDirection: scene.interiorTraversalDirection }
-        : sectionId;
-    buildInteriorPlatforms(scene, seed, sectionTemplate);
+    buildInteriorPlatforms(scene, seed, scene.interiorSectionTemplate || (scene.currentInteriorSection && scene.currentInteriorSection.id));
 }

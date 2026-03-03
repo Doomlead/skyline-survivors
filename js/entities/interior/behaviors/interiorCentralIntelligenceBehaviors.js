@@ -2,7 +2,7 @@
 // Interior Behaviors: CentralIntelligence
 // ------------------------
 const INTERIOR_CENTRALINTELLIGENCE_ENEMIES = ['the_overseer', 'assault_drone'];
-// Runs behavior updates for all enemies in this interior section.
+
 function updateInteriorCentralIntelligenceBehaviors(scene, time, delta) {
     if (!scene?.enemies) return;
     const timeSlowMultiplier = playerState?.powerUps?.timeSlow > 0 ? 0.3 : 1.0;
@@ -10,12 +10,12 @@ function updateInteriorCentralIntelligenceBehaviors(scene, time, delta) {
     entries.forEach(enemy => {
         if (!enemy || !enemy.active) return;
         if (enemy.interiorSection !== 'central_intelligence_core') return;
-        const fn = interiorBehaviorDispatch[enemy.enemyType];
+        const fn = interiorCentralIntelligenceDispatch[enemy.enemyType];
         if (typeof fn === 'function') fn(scene, enemy, time, delta, timeSlowMultiplier);
     });
 }
 
-function updateTheOverseer(scene, enemy, time, delta, timeSlowMultiplier) {
+function updateCentralIntelligenceTheOverseer(scene, enemy, time, delta, timeSlowMultiplier) {
     const player = typeof getActivePlayer === 'function' ? getActivePlayer(scene) : null;
     if (!player) return;
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
@@ -26,7 +26,7 @@ function updateTheOverseer(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
-function updateAssaultDrone(scene, enemy, time, delta, timeSlowMultiplier) {
+function updateCentralIntelligenceAssaultDrone(scene, enemy, time, delta, timeSlowMultiplier) {
     const player = typeof getActivePlayer === 'function' ? getActivePlayer(scene) : null;
     if (!player) return;
     const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, player.x, player.y);
@@ -38,9 +38,9 @@ function updateAssaultDrone(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
-const interiorBehaviorDispatch = {
-    'the_overseer': updateTheOverseer,
-    'assault_drone': updateAssaultDrone,
+const interiorCentralIntelligenceDispatch = {
+    'the_overseer': updateCentralIntelligenceTheOverseer,
+    'assault_drone': updateCentralIntelligenceAssaultDrone,
 };
 
 if (typeof module !== 'undefined') {
