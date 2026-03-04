@@ -79,6 +79,11 @@ const DEFAULT_META_STATE = {
             plasmaLauncher: 0,
             lightningGun: 0,
             stingerDrone: 0
+        },
+        startAmmo: {
+            scattergun: 200,
+            plasmaLauncher: 150,
+            lightningGun: 25000
         }
     }
 };
@@ -107,6 +112,11 @@ function createDefaultPilotWeaponProfile() {
             plasmaLauncher: 0,
             lightningGun: 0,
             stingerDrone: 0
+        },
+        startAmmo: {
+            scattergun: 200,
+            plasmaLauncher: 150,
+            lightningGun: 25000
         }
     };
 }
@@ -116,9 +126,11 @@ function normalizePilotWeaponProfile(raw) {
     const source = raw && typeof raw === 'object' ? raw : {};
     const unlocked = source.unlocked && typeof source.unlocked === 'object' ? source.unlocked : {};
     const tiers = source.tiers && typeof source.tiers === 'object' ? source.tiers : {};
+    const startAmmo = source.startAmmo && typeof source.startAmmo === 'object' ? source.startAmmo : {};
     const out = {
         unlocked: { ...fallback.unlocked },
-        tiers: { ...fallback.tiers }
+        tiers: { ...fallback.tiers },
+        startAmmo: { ...fallback.startAmmo }
     };
     Object.keys(out.unlocked).forEach((weapon) => {
         if (weapon !== 'combatRifle') {
@@ -131,6 +143,12 @@ function normalizePilotWeaponProfile(raw) {
             out.tiers[weapon] = 1;
         }
     });
+
+    Object.keys(out.startAmmo).forEach((weapon) => {
+        const rawAmmo = Number.isFinite(startAmmo[weapon]) ? startAmmo[weapon] : out.startAmmo[weapon];
+        out.startAmmo[weapon] = Math.max(0, Math.round(rawAmmo));
+    });
+
     return out;
 }
 
@@ -237,7 +255,7 @@ function applyLoadoutEffects(gameState, playerState) {
         lightningGun: false,
         stingerDrone: false
     };
-    const maxAmmo = {
+    const maxAmmo = profile.startAmmo || {
         scattergun: 200,
         plasmaLauncher: 150,
         lightningGun: 25000

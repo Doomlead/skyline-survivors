@@ -6,9 +6,14 @@
 function spawnPowerUp(scene, x, y) {
     const { powerUps } = scene;
     if (!powerUps) return;
+    const pilotContext = Boolean(pilotState?.active || gameState?.mode === 'mothership' || gameState?.mode === 'assault');
+    if (pilotContext && Math.random() < 0.16 && maybeSpawnPilotWeaponCrate(scene, x, y)) return;
     const powerUpPool = [
         'laser','drone','shield','missile','overdrive','rear','side','rapid','multiShot','piercing','speed','magnet','bomb','double','invincibility','timeSlow'
     ];
+    if (pilotContext) {
+        powerUpPool.push('pilot_ammo');
+    }
     const type = Phaser.Utils.Array.GetRandom(powerUpPool);
     const powerUp = powerUps.create(x, y, 'powerup_' + type);
     powerUp.setScale(1.25);
@@ -26,6 +31,20 @@ function spawnPowerUp(scene, x, y) {
     scene.time.delayedCall(30000, () => {
         if (powerUp && powerUp.active) powerUp.destroy();
     });
+}
+
+
+
+function maybeSpawnPilotWeaponCrate(scene, x, y) {
+    const state = pilotState?.weaponState;
+    if (!state) return false;
+    const candidates = getPilotWeaponOrder
+        ? getPilotWeaponOrder().filter((weapon) => weapon !== 'combatRifle')
+        : ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
+    if (!candidates.length) return false;
+    const weapon = Phaser.Utils.Array.GetRandom(candidates);
+    spawnPilotWeaponPickup(scene, x, y, weapon);
+    return true;
 }
 
 function spawnPilotWeaponPickup(scene, x, y, weapon) {
@@ -132,7 +151,8 @@ function collectPowerUp(playerSprite, powerUp) {
         pilot_scattergun: 'SCATTERGUN CRATE',
         pilot_plasma: 'PLASMA CRATE',
         pilot_lightning: 'LIGHTNING CRATE',
-        pilot_stinger: 'STINGER DRONE CRATE'
+        pilot_stinger: 'STINGER DRONE CRATE',
+        pilot_ammo: 'AMMO CACHE'
     };
 
     const displayName = overflowUpgrade
@@ -270,6 +290,14 @@ function collectPowerUp(playerSprite, powerUp) {
                 : null;
             if (result?.type === 'tier_upgrade' && typeof showSupplyDropBanner === 'function') {
                 showSupplyDropBanner(this, `PILOT WEAPON UPGRADE\nSTINGER T${result.tier}`, '#34d399');
+            }
+            break;
+        }
+
+        case 'pilot_ammo': {
+            if (typeof pilotState !== 'undefined' && pilotState?.weaponState && typeof grantPilotAmmo === 'function') {
+                const selected = pilotState.weaponState.selected || 'combatRifle';
+                if (selected !== 'combatRifle') grantPilotAmmo(selected, 0.35, { percent: true });
             }
             break;
         }

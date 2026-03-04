@@ -66,7 +66,8 @@ function createPowerUpGraphics(scene) {
         pilot_scattergun: 0xf59e0b,
         pilot_plasma: 0x22d3ee,
         pilot_lightning: 0x60a5fa,
-        pilot_stinger: 0x34d399
+        pilot_stinger: 0x34d399,
+        pilot_ammo: 0xfde047
     };
 
     // Size 24x24 for detail
@@ -118,6 +119,11 @@ function createPowerUpGraphics(scene) {
                 g.fillRect(center - 2.8, center - 3.2, 3.8, 1.4);
                 g.fillRect(center + 1.0, center - 1.8, 1.4, 4.0);
                 g.fillRect(center - 2.8, center + 2.2, 3.8, 1.4);
+            } else if (type === 'pilot_ammo') {
+                g.fillRect(center - 2.6, center - 3.0, 1.2, 6.0);
+                g.fillRect(center - 0.6, center - 3.0, 1.2, 6.0);
+                g.fillRect(center + 1.4, center - 3.0, 1.2, 6.0);
+                g.fillRect(center - 2.6, center + 3.2, 5.2, 1.2);
             }
         } else {
             g.fillRect(center - 2, center - 4, 4, 8); // Vertical bar
