@@ -4,6 +4,21 @@
 
 const INTERIOR_HAZARD_HIT_COOLDOWN_MS = 550;
 
+function addHazardChevron(scene, x, y, color, depth) {
+    const chevron = scene.add.graphics();
+    chevron.fillStyle(color, 0.95);
+    chevron.lineStyle(2, 0x000000, 0.9);
+    chevron.beginPath();
+    chevron.moveTo(x - 10, y - 8);
+    chevron.lineTo(x + 10, y - 8);
+    chevron.lineTo(x, y + 10);
+    chevron.closePath();
+    chevron.fillPath();
+    chevron.strokePath();
+    chevron.setDepth(depth);
+    return chevron;
+}
+
 // Returns the currently active section descriptor for an objective.
 function getInteriorHazardSection(objective) {
     if (!objective) return null;
@@ -109,10 +124,16 @@ function buildLaserGridHazard(scene) {
     const inactiveMs = 1100;
 
     const beams = selectedLanes.map((lane) => {
-        const beam = scene.add.rectangle(lane.x, (beamTop + beamBottom) * 0.5, beamWidth, beamBottom - beamTop, 0xff3355, 0.22);
-        beam.setDepth(FG_DEPTH_BASE + 2);
-        beam.setBlendMode(Phaser.BlendModes.ADD);
-        return beam;
+        const depth = FG_DEPTH_BASE + 2;
+        const core = scene.add.rectangle(lane.x, (beamTop + beamBottom) * 0.5, beamWidth, beamBottom - beamTop, 0xff2d55, 0.58);
+        const glow = scene.add.rectangle(lane.x, (beamTop + beamBottom) * 0.5, beamWidth * 2.4, beamBottom - beamTop, 0xff0055, 0.2);
+        const topMarker = addHazardChevron(scene, lane.x, beamTop + 10, 0xfff173, depth + 1);
+        const bottomMarker = addHazardChevron(scene, lane.x, beamBottom - 10, 0xfff173, depth + 1);
+        core.setDepth(depth + 1);
+        glow.setDepth(depth);
+        glow.setBlendMode(Phaser.BlendModes.ADD);
+        core.setStrokeStyle(2, 0xffffff, 0.95);
+        return { x: lane.x, core, glow, topMarker, bottomMarker };
     });
 
     let timer = 0;
@@ -128,9 +149,13 @@ function buildLaserGridHazard(scene) {
                 active = !active;
             }
 
+            const pulse = 0.85 + Math.sin(timer * 0.015) * 0.15;
             beams.forEach((beam) => {
-                if (!beam || !beam.active) return;
-                beam.setAlpha(active ? 0.28 : 0.05);
+                if (!beam || !beam.core || !beam.core.active) return;
+                beam.core.setAlpha(active ? 0.58 * pulse : 0.12);
+                beam.glow.setAlpha(active ? 0.28 * pulse : 0.03);
+                beam.topMarker.setAlpha(active ? 0.95 : 0.2);
+                beam.bottomMarker.setAlpha(active ? 0.95 : 0.2);
             });
 
             if (!active) return;
@@ -141,14 +166,18 @@ function buildLaserGridHazard(scene) {
             const inVerticalBand = player.y >= beamTop && player.y <= beamBottom;
             if (!inVerticalBand) return;
 
-            const colliding = beams.some((beam) => beam && beam.active && Math.abs(player.x - beam.x) <= beamWidth * 0.6);
+            const colliding = beams.some((beam) => beam && beam.core && beam.core.active && Math.abs(player.x - beam.x) <= beamWidth * 0.6);
             if (colliding) {
                 applyInteriorHazardHit(scene);
             }
         },
         destroy() {
             beams.forEach((beam) => {
-                if (beam && beam.active) beam.destroy();
+                if (!beam) return;
+                if (beam.core && beam.core.active) beam.core.destroy();
+                if (beam.glow && beam.glow.active) beam.glow.destroy();
+                if (beam.topMarker && beam.topMarker.active) beam.topMarker.destroy();
+                if (beam.bottomMarker && beam.bottomMarker.active) beam.bottomMarker.destroy();
             });
         }
     };
@@ -165,9 +194,16 @@ function buildLockedDoorHazard(scene) {
 
     const doors = selected.map((anchor) => {
         const y = (scene.groundLevel || CONFIG.worldHeight - 80) - closedHeight * 0.5;
-        const door = scene.add.rectangle(anchor.x, y, doorWidth, closedHeight, 0x7c3aed, 0.26);
-        door.setDepth(FG_DEPTH_BASE + 2);
-        return door;
+        const frame = scene.add.rectangle(anchor.x, y, doorWidth + 16, closedHeight + 8, 0xffcc33, 0.35);
+        const door = scene.add.rectangle(anchor.x, y, doorWidth, closedHeight, 0x8b5cf6, 0.8);
+        const stripeA = scene.add.rectangle(anchor.x - 8, y, 6, closedHeight, 0xffffff, 0.7);
+        const stripeB = scene.add.rectangle(anchor.x + 8, y, 6, closedHeight, 0xffffff, 0.7);
+        frame.setDepth(FG_DEPTH_BASE + 2);
+        door.setDepth(FG_DEPTH_BASE + 3);
+        stripeA.setDepth(FG_DEPTH_BASE + 4);
+        stripeB.setDepth(FG_DEPTH_BASE + 4);
+        frame.setStrokeStyle(2, 0x000000, 0.9);
+        return { x: anchor.x, y, frame, door, stripeA, stripeB };
     });
 
     let timer = 0;
@@ -183,24 +219,39 @@ function buildLockedDoorHazard(scene) {
                 closed = !closed;
             }
 
+            const pulse = 0.85 + Math.sin(timer * 0.013) * 0.15;
             doors.forEach((door) => {
-                if (!door || !door.active) return;
-                door.height = closed ? closedHeight : openHeight;
-                door.setAlpha(closed ? 0.28 : 0.12);
+                if (!door || !door.door || !door.door.active) return;
+                door.door.height = closed ? closedHeight : openHeight;
+                door.frame.height = closed ? closedHeight + 8 : openHeight + 8;
+                door.stripeA.height = door.door.height;
+                door.stripeB.height = door.door.height;
+                door.door.y = door.y;
+                door.frame.y = door.y;
+                door.stripeA.y = door.y;
+                door.stripeB.y = door.y;
+                door.door.setAlpha(closed ? 0.8 * pulse : 0.22);
+                door.frame.setAlpha(closed ? 0.42 : 0.16);
+                door.stripeA.setAlpha(closed ? 0.85 : 0.18);
+                door.stripeB.setAlpha(closed ? 0.85 : 0.18);
             });
 
             if (!closed) return;
 
             const player = getActivePlayer(scene);
             if (!player || !player.active) return;
-            const collideDoor = doors.some((door) => door && door.active && Math.abs(player.x - door.x) <= doorWidth * 0.75 && player.y >= door.y - closedHeight * 0.55);
+            const collideDoor = doors.some((door) => door && door.door && door.door.active && Math.abs(player.x - door.x) <= doorWidth * 0.75 && player.y >= door.y - closedHeight * 0.55);
             if (collideDoor) {
                 applyInteriorHazardHit(scene);
             }
         },
         destroy() {
             doors.forEach((door) => {
-                if (door && door.active) door.destroy();
+                if (!door) return;
+                if (door.frame && door.frame.active) door.frame.destroy();
+                if (door.door && door.door.active) door.door.destroy();
+                if (door.stripeA && door.stripeA.active) door.stripeA.destroy();
+                if (door.stripeB && door.stripeB.active) door.stripeB.destroy();
             });
         }
     };
@@ -210,9 +261,15 @@ function buildSteamVentHazard(scene) {
     const lanes = Array.isArray(scene.interiorHazardLanes) ? scene.interiorHazardLanes : [];
     const groundY = scene.groundLevel || CONFIG.worldHeight - 80;
     const vents = lanes.slice(0, Math.min(3, lanes.length)).map((lane) => {
-        const plume = scene.add.rectangle(lane.x, groundY - 40, 44, 20, 0x94a3b8, 0.2);
+        const ventCap = scene.add.rectangle(lane.x, groundY - 8, 50, 18, 0x374151, 0.95);
+        const ventCore = scene.add.rectangle(lane.x, groundY - 8, 28, 8, 0xf97316, 0.9);
+        const plume = scene.add.rectangle(lane.x, groundY - 40, 54, 20, 0xcbd5e1, 0.35);
+        const warning = addHazardChevron(scene, lane.x, groundY - 24, 0xfff173, FG_DEPTH_BASE + 4);
+        ventCap.setDepth(FG_DEPTH_BASE + 2);
+        ventCore.setDepth(FG_DEPTH_BASE + 3);
         plume.setDepth(FG_DEPTH_BASE + 2);
-        return { x: lane.x, plume, active: false, timer: 0, cooldown: Phaser.Math.Between(600, 1200) };
+        ventCap.setStrokeStyle(2, 0x111827, 1);
+        return { x: lane.x, plume, ventCap, ventCore, warning, active: false, timer: 0, cooldown: Phaser.Math.Between(600, 1200) };
     });
 
     return {
@@ -234,7 +291,9 @@ function buildSteamVentHazard(scene) {
                 const targetHeight = vent.active ? 120 : 20;
                 vent.plume.height = Phaser.Math.Linear(vent.plume.height, targetHeight, 0.2);
                 vent.plume.y = groundY - vent.plume.height * 0.5;
-                vent.plume.setAlpha(vent.active ? 0.34 : 0.12);
+                vent.plume.setAlpha(vent.active ? 0.55 : 0.18);
+                vent.ventCore.setAlpha(vent.active ? 1 : 0.4);
+                vent.warning.setAlpha(vent.active ? 1 : 0.45);
 
                 if (!vent.active || !player || !player.active) return;
                 const nearX = Math.abs(player.x - vent.x) <= 30;
@@ -245,6 +304,9 @@ function buildSteamVentHazard(scene) {
         destroy() {
             vents.forEach((vent) => {
                 if (vent.plume && vent.plume.active) vent.plume.destroy();
+                if (vent.ventCap && vent.ventCap.active) vent.ventCap.destroy();
+                if (vent.ventCore && vent.ventCore.active) vent.ventCore.destroy();
+                if (vent.warning && vent.warning.active) vent.warning.destroy();
             });
         }
     };
@@ -254,8 +316,16 @@ function buildRadiationZoneHazard(scene) {
     const lanes = Array.isArray(scene.interiorHazardLanes) ? scene.interiorHazardLanes : [];
     const centerLane = lanes[Math.floor(lanes.length * 0.5)] || { x: CONFIG.worldWidth * 0.5, y: CONFIG.worldHeight * 0.5 };
     const radius = 120;
-    const zone = scene.add.circle(centerLane.x, (scene.groundLevel || CONFIG.worldHeight - 80) - 60, radius, 0x22c55e, 0.14);
-    zone.setDepth(FG_DEPTH_BASE + 1);
+    const zoneX = centerLane.x;
+    const zoneY = (scene.groundLevel || CONFIG.worldHeight - 80) - 60;
+    const outerZone = scene.add.circle(zoneX, zoneY, radius + 14, 0x84cc16, 0.24);
+    const zone = scene.add.circle(zoneX, zoneY, radius, 0x22c55e, 0.32);
+    const core = scene.add.circle(zoneX, zoneY, Math.floor(radius * 0.45), 0xa3e635, 0.4);
+    const north = addHazardChevron(scene, zoneX, zoneY - radius - 8, 0xfff173, FG_DEPTH_BASE + 3);
+    const south = addHazardChevron(scene, zoneX, zoneY + radius + 8, 0xfff173, FG_DEPTH_BASE + 3);
+    outerZone.setDepth(FG_DEPTH_BASE + 1);
+    zone.setDepth(FG_DEPTH_BASE + 2);
+    core.setDepth(FG_DEPTH_BASE + 3);
 
     let pulse = 0;
 
@@ -263,7 +333,12 @@ function buildRadiationZoneHazard(scene) {
         id: 'radiation_zone',
         update(delta) {
             pulse += delta * 0.005;
-            zone.setAlpha(0.12 + (Math.sin(pulse) + 1) * 0.08);
+            const phase = (Math.sin(pulse) + 1) * 0.5;
+            zone.setAlpha(0.24 + phase * 0.22);
+            outerZone.setAlpha(0.16 + phase * 0.16);
+            core.setAlpha(0.2 + phase * 0.24);
+            north.setAlpha(0.6 + phase * 0.4);
+            south.setAlpha(0.6 + phase * 0.4);
 
             const player = getActivePlayer(scene);
             if (!player || !player.active) return;
@@ -273,7 +348,11 @@ function buildRadiationZoneHazard(scene) {
             }
         },
         destroy() {
+            if (outerZone && outerZone.active) outerZone.destroy();
             if (zone && zone.active) zone.destroy();
+            if (core && core.active) core.destroy();
+            if (north && north.active) north.destroy();
+            if (south && south.active) south.destroy();
         }
     };
 }
