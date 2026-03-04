@@ -2,13 +2,8 @@
 // File: js/ui/map/buildMapView.js
 // ------------------------
 
-const GLOBE_LAYOUT = {
-    centerXRatio: .75,
-    centerYRatio: 0.75,
-    radiusScale: 0.15,
-    minRadius: 100,
-    maxRadius: 200
-};
+const MAP_VIEW_UTILS = window.mapViewUtils || {};
+const MAP_DISTRICT_VISUALS = window.mapDistrictVisuals || {};
 
 class BuildMapView {
     constructor(scene) {
@@ -172,24 +167,24 @@ class BuildMapView {
 	 * Returns: value defined by the surrounding game flow.
 	 */
 	calculateDimensions(width, height) {
-        const layout = GLOBE_LAYOUT;
-        
-        const safeWidth = width || window.innerWidth;
-        const safeHeight = height || window.innerHeight;
+        const layout = MAP_VIEW_UTILS.GLOBE_LAYOUT || {
+            centerXRatio: 0.75,
+            centerYRatio: 0.75,
+            radiusScale: 0.15,
+            minRadius: 100,
+            maxRadius: 200
+        };
+        const calc = MAP_VIEW_UTILS.calculateGlobeDimensions
+            ? MAP_VIEW_UTILS.calculateGlobeDimensions(width, height, layout)
+            : null;
 
-        this.centerX = safeWidth * layout.centerXRatio;
-        this.centerY = safeHeight * layout.centerYRatio;
-
-        // NEW LOGIC: We calculate size primarily based on Width.
-        // Even if Height is huge (doubled), we ignore the extra height for radius calculation.
-        // This ensures the container grows, but the globe does not.
-        const constrainingDimension = Math.min(safeWidth, safeHeight * 0.6); 
-
-        const baseRadius = constrainingDimension * layout.radiusScale; // Uses the scale 0.18
-        
-        this.globeRadius = Phaser.Math.Clamp(
-            baseRadius, 
-            layout.minRadius, 
+        const safeWidth = calc?.safeWidth ?? width ?? window.innerWidth;
+        const safeHeight = calc?.safeHeight ?? height ?? window.innerHeight;
+        this.centerX = calc?.centerX ?? safeWidth * layout.centerXRatio;
+        this.centerY = calc?.centerY ?? safeHeight * layout.centerYRatio;
+        this.globeRadius = calc?.globeRadius ?? Phaser.Math.Clamp(
+            Math.min(safeWidth, safeHeight * 0.6) * layout.radiusScale,
+            layout.minRadius,
             layout.maxRadius
         );
 
@@ -296,29 +291,38 @@ class BuildMapView {
      * Returns: value defined by the surrounding game flow.
      */
     project3D(lat, lon) {
+        if (MAP_VIEW_UTILS.projectPointOnGlobe) {
+            return MAP_VIEW_UTILS.projectPointOnGlobe(
+                lat,
+                lon,
+                this.rotationX,
+                this.rotationY,
+                this.globeRadius
+            );
+        }
+
         const latRad = lat * Math.PI / 180;
         const lonRad = lon * Math.PI / 180;
-
         let x = Math.cos(latRad) * Math.sin(lonRad);
         let y = Math.sin(latRad);
         let z = Math.cos(latRad) * Math.cos(lonRad);
-
         const cosY = Math.cos(this.rotationY);
         const sinY = Math.sin(this.rotationY);
-        let newX = x * cosY - z * sinY;
-        let newZ = x * sinY + z * cosY;
-        x = newX; z = newZ;
-
+        const rotatedX = x * cosY - z * sinY;
+        const rotatedZ = x * sinY + z * cosY;
+        x = rotatedX;
+        z = rotatedZ;
         const cosX = Math.cos(this.rotationX);
         const sinX = Math.sin(this.rotationX);
-        const newY = y * cosX - z * sinX;
+        const rotatedY = y * cosX - z * sinX;
         const finalZ = y * sinX + z * cosX;
-        y = newY; z = finalZ;
+        y = rotatedY;
+        z = finalZ;
 
         return {
             x: x * this.globeRadius,
             y: -y * this.globeRadius,
-            z: z,
+            z,
             visible: z > 0
         };
     }
@@ -565,15 +569,8 @@ class BuildMapView {
      * Returns: value defined by the surrounding game flow.
      */
     getDistrictCenterCoords(config) {
-        if (!config) return { lat: 0, lon: 0 };
-        if (config.center) return config.center;
-        if (config.polygon?.length) {
-            const sum = config.polygon.reduce((acc, point) => ({
-                lat: acc.lat + (point.lat || 0),
-                lon: acc.lon + (point.lon || 0)
-            }), { lat: 0, lon: 0 });
-            const count = config.polygon.length || 1;
-            return { lat: sum.lat / count, lon: sum.lon / count };
+        if (MAP_VIEW_UTILS.getDistrictCenterCoords) {
+            return MAP_VIEW_UTILS.getDistrictCenterCoords(config);
         }
         return { lat: 0, lon: 0 };
     }
@@ -631,17 +628,11 @@ class BuildMapView {
         if (state.underAttack && state.status !== 'occupied') {
             return 0xfacc15;
         }
-        switch (state.status) {
-            case 'occupied':
-                return 0xef4444;
-            case 'critical':
-                return 0xf97316;
-            case 'threatened':
-                return 0xfacc15;
-            case 'friendly':
-            default:
-                return 0x22c55e;
+        if (MAP_VIEW_UTILS.getDistrictStatusColor) {
+            return MAP_VIEW_UTILS.getDistrictStatusColor(state.status);
         }
+
+        return 0x22c55e;
     }
 
     /**
@@ -650,27 +641,18 @@ class BuildMapView {
      * Returns: value defined by the surrounding game flow.
      */
     drawDistrictThreatPulse(district, projected, radius) {
-        if (!district?.state || !['threatened', 'critical'].includes(district.state.status)) return;
-        const maxTimer = district.config?.timer || 1;
-        const isCritical = district.state.status === 'critical';
-        const remaining = isCritical ? (district.state.criticalTimer ?? 0) : Math.max(0, district.state.timer ?? 0);
-        const urgency = isCritical ? 1 : (maxTimer > 0 ? Phaser.Math.Clamp(1 - remaining / maxTimer, 0, 1) : 1);
-        const pulseSpeed = isCritical ? 0.008 : Phaser.Math.Linear(0.002, 0.006, urgency);
-        const pulse = (Math.sin(this.scene.time.now * pulseSpeed) + 1) / 2;
-        const pulseRadius = radius * (1.7 + pulse * (isCritical ? 0.7 : 0.6));
-        const pulseAlpha = Phaser.Math.Linear(0.2, 0.7, pulse) * Phaser.Math.Linear(0.8, 1, urgency);
-        const pulseColor = isCritical ? 0xf97316 : (urgency > 0.65 ? 0xf87171 : urgency > 0.35 ? 0xfbbf24 : 0xfef08a);
-
-        this.districtGraphics.lineStyle(2, pulseColor, pulseAlpha);
-        this.districtGraphics.strokeCircle(projected.x, projected.y, pulseRadius);
-
-        if (isCritical) {
-            const alertPulse = (Math.sin(this.scene.time.now * 0.012) + 1) / 2;
-            const alertRadius = radius * (2.4 + alertPulse * 0.9);
-            const alertAlpha = Phaser.Math.Linear(0.1, 0.55, alertPulse);
-            this.districtGraphics.lineStyle(1.5, 0xfca5a5, alertAlpha);
-            this.districtGraphics.strokeCircle(projected.x, projected.y, alertRadius);
+        if (MAP_DISTRICT_VISUALS.drawDistrictThreatPulse) {
+            MAP_DISTRICT_VISUALS.drawDistrictThreatPulse({
+                graphics: this.districtGraphics,
+                district,
+                projected,
+                radius,
+                now: this.scene.time.now
+            });
+            return;
         }
+
+        if (!district?.state || !['threatened', 'critical'].includes(district.state.status)) return;
     }
 
     /**
@@ -679,27 +661,18 @@ class BuildMapView {
      * Returns: value defined by the surrounding game flow.
      */
     drawProsperitySignals(district, projected, radius) {
+        if (MAP_DISTRICT_VISUALS.drawProsperitySignals) {
+            MAP_DISTRICT_VISUALS.drawProsperitySignals({
+                graphics: this.districtGraphics,
+                district,
+                projected,
+                radius,
+                now: this.scene.time.now
+            });
+            return;
+        }
+
         if (!district?.state) return;
-        const prosperityMultiplier = district.state.prosperityMultiplier || 1;
-        const prosperityLevel = Math.max(0, district.state.prosperityLevel || 0);
-        const lossActive = district.state.prosperityLossTimer > 0 && district.state.lastProsperityLoss > 0;
-
-        if (prosperityMultiplier > 1 && district.state.status === 'friendly') {
-            const glowPulse = (Math.sin(this.scene.time.now * 0.004) + 1) / 2;
-            const glowRadius = radius * (1.9 + glowPulse * 0.5);
-            const glowAlpha = Phaser.Math.Linear(0.12, 0.35, glowPulse);
-            const glowColor = prosperityLevel >= 4 ? 0x34d399 : 0x22c55e;
-            this.districtGraphics.lineStyle(1.5, glowColor, glowAlpha);
-            this.districtGraphics.strokeCircle(projected.x, projected.y, glowRadius);
-        }
-
-        if (lossActive) {
-            const lossPulse = (Math.sin(this.scene.time.now * 0.015) + 1) / 2;
-            const lossRadius = radius * (2.2 + lossPulse * 0.6);
-            const lossAlpha = Phaser.Math.Linear(0.2, 0.6, lossPulse);
-            this.districtGraphics.lineStyle(2, 0xf87171, lossAlpha);
-            this.districtGraphics.strokeCircle(projected.x, projected.y, lossRadius);
-        }
     }
 
     /**
