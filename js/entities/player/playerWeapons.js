@@ -116,12 +116,13 @@ function normalizePilotWeaponSelection() {
     if (typeof pilotState === 'undefined' || !pilotState) return;
     const state = pilotState.weaponState;
     if (!state) return;
+    if (window.pilotWeaponProgression?.normalizeSelection) {
+        window.pilotWeaponProgression.normalizeSelection(state, getPilotWeaponOrder);
+        return;
+    }
     const order = getPilotWeaponOrder();
     const canUse = (weapon) => Boolean(state.unlocked?.[weapon] || state.temporaryUnlocks?.[weapon]);
-    if (!canUse(state.selected)) {
-        const fallback = order.find(canUse) || 'combatRifle';
-        state.selected = fallback;
-    }
+    if (!canUse(state.selected)) state.selected = order.find(canUse) || 'combatRifle';
 }
 
 function unlockPilotWeapon(weapon, options = {}) {
@@ -129,13 +130,15 @@ function unlockPilotWeapon(weapon, options = {}) {
     const state = pilotState.weaponState;
     if (!state || !weapon || !getPilotWeaponOrder().includes(weapon)) return false;
     const temporary = Boolean(options.temporary);
-    if (temporary) {
+    if (window.pilotWeaponProgression?.unlockWeapon) {
+        window.pilotWeaponProgression.unlockWeapon(state, weapon, { temporary, tier: options.tier });
+    } else if (temporary) {
         state.temporaryUnlocks[weapon] = true;
+        state.tiers[weapon] = Math.max(1, Math.min(3, options.tier || state.tiers?.[weapon] || 1));
     } else {
         state.unlocked[weapon] = true;
+        state.tiers[weapon] = Math.max(1, Math.min(3, options.tier || state.tiers?.[weapon] || 1));
     }
-    const nextTier = Math.max(1, Math.min(3, options.tier || state.tiers?.[weapon] || 1));
-    state.tiers[weapon] = nextTier;
     const maxAmmo = getPilotWeaponMaxAmmo(weapon);
     if (Number.isFinite(maxAmmo) && options.refill !== false) {
         state.ammo[weapon] = maxAmmo;
@@ -149,6 +152,9 @@ function upgradePilotWeaponTier(weapon, amount = 1) {
     const state = pilotState.weaponState;
     if (!state || !weapon || !getPilotWeaponOrder().includes(weapon)) return 0;
     unlockPilotWeapon(weapon, { temporary: false, tier: state.tiers?.[weapon] || 1, refill: false });
+    if (window.pilotWeaponProgression?.upgradeTier) {
+        return window.pilotWeaponProgression.upgradeTier(state, weapon, amount);
+    }
     const current = Math.max(1, state.tiers?.[weapon] || 1);
     const next = Math.max(1, Math.min(3, current + (Number.isFinite(amount) ? amount : 0)));
     state.tiers[weapon] = next;
