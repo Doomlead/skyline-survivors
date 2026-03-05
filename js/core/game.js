@@ -582,6 +582,9 @@ const config = {
     height: dimensions.height,
     parent: 'game-container',
     backgroundColor: '#0a0a2e',
+    input: {
+        gamepad: true
+    },
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
