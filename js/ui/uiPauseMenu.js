@@ -40,7 +40,8 @@ function createPauseMenu(scene, audioManager) {
     mainElements.push(pauseTitle);
 
     // Resume and Menu buttons
-    const resumeText = scene.add.text(centerX - 150, 120, '[ P ] RESUME', {
+    const pauseLabel = getBoundKeyLabel('pause').toUpperCase();
+    const resumeText = scene.add.text(centerX - 150, 120, `[ ${pauseLabel} ] RESUME`, {
         fontSize: '18px', fontFamily: 'Orbitron', color: '#00ff00', stroke: '#000000', strokeThickness: 4
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
     mainElements.push(resumeText);
@@ -280,6 +281,7 @@ function createPauseMenu(scene, audioManager) {
             userSettings.keyBindings[actionId] = normalized;
             persistUserSettings();
             if (scene.refreshKeyBindings) scene.refreshKeyBindings();
+            if (typeof refreshGameplayKeybindingText === 'function') refreshGameplayKeybindingText();
             updateKeyMapValues();
             textObj.setColor('#38bdf8');
             cancelRebind();
@@ -300,6 +302,7 @@ function createPauseMenu(scene, audioManager) {
         userSettings.keyBindings = { ...DEFAULT_KEY_BINDINGS };
         persistUserSettings();
         if (scene.refreshKeyBindings) scene.refreshKeyBindings();
+        if (typeof refreshGameplayKeybindingText === 'function') refreshGameplayKeybindingText();
         updateKeyMapValues();
         keyBindingsHint.setText('Key bindings reset to defaults!').setColor('#22c55e');
         scene.time.delayedCall(2000, () => {

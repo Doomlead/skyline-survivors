@@ -216,7 +216,12 @@ function updateUI(scene) {
         const ammoVal = state.ammo?.[weapon];
         const ammoText = Number.isFinite(ammoVal) ? `${Math.max(0, Math.ceil(ammoVal))}` : '∞';
         const switchHint = getPilotWeaponOrder
-            ? (getPilotWeaponOrder().filter((entry) => state.unlocked?.[entry] || state.temporaryUnlocks?.[entry]).length > 1 ? ' · TAB SWAP' : '')
+            ? (() => {
+                const weaponCount = getPilotWeaponOrder().filter((entry) => state.unlocked?.[entry] || state.temporaryUnlocks?.[entry]).length;
+                if (weaponCount <= 1) return '';
+                const keyName = formatKeyLabel(userSettings?.keyBindings?.switchPrimary || DEFAULT_KEY_BINDINGS.switchPrimary).toUpperCase();
+                return ` · ${keyName} SWAP`;
+            })()
             : '';
         const tempTag = isTemp ? ' · TEMP' : '';
         const droneTag = weapon === 'stingerDrone' ? ` · DRONES:${state.droneCount || 0}` : '';

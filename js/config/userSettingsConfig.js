@@ -15,7 +15,8 @@ const DEFAULT_KEY_BINDINGS = {
     enter: 'R',
     hyperspace: 'Q',
     pause: 'P',
-    switchPrimary: 'TAB'
+    switchPrimary: 'TAB',
+    restart: 'R'
 };
 
 const SETTINGS_STORAGE_KEY = 'skyline_user_settings_v1';
