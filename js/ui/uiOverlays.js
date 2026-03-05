@@ -5,6 +5,7 @@
 function gameOver(scene) {
     const audioManager = scene.audioManager;
     gameState.gameOver = true;
+    gameState.victory = false;
     if (window.missionPlanner) missionPlanner.recordMissionOutcome(false);
     const metaResult = recordMetaOutcome(false);
     scene.physics.pause();
@@ -110,6 +111,7 @@ function showMissionDefeat(scene, metaResult) {
 function winGame(scene) {
     const audioManager = scene.audioManager;
     gameState.gameOver = true;
+    gameState.victory = true;
     if (window.missionPlanner) missionPlanner.recordMissionOutcome(true);
     const metaResult = recordMetaOutcome(true);
     scene.physics.pause();
