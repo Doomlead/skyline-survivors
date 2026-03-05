@@ -59,7 +59,8 @@ function applyKeyBindings(scene) {
         enter: scene.input.keyboard.addKey(resolveKeyCode('enter')),
         hyperspace: scene.input.keyboard.addKey(resolveKeyCode('hyperspace')),
         pause: scene.input.keyboard.addKey(resolveKeyCode('pause')),
-        switchPrimary: scene.input.keyboard.addKey(resolveKeyCode('switchPrimary'))
+        switchPrimary: scene.input.keyboard.addKey(resolveKeyCode('switchPrimary')),
+        restart: scene.input.keyboard.addKey(resolveKeyCode('restart'))
     };
 
     scene.boundKeys = boundKeys;
@@ -76,6 +77,7 @@ function applyKeyBindings(scene) {
     scene.hyperspaceKey = boundKeys.hyperspace;
     scene.pauseKey = boundKeys.pause;
     scene.switchPrimaryKey = boundKeys.switchPrimary;
+    scene.restartKey = boundKeys.restart;
 }
 
 // Preloads runtime-generated graphics assets used by the main game scene.
@@ -342,33 +344,11 @@ function create() {
     // Input
     applyKeyBindings(this);
     this.refreshKeyBindings = () => applyKeyBindings(this);
-    this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
 
-    if (this._restartHandler) {
-        this.input.keyboard.off('keydown-R', this._restartHandler);
-    }
-    this._restartHandler = () => {
-        if (gameState.gameOver) {
-            resetGameState();
-            if (window.enterMainMenu) {
-                enterMainMenu();
-            }
-        }
-    };
-    this.input.keyboard.on('keydown-R', this._restartHandler);
-    
     this.events.once('shutdown', () => {
         // Reset the initialization flag when scene shuts down
         gameSceneInitialized = false;
         
-        if (this._restartHandler) {
-            this.input.keyboard.off('keydown-R', this._restartHandler);
-            this._restartHandler = null;
-        }
-        if (this.rKey) {
-            this.input.keyboard.removeKey(this.rKey);
-            this.rKey = null;
-        }
         if (this.particleManager) {
             this.particleManager.destroy();
             this.particleManager = null;
@@ -454,7 +434,7 @@ function update(time, delta) {
     }
     
     if (gameState.gameOver) {
-        if (this.rKey && Phaser.Input.Keyboard.JustDown(this.rKey)) {
+        if (this.restartKey && Phaser.Input.Keyboard.JustDown(this.restartKey)) {
             resetGameState();
             this.scene.restart();
         }

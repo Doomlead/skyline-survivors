@@ -27,7 +27,8 @@ const KEY_BINDING_ACTIONS = [
     { id: 'enter', label: 'Enter Mech' },
     { id: 'hyperspace', label: 'Hyperspace' },
     { id: 'pause', label: 'Pause' },
-    { id: 'switchPrimary', label: 'Switch Primary' }
+    { id: 'switchPrimary', label: 'Switch Primary' },
+    { id: 'restart', label: 'Restart Run' }
 ];
 
 /**
@@ -87,3 +88,37 @@ function formatMetaTimer(seconds) {
     const secs = String(clamped % 60).padStart(2, '0');
     return `${mins}:${secs}`;
 }
+
+
+function getBoundKeyLabel(actionId) {
+    const fallback = DEFAULT_KEY_BINDINGS?.[actionId];
+    const keyName = userSettings?.keyBindings?.[actionId] || fallback;
+    return formatKeyLabel(keyName);
+}
+
+function refreshGameplayKeybindingText() {
+    const controlsEl = document.getElementById('controls-text');
+    if (controlsEl) {
+        const left = getBoundKeyLabel('moveLeft');
+        const right = getBoundKeyLabel('moveRight');
+        const up = getBoundKeyLabel('moveUp');
+        const down = getBoundKeyLabel('moveDown');
+        const fire = getBoundKeyLabel('fire');
+        const transform = getBoundKeyLabel('transform');
+        const jump = getBoundKeyLabel('jump');
+        const bomb = getBoundKeyLabel('bomb');
+        const eject = getBoundKeyLabel('eject');
+        const enter = getBoundKeyLabel('enter');
+        const hyperspace = getBoundKeyLabel('hyperspace');
+        const switchPrimary = getBoundKeyLabel('switchPrimary');
+        const pause = getBoundKeyLabel('pause');
+        controlsEl.innerHTML = `Desktop Controls: <span class="text-cyan-300">${left}/${right}/${up}/${down}</span> = Move/Aim (Bulwark; diagonals supported), <span class="text-cyan-300">${jump}</span> = Jump/Aim Up, <span class="text-cyan-300">${down}</span> = Aim Down (airborne), <span class="text-cyan-300">${fire}</span> = Fire (move + shoot), <span class="text-cyan-300">${transform}</span> = Transform, <span class="text-cyan-300">${bomb}</span> = Bomb, <span class="text-cyan-300">${eject}</span> = Eject, <span class="text-cyan-300">${enter}</span> = Enter Mech, <span class="text-cyan-300">${hyperspace}</span> = Hyperspace, <span class="text-cyan-300">${switchPrimary}</span> = Switch Primary, <span class="text-cyan-300">${pause}</span> = Pause.`;
+    }
+
+    const restartHintKeyEl = document.getElementById('restart-hint-key');
+    if (restartHintKeyEl) {
+        restartHintKeyEl.textContent = getBoundKeyLabel('restart').toUpperCase();
+    }
+}
+
+refreshGameplayKeybindingText();
