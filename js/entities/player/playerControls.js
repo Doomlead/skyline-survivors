@@ -26,10 +26,11 @@ function updatePlayer(scene, time, delta) {
     if (!aegis || !leftKey || !rightKey || !upKey || !downKey) return;
 
     const vInput = window.virtualInput || { left: false, right: false, up: false, down: false, fire: false };
-    const left = leftKey.isDown || vInput.left;
-    const right = rightKey.isDown || vInput.right;
-    const up = upKey.isDown || vInput.up;
-    const down = downKey.isDown || vInput.down;
+    const gamepadState = getGamepadInputState(scene);
+    const left = leftKey.isDown || vInput.left || gamepadState.left;
+    const right = rightKey.isDown || vInput.right || gamepadState.right;
+    const up = upKey.isDown || vInput.up || gamepadState.up;
+    const down = downKey.isDown || vInput.down || gamepadState.down;
 
     if (aegisState.transformCooldown > 0) {
         aegisState.transformCooldown -= delta;
@@ -38,24 +39,24 @@ function updatePlayer(scene, time, delta) {
     const shipLocked = (gameState.mode === 'mothership' && gameState?.mothershipObjective?.shipLocked)
         || (gameState.mode === 'assault' && gameState?.assaultObjective?.shipLocked);
 
-    if (Phaser.Input.Keyboard.JustDown(transformKey) && aegisState.active && !shipLocked && aegisState.transformCooldown <= 0) {
+    if ((isKeyOrGamepadJustPressed(transformKey, gamepadState.transformPressed)) && aegisState.active && !shipLocked && aegisState.transformCooldown <= 0) {
         const nextMode = aegisState.mode === 'interceptor' ? 'bulwark' : 'interceptor';
         setAegisMode(scene, nextMode);
         aegisState.transformCooldown = 350;
     }
 
-    if (ejectKey && Phaser.Input.Keyboard.JustDown(ejectKey) && aegisState.active && !shipLocked) {
+    if (ejectKey && isKeyOrGamepadJustPressed(ejectKey, gamepadState.ejectPressed) && aegisState.active && !shipLocked) {
         ejectPilot(scene);
     }
 
-    if (enterKey && Phaser.Input.Keyboard.JustDown(enterKey) && pilotState.active && !shipLocked) {
+    if (enterKey && isKeyOrGamepadJustPressed(enterKey, gamepadState.enterPressed) && pilotState.active && !shipLocked) {
         enterAegis(scene);
     }
 
-    if (bombKey && Phaser.Input.Keyboard.JustDown(bombKey)) useSmartBomb(scene);
-    if (hyperspaceKey && Phaser.Input.Keyboard.JustDown(hyperspaceKey)) useHyperspace(scene);
-    if (pauseKey && Phaser.Input.Keyboard.JustDown(pauseKey)) togglePause(scene);
-    if (switchPrimaryKey && Phaser.Input.Keyboard.JustDown(switchPrimaryKey)) {
+    if (isKeyOrGamepadJustPressed(bombKey, gamepadState.bombPressed)) useSmartBomb(scene);
+    if (isKeyOrGamepadJustPressed(hyperspaceKey, gamepadState.hyperspacePressed)) useHyperspace(scene);
+    if (isKeyOrGamepadJustPressed(pauseKey, gamepadState.pausePressed)) togglePause(scene);
+    if (isKeyOrGamepadJustPressed(switchPrimaryKey, gamepadState.switchPrimaryPressed)) {
         if (pilotState.active && typeof cyclePilotWeapon === 'function') {
             cyclePilotWeapon();
         } else {
@@ -185,7 +186,7 @@ function updatePlayer(scene, time, delta) {
                     pilotState.vx *= 0.8;
                 }
 
-                const jumpPressed = (jumpKey && jumpKey.isDown) || vInput.up;
+                const jumpPressed = (jumpKey && jumpKey.isDown) || vInput.up || gamepadState.jump;
                 if (jumpPressed && pilotState.grounded && (left || right || !(fireKey.isDown || vInput.fire))) {
                     pilotState.vy = jumpForce;
                     pilotState.grounded = false;
@@ -220,7 +221,7 @@ function updatePlayer(scene, time, delta) {
                 pilotState.vx *= 0.8;
             }
 
-            const jumpPressed = (jumpKey && jumpKey.isDown) || vInput.up;
+            const jumpPressed = (jumpKey && jumpKey.isDown) || vInput.up || gamepadState.jump;
             if (jumpPressed && pilotState.grounded && (left || right || !(fireKey.isDown || vInput.fire))) {
                 pilotState.vy = jumpForce;
                 pilotState.grounded = false;
@@ -252,7 +253,7 @@ function updatePlayer(scene, time, delta) {
 
     const activePlayer = syncActivePlayer(scene);
 
-    if ((fireKey.isDown || vInput.fire) && time > playerState.lastFire + playerState.fireRate) {
+    if ((fireKey.isDown || vInput.fire || gamepadState.fire) && time > playerState.lastFire + playerState.fireRate) {
         let angle = null;
         if (pilotState.active) {
             angle = getPilotAimAngle(left, right, up, down, pilotState.grounded);
@@ -321,6 +322,94 @@ function updatePlayer(scene, time, delta) {
     } else if (particleManager) {
         particleManager.stopExhaustTrail();
     }
+}
+
+
+// Reads keyboard-compatible movement and action values from the first connected gamepad.
+function getGamepadInputState(scene) {
+    const neutralState = {
+        left: false,
+        right: false,
+        up: false,
+        down: false,
+        fire: false,
+        jump: false,
+        transformPressed: false,
+        bombPressed: false,
+        hyperspacePressed: false,
+        pausePressed: false,
+        switchPrimaryPressed: false,
+        ejectPressed: false,
+        enterPressed: false,
+    };
+
+    const padManager = scene && scene.input ? scene.input.gamepad : null;
+    const pad = padManager && Array.isArray(padManager.gamepads)
+        ? padManager.gamepads.find((g) => g && g.connected)
+        : null;
+    if (!pad) return neutralState;
+
+    const axisThreshold = 0.35;
+    const leftAxisX = getGamepadAxisValue(pad, 0);
+    const leftAxisY = getGamepadAxisValue(pad, 1);
+
+    const leftDpad = getGamepadButtonDown(pad, 14);
+    const rightDpad = getGamepadButtonDown(pad, 15);
+    const upDpad = getGamepadButtonDown(pad, 12);
+    const downDpad = getGamepadButtonDown(pad, 13);
+
+    const fireHeld = getGamepadButtonDown(pad, 7) || getGamepadButtonDown(pad, 5) || getGamepadButtonDown(pad, 0);
+    const jumpHeld = getGamepadButtonDown(pad, 0);
+
+    return {
+        left: leftDpad || leftAxisX <= -axisThreshold,
+        right: rightDpad || leftAxisX >= axisThreshold,
+        up: upDpad || leftAxisY <= -axisThreshold,
+        down: downDpad || leftAxisY >= axisThreshold,
+        fire: fireHeld,
+        jump: jumpHeld,
+        transformPressed: getGamepadButtonEdge(pad, 3),
+        bombPressed: getGamepadButtonEdge(pad, 1),
+        hyperspacePressed: getGamepadButtonEdge(pad, 8),
+        pausePressed: getGamepadButtonEdge(pad, 9),
+        switchPrimaryPressed: getGamepadButtonEdge(pad, 4),
+        ejectPressed: getGamepadButtonEdge(pad, 2),
+        enterPressed: getGamepadButtonEdge(pad, 2),
+    };
+}
+
+// Returns true when either keyboard JustDown or gamepad press edge is detected.
+function isKeyOrGamepadJustPressed(key, gamepadPressed) {
+    const keyboardPressed = Boolean(key && Phaser.Input.Keyboard.JustDown(key));
+    return keyboardPressed || Boolean(gamepadPressed);
+}
+
+// Safely reads a gamepad axis value by index.
+function getGamepadAxisValue(pad, axisIndex) {
+    if (!pad || !Array.isArray(pad.axes)) return 0;
+    const axis = pad.axes[axisIndex];
+    return axis && typeof axis.getValue === 'function' ? axis.getValue() : 0;
+}
+
+// Safely reads whether a gamepad button is currently held down.
+function getGamepadButtonDown(pad, buttonIndex) {
+    if (!pad || !Array.isArray(pad.buttons)) return false;
+    const button = pad.buttons[buttonIndex];
+    return Boolean(button && button.pressed);
+}
+
+// Safely reads whether a gamepad button transitioned from up to down this frame.
+function getGamepadButtonEdge(pad, buttonIndex) {
+    if (!pad) return false;
+    const padId = typeof pad.index === 'number' ? pad.index : 0;
+    if (!window.gamepadButtonState) window.gamepadButtonState = {};
+    if (!window.gamepadButtonState[padId]) window.gamepadButtonState[padId] = {};
+
+    const store = window.gamepadButtonState[padId];
+    const isDown = getGamepadButtonDown(pad, buttonIndex);
+    const wasDown = Boolean(store[buttonIndex]);
+    store[buttonIndex] = isDown;
+    return isDown && !wasDown;
 }
 
 // Returns pilot center-Y clamp so feet land on top of interior ground platform.
