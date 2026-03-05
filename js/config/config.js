@@ -94,6 +94,7 @@ const gameState = {
     lives: 3,
     paused: false,
     gameOver: false,
+    victory: false,
     difficulty: 1,
     wave: 1,
     mode: 'classic',
@@ -314,6 +315,7 @@ function resetGameState() {
     gameState.lives = 3;
     gameState.paused = false;
     gameState.gameOver = false;
+    gameState.victory = false;
     gameState.difficulty = 1;
     gameState.wave = 1;
     gameState.enemiesToKillThisWave = 0;

@@ -434,7 +434,7 @@ function update(time, delta) {
     }
     
     if (gameState.gameOver) {
-        if (this.restartKey && Phaser.Input.Keyboard.JustDown(this.restartKey)) {
+        if (!gameState.victory && this.restartKey && Phaser.Input.Keyboard.JustDown(this.restartKey)) {
             resetGameState();
             this.scene.restart();
         }
