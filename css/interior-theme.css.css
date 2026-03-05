@@ -1,0 +1,167 @@
+/* ------------------------
+ Interior Theme - Skyline Survivors
+ ------------------------ */
+
+/* Pilot Weapon HUD */
+.interior-hud {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.interior-weapon-slot {
+  background: rgba(15, 23, 42, 0.9);
+  border: 2px solid #1d5c9e;
+  border-radius: 4px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 80px;
+}
+
+.interior-weapon-slot.active {
+  border-color: #22d3ee;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+}
+
+.interior-weapon-icon {
+  font-size: 14px;
+}
+
+.interior-ammo-bar {
+  width: 40px;
+  height: 4px;
+  background: #334155;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.interior-ammo-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22d3ee, #1d5c9e);
+  transition: width 0.2s;
+}
+
+.interior-weapon-tier {
+  font-family: 'Orbitron', monospace;
+  font-size: 9px;
+  color: #a855f7;
+}
+
+/* Section Indicators */
+.interior-section-bar {
+  position: fixed;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 20px;
+  z-index: 999;
+}
+
+.interior-section-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #475569;
+  border: 2px solid #334155;
+}
+
+.interior-section-dot.current {
+  background: #22d3ee;
+  border-color: #22d3ee;
+  box-shadow: 0 0 6px #22d3ee;
+}
+
+.interior-section-dot.completed {
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+/* Hazard Warnings */
+.interior-hazard-banner {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(220, 38, 38, 0.9);
+  color: #fff;
+  padding: 8px 24px;
+  border-radius: 4px;
+  font-family: 'Orbitron', monospace;
+  font-size: 14px;
+  text-transform: uppercase;
+  z-index: 1001;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
+
+/* Gate Status */
+.interior-gate-indicator {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 2px solid #ef4444;
+  border-radius: 4px;
+  z-index: 998;
+}
+
+.interior-gate-indicator.open {
+  border-color: #22c55e;
+}
+
+.interior-gate-text {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  color: #94a3b8;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* Status Effects */
+.interior-status-banners {
+  position: fixed;
+  top: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1001;
+}
+
+.status-banner {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 4px 12px;
+  border-radius: 2px;
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.status-banner.poison { color: #22c55e; }
+.status-banner.electrocuted { color: #fbbf24; }
+.status-banner.radiation { color: #a855f7; }
+.status-banner.emp { color: #f97316; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
