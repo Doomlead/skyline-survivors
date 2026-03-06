@@ -64,6 +64,8 @@ function showMissionDefeat(scene, metaResult) {
     const statsLines = [];
     if (!isAssault) {
         statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
+    } else {
+        statsLines.push('Assault Mystery Cache: No payout (mission failed)');
     }
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
@@ -207,6 +209,7 @@ function showMissionVictory(scene, metaResult) {
     const timePlayed = formatCampaignTime(gameState.timePlayedMs || 0);
     const metaCredits = metaResult?.earnedCredits || 0;
     const metaBank = metaProgression?.getMetaState?.().credits || 0;
+    const assaultReward = metaResult?.assaultJackpot || null;
 
     scene.add.rectangle(centerX, centerY, cam.width, cam.height, 0x000000, 0.75)
         .setScrollFactor(0).setDepth(990);
@@ -236,77 +239,31 @@ function showMissionVictory(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
-    const buttonY = centerY + 150 * overlayScale;
-    const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
-        fontSize: `${Math.round(22 * overlayScale)}px`,
-        fontFamily: 'Orbitron',
-        color: '#facc15',
-        stroke: '#000000',
-        strokeThickness: Math.round(4 * overlayScale)
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
+    if (isAssault && assaultReward) {
+        const jackpotColor = assaultReward.tier === 'jackpot' ? '#facc15' : assaultReward.tier === 'rare' ? '#a78bfa' : '#67e8f9';
+        scene.add.text(centerX, centerY + 70 * overlayScale, `MYSTERY RESOLVED · ${String(assaultReward.tier || 'common').toUpperCase()}`, {
+            fontSize: `${Math.round(18 * overlayScale)}px`,
+            fontFamily: 'Orbitron',
+            color: jackpotColor,
+            stroke: '#000000',
+            strokeThickness: Math.round(3 * overlayScale)
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
 
-    /**
-     * Handles the handleReturn routine and encapsulates its core gameplay logic.
-     * Parameters: none.
-     * Returns: value defined by the surrounding game flow.
-     */
-    const handleReturn = () => {
-        resetGameState();
-        if (window.enterDistrictMap) {
-            enterDistrictMap({ fromVictory: true });
-        }
-    };
-
-    scene.input.keyboard.once('keydown-D', handleReturn);
-    returnButton.on('pointerdown', handleReturn);
-}
-
-/**
- * Handles the showMissionVictory routine and encapsulates its core gameplay logic.
- * Parameters: scene, metaResult.
- * Returns: value defined by the surrounding game flow.
- */
-function showMissionVictory(scene, metaResult) {
-    const cam = scene.cameras.main;
-    const centerX = cam.width / 2;
-    const centerY = cam.height / 2;
-    const overlayScale = getOverlayScale(scene);
-    const isAssault = gameState.mode === 'assault';
-    const bannerText = isAssault ? 'ASSAULT SUCCESSFUL' : 'DISTRICT DEFENDED';
-    const bannerColor = isAssault ? '#38bdf8' : '#4ade80';
-    const timePlayed = formatCampaignTime(gameState.timePlayedMs || 0);
-    const metaCredits = metaResult?.earnedCredits || 0;
-    const metaBank = metaProgression?.getMetaState?.().credits || 0;
-
-    scene.add.rectangle(centerX, centerY, cam.width, cam.height, 0x000000, 0.75)
-        .setScrollFactor(0).setDepth(990);
-
-    scene.add.text(centerX, centerY - 140 * overlayScale, bannerText, {
-        fontSize: `${Math.round(60 * overlayScale)}px`,
-        fontFamily: 'Orbitron',
-        color: bannerColor,
-        stroke: '#000000',
-        strokeThickness: Math.round(8 * overlayScale)
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
-
-    const statsLines = [];
-    if (!isAssault) {
-        statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
+        const detailLines = [
+            `${assaultReward.label || 'assault cache'} · ${assaultReward.type} +${assaultReward.value || 0}`,
+            `${assaultReward.flavor || 'salvage'} · ${assaultReward.source || 'assault_base_clear'}${assaultReward.districtName ? ` · ${assaultReward.districtName}` : ''}`
+        ];
+        scene.add.text(centerX, centerY + 102 * overlayScale, detailLines.join('\n'), {
+            fontSize: `${Math.round(14 * overlayScale)}px`,
+            fontFamily: 'Orbitron',
+            color: '#cbd5e1',
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: Math.round(2 * overlayScale)
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
     }
-    statsLines.push(`Time Played: ${timePlayed}`);
-    statsLines.push(`Score: ${gameState.score}`);
-    statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
 
-    scene.add.text(centerX, centerY - 20 * overlayScale, statsLines.join('\n'), {
-        fontSize: `${Math.round(26 * overlayScale)}px`,
-        fontFamily: 'Orbitron',
-        color: '#e2e8f0',
-        align: 'center',
-        stroke: '#000000',
-        strokeThickness: Math.round(4 * overlayScale)
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
-
-    const buttonY = centerY + 150 * overlayScale;
+    const buttonY = centerY + 170 * overlayScale;
     const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
         fontSize: `${Math.round(22 * overlayScale)}px`,
         fontFamily: 'Orbitron',
@@ -315,11 +272,6 @@ function showMissionVictory(scene, metaResult) {
         strokeThickness: Math.round(4 * overlayScale)
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
 
-    /**
-     * Handles the handleReturn routine and encapsulates its core gameplay logic.
-     * Parameters: none.
-     * Returns: value defined by the surrounding game flow.
-     */
     const handleReturn = () => {
         resetGameState();
         if (window.enterDistrictMap) {
@@ -330,6 +282,7 @@ function showMissionVictory(scene, metaResult) {
     scene.input.keyboard.once('keydown-D', handleReturn);
     returnButton.on('pointerdown', handleReturn);
 }
+
 
 /**
  * Handles the getCampaignVictoryStats routine and encapsulates its core gameplay logic.
@@ -439,33 +392,14 @@ function showCampaignVictory(scene, metaResult) {
  * Parameters: none.
  * Returns: value defined by the surrounding game flow.
  */
-function getCampaignVictoryStats() {
-    const allDistricts = window.missionPlanner?.getAllDistrictStates?.() || [];
-    const districtsSaved = allDistricts.filter(entry => entry.state?.status === 'friendly').length;
-    return {
-        districtsSaved,
-        totalDistricts: allDistricts.length,
-        timePlayedMs: gameState.timePlayedMs || 0,
-        score: gameState.score
-    };
-}
+
 
 /**
  * Handles the formatCampaignTime routine and encapsulates its core gameplay logic.
  * Parameters: ms.
  * Returns: value defined by the surrounding game flow.
  */
-function formatCampaignTime(ms = 0) {
-    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
 
-    if (hours > 0) {
-        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
 
 /**
  * Handles the recordMetaOutcome routine and encapsulates its core gameplay logic.
@@ -482,7 +416,9 @@ function recordMetaOutcome(success) {
         directives: gameState.missionDirectives,
         districtId: gameState.missionContext?.district,
         districtName: gameState.missionDirectives?.districtName || gameState.missionContext?.city,
-        intelSummary: gameState.missionIntelSummary || null
+        intelSummary: gameState.missionIntelSummary || null,
+        seed: gameState.missionContext?.seed || null,
+        settlementKey: `${gameState.missionContext?.district || 'district'}:${gameState.missionContext?.seed || 'seedless'}:${gameState.mode}:${success ? 'success' : 'fail'}`
     };
     const result = metaProgression.recordRunOutcome(outcome);
     gameState.metaRewardsGranted = true;

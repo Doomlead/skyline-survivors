@@ -66,6 +66,9 @@ const DEFAULT_META_STATE = {
     totalDropsPurchased: 0,
     lootHistory: [], // Last 5 drops for "history" display
     nextDeploymentAmmoBonus: 0,
+    assaultJackpotPity: 0,
+    assaultJackpotLastAt: 0,
+    assaultSettlementLog: {},
     pilotWeapons: {
         unlocked: {
             combatRifle: true,
@@ -96,6 +99,30 @@ const PILOT_WEAPON_SHOP = {
     plasmaLauncher: { cost: 150, name: 'Plasma Launcher Unlock' },
     lightningGun: { cost: 180, name: 'Lightning Gun Unlock' },
     stingerDrone: { cost: 220, name: 'Stinger Drone Unlock' }
+};
+
+const ASSAULT_JACKPOT_CONFIG = {
+    pityThreshold: 4,
+    valueCapPerRun: 260,
+    jackpotChance: 0.12,
+    rareChance: 0.28,
+    cooldownMs: 20 * 60 * 1000,
+    tables: {
+        common: [
+            { id: 'salvage_credits_small', weight: 50, type: 'credits', value: 45, rarity: 'common', flavor: 'salvage cache' },
+            { id: 'salvage_credits_medium', weight: 35, type: 'credits', value: 70, rarity: 'common', flavor: 'raider manifest' },
+            { id: 'supply_trace_basic', weight: 15, type: 'supply_drop_discount', value: 1, rarity: 'common', flavor: 'encrypted manifests' }
+        ],
+        rare: [
+            { id: 'assault_credits_boost', weight: 45, type: 'credits', value: 110, rarity: 'rare', flavor: 'core fragment bounty' },
+            { id: 'assault_drop_elite_token', weight: 35, type: 'supply_drop_token', value: 1, rarity: 'rare', flavor: 'elite pod coordinates' },
+            { id: 'pilot_ammo_cache', weight: 20, type: 'ammo_cap_bonus', value: 40, rarity: 'rare', flavor: 'munitions convoy' }
+        ],
+        jackpot: [
+            { id: 'legendary_credit_haul', weight: 60, type: 'credits', value: 220, rarity: 'jackpot', flavor: 'war chest recovered' },
+            { id: 'legendary_elite_package', weight: 40, type: 'bundle', value: 240, rarity: 'jackpot', flavor: 'command vault breach' }
+        ]
+    }
 };
 
 function createDefaultPilotWeaponProfile() {
@@ -171,6 +198,11 @@ function loadMetaProgression() {
                 lootHistory: Array.isArray(stored.lootHistory) ? stored.lootHistory.slice(-5) : []
             };
             metaState.pilotWeapons = normalizePilotWeaponProfile(stored.pilotWeapons);
+            metaState.assaultJackpotPity = Math.max(0, Math.round(Number(metaState.assaultJackpotPity) || 0));
+            metaState.assaultJackpotLastAt = Math.max(0, Math.round(Number(metaState.assaultJackpotLastAt) || 0));
+            metaState.assaultSettlementLog = metaState.assaultSettlementLog && typeof metaState.assaultSettlementLog === 'object'
+                ? metaState.assaultSettlementLog
+                : {};
         }
     } catch (err) {
         metaState = { ...DEFAULT_META_STATE };
@@ -350,6 +382,120 @@ function spendCredits(cost) {
     return true;
 }
 
+
+function weightedPick(items) {
+    if (!Array.isArray(items) || items.length === 0) return null;
+    const total = items.reduce((sum, item) => sum + Math.max(0, item.weight || 0), 0);
+    if (total <= 0) return items[0] || null;
+    let roll = Math.random() * total;
+    for (const item of items) {
+        roll -= Math.max(0, item.weight || 0);
+        if (roll <= 0) return item;
+    }
+    return items[items.length - 1] || null;
+}
+
+function applyAssaultRewardPayload(state, reward) {
+    if (!reward) return;
+    if (reward.type === 'credits') {
+        state.credits = Math.max(0, Math.round((state.credits || 0) + (reward.value || 0)));
+        return;
+    }
+    if (reward.type === 'ammo_cap_bonus') {
+        state.nextDeploymentAmmoBonus = Math.max(0, Math.round(state.nextDeploymentAmmoBonus || 0)) + (reward.value || 0);
+        return;
+    }
+    if (reward.type === 'supply_drop_token') {
+        state.pendingDrop = {
+            items: [{ id: 'overdrive', name: 'Overdrive Cache', duration: 7000, tier: 'tier3' }],
+            dropType: 'elite',
+            purchaseTime: Date.now(),
+            source: 'assault_jackpot'
+        };
+        return;
+    }
+    if (reward.type === 'supply_drop_discount') {
+        state.credits = Math.max(0, Math.round((state.credits || 0) + 35));
+        return;
+    }
+    if (reward.type === 'bundle') {
+        state.credits = Math.max(0, Math.round((state.credits || 0) + 160));
+        state.nextDeploymentAmmoBonus = Math.max(0, Math.round(state.nextDeploymentAmmoBonus || 0)) + 30;
+    }
+}
+
+function resolveAssaultJackpotReward(outcome = {}) {
+    const state = loadMetaProgression();
+    if (!outcome.success || outcome.mode !== 'assault') {
+        return { settled: false, reason: 'not_assault_victory' };
+    }
+
+    const settlementKey = String(outcome.settlementKey || `${outcome.districtId || 'district'}:${outcome.seed || 'seedless'}:${outcome.mode || 'assault'}:victory`);
+    if (state.assaultSettlementLog[settlementKey]) {
+        return { settled: false, duplicate: true, payload: { ...state.assaultSettlementLog[settlementKey] } };
+    }
+
+    const now = Date.now();
+    const inCooldown = (now - (state.assaultJackpotLastAt || 0)) < ASSAULT_JACKPOT_CONFIG.cooldownMs;
+    const pityActive = (state.assaultJackpotPity || 0) >= ASSAULT_JACKPOT_CONFIG.pityThreshold;
+
+    let tier = 'common';
+    if (!inCooldown && (pityActive || Math.random() < ASSAULT_JACKPOT_CONFIG.jackpotChance)) {
+        tier = 'jackpot';
+    } else if (Math.random() < ASSAULT_JACKPOT_CONFIG.rareChance) {
+        tier = 'rare';
+    }
+
+    const picked = weightedPick(ASSAULT_JACKPOT_CONFIG.tables[tier]) || ASSAULT_JACKPOT_CONFIG.tables.common[0];
+    const rewardValue = Math.min(ASSAULT_JACKPOT_CONFIG.valueCapPerRun, Math.max(0, Math.round(picked.value || 0)));
+
+    const payload = {
+        id: picked.id,
+        tier,
+        rarity: picked.rarity || tier,
+        type: picked.type,
+        value: rewardValue,
+        label: picked.id.replace(/_/g, ' '),
+        flavor: picked.flavor || 'assault cache',
+        source: 'assault_base_clear',
+        districtId: outcome.districtId || null,
+        districtName: outcome.districtName || null,
+        settledAt: now,
+        settlementKey
+    };
+
+    applyAssaultRewardPayload(state, payload);
+    state.assaultJackpotLastAt = tier === 'jackpot' ? now : (state.assaultJackpotLastAt || 0);
+    state.assaultJackpotPity = tier === 'jackpot' ? 0 : Math.min(ASSAULT_JACKPOT_CONFIG.pityThreshold + 1, (state.assaultJackpotPity || 0) + 1);
+    state.assaultSettlementLog[settlementKey] = payload;
+
+    return { settled: true, payload };
+}
+
+function getAssaultRewardBalanceReport(samples = 5000) {
+    const count = Math.max(100, Math.min(50000, Math.round(Number(samples) || 5000)));
+    const tally = { common: 0, rare: 0, jackpot: 0, value: 0 };
+    for (let i = 0; i < count; i++) {
+        const rollA = Math.random();
+        const rollB = Math.random();
+        let tier = 'common';
+        if (rollA < ASSAULT_JACKPOT_CONFIG.jackpotChance) tier = 'jackpot';
+        else if (rollB < ASSAULT_JACKPOT_CONFIG.rareChance) tier = 'rare';
+        const item = weightedPick(ASSAULT_JACKPOT_CONFIG.tables[tier]);
+        tally[tier] += 1;
+        tally.value += Math.min(ASSAULT_JACKPOT_CONFIG.valueCapPerRun, Math.max(0, Math.round(item?.value || 0)));
+    }
+    return {
+        samples: count,
+        avgValue: tally.value / count,
+        tierRates: {
+            common: tally.common / count,
+            rare: tally.rare / count,
+            jackpot: tally.jackpot / count
+        }
+    };
+}
+
 // Computes end-of-run credit rewards from score, rescues, directives, and mission success.
 function calculateRunCredits(outcome) {
     const baseScore = Math.max(50, Math.round((outcome.score || 0) / 750));
@@ -368,12 +514,16 @@ function calculateRunCredits(outcome) {
 // Records run results, grants calculated credits, updates history, and clears pending drops.
 function recordRunOutcome(outcome) {
     const state = loadMetaProgression();
-    const earned = calculateRunCredits(outcome || {});
+    const safeOutcome = outcome || {};
+    const earned = calculateRunCredits(safeOutcome);
     addCredits(earned);
 
+    const assaultRewardResult = resolveAssaultJackpotReward(safeOutcome);
+
     const runEntry = {
-        ...outcome,
+        ...safeOutcome,
         earnedCredits: earned,
+        assaultJackpot: assaultRewardResult?.payload || null,
         timestamp: Date.now()
     };
 
@@ -604,8 +754,11 @@ window.metaProgression = {
     upgradePilotWeaponTier: upgradePilotWeaponTierMeta,
     getLoadoutOptions,
     grantPilotIntelMilestoneReward,
+    resolveAssaultJackpotReward,
+    getAssaultRewardBalanceReport,
     applyLoadoutEffects,
     LOOT_TABLES,
     POWERUP_TIERS,
-    PILOT_WEAPON_SHOP
+    PILOT_WEAPON_SHOP,
+    ASSAULT_JACKPOT_CONFIG
 };
