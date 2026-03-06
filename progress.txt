@@ -311,3 +311,12 @@ The best immediate next investment is the **Pilot Intel + District Ribbon** feat
 4. Milestone rewards grant unlock/tier/ammo-cap bonus and persist correctly.
 5. Add automated tests for intel award logic, milestone payout routing, and occupied-district suppression behavior.
 
+
+## Update — Epic E1 + E3 Implementation Pass (Assault Jackpot + Bulwark Siege)
+- Implemented a new assault jackpot/mystery reward system with weighted pools, anti-inflation controls (cooldown + pity + rolling-window caps), and stable serializable payload schemas in `js/config/assaultJackpotRewards.js`.
+- Added settlement idempotency keyed by assault success run key and persisted reward outcomes through meta progression state/history (`assaultRewards.settlementByKey`, rewardHistory, average value tracking).
+- Hooked assault reward settlement to successful assault completion only (interior core destruction path), ensuring failed/aborted runs do not receive payout.
+- Added mission-end reward summary output for assault victories/defeats and in-run jackpot/mystery callout styling with rarity/context tags.
+- Implemented Bulwark structural siege rules in `js/config/assaultSiegeRules.js` so siege multipliers apply only to approved assault structure roles and never to non-structural enemies.
+- Added Bulwark siege hit feedback (floating text/explosion variant), HUD status surfacing, and mission-type segmented siege telemetry counters.
+- Added regression tests for reward distribution/idempotency/failure-path behavior and siege role routing.

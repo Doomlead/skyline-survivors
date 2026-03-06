@@ -128,6 +128,11 @@ const gameState = {
     metaAppliedLoadout: null,
     metaAppliedDrop: null,
     metaRewardsGranted: false,
+    lastAssaultReward: null,
+    combatTelemetry: {
+        bulwarkSiegeHits: 0,
+        hitsByMissionType: {}
+    },
     assaultObjective: {
         active: false,
         baseHp: 0,
@@ -428,6 +433,8 @@ function resetGameState() {
     gameState.metaAppliedLoadout = null;
     gameState.metaAppliedDrop = null;
     gameState.metaRewardsGranted = false;
+    gameState.lastAssaultReward = null;
+    gameState.combatTelemetry = { bulwarkSiegeHits: 0, hitsByMissionType: {} };
     gameState.assaultObjective = {
         active: false,
         baseHp: 0,

@@ -510,6 +510,9 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     proj.setVelocity(vx, vy);
     proj.projectileType = type;
     proj.damage = damage;
+    const aegisMode = (typeof aegisState !== 'undefined' && aegisState && aegisState.active) ? aegisState.mode : null;
+    const pilotMode = (typeof pilotState !== 'undefined' && pilotState && pilotState.active) ? 'pilot' : null;
+    proj.sourceMode = aegisMode || pilotMode || 'interceptor';
     proj.isPiercing = piercing || playerState.powerUps.piercing > 0 || type === 'wave' || type === 'piercing';
     proj.birthTime = scene.time.now;
     proj.travelDistance = 0;
