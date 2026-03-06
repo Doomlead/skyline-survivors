@@ -50,6 +50,45 @@ const ASSAULT_INTERIOR_STYLE_BY_BASE = {
     assaultBaseDreadnought: 'dreadnought_interior'
 };
 
+
+function emitBulwarkSiegeFeedback(scene, target, siegeResult) {
+    if (!scene || !target || !siegeResult?.applied) return;
+    createFloatingText(scene, target.x, target.y - 24, `BULWARK SIEGE x${siegeResult.multiplier.toFixed(2)}`, '#facc15');
+    createExplosion(scene, target.x, target.y, 0xfacc15, 0.35);
+    if (!gameState.combatTelemetry) gameState.combatTelemetry = { bulwarkSiegeHits: 0, hitsByMissionType: {} };
+    gameState.combatTelemetry.bulwarkSiegeHits = (gameState.combatTelemetry.bulwarkSiegeHits || 0) + 1;
+    const mode = gameState.mode || 'unknown';
+    gameState.combatTelemetry.hitsByMissionType[mode] = (gameState.combatTelemetry.hitsByMissionType[mode] || 0) + 1;
+}
+
+function resolveAssaultJackpotReward(scene, objective) {
+    const settlementKey = objective?.settlementKey || `assault-${gameState.missionContext?.district || 'free'}-${Date.now()}`;
+    objective.settlementKey = settlementKey;
+    if (objective.rewardSettled) return objective.lastRewardResult || null;
+    if (!window.metaProgression?.settleAssaultReward) return null;
+
+    const context = {
+        districtId: gameState.missionContext?.district || null,
+        districtName: gameState.missionDirectives?.districtName || gameState.missionContext?.city || null,
+        baseVariant: objective?.baseVariant || null,
+        mode: gameState.mode
+    };
+
+    const outcome = window.metaProgression.settleAssaultReward({
+        settlementKey,
+        success: true,
+        context
+    });
+    if (outcome?.settled && outcome?.reward) {
+        objective.rewardSettled = true;
+        objective.lastRewardResult = outcome.reward;
+        gameState.lastAssaultReward = outcome.reward;
+        const rewardKind = outcome.reward.rewardType === 'jackpot' ? 'JACKPOT' : outcome.reward.rewardType.toUpperCase();
+        showRebuildObjectiveBanner(scene, `${rewardKind} RESOLVED: ${outcome.reward.payload?.label || outcome.reward.summary}`, '#facc15');
+    }
+    return outcome;
+}
+
 // Returns the assault base texture variant key based on objective state or random selection.
 function getAssaultBaseTextureKey(objective) {
     if (objective?.baseVariant && ASSAULT_BASE_TEXTURES.includes(objective.baseVariant)) {
@@ -132,6 +171,9 @@ function setupAssaultObjective(scene) {
     objective.transitionTimer = 0;
     objective.currentSectionIndex = 0;
     objective.activeSectionId = objective.sectionGraph?.[0]?.id || null;
+    objective.rewardSettled = false;
+    objective.lastRewardResult = null;
+    objective.settlementKey = `assault-${gameState.missionContext?.district || 'free'}-${Date.now()}`;
     if (Array.isArray(objective.sectionProgress)) {
         objective.sectionProgress = objective.sectionProgress.map((sectionProgress, index) => ({
             ...sectionProgress,
@@ -201,6 +243,11 @@ function hitAssaultTarget(projectile, target) {
 
     const scene = projectile.scene;
     const now = scene.time?.now || 0;
+    const baseDamage = projectile?.damage || 1;
+    const siegeResult = window.assaultSiegeRules?.computeBulwarkSiegeDamage
+        ? window.assaultSiegeRules.computeBulwarkSiegeDamage(baseDamage, target.assaultRole, projectile, aegisState)
+        : { damage: baseDamage, multiplier: 1, applied: false };
+    const resolvedDamage = siegeResult.damage;
 
     if (projectile && projectile.empDisableDuration && (target.assaultRole === 'turret' || target.assaultRole === 'shield')) {
         target.empDisabledUntil = now + projectile.empDisableDuration;
@@ -209,7 +256,7 @@ function hitAssaultTarget(projectile, target) {
 
     if (target.assaultRole === 'core') {
         if (objective.damageWindowUntil > 0 && now < objective.damageWindowUntil) {
-            target.hp -= projectile.damage || 1;
+            target.hp -= resolvedDamage;
             objective.baseHp = Math.max(0, target.hp);
             target.setTint(0xff0000);
             scene.time.delayedCall(50, () => {
@@ -223,7 +270,7 @@ function hitAssaultTarget(projectile, target) {
             }
         }
     } else {
-        target.hp -= projectile.damage || 1;
+        target.hp -= resolvedDamage;
         if (target.hp <= 0) {
             if (target.assaultRole === 'shield') {
                 objective.shieldsRemaining = Math.max(0, (objective.shieldsRemaining || 0) - 1);
@@ -242,6 +289,7 @@ function hitAssaultTarget(projectile, target) {
         }
     }
 
+    emitBulwarkSiegeFeedback(scene, target, siegeResult);
     if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
 
     if (objective.baseHp <= 0 && objective.active) {
@@ -611,7 +659,11 @@ function hitAssaultInteriorTarget(projectile, target) {
     }
 
     const scene = projectile.scene;
-    target.hp -= projectile.damage || 1;
+    const baseDamage = projectile?.damage || 1;
+    const siegeResult = window.assaultSiegeRules?.computeBulwarkSiegeDamage
+        ? window.assaultSiegeRules.computeBulwarkSiegeDamage(baseDamage, target.assaultRole, projectile, aegisState)
+        : { damage: baseDamage, multiplier: 1, applied: false };
+    target.hp -= siegeResult.damage;
 
     target.setTint(0xff0000);
     scene.time.delayedCall(60, () => {
@@ -651,6 +703,7 @@ function hitAssaultInteriorTarget(projectile, target) {
                 clearInteriorHazards(scene);
             }
 
+            resolveAssaultJackpotReward(scene, objective);
             showRebuildObjectiveBanner(scene, 'ASSAULT BASE CORE DESTROYED\nTARGET ELIMINATED!', '#00ff00');
             scene.time.delayedCall(2000, () => {
                 winGame(scene);
@@ -666,5 +719,6 @@ function hitAssaultInteriorTarget(projectile, target) {
         objective.coreChamberHp = Math.max(0, target.hp);
     }
 
+    emitBulwarkSiegeFeedback(scene, target, siegeResult);
     if (projectile && projectile.active && !projectile.isPiercing) projectile.destroy();
 }

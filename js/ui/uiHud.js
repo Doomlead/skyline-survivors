@@ -360,13 +360,21 @@ function updateUI(scene) {
             const lossTag = directives.prosperityLossTimer > 0 && directives.lastProsperityLoss
                 ? ` · LOSS -${directives.lastProsperityLoss}`
                 : '';
-            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}${prosperityTag}${lossTag}`;
+            const siegeActive = aegisState?.active && aegisState?.mode === 'bulwark';
+            const siegeTag = siegeActive ? ' · BULWARK SIEGE READY' : '';
+            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}${prosperityTag}${lossTag}${siegeTag}`;
+
+            rewardEl.classList.toggle('jackpot-callout', Boolean(gameState.lastAssaultReward?.isJackpot));
+            rewardEl.classList.toggle('mystery-callout', Boolean(gameState.lastAssaultReward && !gameState.lastAssaultReward.isJackpot));
+
         } else {
             districtEl.innerText = 'DISTRICT: Free Patrol';
             threatEl.innerText = 'THREAT: Neutral';
             threatEl.classList.remove('animate-pulse', 'text-red-300');
             threatEl.classList.add('text-amber-200');
-            rewardEl.innerText = 'REWARDS: x1.00 standard loot';
+            const siegeActive = aegisState?.active && aegisState?.mode === 'bulwark';
+            rewardEl.innerText = `REWARDS: x1.00 standard loot${siegeActive ? ' · BULWARK SIEGE READY' : ''}`;
+            rewardEl.classList.remove('jackpot-callout', 'mystery-callout');
         }
     }
 }

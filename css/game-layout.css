@@ -193,3 +193,13 @@ body.fullscreen-active #game-container {
     right: 16px;
     font-size: 10px;
 }
+
+#reward-el.jackpot-callout {
+    color: #fde68a;
+    text-shadow: 0 0 6px rgba(250, 204, 21, 0.5);
+}
+
+#reward-el.mystery-callout {
+    color: #c4b5fd;
+    text-shadow: 0 0 6px rgba(167, 139, 250, 0.45);
+}

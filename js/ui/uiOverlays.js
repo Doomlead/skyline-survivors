@@ -64,6 +64,8 @@ function showMissionDefeat(scene, metaResult) {
     const statsLines = [];
     if (!isAssault) {
         statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
+    } else {
+        statsLines.push('Assault Reward: No payout (mission failed/aborted)');
     }
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
@@ -222,6 +224,15 @@ function showMissionVictory(scene, metaResult) {
     const statsLines = [];
     if (!isAssault) {
         statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
+    } else {
+        const reward = gameState.lastAssaultReward;
+        if (reward?.payload) {
+            const typeLabel = reward.rewardType === 'jackpot' ? 'Jackpot' : (reward.rewardType || 'mystery');
+            const valueLabel = typeof reward.payload.value === 'number' ? ` +${reward.payload.value}` : '';
+            statsLines.push(`Assault Reward: ${reward.payload.label}${valueLabel} · ${typeLabel} · ${reward.rarity || 'n/a'}`);
+        } else {
+            statsLines.push('Assault Reward: Pending settlement');
+        }
     }
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
@@ -266,71 +277,6 @@ function showMissionVictory(scene, metaResult) {
  * Parameters: scene, metaResult.
  * Returns: value defined by the surrounding game flow.
  */
-function showMissionVictory(scene, metaResult) {
-    const cam = scene.cameras.main;
-    const centerX = cam.width / 2;
-    const centerY = cam.height / 2;
-    const overlayScale = getOverlayScale(scene);
-    const isAssault = gameState.mode === 'assault';
-    const bannerText = isAssault ? 'ASSAULT SUCCESSFUL' : 'DISTRICT DEFENDED';
-    const bannerColor = isAssault ? '#38bdf8' : '#4ade80';
-    const timePlayed = formatCampaignTime(gameState.timePlayedMs || 0);
-    const metaCredits = metaResult?.earnedCredits || 0;
-    const metaBank = metaProgression?.getMetaState?.().credits || 0;
-
-    scene.add.rectangle(centerX, centerY, cam.width, cam.height, 0x000000, 0.75)
-        .setScrollFactor(0).setDepth(990);
-
-    scene.add.text(centerX, centerY - 140 * overlayScale, bannerText, {
-        fontSize: `${Math.round(60 * overlayScale)}px`,
-        fontFamily: 'Orbitron',
-        color: bannerColor,
-        stroke: '#000000',
-        strokeThickness: Math.round(8 * overlayScale)
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
-
-    const statsLines = [];
-    if (!isAssault) {
-        statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
-    }
-    statsLines.push(`Time Played: ${timePlayed}`);
-    statsLines.push(`Score: ${gameState.score}`);
-    statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
-
-    scene.add.text(centerX, centerY - 20 * overlayScale, statsLines.join('\n'), {
-        fontSize: `${Math.round(26 * overlayScale)}px`,
-        fontFamily: 'Orbitron',
-        color: '#e2e8f0',
-        align: 'center',
-        stroke: '#000000',
-        strokeThickness: Math.round(4 * overlayScale)
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
-
-    const buttonY = centerY + 150 * overlayScale;
-    const returnButton = scene.add.text(centerX, buttonY, 'RETURN TO DISTRICT MAP', {
-        fontSize: `${Math.round(22 * overlayScale)}px`,
-        fontFamily: 'Orbitron',
-        color: '#facc15',
-        stroke: '#000000',
-        strokeThickness: Math.round(4 * overlayScale)
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(999).setInteractive({ useHandCursor: true });
-
-    /**
-     * Handles the handleReturn routine and encapsulates its core gameplay logic.
-     * Parameters: none.
-     * Returns: value defined by the surrounding game flow.
-     */
-    const handleReturn = () => {
-        resetGameState();
-        if (window.enterDistrictMap) {
-            enterDistrictMap({ fromVictory: true });
-        }
-    };
-
-    scene.input.keyboard.once('keydown-D', handleReturn);
-    returnButton.on('pointerdown', handleReturn);
-}
-
 /**
  * Handles the getCampaignVictoryStats routine and encapsulates its core gameplay logic.
  * Parameters: none.

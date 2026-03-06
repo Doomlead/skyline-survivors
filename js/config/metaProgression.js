@@ -62,6 +62,16 @@ const DEFAULT_META_STATE = {
     credits: 250,
     pendingDrop: null, // Items to apply on next mission start
     runHistory: [],
+    assaultRewards: {
+        settlementByKey: {},
+        pityCounter: 0,
+        nonJackpotStreak: 0,
+        cooldownRemaining: 0,
+        rewardHistory: [],
+        totalCreditEquivalent: 0,
+        averageCreditEquivalent: 0,
+        sampleCount: 0
+    },
     lastRun: null,
     totalDropsPurchased: 0,
     lootHistory: [], // Last 5 drops for "history" display
@@ -169,6 +179,9 @@ function loadMetaProgression() {
                 runHistory: Array.isArray(stored.runHistory) ? stored.runHistory.slice(-8) : [],
                 lootHistory: Array.isArray(stored.lootHistory) ? stored.lootHistory.slice(-5) : []
             };
+            if (window.assaultJackpotRewards?.ensureRewardState) {
+                metaState.assaultRewards = window.assaultJackpotRewards.ensureRewardState(stored.assaultRewards);
+            }
             metaState.pilotWeapons = normalizePilotWeaponProfile(stored.pilotWeapons);
         }
     } catch (err) {
@@ -190,11 +203,15 @@ function persistMetaProgression() {
 // Returns a defensive copy of meta-progression state for external consumers.
 function getMetaState() {
     const state = loadMetaProgression();
+    const assaultRewards = window.assaultJackpotRewards?.ensureRewardState
+        ? window.assaultJackpotRewards.ensureRewardState(state.assaultRewards)
+        : (state.assaultRewards || null);
     return {
         ...state,
         pendingDrop: state.pendingDrop ? { ...state.pendingDrop } : null,
         runHistory: [...state.runHistory],
         lootHistory: [...state.lootHistory],
+        assaultRewards,
         pilotWeapons: normalizePilotWeaponProfile(state.pilotWeapons)
     };
 }
@@ -554,6 +571,40 @@ function getLootHistory() {
     return state.lootHistory || [];
 }
 
+function settleAssaultReward(settlementInput) {
+    const state = loadMetaProgression();
+    if (!window.assaultJackpotRewards?.settleAssaultReward) {
+        return { settled: false, reason: 'reward_system_unavailable' };
+    }
+
+    state.assaultRewards = window.assaultJackpotRewards.ensureRewardState(state.assaultRewards);
+    const outcome = window.assaultJackpotRewards.settleAssaultReward({
+        ...settlementInput,
+        metaState: state.assaultRewards,
+        runtime: {
+            metaProgression: window.metaProgression,
+            gameState: typeof gameState !== 'undefined' ? gameState : null
+        }
+    });
+
+    state.assaultRewards = outcome.rewardState;
+    if (outcome.settled && outcome.reward) {
+        const runEntry = {
+            type: 'assault_jackpot',
+            timestamp: outcome.reward.settledAt,
+            settlementKey: outcome.reward.settlementKey,
+            rewardType: outcome.reward.rewardType,
+            rarity: outcome.reward.rarity,
+            payload: outcome.reward.payload,
+            districtId: outcome.reward.context?.districtId || null,
+            districtName: outcome.reward.context?.districtName || null
+        };
+        state.runHistory = [...(state.runHistory || []), runEntry].slice(-8);
+    }
+    persistMetaProgression();
+    return outcome;
+}
+
 window.metaProgression = {
     getMetaState,
     addCredits,
@@ -565,6 +616,7 @@ window.metaProgression = {
     recordRunOutcome,
     getLastRunSummary,
     getLootHistory,
+    settleAssaultReward,
     getPilotWeaponProfile,
     purchasePilotWeapon,
     upgradePilotWeaponTier: upgradePilotWeaponTierMeta,
