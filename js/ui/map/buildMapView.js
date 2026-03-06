@@ -135,11 +135,6 @@ class BuildMapView {
     cleanup() {
         this._isBuilt = false; // Stop updates immediately
 
-        if (this._districtHoverHandler) this.scene.input.off('pointermove', this._districtHoverHandler);
-        if (this._districtClickHandler) this.scene.input.off('pointerdown', this._districtClickHandler);
-        this._districtHoverHandler = null;
-        this._districtClickHandler = null;
-
         this.mapNodes.forEach(node => {
             if (node.pulse) node.pulse.stop();
             if (node.node) node.node.destroy();
@@ -899,11 +894,6 @@ class BuildMapView {
         });
 
         const allFriendly = missionPlanner.areAllDistrictsFriendly?.();
-        if (this._districtHoverHandler) this.scene.input.off('pointermove', this._districtHoverHandler);
-        if (this._districtClickHandler) this.scene.input.off('pointerdown', this._districtClickHandler);
-        this._districtHoverHandler = null;
-        this._districtClickHandler = null;
-
         this.mapNodes.forEach(node => {
             if (node.id !== 'mothership') return;
             const ready = !!allFriendly;
@@ -926,11 +916,6 @@ class BuildMapView {
                 node.isEnabled = false;
             }
         });
-
-        if (this._districtHoverHandler) this.scene.input.off('pointermove', this._districtHoverHandler);
-        if (this._districtClickHandler) this.scene.input.off('pointerdown', this._districtClickHandler);
-        this._districtHoverHandler = null;
-        this._districtClickHandler = null;
 
         this.mapNodes.forEach(node => {
             if (node.id === 'mothership') return;
