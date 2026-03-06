@@ -50,6 +50,38 @@ const ASSAULT_INTERIOR_STYLE_BY_BASE = {
     assaultBaseDreadnought: 'dreadnought_interior'
 };
 
+
+const ASSAULT_SIEGE_RULES = (typeof globalThis !== 'undefined' && globalThis.assaultSiegeRules) ? globalThis.assaultSiegeRules : {};
+
+function resolveAssaultSiegeHit(projectile, targetRole, objective, missionType = 'assault_exterior') {
+    const baseDamage = projectile?.damage || 1;
+    const firedAegisMode = projectile?.firedAegisMode || null;
+    const resolved = ASSAULT_SIEGE_RULES.resolveSiegeDamage
+        ? ASSAULT_SIEGE_RULES.resolveSiegeDamage({ baseDamage, targetRole, firedAegisMode })
+        : { damage: baseDamage, multiplier: 1, bonusApplied: false, telemetryTag: 'structure_hit_standard' };
+
+    if (objective) {
+        objective.siegeHits = Math.max(0, Math.round(objective.siegeHits || 0)) + (resolved.bonusApplied ? 1 : 0);
+        objective.siegeBonusDamage = Math.max(0, Number(objective.siegeBonusDamage || 0))
+            + Math.max(0, resolved.damage - baseDamage);
+        const event = {
+            at: Date.now(),
+            missionType,
+            tag: resolved.telemetryTag,
+            role: targetRole || 'unknown',
+            mode: firedAegisMode || 'none',
+            multiplier: resolved.multiplier || 1,
+            damage: resolved.damage
+        };
+        objective.siegeTelemetry = [...(objective.siegeTelemetry || []), event].slice(-80);
+        objective.siegeLastTag = resolved.telemetryTag;
+        objective.siegeLastHitAt = Date.now();
+    }
+
+    return resolved;
+}
+
+
 // Returns the assault base texture variant key based on objective state or random selection.
 function getAssaultBaseTextureKey(objective) {
     if (objective?.baseVariant && ASSAULT_BASE_TEXTURES.includes(objective.baseVariant)) {
@@ -128,6 +160,11 @@ function setupAssaultObjective(scene) {
     objective.coreChamberHpMax = 0;
     objective.coreChamberActive = false;
     objective.interiorReinforcementTimer = 0;
+    objective.siegeHits = 0;
+    objective.siegeBonusDamage = 0;
+    objective.siegeTelemetry = [];
+    objective.siegeLastTag = '';
+    objective.siegeLastHitAt = 0;
     objective.shipLocked = false;
     objective.transitionTimer = 0;
     objective.currentSectionIndex = 0;
@@ -209,7 +246,13 @@ function hitAssaultTarget(projectile, target) {
 
     if (target.assaultRole === 'core') {
         if (objective.damageWindowUntil > 0 && now < objective.damageWindowUntil) {
-            target.hp -= projectile.damage || 1;
+            const siege = resolveAssaultSiegeHit(projectile, target.assaultRole, objective, 'assault_exterior');
+            target.hp -= siege.damage;
+            if (siege.bonusApplied && objective.shieldHitCooldown <= 0) {
+                createExplosion(scene, target.x, target.y - 10, 0xfacc15, 0.35);
+                createFloatingText(scene, target.x, target.y - 56, `SIEGE x${siege.multiplier.toFixed(2)}`, '#facc15');
+                objective.shieldHitCooldown = 180;
+            }
             objective.baseHp = Math.max(0, target.hp);
             target.setTint(0xff0000);
             scene.time.delayedCall(50, () => {
@@ -223,7 +266,13 @@ function hitAssaultTarget(projectile, target) {
             }
         }
     } else {
-        target.hp -= projectile.damage || 1;
+        const siege = resolveAssaultSiegeHit(projectile, target.assaultRole, objective, 'assault_exterior');
+        target.hp -= siege.damage;
+        if (siege.bonusApplied && objective.shieldHitCooldown <= 0) {
+            createExplosion(scene, target.x, target.y, 0xfacc15, 0.3);
+            createFloatingText(scene, target.x, target.y - 40, `SIEGE x${siege.multiplier.toFixed(2)}`, '#facc15');
+            objective.shieldHitCooldown = 180;
+        }
         if (target.hp <= 0) {
             if (target.assaultRole === 'shield') {
                 objective.shieldsRemaining = Math.max(0, (objective.shieldsRemaining || 0) - 1);
@@ -611,7 +660,11 @@ function hitAssaultInteriorTarget(projectile, target) {
     }
 
     const scene = projectile.scene;
-    target.hp -= projectile.damage || 1;
+    const siege = resolveAssaultSiegeHit(projectile, target.assaultRole, objective, 'assault_interior');
+    target.hp -= siege.damage;
+    if (siege.bonusApplied) {
+        createExplosion(scene, target.x, target.y, 0xfacc15, 0.28);
+    }
 
     target.setTint(0xff0000);
     scene.time.delayedCall(60, () => {

@@ -66,6 +66,7 @@ function showMissionDefeat(scene, metaResult) {
         statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
     } else {
         statsLines.push('Assault Mystery Cache: No payout (mission failed)');
+        statsLines.push(`Bulwark Siege Hits: ${gameState.assaultObjective?.siegeHits || 0}`);
     }
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
@@ -225,6 +226,8 @@ function showMissionVictory(scene, metaResult) {
     const statsLines = [];
     if (!isAssault) {
         statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
+    } else {
+        statsLines.push(`Bulwark Siege Hits: ${gameState.assaultObjective?.siegeHits || 0}`);
     }
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
@@ -418,7 +421,15 @@ function recordMetaOutcome(success) {
         districtName: gameState.missionDirectives?.districtName || gameState.missionContext?.city,
         intelSummary: gameState.missionIntelSummary || null,
         seed: gameState.missionContext?.seed || null,
-        settlementKey: `${gameState.missionContext?.district || 'district'}:${gameState.missionContext?.seed || 'seedless'}:${gameState.mode}:${success ? 'success' : 'fail'}`
+        settlementKey: `${gameState.missionContext?.district || 'district'}:${gameState.missionContext?.seed || 'seedless'}:${gameState.mode}:${success ? 'success' : 'fail'}`,
+        assaultSiegeSummary: gameState.mode === 'assault'
+            ? {
+                hits: gameState.assaultObjective?.siegeHits || 0,
+                bonusDamage: Number(gameState.assaultObjective?.siegeBonusDamage || 0),
+                lastTag: gameState.assaultObjective?.siegeLastTag || '',
+                events: (gameState.assaultObjective?.siegeTelemetry || []).slice(-12)
+            }
+            : null
     };
     const result = metaProgression.recordRunOutcome(outcome);
     gameState.metaRewardsGranted = true;

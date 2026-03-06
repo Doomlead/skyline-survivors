@@ -144,11 +144,18 @@ function updateUI(scene) {
             assaultCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(baseHp))}/${Math.max(0, Math.ceil(baseMax))}`;
         }
         if (assaultShieldLabelEl) {
+            const siegeHudLabel = window.assaultSiegeRules?.getSiegeHudLabel?.() || 'SIEGE ONLINE';
+            const siegeActive = Boolean(aegisState?.active && aegisState?.mode === 'bulwark');
+            const siegeTag = siegeActive ? ` · ${siegeHudLabel}` : ' · SIEGE OFFLINE';
             if (interiorPhase) {
                 const phase = objective?.phaseLabel || 'PHASE 2 - INTERIOR';
                 const gate = objective?.gateLabel ? ` · ${objective.gateLabel}` : '';
-                assaultShieldLabelEl.innerText = `${phase}${gate}`;
-                if (objective?.gateColor) assaultShieldLabelEl.style.color = objective.gateColor;
+                assaultShieldLabelEl.innerText = `${phase}${gate}${siegeTag}`;
+                if (siegeActive) {
+                    assaultShieldLabelEl.style.color = '#facc15';
+                } else if (objective?.gateColor) {
+                    assaultShieldLabelEl.style.color = objective.gateColor;
+                }
             } else {
                 const shields = objective?.shieldsRemaining ?? 0;
                 const stage = objective?.shieldStage || 1;
@@ -156,8 +163,9 @@ function updateUI(scene) {
                 const now = scene?.time?.now || 0;
                 const windowLeft = Math.max(0, ((objective?.damageWindowUntil || 0) - now));
                 const windowTag = windowLeft > 0 ? ` · Window ${Math.ceil(windowLeft / 1000)}s` : '';
-                assaultShieldLabelEl.innerText = `Stage ${stage}/${total} · Shields: ${shields}${windowTag}`;
-                assaultShieldLabelEl.style.color = '';
+                const siegeStats = objective?.siegeHits ? ` · Siege Hits ${objective.siegeHits}` : '';
+                assaultShieldLabelEl.innerText = `Stage ${stage}/${total} · Shields: ${shields}${windowTag}${siegeTag}${siegeStats}`;
+                assaultShieldLabelEl.style.color = siegeActive ? '#facc15' : '';
             }
         }
     } else if (gameState.mode === 'mothership') {

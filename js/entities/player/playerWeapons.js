@@ -19,6 +19,7 @@ function fireWeapon(scene, angleOverride = null) {
     let speed = 600;
     if (playerState.powerUps.speed > 0) speed = 750;
     const p = playerState.powerUps;
+    const firedAegisMode = (typeof aegisState !== 'undefined' && aegisState?.active && !pilotActive) ? (aegisState.mode || 'interceptor') : null;
     const baseAngle = typeof angleOverride === 'number'
         ? angleOverride
         : (playerState.direction === 'right' ? 0 : Math.PI);
@@ -34,13 +35,13 @@ function fireWeapon(scene, angleOverride = null) {
     const shotPattern = getPrimaryShotPattern(activeLaserTier, activeMultiShotTier);
     const coveragePattern = getCoverageShotPattern();
 
-    fireShotPattern(scene, fireX, fireY, baseAngle, speed, damage, laserConfig, shotPattern);
+    fireShotPattern(scene, fireX, fireY, baseAngle, speed, damage, laserConfig, shotPattern, firedAegisMode);
 
     const coverageConfig = getCoverageConfig();
     if (p.coverage > 0) {
         const rearAngle = baseAngle + Math.PI;
         const rearOrigin = getFireOrigin(player, rearAngle);
-        fireShotPattern(scene, rearOrigin.fireX, rearOrigin.fireY, rearAngle, speed, damage, coverageConfig, coveragePattern);
+        fireShotPattern(scene, rearOrigin.fireX, rearOrigin.fireY, rearAngle, speed, damage, coverageConfig, coveragePattern, firedAegisMode);
     }
 
     if (p.coverage > 1) {
@@ -48,8 +49,8 @@ function fireWeapon(scene, angleOverride = null) {
         const rightAngle = baseAngle + Math.PI / 2;
         const leftOrigin = getFireOrigin(player, leftAngle);
         const rightOrigin = getFireOrigin(player, rightAngle);
-        fireShotPattern(scene, leftOrigin.fireX, leftOrigin.fireY, leftAngle, speed, damage, coverageConfig, coveragePattern);
-        fireShotPattern(scene, rightOrigin.fireX, rightOrigin.fireY, rightAngle, speed, damage, coverageConfig, coveragePattern);
+        fireShotPattern(scene, leftOrigin.fireX, leftOrigin.fireY, leftAngle, speed, damage, coverageConfig, coveragePattern, firedAegisMode);
+        fireShotPattern(scene, rightOrigin.fireX, rightOrigin.fireY, rightAngle, speed, damage, coverageConfig, coveragePattern, firedAegisMode);
     }
 
     if (p.missile > 0) {
@@ -62,12 +63,12 @@ function fireWeapon(scene, angleOverride = null) {
             Math.sin(baseAngle) * missileSpeed,
             'homing',
             damage,
-            { homingTier: p.missile }
+            { homingTier: p.missile, firedAegisMode }
         );
     }
     if (p.overdrive > 0) {
-        createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.08) * speed, Math.sin(baseAngle - 0.08) * speed, 'overdrive', damage);
-        createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.08) * speed, Math.sin(baseAngle + 0.08) * speed, 'overdrive', damage);
+        createProjectile(scene, fireX, fireY, Math.cos(baseAngle - 0.08) * speed, Math.sin(baseAngle - 0.08) * speed, 'overdrive', damage, { firedAegisMode });
+        createProjectile(scene, fireX, fireY, Math.cos(baseAngle + 0.08) * speed, Math.sin(baseAngle + 0.08) * speed, 'overdrive', damage, { firedAegisMode });
     }
 
     if (!drones || !drones.children || !drones.children.entries) return;
@@ -80,6 +81,7 @@ function fireWeapon(scene, angleOverride = null) {
         dProj.setVelocity(velocityX, velocityY);
         dProj.damage = damage;
         dProj.projectileType = 'drone';
+        dProj.firedAegisMode = firedAegisMode;
         scene.time.delayedCall(2000, () => {
             if (dProj && dProj.active) dProj.destroy();
         });
@@ -374,7 +376,7 @@ function getShotPattern(tier) {
 }
 
 // Spawns a full projectile pattern from one origin using shared projectile creation rules.
-function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, laserConfig, shotPattern) {
+function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, laserConfig, shotPattern, firedAegisMode = null) {
     if (shotPattern.mode === 'twin') {
         shotPattern.offsets.forEach(offset => {
             const offsetX = Math.cos(baseAngle + Math.PI / 2) * offset;
@@ -387,7 +389,7 @@ function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, lase
                 Math.sin(baseAngle) * speed,
                 laserConfig.type,
                 damage,
-                { piercing: laserConfig.piercing }
+                { piercing: laserConfig.piercing, firedAegisMode }
             );
         });
         return;
@@ -402,7 +404,7 @@ function fireShotPattern(scene, originX, originY, baseAngle, speed, damage, lase
             Math.sin(angle) * speed,
             laserConfig.type,
             damage,
-            { piercing: laserConfig.piercing }
+            { piercing: laserConfig.piercing, firedAegisMode }
         );
     });
 }
@@ -509,6 +511,7 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     proj.setDepth(FG_DEPTH_BASE + 6);
     proj.setVelocity(vx, vy);
     proj.projectileType = type;
+    proj.firedAegisMode = options.firedAegisMode || null;
     proj.damage = damage;
     proj.isPiercing = piercing || playerState.powerUps.piercing > 0 || type === 'wave' || type === 'piercing';
     proj.birthTime = scene.time.now;

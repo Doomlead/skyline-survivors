@@ -157,6 +157,11 @@ const gameState = {
         coreChamberHpMax: 0,
         coreChamberActive: false,
         interiorReinforcementTimer: 0,
+        siegeHits: 0,
+        siegeBonusDamage: 0,
+        siegeTelemetry: [],
+        siegeLastTag: '',
+        siegeLastHitAt: 0,
         shipLocked: false,
         transitionTimer: 0,
         ...createInteriorSectionState(ASSAULT_INTERIOR_SECTIONS)
@@ -457,6 +462,11 @@ function resetGameState() {
         coreChamberHpMax: 0,
         coreChamberActive: false,
         interiorReinforcementTimer: 0,
+        siegeHits: 0,
+        siegeBonusDamage: 0,
+        siegeTelemetry: [],
+        siegeLastTag: '',
+        siegeLastHitAt: 0,
         shipLocked: false,
         transitionTimer: 0,
         ...createInteriorSectionState(ASSAULT_INTERIOR_SECTIONS)
