@@ -610,6 +610,7 @@ class BuildMapView {
             this.districtGraphics.strokeCircle(projected.x, projected.y, radius);
 
             this.drawProsperitySignals(district, projected, radius);
+            this.drawIntelRibbon(district, projected, radius);
 
             district.projectedX = projected.x;
             district.projectedY = projected.y;
@@ -695,6 +696,34 @@ class BuildMapView {
             }
         };
         this.scene.input.on('pointerdown', this._districtClickHandler);
+    }
+
+
+    getPilotOwnershipLabel() {
+        const profile = window.metaProgression?.getPilotWeaponProfile?.();
+        if (!profile?.unlocked) return 'Pilot loadout data unavailable';
+        const unlocked = ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone']
+            .filter((weapon) => profile.unlocked[weapon]);
+        return unlocked.length
+            ? `Owned: ${unlocked.join(', ')}`
+            : 'Owned: combatRifle only';
+    }
+
+    drawIntelRibbon(district, projected, radius) {
+        const intel = district?.state?.pilotIntel || 0;
+        const milestoneIndex = district?.state?.pilotIntelMilestoneIndex || 0;
+        const start = milestoneIndex * 100;
+        const ratio = Phaser.Math.Clamp((intel - start) / 100, 0, 1);
+        const width = radius * 2.8;
+        const height = 4;
+        const x = projected.x - width / 2;
+        const y = projected.y + radius + 6;
+        this.districtGraphics.fillStyle(0x0b1220, 0.9);
+        this.districtGraphics.fillRect(x, y, width, height);
+        this.districtGraphics.fillStyle(0x22d3ee, 0.95);
+        this.districtGraphics.fillRect(x, y, width * ratio, height);
+        this.districtGraphics.lineStyle(1, 0x67e8f9, 0.7);
+        this.districtGraphics.strokeRect(x, y, width, height);
     }
 
     /**
@@ -906,7 +935,13 @@ class BuildMapView {
                         : isCritical
                             ? '#fb923c'
                             : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
-                const lines = [timerLabel, prosperityLabel];
+                const profile = window.metaProgression?.getPilotWeaponProfile?.() || null;
+                const nextReward = window.pilotIntelProgression?.describeNextReward?.(profile) || 'Next reward pending';
+                const ownership = this.getPilotOwnershipLabel();
+                const intel = node.state.pilotIntel || 0;
+                const milestoneIndex = node.state.pilotIntelMilestoneIndex || 0;
+                const nextTarget = (milestoneIndex + 1) * 100;
+                const lines = [timerLabel, prosperityLabel, `Intel ${intel}/${nextTarget}`, nextReward, ownership];
                 if (lossLabel) lines.unshift(lossLabel);
                 node.timerText.setText(lines.join('\n'));
                 node.timerText.setColor(color);

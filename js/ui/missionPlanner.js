@@ -31,7 +31,21 @@
     let mission = null;
     let districtState = null;
     let battleshipState = null;
+    let lastIntelOutcome = null;
     const mapState = { nodes: {}, hasTimerData: false };
+    const intelHelpers = window.pilotIntelProgression || null;
+
+    function normalizeDistrictPilotIntel(entry) {
+        if (intelHelpers?.normalizeDistrictIntelState) {
+            intelHelpers.normalizeDistrictIntelState(entry);
+            return;
+        }
+        entry.pilotIntel = Math.max(0, Math.floor(Number(entry.pilotIntel) || 0));
+        entry.pilotIntelMilestoneIndex = Math.max(0, Math.floor(Number(entry.pilotIntelMilestoneIndex) || 0));
+        entry.pilotIntelLastReward = entry.pilotIntelLastReward || null;
+        entry.pilotIntelLastAwardMissionId = entry.pilotIntelLastAwardMissionId || null;
+        entry.pilotIntelLastProcessedMissionId = entry.pilotIntelLastProcessedMissionId || null;
+    }
 
     /**
      * Handles the getDefaultDistrictState routine and encapsulates its core gameplay logic.
@@ -50,8 +64,14 @@
             lastProsperityLoss: 0,
             prosperityLossTimer: 0,
             lastOutcome: null,
-            clearedRuns: 0
+            clearedRuns: 0,
+            pilotIntel: 0,
+            pilotIntelMilestoneIndex: 0,
+            pilotIntelLastReward: null,
+            pilotIntelLastAwardMissionId: null,
+            pilotIntelLastProcessedMissionId: null
         };
+        normalizeDistrictPilotIntel(state);
         syncProsperityMetrics(state);
         return state;
     }
@@ -156,6 +176,7 @@
             if (base.prosperityLossTimer > 0) {
                 base.prosperityLossTimer = Math.max(0, base.prosperityLossTimer - elapsed);
             }
+            normalizeDistrictPilotIntel(base);
             syncProsperityMetrics(base);
             districtState.districts[cfg.id] = base;
         });
@@ -510,6 +531,7 @@
             const cfg = getDistrictConfigById(id);
             state.districts[id] = cfg ? getDefaultDistrictState(cfg) : { id, status: 'friendly', timer: 90 };
         }
+        normalizeDistrictPilotIntel(state.districts[id]);
         return state.districts[id];
     }
 
@@ -574,6 +596,17 @@
         const threatMix = focusedTypes.map(type => ({ type, weight: 2 }));
         threatMix.push({ type: 'lander', weight: 1 }, { type: 'mutant', weight: 1 });
 
+        const intelProgress = intelHelpers?.getIntelProgressSnapshot
+            ? intelHelpers.getIntelProgressSnapshot(state)
+            : {
+                currentIntel: state.pilotIntel || 0,
+                milestoneTarget: ((state.pilotIntelMilestoneIndex || 0) + 1) * 100,
+                progressRatio: Math.max(0, Math.min(1, ((state.pilotIntel || 0) % 100) / 100))
+            };
+        const nextRewardHint = intelHelpers?.describeNextReward
+            ? intelHelpers.describeNextReward(window.metaProgression?.getPilotWeaponProfile?.() || null)
+            : 'Next milestone reward pending';
+
         return {
             districtId: config.id,
             districtName: config.name,
@@ -590,6 +623,10 @@
             prosperityLossTimer: state.prosperityLossTimer ?? 0,
             lastProsperityLoss: state.lastProsperityLoss ?? 0,
             status: state.status,
+            pilotIntel: intelProgress.currentIntel,
+            pilotIntelMilestoneTarget: intelProgress.milestoneTarget,
+            pilotIntelProgressRatio: intelProgress.progressRatio,
+            nextPilotIntelReward: nextRewardHint,
             mode: modeOverride,
             districtState: { ...state },
             threatMix
@@ -685,6 +722,28 @@
         const state = getDistrictState(currentMission.district);
         if (!cfg) return;
 
+        const missionId = `${currentMission.district}:${currentMission.seed || 'noseed'}:${currentMission.mode || 'classic'}`;
+        if (state.pilotIntelLastProcessedMissionId === missionId) {
+            return;
+        }
+
+        const preMissionState = { ...state };
+        const intelBreakdown = intelHelpers?.computeIntelAward
+            ? intelHelpers.computeIntelAward({
+                success,
+                directives: currentMission.directives,
+                preMissionState
+            })
+            : {
+                urgency: currentMission.directives?.urgency || 'stable',
+                baseIntel: success ? 20 : 0,
+                criticalBonusMultiplier: currentMission.directives?.urgency === 'critical' ? 1.5 : 1,
+                occupiedSuppressed: preMissionState.status === 'occupied',
+                awardIntel: preMissionState.status === 'occupied'
+                    ? 0
+                    : Math.round((success ? 20 : 0) * (currentMission.directives?.urgency === 'critical' ? 1.5 : 1))
+            };
+
         if (success) {
             state.status = 'friendly';
             state.timer = cfg.timer + 60;
@@ -701,13 +760,67 @@
             retireBattleshipsForDistrict(currentMission.district);
         }
 
+        state.pilotIntelLastProcessedMissionId = missionId;
+        state.pilotIntelLastAwardMissionId = missionId;
+
+        const milestoneRewards = [];
+        if (intelHelpers?.applyIntelAwardToState) {
+            intelHelpers.applyIntelAwardToState(state, intelBreakdown.awardIntel);
+            if (intelHelpers.processMilestones) {
+                intelHelpers.processMilestones(state, () => {
+                    const profile = window.metaProgression?.getPilotWeaponProfile?.() || null;
+                    const reward = intelHelpers.resolveMilestoneReward({ profile });
+                    if (!reward) return null;
+                    if (reward.type === 'unlock') {
+                        window.metaProgression?.grantPilotWeaponUnlock?.(reward.weapon);
+                    } else if (reward.type === 'tier_token') {
+                        window.metaProgression?.grantPilotWeaponTierToken?.(reward.weapon);
+                    } else if (reward.type === 'ammo_cap_bonus') {
+                        window.metaProgression?.grantNextDeploymentAmmoBonus?.(reward.amount || 1);
+                    }
+                    milestoneRewards.push(reward);
+                    return reward;
+                });
+            }
+        }
+
+        const intelProgress = intelHelpers?.getIntelProgressSnapshot
+            ? intelHelpers.getIntelProgressSnapshot(state)
+            : {
+                currentIntel: state.pilotIntel || 0,
+                milestoneTarget: ((state.pilotIntelMilestoneIndex || 0) + 1) * 100,
+                progressRatio: Math.max(0, Math.min(1, ((state.pilotIntel || 0) % 100) / 100))
+            };
+        const nextRewardHint = intelHelpers?.describeNextReward
+            ? intelHelpers.describeNextReward(window.metaProgression?.getPilotWeaponProfile?.() || null)
+            : 'Next milestone reward pending';
+
+        lastIntelOutcome = {
+            missionId,
+            districtId: currentMission.district,
+            success: !!success,
+            urgency: intelBreakdown.urgency,
+            occupiedSuppressed: !!intelBreakdown.occupiedSuppressed,
+            baseIntel: intelBreakdown.baseIntel,
+            awardedIntel: intelBreakdown.awardIntel,
+            criticalBonusMultiplier: intelBreakdown.criticalBonusMultiplier,
+            milestoneRewards,
+            intelProgress,
+            nextRewardHint
+        };
+
         districtState.lastUpdated = Date.now();
         persistState();
         mission = {
             ...currentMission,
             directives: buildMissionDirectives(cfg, state, currentMission.mode),
-            districtState: { ...state }
+            districtState: { ...state },
+            intelOutcome: { ...lastIntelOutcome }
         };
+    }
+
+    function getLastIntelOutcome() {
+        return lastIntelOutcome ? { ...lastIntelOutcome } : null;
     }
 
     /**
@@ -853,6 +966,7 @@
         hasMapTimerData,
         setMapTimerDataAvailable,
         tickBattleships,
-        getBattleships
+        getBattleships,
+        getLastIntelOutcome
     };
 })();

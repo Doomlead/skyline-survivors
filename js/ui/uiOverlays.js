@@ -474,6 +474,7 @@ function formatCampaignTime(ms = 0) {
  */
 function recordMetaOutcome(success) {
     if (!window.metaProgression || gameState.metaRewardsGranted) return null;
+    const intelOutcome = window.missionPlanner?.getLastIntelOutcome?.() || null;
     const outcome = {
         success,
         score: gameState.score,
@@ -481,7 +482,8 @@ function recordMetaOutcome(success) {
         mode: gameState.mode,
         directives: gameState.missionDirectives,
         districtId: gameState.missionContext?.district,
-        districtName: gameState.missionDirectives?.districtName || gameState.missionContext?.city
+        districtName: gameState.missionDirectives?.districtName || gameState.missionContext?.city,
+        pilotIntel: intelOutcome
     };
     const result = metaProgression.recordRunOutcome(outcome);
     gameState.metaRewardsGranted = true;

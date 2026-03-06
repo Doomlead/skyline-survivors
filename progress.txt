@@ -311,3 +311,10 @@ The best immediate next investment is the **Pilot Intel + District Ribbon** feat
 4. Milestone rewards grant unlock/tier/ammo-cap bonus and persist correctly.
 5. Add automated tests for intel award logic, milestone payout routing, and occupied-district suppression behavior.
 
+
+## Epic E1 Update — Pilot Intel Ribbon Loop (Completed)
+- Added district-level Pilot Intel persistence fields (`pilotIntel`, milestone index, last reward + mission de-dupe markers) with migration-safe defaulting for legacy saves.
+- Implemented mission-outcome Intel awards with urgency scaling, CRITICAL +50% near-miss bonus, and occupied-district suppression.
+- Added deterministic milestone reward routing (unlock → tier token → next-deployment ammo-cap bonus) and wired results into mission outcome metadata + run summaries.
+- Surfaced Pilot Intel ribbon progress and next reward/ownership tooltip context on map node labels and district panel intel section.
+- Added regression tests covering intel math, CRITICAL bonus, occupied suppression, migration defaults, and milestone rollover behavior.

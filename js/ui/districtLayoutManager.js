@@ -285,11 +285,15 @@ const DistrictLayoutManager = (function() {
             ? '🔴 OCCUPIED'
             : district.state?.status === 'friendly'
                 ? '🟢 FRIENDLY'
-                : '🟡 THREATENED';
+                : district.state?.status === 'critical'
+                    ? '🟠 CRITICAL'
+                    : '🟡 THREATENED';
         
-        const timerText = district.state?.status === 'threatened' && district.state?.timer > 0
-            ? `Destabilization in: ${formatSeconds(district.state.timer)}`
-            : 'No active timer';
+        const timerText = district.state?.status === 'critical' && district.state?.criticalTimer > 0
+            ? `Critical collapse in: ${formatSeconds(district.state.criticalTimer)}`
+            : district.state?.status === 'threatened' && district.state?.timer > 0
+                ? `Destabilization in: ${formatSeconds(district.state.timer)}`
+                : 'No active timer';
         
         container.innerHTML = `
             <div class="district-stat-row">
@@ -303,6 +307,40 @@ const DistrictLayoutManager = (function() {
             <div class="district-stat-row">
                 <span class="district-stat-label">Reward Focus</span>
                 <span class="district-stat-value">${district.config?.reward || 'Standard'}</span>
+            </div>
+        `;
+
+        const intelContainer = document.getElementById('district-intel-status');
+        if (!intelContainer) return;
+        const intel = district.state?.pilotIntel || 0;
+        const milestoneIndex = district.state?.pilotIntelMilestoneIndex || 0;
+        const nextTarget = (milestoneIndex + 1) * 100;
+        const progressPct = Math.round(Math.max(0, Math.min(1, (intel - (milestoneIndex * 100)) / 100)) * 100);
+        const profile = window.metaProgression?.getPilotWeaponProfile?.();
+        const nextReward = window.pilotIntelProgression?.describeNextReward?.(profile) || 'Next reward pending';
+        const ownership = profile?.unlocked
+            ? ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'].filter((weapon) => profile.unlocked[weapon]).join(', ') || 'combatRifle only'
+            : 'Unavailable';
+        intelContainer.innerHTML = `
+            <div class="district-stat-row">
+                <span class="district-stat-label">Current Intel</span>
+                <span class="district-stat-value">${intel}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Next Milestone</span>
+                <span class="district-stat-value">${nextTarget}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Ribbon Progress</span>
+                <span class="district-stat-value">${progressPct}%</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Next Reward</span>
+                <span class="district-stat-value">${nextReward}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Pilot Ownership</span>
+                <span class="district-stat-value">${ownership}</span>
             </div>
         `;
     }

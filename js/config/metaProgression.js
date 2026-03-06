@@ -84,6 +84,13 @@ const DEFAULT_META_STATE = {
             scattergun: 200,
             plasmaLauncher: 150,
             lightningGun: 25000
+        },
+        nextDeploymentAmmoCapBonus: 0,
+        tierTokens: {
+            scattergun: 0,
+            plasmaLauncher: 0,
+            lightningGun: 0,
+            stingerDrone: 0
         }
     }
 };
@@ -117,6 +124,13 @@ function createDefaultPilotWeaponProfile() {
             scattergun: 200,
             plasmaLauncher: 150,
             lightningGun: 25000
+        },
+        nextDeploymentAmmoCapBonus: 0,
+        tierTokens: {
+            scattergun: 0,
+            plasmaLauncher: 0,
+            lightningGun: 0,
+            stingerDrone: 0
         }
     };
 }
@@ -127,10 +141,13 @@ function normalizePilotWeaponProfile(raw) {
     const unlocked = source.unlocked && typeof source.unlocked === 'object' ? source.unlocked : {};
     const tiers = source.tiers && typeof source.tiers === 'object' ? source.tiers : {};
     const startAmmo = source.startAmmo && typeof source.startAmmo === 'object' ? source.startAmmo : {};
+    const tierTokens = source.tierTokens && typeof source.tierTokens === 'object' ? source.tierTokens : {};
     const out = {
         unlocked: { ...fallback.unlocked },
         tiers: { ...fallback.tiers },
-        startAmmo: { ...fallback.startAmmo }
+        startAmmo: { ...fallback.startAmmo },
+        nextDeploymentAmmoCapBonus: Math.max(0, Math.round(Number(source.nextDeploymentAmmoCapBonus) || 0)),
+        tierTokens: { ...fallback.tierTokens }
     };
     Object.keys(out.unlocked).forEach((weapon) => {
         if (weapon !== 'combatRifle') {
@@ -147,6 +164,11 @@ function normalizePilotWeaponProfile(raw) {
     Object.keys(out.startAmmo).forEach((weapon) => {
         const rawAmmo = Number.isFinite(startAmmo[weapon]) ? startAmmo[weapon] : out.startAmmo[weapon];
         out.startAmmo[weapon] = Math.max(0, Math.round(rawAmmo));
+    });
+
+    Object.keys(out.tierTokens).forEach((weapon) => {
+        const rawTokens = Number.isFinite(tierTokens[weapon]) ? tierTokens[weapon] : 0;
+        out.tierTokens[weapon] = Math.max(0, Math.round(rawTokens));
     });
 
     return out;
@@ -234,6 +256,39 @@ function upgradePilotWeaponTierMeta(weaponId) {
     return { success: true, weaponId, tier: nextTier, profile: normalizePilotWeaponProfile(state.pilotWeapons) };
 }
 
+
+function grantPilotWeaponUnlockMeta(weaponId) {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    if (!Object.prototype.hasOwnProperty.call(state.pilotWeapons.unlocked, weaponId) || weaponId === 'combatRifle') {
+        return { success: false, reason: 'invalid_weapon' };
+    }
+    state.pilotWeapons.unlocked[weaponId] = true;
+    state.pilotWeapons.tiers[weaponId] = Math.max(1, state.pilotWeapons.tiers[weaponId] || 1);
+    persistMetaProgression();
+    return { success: true, weaponId, profile: normalizePilotWeaponProfile(state.pilotWeapons) };
+}
+
+function grantPilotWeaponTierTokenMeta(weaponId) {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    if (!Object.prototype.hasOwnProperty.call(state.pilotWeapons.tierTokens, weaponId)) {
+        return { success: false, reason: 'invalid_weapon' };
+    }
+    state.pilotWeapons.tierTokens[weaponId] = (state.pilotWeapons.tierTokens[weaponId] || 0) + 1;
+    persistMetaProgression();
+    return { success: true, weaponId, tokens: state.pilotWeapons.tierTokens[weaponId] };
+}
+
+function grantNextDeploymentAmmoBonusMeta(amount = 1) {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    const delta = Math.max(0, Math.round(Number(amount) || 0));
+    state.pilotWeapons.nextDeploymentAmmoCapBonus = (state.pilotWeapons.nextDeploymentAmmoCapBonus || 0) + delta;
+    persistMetaProgression();
+    return { success: true, amount: delta, total: state.pilotWeapons.nextDeploymentAmmoCapBonus };
+}
+
 function applyLoadoutEffects(gameState, playerState) {
     const profile = getPilotWeaponProfile();
     const runtimePilotState = typeof pilotState !== 'undefined' ? pilotState : null;
@@ -262,16 +317,23 @@ function applyLoadoutEffects(gameState, playerState) {
     };
     Object.keys(maxAmmo).forEach((weapon) => {
         if (weaponState.unlocked[weapon]) {
-            weaponState.ammo[weapon] = maxAmmo[weapon];
+            const bonusAmmo = (profile.nextDeploymentAmmoCapBonus || 0) * 20;
+            weaponState.ammo[weapon] = maxAmmo[weapon] + bonusAmmo;
         }
     });
     const order = ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
     if (!weaponState.unlocked[weaponState.selected]) {
         weaponState.selected = order.find((weapon) => weaponState.unlocked[weapon]) || 'combatRifle';
     }
+    const normalized = normalizePilotWeaponProfile(profile);
+    if (normalized.nextDeploymentAmmoCapBonus > 0) {
+        const state = loadMetaProgression();
+        state.pilotWeapons.nextDeploymentAmmoCapBonus = 0;
+        persistMetaProgression();
+    }
     return {
         applied: true,
-        pilotWeapons: normalizePilotWeaponProfile(profile)
+        pilotWeapons: normalized
     };
 }
 
@@ -568,6 +630,9 @@ window.metaProgression = {
     getPilotWeaponProfile,
     purchasePilotWeapon,
     upgradePilotWeaponTier: upgradePilotWeaponTierMeta,
+    grantPilotWeaponUnlock: grantPilotWeaponUnlockMeta,
+    grantPilotWeaponTierToken: grantPilotWeaponTierTokenMeta,
+    grantNextDeploymentAmmoBonus: grantNextDeploymentAmmoBonusMeta,
     getLoadoutOptions,
     applyLoadoutEffects,
     LOOT_TABLES,
