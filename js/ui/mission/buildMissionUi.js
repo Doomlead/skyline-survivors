@@ -385,7 +385,9 @@ class BuildMissionUi {
             const lossTag = node.state.prosperityLossTimer > 0 && node.state.lastProsperityLoss
                 ? ` · LOSS -${node.state.lastProsperityLoss}`
                 : '';
-            return `${node.config.label}: ${statusLabel}${prosperityTag}${lossTag}`;
+            const intel = window.pilotIntelSystem?.getRibbonProgress?.(node.state);
+            const intelTag = intel ? ` · Intel ${intel.current}/${intel.nextTarget}` : '';
+            return `${node.config.label}: ${statusLabel}${prosperityTag}${lossTag}${intelTag}`;
         });
         const district = selectedDistrict ? `${selectedDistrict.config.name}: ${selectedDistrict.state.status.toUpperCase()}` : 'No district selected';
         this.nodeStatusText.setText([

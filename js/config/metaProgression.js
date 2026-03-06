@@ -65,6 +65,7 @@ const DEFAULT_META_STATE = {
     lastRun: null,
     totalDropsPurchased: 0,
     lootHistory: [], // Last 5 drops for "history" display
+    nextDeploymentAmmoBonus: 0,
     pilotWeapons: {
         unlocked: {
             combatRifle: true,
@@ -234,6 +235,35 @@ function upgradePilotWeaponTierMeta(weaponId) {
     return { success: true, weaponId, tier: nextTier, profile: normalizePilotWeaponProfile(state.pilotWeapons) };
 }
 
+
+function grantPilotIntelMilestoneReward() {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    const profile = state.pilotWeapons;
+    const order = ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
+
+    const missing = order.find((weapon) => !profile.unlocked[weapon]);
+    if (missing) {
+        profile.unlocked[missing] = true;
+        profile.tiers[missing] = Math.max(1, profile.tiers[missing] || 1);
+        persistMetaProgression();
+        return { type: 'unlock', weapon: missing, tier: profile.tiers[missing] };
+    }
+
+    const upgradable = order
+        .filter((weapon) => profile.unlocked[weapon] && (profile.tiers[weapon] || 0) < 3)
+        .sort((a, b) => (profile.tiers[a] || 0) - (profile.tiers[b] || 0) || order.indexOf(a) - order.indexOf(b))[0];
+    if (upgradable) {
+        profile.tiers[upgradable] = Math.min(3, Math.max(1, (profile.tiers[upgradable] || 1) + 1));
+        persistMetaProgression();
+        return { type: 'tier_token', weapon: upgradable, tier: profile.tiers[upgradable] };
+    }
+
+    state.nextDeploymentAmmoBonus = Math.max(0, Math.round(state.nextDeploymentAmmoBonus || 0)) + 30;
+    persistMetaProgression();
+    return { type: 'ammo_cap_bonus', amount: 30 };
+}
+
 function applyLoadoutEffects(gameState, playerState) {
     const profile = getPilotWeaponProfile();
     const runtimePilotState = typeof pilotState !== 'undefined' ? pilotState : null;
@@ -260,11 +290,15 @@ function applyLoadoutEffects(gameState, playerState) {
         plasmaLauncher: 150,
         lightningGun: 25000
     };
+    const ammoBonus = Math.max(0, Math.round(loadMetaProgression().nextDeploymentAmmoBonus || 0));
     Object.keys(maxAmmo).forEach((weapon) => {
         if (weaponState.unlocked[weapon]) {
-            weaponState.ammo[weapon] = maxAmmo[weapon];
+            weaponState.ammo[weapon] = maxAmmo[weapon] + ammoBonus;
         }
     });
+    if (ammoBonus > 0) {
+        loadMetaProgression().nextDeploymentAmmoBonus = 0;
+    }
     const order = ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
     if (!weaponState.unlocked[weaponState.selected]) {
         weaponState.selected = order.find((weapon) => weaponState.unlocked[weapon]) || 'combatRifle';
@@ -569,6 +603,7 @@ window.metaProgression = {
     purchasePilotWeapon,
     upgradePilotWeaponTier: upgradePilotWeaponTierMeta,
     getLoadoutOptions,
+    grantPilotIntelMilestoneReward,
     applyLoadoutEffects,
     LOOT_TABLES,
     POWERUP_TIERS,

@@ -135,6 +135,11 @@ class BuildMapView {
     cleanup() {
         this._isBuilt = false; // Stop updates immediately
 
+        if (this._districtHoverHandler) this.scene.input.off('pointermove', this._districtHoverHandler);
+        if (this._districtClickHandler) this.scene.input.off('pointerdown', this._districtClickHandler);
+        this._districtHoverHandler = null;
+        this._districtClickHandler = null;
+
         this.mapNodes.forEach(node => {
             if (node.pulse) node.pulse.stop();
             if (node.node) node.node.destroy();
@@ -610,6 +615,7 @@ class BuildMapView {
             this.districtGraphics.strokeCircle(projected.x, projected.y, radius);
 
             this.drawProsperitySignals(district, projected, radius);
+            this.drawIntelRibbon(district, projected, radius);
 
             district.projectedX = projected.x;
             district.projectedY = projected.y;
@@ -675,6 +681,25 @@ class BuildMapView {
         if (!district?.state) return;
     }
 
+
+    /**
+     * Handles the drawIntelRibbon routine and encapsulates its core gameplay logic.
+     * Parameters: district, projected, radius.
+     * Returns: value defined by the surrounding game flow.
+     */
+    drawIntelRibbon(district, projected, radius) {
+        const intel = window.pilotIntelSystem;
+        if (!intel?.getRibbonProgress || !district?.state) return;
+        const ribbon = intel.getRibbonProgress(district.state);
+        const baseY = projected.y + radius + 6;
+        const width = radius * 3.2;
+        const left = projected.x - width / 2;
+        this.districtGraphics.fillStyle(0x0b1220, 0.75);
+        this.districtGraphics.fillRect(left, baseY, width, 3);
+        this.districtGraphics.fillStyle(district.state.status === 'occupied' ? 0x64748b : 0x38bdf8, 0.95);
+        this.districtGraphics.fillRect(left, baseY, width * ribbon.percentToNext, 3);
+    }
+
     /**
      * Handles the setupDistrictInteraction routine and encapsulates its core gameplay logic.
      * Parameters: none.
@@ -695,6 +720,23 @@ class BuildMapView {
             }
         };
         this.scene.input.on('pointerdown', this._districtClickHandler);
+
+        if (this._districtHoverHandler) this.scene.input.off('pointermove', this._districtHoverHandler);
+        this._districtHoverHandler = (pointer) => {
+            const localX = pointer.x - this.centerX;
+            const localY = pointer.y - this.centerY;
+            let hovered = null;
+            for (const district of this.districts) {
+                if (district.projectedX === undefined) continue;
+                const dist = Phaser.Math.Distance.Between(localX, localY, district.projectedX, district.projectedY);
+                if (dist < district.projectedRadius) {
+                    hovered = district;
+                    break;
+                }
+            }
+            this.onNodeDetailsRequested?.(hovered);
+        };
+        this.scene.input.on('pointermove', this._districtHoverHandler);
     }
 
     /**
@@ -857,6 +899,11 @@ class BuildMapView {
         });
 
         const allFriendly = missionPlanner.areAllDistrictsFriendly?.();
+        if (this._districtHoverHandler) this.scene.input.off('pointermove', this._districtHoverHandler);
+        if (this._districtClickHandler) this.scene.input.off('pointerdown', this._districtClickHandler);
+        this._districtHoverHandler = null;
+        this._districtClickHandler = null;
+
         this.mapNodes.forEach(node => {
             if (node.id !== 'mothership') return;
             const ready = !!allFriendly;
@@ -879,6 +926,11 @@ class BuildMapView {
                 node.isEnabled = false;
             }
         });
+
+        if (this._districtHoverHandler) this.scene.input.off('pointermove', this._districtHoverHandler);
+        if (this._districtClickHandler) this.scene.input.off('pointerdown', this._districtClickHandler);
+        this._districtHoverHandler = null;
+        this._districtClickHandler = null;
 
         this.mapNodes.forEach(node => {
             if (node.id === 'mothership') return;

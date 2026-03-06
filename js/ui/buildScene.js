@@ -241,8 +241,18 @@ class BuildScene extends Phaser.Scene {
      * Returns: value defined by the surrounding game flow.
      */
     handleNodeDetails(node) {
-        if (!node) return;
-        console.log('[BuildScene] Node details requested', node);
+        if (!this.hintText) return;
+        if (!node) {
+            this.hintText.setText('Click a glowing district to select · Press SPACE to launch');
+            return;
+        }
+        const intelSystem = window.pilotIntelSystem;
+        const profile = window.metaProgression?.getPilotWeaponProfile?.() || { unlocked: {} };
+        const nextReward = intelSystem?.getNextRewardPreview?.(profile)?.label || 'Next reward pending';
+        const ownership = (intelSystem?.TRACK_WEAPONS || ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'])
+            .map((weapon) => `${profile.unlocked?.[weapon] ? '✓' : '○'} ${weapon}`)
+            .join(' · ');
+        this.hintText.setText(`${node.config.name}: ${nextReward} | ${ownership}`);
     }
 
     /**

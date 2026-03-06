@@ -289,7 +289,20 @@ const DistrictLayoutManager = (function() {
         
         const timerText = district.state?.status === 'threatened' && district.state?.timer > 0
             ? `Destabilization in: ${formatSeconds(district.state.timer)}`
-            : 'No active timer';
+            : district.state?.status === 'critical' && district.state?.criticalTimer > 0
+                ? `CRITICAL window: ${formatSeconds(district.state.criticalTimer)}`
+                : 'No active timer';
+        const intelSystem = window.pilotIntelSystem;
+        const ribbon = intelSystem?.getRibbonProgress?.(district.state) || {
+            current: district.state?.intelProgress || 0,
+            nextTarget: 100,
+            percentToNext: 0
+        };
+        const profile = window.metaProgression?.getPilotWeaponProfile?.() || { unlocked: {} };
+        const ownership = (intelSystem?.TRACK_WEAPONS || ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'])
+            .map((weapon) => `${profile.unlocked?.[weapon] ? '✓' : '○'} ${weapon}`)
+            .join(' · ');
+        const nextReward = intelSystem?.getNextRewardPreview?.(profile)?.label || 'Next reward pending';
         
         container.innerHTML = `
             <div class="district-stat-row">
@@ -299,6 +312,18 @@ const DistrictLayoutManager = (function() {
             <div class="district-stat-row">
                 <span class="district-stat-label">Timer</span>
                 <span class="district-stat-value">${timerText}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Pilot Intel</span>
+                <span class="district-stat-value">${ribbon.current} / ${ribbon.nextTarget} (${Math.round(ribbon.percentToNext * 100)}%)</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Next Reward</span>
+                <span class="district-stat-value">${nextReward}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Ownership</span>
+                <span class="district-stat-value">${ownership}</span>
             </div>
             <div class="district-stat-row">
                 <span class="district-stat-label">Reward Focus</span>

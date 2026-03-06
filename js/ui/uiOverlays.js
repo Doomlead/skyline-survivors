@@ -481,7 +481,8 @@ function recordMetaOutcome(success) {
         mode: gameState.mode,
         directives: gameState.missionDirectives,
         districtId: gameState.missionContext?.district,
-        districtName: gameState.missionDirectives?.districtName || gameState.missionContext?.city
+        districtName: gameState.missionDirectives?.districtName || gameState.missionContext?.city,
+        intelSummary: gameState.missionIntelSummary || null
     };
     const result = metaProgression.recordRunOutcome(outcome);
     gameState.metaRewardsGranted = true;

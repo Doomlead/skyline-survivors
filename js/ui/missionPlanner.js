@@ -5,6 +5,7 @@
 (function() {
     const plannerData = window.missionPlannerData || {};
     const plannerDirectives = window.missionPlannerDirectives || {};
+    const pilotIntelSystem = window.pilotIntelSystem || {};
     const STORAGE_KEY = plannerData.STORAGE_KEY || 'skyline_district_state';
     const DISTRICT_CONFIGS = plannerData.DISTRICT_CONFIGS || [];
     const BATTLESHIP_CONFIG = plannerData.BATTLESHIP_CONFIG || {
@@ -50,7 +51,8 @@
             lastProsperityLoss: 0,
             prosperityLossTimer: 0,
             lastOutcome: null,
-            clearedRuns: 0
+            clearedRuns: 0,
+            ...(pilotIntelSystem.getDefaultIntelState ? pilotIntelSystem.getDefaultIntelState() : {})
         };
         syncProsperityMetrics(state);
         return state;
@@ -121,6 +123,9 @@
         DISTRICT_CONFIGS.forEach(cfg => {
             const existing = stored?.districts?.[cfg.id];
             const base = existing ? { ...existing } : getDefaultDistrictState(cfg);
+            if (pilotIntelSystem.ensureIntelState) {
+                Object.assign(base, pilotIntelSystem.ensureIntelState(base));
+            }
             if (base.status === 'threatened') {
                 const remaining = (base.timer ?? 0) - elapsed;
                 if (remaining > 0) {
@@ -508,7 +513,12 @@
         const state = safeLoadState();
         if (!state.districts[id]) {
             const cfg = getDistrictConfigById(id);
-            state.districts[id] = cfg ? getDefaultDistrictState(cfg) : { id, status: 'friendly', timer: 90 };
+            state.districts[id] = cfg ? getDefaultDistrictState(cfg) : {
+                id,
+                status: 'friendly',
+                timer: 90,
+                ...(pilotIntelSystem.getDefaultIntelState ? pilotIntelSystem.getDefaultIntelState() : {})
+            };
         }
         return state.districts[id];
     }
@@ -673,6 +683,50 @@
         }
     }
 
+
+    function awardDistrictPilotIntel(entry, { success, directives, missionEventId, statusBeforeOutcome }) {
+        if (!entry) return null;
+        if (entry.intelLastMissionEventId && entry.intelLastMissionEventId === missionEventId) {
+            return entry.intelLastReward || null;
+        }
+        if (pilotIntelSystem.ensureIntelState) {
+            Object.assign(entry, pilotIntelSystem.ensureIntelState(entry));
+        }
+        const urgency = directives?.urgency || (entry.status === 'critical' ? 'critical' : entry.status);
+        const intel = pilotIntelSystem.calculateIntelAward
+            ? pilotIntelSystem.calculateIntelAward({ success, urgency, districtStatus: statusBeforeOutcome || entry.status })
+            : { amount: 0, suppressed: false, criticalBonusApplied: false, baseAward: 0 };
+
+        const result = {
+            missionEventId,
+            suppressed: intel.suppressed,
+            awardAmount: intel.amount,
+            baseAward: intel.baseAward,
+            criticalBonusApplied: intel.criticalBonusApplied,
+            milestoneRewards: []
+        };
+
+        if (!intel.suppressed && intel.amount > 0) {
+            entry.intelProgress = Math.max(0, (entry.intelProgress || 0) + intel.amount);
+            while (pilotIntelSystem.getNextMilestoneTarget
+                && entry.intelProgress >= pilotIntelSystem.getNextMilestoneTarget(entry.intelMilestoneIndex || 0)) {
+                const reward = window.metaProgression?.grantPilotIntelMilestoneReward?.() || { type: 'ammo_cap_bonus', amount: 0 };
+                result.milestoneRewards.push(reward);
+                entry.intelMilestoneIndex = (entry.intelMilestoneIndex || 0) + 1;
+            }
+        }
+
+        entry.intelSuppressed = entry.status === 'occupied';
+        entry.intelLastMissionEventId = missionEventId;
+        entry.intelLastAwardAmount = result.awardAmount;
+        entry.intelLastReward = {
+            ...result,
+            totalIntel: entry.intelProgress,
+            milestoneIndex: entry.intelMilestoneIndex
+        };
+        return entry.intelLastReward;
+    }
+
     /**
      * Handles the recordMissionOutcome routine and encapsulates its core gameplay logic.
      * Parameters: success.
@@ -685,6 +739,8 @@
         const state = getDistrictState(currentMission.district);
         if (!cfg) return;
 
+        const missionEventId = `${currentMission.seed || 'seedless'}:${currentMission.mode || 'classic'}:${success ? 'success' : 'fail'}`;
+        const statusBeforeOutcome = currentMission?.districtState?.status || state.status;
         if (success) {
             state.status = 'friendly';
             state.timer = cfg.timer + 60;
@@ -701,13 +757,24 @@
             retireBattleshipsForDistrict(currentMission.district);
         }
 
+        const intelSummary = awardDistrictPilotIntel(state, {
+            success,
+            directives: currentMission.directives,
+            missionEventId,
+            statusBeforeOutcome
+        });
+
         districtState.lastUpdated = Date.now();
         persistState();
         mission = {
             ...currentMission,
             directives: buildMissionDirectives(cfg, state, currentMission.mode),
-            districtState: { ...state }
+            districtState: { ...state },
+            intelSummary
         };
+        if (typeof gameState !== 'undefined') {
+            gameState.missionIntelSummary = intelSummary || null;
+        }
     }
 
     /**
