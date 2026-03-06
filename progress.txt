@@ -216,25 +216,26 @@
 
 ## MVP Completion
 
-- **Status:** ~90% complete (district intel ribbon loop now exists in state, rewards, and UI; remaining work is concentrated in assault jackpot presentation, Bulwark siege payoff, challenge mode surfacing, and world reactivity).
-- **Primary Blockers:** assault reward/jackpot loop, Bulwark structural siege payoff, challenge-mode productization, and weather/time-of-day reactivity.
+- **Status:** ~93% complete (district Pilot Intel ribbon + assault jackpot settlement/presentation are now implemented; remaining work is concentrated in Bulwark siege identity, challenge-mode productization, and world reactivity).
+- **Primary Blockers:** Bulwark structural siege payoff, challenge-mode surfacing, and weather/time-of-day reactivity.
 
 ## Gap Analysis & Next Steps (Codebase + Design Document Audit)
 
 ### Overall Completion Statistics
-- **Design Document Alignment:** ~90% (map pressure loop, rescue/deploy loop, pilot combat/persistence, interior sections, and district intel ribbon loop are now implemented; largest deltas are assault jackpot emotional payoff, Bulwark siege identity, challenge-mode surfacing, and reactive world presentation).
-- **Major Milestones Achieved:** threatened→critical→occupied district pressure model, prosperity investment/loss behavior, cargo-weight rescue + hangar deployment into classed operatives, ship destruction→pilot rebuild loop, persistent pilot-weapon unlock/shop framework, district Pilot Intel ribbon + CRITICAL bonus + milestone reward routing, mothership exterior→interior section flow, and a 25-test automated regression suite.
-- **Immediate Next Steps (Recommended Order):** (1) assault base-clear jackpot/mystery rewards and mission-summary callouts, (2) Bulwark structural siege bonus + feedback, (3) challenge-mode menu surfacing with score persistence, (4) weather/time-of-day world reactivity layer, (5) post-pass balancing on Pilot Intel pacing/reward tuning.
-- **Estimated Remaining Work:** ~6-9 focused dev days for MVP compliance (plus ~2-3 additional weeks of balancing/presentation polish if targeting full v2.0 feel).
+- **Design Document Alignment:** ~93% (map pressure loop, rescue/deploy loop, pilot progression layer, interior sections, and assault mystery payout loop are implemented; largest deltas are Bulwark siege differentiation, challenge-mode UX/reporting, and reactive world presentation).
+- **Major Milestones Achieved:** threatened→critical→occupied district pressure model, prosperity investment/loss behavior, cargo-weight rescue + hangar deployment into classed operatives, ship destruction→pilot rebuild loop, persistent pilot-weapon unlock/shop framework, district Pilot Intel ribbon + CRITICAL bonus + milestone rewards, assault jackpot table/settlement pipeline with idempotency + summary surfacing, mothership exterior→interior section flow, and a 26-test automated regression suite.
+- **Immediate Next Steps (Recommended Order):** (1) Bulwark structural siege bonus + feedback, (2) challenge-mode menu surfacing with score persistence, (3) weather/time-of-day world reactivity layer, (4) balancing pass on jackpot/intel pacing and economy, (5) optional cinematic/audio polish for loss-aversion beats.
+- **Estimated Remaining Work:** ~4-7 focused dev days for MVP compliance (plus ~2-3 additional weeks of balancing/presentation polish if targeting full v2.0 feel).
 - **Post-MVP Polish (Optional):** adaptive music escalation/stingers, richer squad autonomy while pilot is airborne, biome hazard mutators, stronger district transition cinematics, and deeper leaderboard segmentation.
-- **MVP Completion:** ~90%
-- **Critical Missing Features for Design Document Compliance:** assault jackpot/mystery payout pipeline, Bulwark siege identity against structures, surfaced challenge-mode UX/reporting, and weather/reactive destruction visuals.
+- **MVP Completion:** ~93%
+- **Critical Missing Features for Design Document Compliance:** Bulwark siege identity against structures, surfaced challenge-mode UX/reporting, and weather/reactive destruction visuals.
 
 ### Design Document Alignment
 **Aligned / Implemented**
 - Strategic district campaign map with Friendly/Threatened/Critical/Occupied progression and urgency multipliers.
 - Prosperity investment + occupation penalties integrated into mission planning economy.
 - District Pilot Intel ribbon loop (district-level persistence, CRITICAL near-miss bonus behavior, milestone progression, deterministic reward routing, panel/map surfacing).
+- Assault mystery/jackpot payout loop (weighted tables, anti-inflation controls, idempotent settlement, mission-end summary callout, run-history payload).
 - Rescue/carry/deploy loop with cargo inertia and operative conversion at hangar.
 - On-foot rebuild defense loop with squad follow/aura + sacrifice behavior.
 - Interior mission section FSMs (assault + mothership), section hazards, and section enemy pools.
@@ -242,11 +243,9 @@
 
 **Partially Aligned**
 - Bulwark handling exists, but assault-specific structural siege payoff and telegraphing remain limited.
-- Assault reward loop exists at baseline economy level, but jackpot/mystery emotional payoff presentation is still missing.
 - Environment generators are broad, but weather/time-of-day reactivity is absent.
 
 **Not Yet Aligned (Major Gaps)**
-- Base-clear jackpot/mystery reward outcomes.
 - Challenge mode as first-class flow (menu + score persistence/report).
 - Weather and district destruction-state reactivity layer.
 
@@ -255,37 +254,39 @@
 - District Pilot Intel persistence/migration defaults and occupied suppression.
 - CRITICAL +50% intel bonus plus milestone reward precedence (unlock → tier token → ammo-cap bonus).
 - District map/panel surfacing for intel progress and next reward visibility.
+- Assault jackpot weighted reward pools with pity/cooldown/value-cap safeguards.
+- Assault reward idempotency (settlement key) and run-history persistence.
+- Assault mission-end explicit payout/no-payout presentation.
 - Defense/assault mission scaffolding and objective progression.
 - Mothership multi-stage finale (exterior boss to interior boarding).
 - Operative ecosystem (class spawning + support behaviors).
 - Meta progression and pilot-weapon persistence primitives.
-- 25 Node test files protecting enemy/projectile/interior/intel regressions.
+- 26 Node test files protecting enemy/projectile/interior/intel/jackpot regressions.
 
 ### Critical Missing Features for Design Document Compliance
-1. **Assault Jackpot Rewards:** Base-clear reward tables with mystery outcome variants and strong mission-end presentation.
-2. **Bulwark Siege Identity:** Structure-damage bonus rules + clear active-mode feedback.
-3. **Challenge Mode Productization:** Last Stand / Assault Only selectors and score persistence/reporting UX.
-4. **World Reactivity Layer:** Weather/time-of-day and occupied-district destruction readability pass.
+1. **Bulwark Siege Identity:** Structure-damage bonus rules + clear active-mode feedback.
+2. **Challenge Mode Productization:** Last Stand / Assault Only selectors and score persistence/reporting UX.
+3. **World Reactivity Layer:** Weather/time-of-day and occupied-district destruction readability pass.
 
 ### Immediate Next Steps (Recommended Order)
-1. **Assault jackpot reward sprint (2 days)**  
-   - Add base-clear mystery/jackpot outcomes with mission-summary + in-run callouts.
-2. **Bulwark siege pass (1-2 days)**  
+1. **Bulwark siege pass (1-2 days)**  
    - Add structural DPS multipliers/interactions and mode-active HUD/FX indicators.
-3. **Challenge mode surfacing sprint (2 days)**  
+2. **Challenge mode surfacing sprint (2 days)**  
    - Promote Last Stand / Assault Only into mode-select UI with persistent score reporting.
-4. **World-reactivity pass (1-2 days)**  
+3. **World-reactivity pass (1-2 days)**  
    - Introduce weather/time-of-day hooks and district destruction-state visual/audio cues.
-5. **Pilot Intel balancing pass (1 day)**  
-   - Tune milestone pacing, reward cadence, and tooltip wording from playtest telemetry.
+4. **Economy balancing pass (1 day)**  
+   - Tune assault jackpot expected value, pity cadence, and Pilot Intel progression pacing.
+5. **Loss-aversion presentation pass (1 day)**  
+   - Add stronger mission-loss audiovisual beats (brief stingers/transition emphasis).
 
 ### Estimated Remaining Work
-- **To MVP compliance:** ~6-9 dev days (includes implementation + regression tests + light tuning).
+- **To MVP compliance:** ~4-7 dev days (includes implementation + regression tests + light tuning).
 - **To polished v2.0 presentation:** additional ~2-3 weeks for balance, UX refinement, VFX/SFX reinforcement, and readability passes.
 
 ### MVP Completion
-- **Current Progress:** ~90%
-- **Largest remaining blockers:** Assault jackpot rewards, Bulwark siege role clarity, and challenge/world-reactivity surfacing.
+- **Current Progress:** ~93%
+- **Largest remaining blockers:** Bulwark siege role clarity, challenge-mode productization, and world-reactivity surfacing.
 
 ### Post-MVP Polish (Optional)
 - Adaptive music layering for district urgency and interior milestones.
@@ -294,19 +295,19 @@
 - Challenge mutator variants + richer leaderboard slices.
 
 ### What We Should Work On Next
-The best immediate next investment is the **Assault Jackpot Reward Loop**, because it closes the highest-impact remaining reward-presentation gap and makes assault victories feel as meaningful as district-defense recoveries.
+The best immediate next investment is the **Bulwark Siege Identity Pass**, because it is now the highest-impact gameplay gap left in the core assault loop.
 
 **Why this should be next:**
-- It converts a currently functional but flat assault completion into a memorable payoff moment.
-- It ties directly into player retention by reinforcing “one more run” reward anticipation.
-- It can reuse existing meta/run-summary plumbing added in prior progression work.
+- It differentiates Bulwark from Interceptor beyond movement/aim profile and fulfills design intent for structure-focused power.
+- It directly improves assault readability and tactical decision-making in the moment-to-moment loop.
+- It complements the newly added jackpot rewards by making base-destruction gameplay itself more satisfying.
 
 ### One-Task Update for the Next Sprint
-**Task:** Implement **Assault Jackpot Reward Loop v1** end-to-end.
+**Task:** Implement **Bulwark Siege Identity v1** end-to-end.
 
 **Definition of done:**
-1. Base destruction resolves exactly one jackpot reward outcome from deterministic/weighted tables.
-2. Reward outcome is surfaced in post-mission summary and saved in run history payload.
-3. Reward grant is idempotent (no duplicate grants from retries/reopened summaries).
-4. Reward state persists across relaunches and is consumed/applied at the correct lifecycle point.
-5. Add automated tests for reward routing, duplicate suppression, and persistence behavior.
+1. Bulwark mode applies explicit, test-covered structural damage multipliers/bonuses against assault objectives.
+2. Active siege benefit is clearly surfaced in HUD/FX/audio when Bulwark is engaging structures.
+3. Assault completion metrics confirm Bulwark contribution is reflected in mission-end summary context.
+4. No regressions to non-Bulwark weapon damage paths or existing objective phase logic.
+5. Add automated tests for structural bonus rules and mode-gated behavior.
