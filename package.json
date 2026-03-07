@@ -1,7 +1,7 @@
 {
-  "name": "skyline-survivors",
+  "name": "last-bastion",
   "version": "1.0.0",
-  "description": "",
+  "description": "Last Bastion - Defend. Liberate. Survive.",
   "main": "index.js",
   "scripts": {
     "test": "node --test --experimental-test-coverage"

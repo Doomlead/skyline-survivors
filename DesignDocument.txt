@@ -1,4 +1,8 @@
-# Skyline Survivors: Urban Defender – Design Document v2.0
+# Last Bastion – Design Document v2.0
+
+**Tagline:** "Defend. Liberate. Survive."
+
+**Trailer Hook:** "The last line of defense is you."
 
 ## 1. Core Concept
 A modern reimagining of *Defender/Stargate* fused with *Strike Force*, *Vampire Survivors*, and *Blaster Master*-style vehicle/foot combat.
@@ -9,7 +13,7 @@ A modern reimagining of *Defender/Stargate* fused with *Strike Force*, *Vampire 
 *   **Seamless Transition:** Shift between piloting a heavy strike ship and fighting on foot as a Squad Leader.
 *   **The "Comrade" System:** Rescued civilians become armed operatives that provide fire-and-forget support.
 
-**The Hook:** High-intensity "sensory jackpot" combat combined with a strategic layer that leverages Loss Aversion and specific "Rescue-to-Deploy" gameplay loops.
+**The Hook:** "The last line of defense is you." High-intensity "sensory jackpot" combat combined with a strategic layer that leverages Loss Aversion and specific "Rescue-to-Deploy" gameplay loops.
 
 ---
 

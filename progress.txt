@@ -1,6 +1,11 @@
-# Skyline Survivors: Urban Defender
+# Last Bastion
 
 ## 1. Core Concept
+
+**Tagline:** "Defend. Liberate. Survive."
+
+**Trailer Hook:** "The last line of defense is you."
+
 
 **Implementation Status: 84% Complete**
 

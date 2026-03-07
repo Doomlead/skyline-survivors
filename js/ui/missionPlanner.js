@@ -6,7 +6,7 @@
     const plannerData = window.missionPlannerData || {};
     const plannerDirectives = window.missionPlannerDirectives || {};
     const pilotIntelRibbon = window.pilotIntelRibbon || {};
-    const STORAGE_KEY = plannerData.STORAGE_KEY || 'skyline_district_state';
+    const STORAGE_KEY = plannerData.STORAGE_KEY || 'last_bastion_district_state';
     const DISTRICT_CONFIGS = plannerData.DISTRICT_CONFIGS || [];
     const BATTLESHIP_CONFIG = plannerData.BATTLESHIP_CONFIG || {
         count: 2,

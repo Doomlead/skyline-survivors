@@ -1,5 +1,5 @@
 // ------------------------
-// Audio System for Skyline Survivors
+// Audio System for Last Bastion
 // ------------------------
 
 class AudioManager {

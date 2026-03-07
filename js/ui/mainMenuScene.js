@@ -52,7 +52,7 @@ class MainMenuScene extends Phaser.Scene {
      * Returns: value defined by the surrounding game flow.
      */
     createTitle(width) {
-        const title = this.add.text(width / 2, 80, 'Skyline Survivors', {
+        const title = this.add.text(width / 2, 80, 'Last Bastion', {
             fontFamily: 'Orbitron',
             fontSize: '28px',
             color: '#8bf1ff',
@@ -60,7 +60,7 @@ class MainMenuScene extends Phaser.Scene {
         }).setOrigin(0.5);
         title.setShadow(0, 0, '#1fb6ff', 10, true, true);
 
-        this.add.text(width / 2, 120, 'Command Deck', {
+        this.add.text(width / 2, 120, 'Defend. Liberate. Survive.', {
             fontFamily: 'Orbitron',
             fontSize: '14px',
             color: '#c7e3ff',
@@ -77,14 +77,14 @@ class MainMenuScene extends Phaser.Scene {
         const frame = this.add.rectangle(width / 2, height / 2, width * 0.7, height * 0.5, 0x0b1220, 0.8);
         frame.setStrokeStyle(3, 0x1b4f8f, 0.7);
 
-        this.add.text(width / 2, height / 2 - 60, 'Welcome to Skyline Survivors', {
+        this.add.text(width / 2, height / 2 - 60, 'Welcome to Last Bastion', {
             fontFamily: 'Orbitron',
             fontSize: '16px',
             color: '#c7e3ff',
             align: 'center'
         }).setOrigin(0.5);
 
-        this.add.text(width / 2, height / 2 - 20, 'Press SPACE to enter the District Map\nor use the buttons below.', {
+        this.add.text(width / 2, height / 2 - 20, 'The last line of defense is you.\nPress SPACE to enter the District Map or use the buttons below.', {
             fontFamily: 'Orbitron',
             fontSize: '12px',
             color: '#9fb8d1',
