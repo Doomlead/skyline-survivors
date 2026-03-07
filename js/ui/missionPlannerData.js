@@ -3,7 +3,7 @@
 // ----------------------------
 
 (function() {
-    const STORAGE_KEY = 'skyline_district_state';
+    const STORAGE_KEY = 'last_bastion_district_state';
 
     const DISTRICT_CONFIGS = [
         {

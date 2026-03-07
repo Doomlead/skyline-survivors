@@ -2,7 +2,7 @@
 // Meta progression - Supply Drop Gacha System
 // ------------------------
 
-const META_STORAGE_KEY = 'skyline_meta_progression_v2';
+const META_STORAGE_KEY = 'last_bastion_meta_progression_v2';
 
 // Loot tables for Supply Drops
 const LOOT_TABLES = {

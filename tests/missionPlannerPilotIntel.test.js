@@ -53,7 +53,7 @@ function loadPlannerContext(storageSeed = {}) {
 
 test('old district state migrates pilot intel defaults safely', () => {
     const seed = {
-        skyline_district_state: JSON.stringify({
+        last_bastion_district_state: JSON.stringify({
             lastUpdated: Date.now(),
             districts: {
                 'pacific-rim-bastion': {

@@ -19,7 +19,7 @@ const DEFAULT_KEY_BINDINGS = {
     restart: 'R'
 };
 
-const SETTINGS_STORAGE_KEY = 'skyline_user_settings_v1';
+const SETTINGS_STORAGE_KEY = 'last_bastion_user_settings_v1';
 const userSettings = {
     musicVolume: 0.6,
     sfxVolume: 0.7,
