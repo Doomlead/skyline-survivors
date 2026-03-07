@@ -216,19 +216,19 @@
 
 ## MVP Completion
 
-- **Status:** ~86% complete (core mission loop, district pressure, rescue/deploy mechanics, and mothership multi-phase finale are implemented; remaining work is concentrated in progression UX and reward-loop parity).
-- **Primary Blockers:** district Pilot Intel ribbon, assault reward/jackpot loop, Bulwark structural siege payoff, challenge-mode surfacing, and weather reactivity.
+- **Status:** ~90% complete (core mission loop, district pressure, rescue/deploy mechanics, assault jackpot rewards, Bulwark siege identity, and mothership multi-phase finale are implemented; remaining work is concentrated in district pilot-progression UX and mode/world presentation).
+- **Primary Blockers:** district Pilot Intel ribbon UX loop, challenge-mode surfacing, and weather/time-of-day world reactivity.
 
 ## Gap Analysis & Next Steps (Codebase + Design Document Audit)
 
 ### Overall Completion Statistics
-- **Design Document Alignment:** ~86% (core map pressure loop, rescue/deploy loop, pilot combat systems, and interior section architecture are implemented; biggest deltas are pilot intel ribbon UX, assault jackpot rewards, and world-reactivity presentation).
-- **Major Milestones Achieved:** threatened→critical→occupied district pressure model, prosperity investment/loss behavior, cargo-weight rescue + hangar deployment into classed operatives, ship destruction→pilot rebuild loop, persistent pilot-weapon unlock/shop framework, mothership exterior→interior section flow, and a 24-test automated regression suite.
-- **Immediate Next Steps (Recommended Order):** (1) district Pilot Intel ribbon + milestone rewards, (2) assault base-clear jackpot/mystery rewards and mission-summary callouts, (3) Bulwark structural siege bonus + feedback, (4) challenge-mode menu surfacing with score persistence, (5) weather/time-of-day world reactivity layer.
-- **Estimated Remaining Work:** ~8-11 focused dev days for MVP compliance (plus ~2-3 additional weeks of balancing/presentation polish if targeting full v2.0 feel).
+- **Design Document Alignment:** ~90% (strategic pressure loop, rescue/deploy loop, pilot combat stack, assault jackpot economy, and Bulwark structural siege behavior are now implemented; biggest deltas are pilot intel ribbon UX plus challenge/weather presentation layers).
+- **Major Milestones Achieved:** threatened→critical→occupied district pressure model, prosperity investment/loss behavior, cargo-weight rescue + hangar deployment into classed operatives, ship destruction→pilot rebuild loop, persistent pilot-weapon unlock/shop framework, assault jackpot+mystery payout settlement, Bulwark siege multipliers/telemetry, mothership exterior→interior section flow, and a 26-test automated regression suite.
+- **Immediate Next Steps (Recommended Order):** (1) district Pilot Intel ribbon + milestone rewards + tooltip surfacing, (2) challenge-mode menu surfacing with score persistence/reporting, (3) weather/time-of-day world reactivity layer, (4) district destruction-state visual/audio readability pass, (5) post-pass tuning for assault reward pacing and Bulwark feedback readability.
+- **Estimated Remaining Work:** ~5-8 focused dev days for MVP compliance (plus ~2-3 additional weeks of balancing/presentation polish if targeting full v2.0 feel).
 - **Post-MVP Polish (Optional):** adaptive music escalation/stingers, richer squad autonomy while pilot is airborne, biome hazard mutators, stronger district transition cinematics, and deeper leaderboard segmentation.
-- **MVP Completion:** ~86%
-- **Critical Missing Features for Design Document Compliance:** district-level Pilot Intel ribbon and reward tooltip loop, assault jackpot/mystery payout pipeline, Bulwark siege identity against structures, surfaced challenge-mode UX/reporting, and weather/reactive destruction visuals.
+- **MVP Completion:** ~90%
+- **Critical Missing Features for Design Document Compliance:** district-level Pilot Intel ribbon and reward tooltip loop, surfaced challenge-mode UX/reporting, and weather/reactive destruction visuals.
 
 ### Design Document Alignment
 **Aligned / Implemented**
@@ -238,16 +238,16 @@
 - On-foot rebuild defense loop with squad follow/aura + sacrifice behavior.
 - Interior mission section FSMs (assault + mothership), section hazards, and section enemy pools.
 - Supply-drop shop/unboxing flow and pilot weapon persistence foundation.
+- Assault jackpot/mystery reward settlement flow, mission-end summaries, and anti-inflation controls.
+- Bulwark structural siege multipliers with assault-role routing and HUD/feedback hooks.
 
 **Partially Aligned**
 - Pilot weapon progression exists in systems/state, but district-layer Pilot Intel ribbon and explicit next-reward UX are not fully surfaced.
-- Bulwark handling exists, but assault-specific structural siege payoff and telegraphing remain limited.
-- Assault reward loop exists at baseline economy level, but jackpot/mystery emotional payoff presentation is still missing.
+- Challenge mode exists conceptually in design but is not yet promoted as a first-class menu/reporting flow.
 - Environment generators are broad, but weather/time-of-day reactivity is absent.
 
 **Not Yet Aligned (Major Gaps)**
 - Pilot Intel district ribbon + milestone reward surfacing.
-- Base-clear jackpot/mystery reward outcomes.
 - Challenge mode as first-class flow (menu + score persistence/report).
 - Weather and district destruction-state reactivity layer.
 
@@ -257,35 +257,33 @@
 - Mothership multi-stage finale (exterior boss to interior boarding).
 - Operative ecosystem (class spawning + support behaviors).
 - Meta progression and pilot-weapon persistence primitives.
-- 24 Node test files protecting enemy/projectile/interior regressions.
+- Assault jackpot/mystery rewards wired to successful assault settlement with mission summary reporting.
+- Bulwark siege-role damage rules and segmented telemetry/readability hooks.
+- 26 Node test files protecting reward/siege/enemy/projectile/interior regressions.
 
 ### Critical Missing Features for Design Document Compliance
 1. **Pilot Intel Ribbon UX:** Per-district intel accumulation, next reward tooltip, and milestone payout surfacing.
-2. **Assault Jackpot Rewards:** Base-clear reward tables with mystery outcome variants and strong mission-end presentation.
-3. **Bulwark Siege Identity:** Structure-damage bonus rules + clear active-mode feedback.
-4. **Challenge Mode Productization:** Last Stand / Assault Only selectors and score persistence/reporting UX.
-5. **World Reactivity Layer:** Weather/time-of-day and occupied-district destruction readability pass.
+2. **Challenge Mode Productization:** Last Stand / Assault Only selectors and score persistence/reporting UX.
+3. **World Reactivity Layer:** Weather/time-of-day and occupied-district destruction readability pass.
 
 ### Immediate Next Steps (Recommended Order)
 1. **Pilot Intel + District Ribbon sprint (2-3 days)**  
    - Add district-level intel state, CRITICAL +50% bonus handling, milestone thresholds, and reward routing.  
    - Render ribbon progress + tooltip preview on map nodes and district panel.
-2. **Assault jackpot reward sprint (2 days)**  
-   - Add base-clear mystery/jackpot outcomes with mission-summary + in-run callouts.
-3. **Bulwark siege pass (1-2 days)**  
-   - Add structural DPS multipliers/interactions and mode-active HUD/FX indicators.
-4. **Challenge mode surfacing sprint (2 days)**  
+2. **Challenge mode surfacing sprint (2 days)**  
    - Promote Last Stand / Assault Only into mode-select UI with persistent score reporting.
-5. **World-reactivity pass (1-2 days)**  
+3. **World-reactivity pass (1-2 days)**  
    - Introduce weather/time-of-day hooks and district destruction-state visual/audio cues.
+4. **Readability/tuning pass (1 day)**  
+   - Tune assault reward pacing and Bulwark siege feedback readability after broader playtesting.
 
 ### Estimated Remaining Work
-- **To MVP compliance:** ~8-11 dev days (includes implementation + regression tests + light tuning).
+- **To MVP compliance:** ~5-8 dev days (includes implementation + regression tests + light tuning).
 - **To polished v2.0 presentation:** additional ~2-3 weeks for balance, UX refinement, VFX/SFX reinforcement, and readability passes.
 
 ### MVP Completion
-- **Current Progress:** ~86%
-- **Largest remaining blockers:** Pilot Intel ribbon loop, assault jackpot rewards, and Bulwark siege role clarity.
+- **Current Progress:** ~90%
+- **Largest remaining blockers:** Pilot Intel ribbon loop, challenge-mode surfacing, and weather/reactivity presentation.
 
 ### Post-MVP Polish (Optional)
 - Adaptive music layering for district urgency and interior milestones.
@@ -294,12 +292,12 @@
 - Challenge mutator variants + richer leaderboard slices.
 
 ### What We Should Work On Next
-The best immediate next investment is the **Pilot Intel + District Ribbon** feature, because it closes the highest-impact design-document gap while connecting existing mission outcomes to persistent pilot progression in a player-visible way.
+The best immediate next investment is the **Pilot Intel + District Ribbon** feature, because it is now the single largest gameplay-progression gap remaining between current implementation and the design document.
 
 **Why this should be next:**
-- It turns already-implemented pilot unlock persistence into a clear map-level decision loop.
-- It creates immediate player-facing payoff for defending CRITICAL districts.
-- It establishes progression telemetry that later reward and challenge-mode features can reuse.
+- It links already-completed assault rewards and persistent pilot unlock systems into a clear district-level progression loop.
+- It turns CRITICAL district choices into visible progression strategy rather than only short-term mission urgency.
+- It gives challenge-mode and world-reactivity updates a stronger progression backbone for future telemetry and UX messaging.
 
 ### One-Task Update for the Next Sprint
 **Task:** Implement **Pilot Intel + District Ribbon v1** end-to-end.
@@ -310,7 +308,6 @@ The best immediate next investment is the **Pilot Intel + District Ribbon** feat
 3. District node UI displays ribbon progress + next reward preview.
 4. Milestone rewards grant unlock/tier/ammo-cap bonus and persist correctly.
 5. Add automated tests for intel award logic, milestone payout routing, and occupied-district suppression behavior.
-
 
 ## Update — Epic E1 + E3 Implementation Pass (Assault Jackpot + Bulwark Siege)
 - Implemented a new assault jackpot/mystery reward system with weighted pools, anti-inflation controls (cooldown + pity + rolling-window caps), and stable serializable payload schemas in `js/config/assaultJackpotRewards.js`.
