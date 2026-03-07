@@ -180,7 +180,7 @@ function settleAssaultReward({
     return { settled: true, reward: entry, rewardState: state };
 }
 
-const exported = {
+const assaultJackpotRewardsExport = {
     ASSAULT_REWARD_TABLE,
     ASSAULT_REWARD_CONSTRAINTS,
     ensureRewardState,
@@ -190,9 +190,9 @@ const exported = {
 };
 
 if (typeof module !== 'undefined') {
-    module.exports = exported;
+    module.exports = assaultJackpotRewardsExport;
 }
 
 if (typeof window !== 'undefined') {
-    window.assaultJackpotRewards = exported;
+    window.assaultJackpotRewards = assaultJackpotRewardsExport;
 }
