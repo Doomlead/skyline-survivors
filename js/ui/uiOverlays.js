@@ -70,6 +70,14 @@ function showMissionDefeat(scene, metaResult) {
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
     statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
+    if (gameState.lastPilotIntelAward) {
+        const intel = gameState.lastPilotIntelAward;
+        const tags = Array.isArray(intel.tags) && intel.tags.length ? ` · ${intel.tags.join(', ')}` : '';
+        const milestones = Array.isArray(intel.milestones) && intel.milestones.length
+            ? ` · Rewards: ${intel.milestones.map((m) => m.reward).join('; ')}`
+            : '';
+        statsLines.push(`Pilot Intel: +${intel.amount || 0}${tags}${milestones}`);
+    }
 
     scene.add.text(centerX, centerY - 20 * overlayScale, statsLines.join('\n'), {
         fontSize: `${Math.round(26 * overlayScale)}px`,
@@ -237,6 +245,14 @@ function showMissionVictory(scene, metaResult) {
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
     statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
+    if (gameState.lastPilotIntelAward) {
+        const intel = gameState.lastPilotIntelAward;
+        const tags = Array.isArray(intel.tags) && intel.tags.length ? ` · ${intel.tags.join(', ')}` : '';
+        const milestones = Array.isArray(intel.milestones) && intel.milestones.length
+            ? ` · Rewards: ${intel.milestones.map((m) => m.reward).join('; ')}`
+            : '';
+        statsLines.push(`Pilot Intel: +${intel.amount || 0}${tags}${milestones}`);
+    }
 
     scene.add.text(centerX, centerY - 20 * overlayScale, statsLines.join('\n'), {
         fontSize: `${Math.round(26 * overlayScale)}px`,

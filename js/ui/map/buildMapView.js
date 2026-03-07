@@ -610,6 +610,7 @@ class BuildMapView {
             this.districtGraphics.strokeCircle(projected.x, projected.y, radius);
 
             this.drawProsperitySignals(district, projected, radius);
+            this.drawPilotRibbonSignals(district, projected, radius);
 
             district.projectedX = projected.x;
             district.projectedY = projected.y;
@@ -653,6 +654,18 @@ class BuildMapView {
         }
 
         if (!district?.state || !['threatened', 'critical'].includes(district.state.status)) return;
+    }
+
+    drawPilotRibbonSignals(district, projected, radius) {
+        if (MAP_DISTRICT_VISUALS.drawPilotRibbonSignals) {
+            MAP_DISTRICT_VISUALS.drawPilotRibbonSignals({
+                graphics: this.districtGraphics,
+                district,
+                projected,
+                radius,
+                now: this.scene.time.now
+            });
+        }
     }
 
     /**

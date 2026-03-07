@@ -5,6 +5,7 @@
 (function() {
     const plannerData = window.missionPlannerData || {};
     const plannerDirectives = window.missionPlannerDirectives || {};
+    const pilotIntelRibbon = window.pilotIntelRibbon || {};
     const STORAGE_KEY = plannerData.STORAGE_KEY || 'skyline_district_state';
     const DISTRICT_CONFIGS = plannerData.DISTRICT_CONFIGS || [];
     const BATTLESHIP_CONFIG = plannerData.BATTLESHIP_CONFIG || {
@@ -32,6 +33,19 @@
     let districtState = null;
     let battleshipState = null;
     const mapState = { nodes: {}, hasTimerData: false };
+    const PILOT_INTEL_HISTORY_MAX = 20;
+
+    function normalizeDistrictIntelState(entry) {
+        if (!entry) return;
+        entry.pilotIntel = Math.max(0, Math.round(entry.pilotIntel || 0));
+        entry.pilotRibbonLevel = Math.max(0, Math.round(entry.pilotRibbonLevel || 0));
+        entry.pilotRibbonHistory = Array.isArray(entry.pilotRibbonHistory)
+            ? entry.pilotRibbonHistory.slice(-PILOT_INTEL_HISTORY_MAX)
+            : [];
+        entry.lastIntelAward = entry.lastIntelAward && typeof entry.lastIntelAward === 'object'
+            ? { ...entry.lastIntelAward }
+            : null;
+    }
 
     /**
      * Handles the getDefaultDistrictState routine and encapsulates its core gameplay logic.
@@ -50,7 +64,11 @@
             lastProsperityLoss: 0,
             prosperityLossTimer: 0,
             lastOutcome: null,
-            clearedRuns: 0
+            clearedRuns: 0,
+            pilotIntel: 0,
+            pilotRibbonLevel: 0,
+            pilotRibbonHistory: [],
+            lastIntelAward: null
         };
         syncProsperityMetrics(state);
         return state;
@@ -156,6 +174,7 @@
             if (base.prosperityLossTimer > 0) {
                 base.prosperityLossTimer = Math.max(0, base.prosperityLossTimer - elapsed);
             }
+            normalizeDistrictIntelState(base);
             syncProsperityMetrics(base);
             districtState.districts[cfg.id] = base;
         });
@@ -554,7 +573,8 @@
      */
     function buildMissionDirectives(config, state, modeOverride = null) {
         if (plannerDirectives.buildDistrictMissionDirectives) {
-            return plannerDirectives.buildDistrictMissionDirectives(config, state, modeOverride);
+            const base = plannerDirectives.buildDistrictMissionDirectives(config, state, modeOverride);
+            return augmentPilotIntelDirectives(base, state, modeOverride);
         }
 
         if (!config || !state) return null;
@@ -574,7 +594,7 @@
         const threatMix = focusedTypes.map(type => ({ type, weight: 2 }));
         threatMix.push({ type: 'lander', weight: 1 }, { type: 'mutant', weight: 1 });
 
-        return {
+        const baseDirectives = {
             districtId: config.id,
             districtName: config.name,
             reward: config.reward,
@@ -593,6 +613,44 @@
             mode: modeOverride,
             districtState: { ...state },
             threatMix
+        };
+        return augmentPilotIntelDirectives(baseDirectives, state, modeOverride);
+    }
+
+    function augmentPilotIntelDirectives(baseDirectives, districtEntry, modeOverride = null) {
+        if (!baseDirectives || !districtEntry) return baseDirectives;
+        const intel = Math.max(0, Math.round(districtEntry.pilotIntel || 0));
+        const effectiveMode = modeOverride || baseDirectives.mode || 'classic';
+        const nextMilestone = pilotIntelRibbon.getNextRibbonMilestone
+            ? pilotIntelRibbon.getNextRibbonMilestone(intel)
+            : null;
+        const nextThreshold = nextMilestone?.threshold || intel;
+        const progressRatio = nextMilestone
+            ? Phaser.Math.Clamp(intel / Math.max(1, nextThreshold), 0, 1)
+            : 1;
+
+        const wasCritical = districtEntry.status === 'critical';
+        const preview = pilotIntelRibbon.computePilotIntelAward
+            ? pilotIntelRibbon.computePilotIntelAward({
+                success: true,
+                missionMode: effectiveMode,
+                wasCritical,
+                preMissionStatus: districtEntry.status,
+                districtStatusAfter: districtEntry.status === 'occupied' ? 'friendly' : districtEntry.status
+            })
+            : { amount: 0, eligible: false };
+
+        return {
+            ...baseDirectives,
+            pilotIntelEligible: Boolean(preview?.eligible),
+            pilotIntelCriticalBonusActive: wasCritical,
+            pilotIntelProjected: preview?.amount || 0,
+            pilotRibbonPreview: {
+                currentIntel: intel,
+                nextThreshold,
+                progressRatio,
+                nextReward: nextMilestone?.reward ? (pilotIntelRibbon.describeReward?.(nextMilestone.reward) || nextMilestone.reward.type) : 'All milestones complete'
+            }
         };
     }
 
@@ -685,6 +743,10 @@
         const state = getDistrictState(currentMission.district);
         if (!cfg) return;
 
+        const preMissionStatus = state.status;
+        const wasCritical = preMissionStatus === 'critical';
+        const missionMode = currentMission.mode || 'classic';
+
         if (success) {
             state.status = 'friendly';
             state.timer = cfg.timer + 60;
@@ -699,6 +761,91 @@
             state.criticalTimer = 0;
             applyProsperityLoss(state);
             retireBattleshipsForDistrict(currentMission.district);
+        }
+
+        normalizeDistrictIntelState(state);
+        const awardResult = pilotIntelRibbon.computePilotIntelAward
+            ? pilotIntelRibbon.computePilotIntelAward({
+                success,
+                missionMode,
+                wasCritical,
+                preMissionStatus,
+                districtStatusAfter: state.status
+            })
+            : { amount: 0, eligible: false, reason: 'intel_module_unavailable', tags: [] };
+
+        const ribbonRewards = [];
+        if (awardResult.eligible && awardResult.amount > 0) {
+            const previousIntel = state.pilotIntel;
+            const nextIntel = previousIntel + awardResult.amount;
+            state.pilotIntel = nextIntel;
+            const milestonesCrossed = pilotIntelRibbon.getMilestonesCrossed
+                ? pilotIntelRibbon.getMilestonesCrossed(previousIntel, nextIntel)
+                : [];
+            const allMilestones = pilotIntelRibbon.PILOT_RIBBON_MILESTONES || [];
+            const unclaimed = milestonesCrossed.filter((milestone) => allMilestones.findIndex((entry) => entry.threshold === milestone.threshold) >= state.pilotRibbonLevel);
+            unclaimed.forEach((milestone) => {
+                const resolved = pilotIntelRibbon.resolveRibbonReward
+                    ? pilotIntelRibbon.resolveRibbonReward({
+                        metaState: window.metaProgression?.getMetaState?.(),
+                        milestone,
+                        districtId: currentMission.district
+                    })
+                    : null;
+                if (!resolved?.applied) return;
+                const appliedReward = window.metaProgression?.applyPilotIntelReward
+                    ? window.metaProgression.applyPilotIntelReward(resolved.rewardPayload)
+                    : { applied: false, reason: 'meta_progression_unavailable' };
+                ribbonRewards.push({
+                    threshold: milestone.threshold,
+                    reward: resolved.summary,
+                    rewardType: resolved.rewardType,
+                    applied: appliedReward.applied !== false,
+                    result: appliedReward
+                });
+                state.pilotRibbonLevel += 1;
+            });
+
+            if (window.metaProgression?.addPilotIntelEarned) {
+                window.metaProgression.addPilotIntelEarned(awardResult.amount, currentMission.district);
+            }
+
+            state.lastIntelAward = {
+                amount: awardResult.amount,
+                reason: awardResult.reason,
+                tags: awardResult.tags,
+                timestamp: Date.now(),
+                missionMode,
+                wasCritical,
+                districtId: currentMission.district,
+                milestones: ribbonRewards.map((entry) => ({ threshold: entry.threshold, rewardType: entry.rewardType, reward: entry.reward }))
+            };
+            state.pilotRibbonHistory = [
+                ...(state.pilotRibbonHistory || []),
+                state.lastIntelAward
+            ].slice(-PILOT_INTEL_HISTORY_MAX);
+        } else {
+            state.lastIntelAward = {
+                amount: 0,
+                reason: awardResult.reason,
+                tags: awardResult.tags || [],
+                timestamp: Date.now(),
+                missionMode,
+                wasCritical,
+                districtId: currentMission.district,
+                milestones: []
+            };
+        }
+
+        if (typeof gameState !== 'undefined') {
+            gameState.lastPilotIntelAward = {
+                districtId: currentMission.district,
+                districtName: cfg.name,
+                amount: state.lastIntelAward?.amount || 0,
+                reason: state.lastIntelAward?.reason,
+                tags: state.lastIntelAward?.tags || [],
+                milestones: state.lastIntelAward?.milestones || []
+            };
         }
 
         districtState.lastUpdated = Date.now();

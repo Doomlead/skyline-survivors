@@ -280,17 +280,33 @@ const DistrictLayoutManager = (function() {
     function updateDistrictStatus(district) {
         const container = document.getElementById('district-node-status');
         if (!container) return;
-        
+
+        const intelModule = window.pilotIntelRibbon;
+        const meta = window.metaProgression?.getMetaState?.();
         const statusLabel = district.state?.status === 'occupied'
             ? '🔴 OCCUPIED'
             : district.state?.status === 'friendly'
                 ? '🟢 FRIENDLY'
-                : '🟡 THREATENED';
-        
+                : district.state?.status === 'critical'
+                    ? '🟠 CRITICAL'
+                    : '🟡 THREATENED';
+
         const timerText = district.state?.status === 'threatened' && district.state?.timer > 0
             ? `Destabilization in: ${formatSeconds(district.state.timer)}`
-            : 'No active timer';
-        
+            : district.state?.status === 'critical' && district.state?.criticalTimer > 0
+                ? `Critical window: ${formatSeconds(district.state.criticalTimer)}`
+                : 'No active timer';
+
+        const currentIntel = Math.max(0, Math.round(district.state?.pilotIntel || 0));
+        const nextMilestone = intelModule?.getNextRibbonMilestone?.(currentIntel) || null;
+        const intelText = nextMilestone ? `${currentIntel} / ${nextMilestone.threshold}` : `${currentIntel} / MAX`;
+        const nextReward = nextMilestone?.reward ? (intelModule?.describeReward?.(nextMilestone.reward) || nextMilestone.reward.type) : 'All ribbon rewards claimed';
+        const pilotWeapons = meta?.pilotWeapons || { unlocked: {} };
+        const ownership = ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone']
+            .map((weaponId) => `${intelModule?.getWeaponDisplayName?.(weaponId) || weaponId}: ${pilotWeapons.unlocked?.[weaponId] ? 'Owned' : 'Locked'}`)
+            .join(' · ');
+        const criticalBadge = district.state?.status === 'critical' ? '⚠️ CRITICAL +50% Intel if successful' : 'Intel baseline applies';
+
         container.innerHTML = `
             <div class="district-stat-row">
                 <span class="district-stat-label">Status</span>
@@ -303,6 +319,22 @@ const DistrictLayoutManager = (function() {
             <div class="district-stat-row">
                 <span class="district-stat-label">Reward Focus</span>
                 <span class="district-stat-value">${district.config?.reward || 'Standard'}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Pilot Intel</span>
+                <span class="district-stat-value">${intelText}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Next Ribbon</span>
+                <span class="district-stat-value">${nextReward}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Weapon Ownership</span>
+                <span class="district-stat-value">${ownership}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Intel Bonus</span>
+                <span class="district-stat-value">${criticalBadge}</span>
             </div>
         `;
     }
