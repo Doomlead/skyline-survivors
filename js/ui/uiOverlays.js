@@ -110,6 +110,7 @@ function showMissionDefeat(scene, metaResult) {
     };
 
     scene.input.keyboard.once('keydown-D', handleReturn);
+    scene.input.keyboard.once('keydown-R', handleReturn);
     returnButton.on('pointerdown', handleReturn);
 }
 
@@ -198,6 +199,7 @@ function showCampaignDefeat(scene, metaResult) {
     };
 
     scene.input.keyboard.once('keydown-D', handleReturn);
+    scene.input.keyboard.once('keydown-R', handleReturn);
     returnButton.on('pointerdown', handleReturn);
 }
 
@@ -285,6 +287,7 @@ function showMissionVictory(scene, metaResult) {
     };
 
     scene.input.keyboard.once('keydown-D', handleReturn);
+    scene.input.keyboard.once('keydown-R', handleReturn);
     returnButton.on('pointerdown', handleReturn);
 }
 
