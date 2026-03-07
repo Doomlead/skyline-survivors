@@ -28,6 +28,61 @@
         }
     }
 
+
+    function drawPilotIntelRibbon({ graphics, district, projected, radius }) {
+        if (!graphics || !district?.state || !projected?.visible) return;
+        const intel = Math.max(0, Number(district.state.pilotIntel || 0));
+        const intelModule = window.pilotIntelRibbon || {};
+        const profile = window.metaProgression?.getPilotWeaponProfile?.();
+        const summary = intelModule.getRibbonSummary
+            ? intelModule.getRibbonSummary({
+                intel,
+                claimedMilestones: district.state.pilotIntelMilestonesClaimed || [],
+                pilotProfile: profile
+            })
+            : null;
+        const nextMilestone = Number(summary?.nextMilestone?.threshold || district.state.pilotIntelNextMilestone || 0);
+        const toNext = Math.max(0, Number(summary?.nextMilestone?.remaining || district.state.pilotIntelToNext || 0));
+        let progress = Number(summary?.nextMilestone?.progress ?? district.state.pilotIntelRibbonProgress);
+        if (!Number.isFinite(progress)) {
+            if (nextMilestone > 0) {
+                const prev = Math.max(0, nextMilestone - Math.max(1, toNext + Math.round(intel)));
+                const span = Math.max(1, nextMilestone - prev);
+                progress = Math.max(0, Math.min(1, (intel - prev) / span));
+            } else {
+                progress = 1;
+            }
+        }
+
+        const width = radius * 4.2;
+        const height = 4;
+        const x = projected.x - width / 2;
+        const y = projected.y + radius + 5;
+
+        const status = district.state.status;
+        const fillColor = status === 'critical'
+            ? 0xfb923c
+            : status === 'occupied'
+                ? 0xf87171
+                : status === 'threatened'
+                    ? 0xfacc15
+                    : 0x38bdf8;
+
+        graphics.fillStyle(0x020617, 0.8);
+        graphics.fillRoundedRect(x - 1, y - 1, width + 2, height + 2, 2);
+        graphics.fillStyle(0x1e293b, 0.95);
+        graphics.fillRoundedRect(x, y, width, height, 2);
+        graphics.fillStyle(fillColor, 0.95);
+        graphics.fillRoundedRect(x, y, Math.max(1, width * Math.max(0, Math.min(1, progress))), height, 2);
+
+        const pips = [0.2, 0.4, 0.6, 0.8];
+        graphics.lineStyle(1, 0xe2e8f0, 0.35);
+        pips.forEach((ratio) => {
+            const px = x + width * ratio;
+            graphics.lineBetween(px, y, px, y + height);
+        });
+    }
+
     function drawProsperitySignals({ graphics, district, projected, radius, now }) {
         if (!graphics || !district?.state) return;
 
@@ -55,6 +110,7 @@
 
     window.mapDistrictVisuals = {
         drawDistrictThreatPulse,
-        drawProsperitySignals
+        drawProsperitySignals,
+        drawPilotIntelRibbon
     };
 })();

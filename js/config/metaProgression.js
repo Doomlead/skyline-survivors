@@ -75,6 +75,14 @@ const DEFAULT_META_STATE = {
     lastRun: null,
     totalDropsPurchased: 0,
     lootHistory: [], // Last 5 drops for "history" display
+    pilotIntelBonuses: {
+        nextDeploymentAmmoBonus: {
+            scattergun: 0,
+            plasmaLauncher: 0,
+            lightningGun: 0
+        },
+        history: []
+    },
     pilotWeapons: {
         unlocked: {
             combatRifle: true,
@@ -212,7 +220,17 @@ function getMetaState() {
         runHistory: [...state.runHistory],
         lootHistory: [...state.lootHistory],
         assaultRewards,
-        pilotWeapons: normalizePilotWeaponProfile(state.pilotWeapons)
+        pilotWeapons: normalizePilotWeaponProfile(state.pilotWeapons),
+        pilotIntelBonuses: state.pilotIntelBonuses && typeof state.pilotIntelBonuses === 'object'
+            ? {
+                nextDeploymentAmmoBonus: {
+                    scattergun: Number(state.pilotIntelBonuses.nextDeploymentAmmoBonus?.scattergun || 0),
+                    plasmaLauncher: Number(state.pilotIntelBonuses.nextDeploymentAmmoBonus?.plasmaLauncher || 0),
+                    lightningGun: Number(state.pilotIntelBonuses.nextDeploymentAmmoBonus?.lightningGun || 0)
+                },
+                history: Array.isArray(state.pilotIntelBonuses.history) ? [...state.pilotIntelBonuses.history].slice(-20) : []
+            }
+            : { nextDeploymentAmmoBonus: { scattergun: 0, plasmaLauncher: 0, lightningGun: 0 }, history: [] }
     };
 }
 
@@ -251,6 +269,71 @@ function upgradePilotWeaponTierMeta(weaponId) {
     return { success: true, weaponId, tier: nextTier, profile: normalizePilotWeaponProfile(state.pilotWeapons) };
 }
 
+
+function ensurePilotIntelBonusState(state) {
+    const source = state.pilotIntelBonuses && typeof state.pilotIntelBonuses === 'object' ? state.pilotIntelBonuses : {};
+    state.pilotIntelBonuses = {
+        nextDeploymentAmmoBonus: {
+            scattergun: Number(source.nextDeploymentAmmoBonus?.scattergun || 0),
+            plasmaLauncher: Number(source.nextDeploymentAmmoBonus?.plasmaLauncher || 0),
+            lightningGun: Number(source.nextDeploymentAmmoBonus?.lightningGun || 0)
+        },
+        history: Array.isArray(source.history) ? source.history.slice(-20) : []
+    };
+    return state.pilotIntelBonuses;
+}
+
+function grantPilotIntelMilestoneReward(rewardSpec = {}) {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    const bonusState = ensurePilotIntelBonusState(state);
+
+    const threshold = rewardSpec.threshold || null;
+    const weaponId = rewardSpec.weaponId;
+    let result = {
+        success: false,
+        type: rewardSpec.type || 'none',
+        weaponId,
+        threshold,
+        label: rewardSpec.label || 'Pilot Intel milestone reward'
+    };
+
+    if (!weaponId || !rewardSpec.type) {
+        persistMetaProgression();
+        return result;
+    }
+
+    if (rewardSpec.type === 'unlock') {
+        if (weaponId !== 'combatRifle' && !state.pilotWeapons.unlocked[weaponId]) {
+            state.pilotWeapons.unlocked[weaponId] = true;
+            state.pilotWeapons.tiers[weaponId] = Math.max(1, state.pilotWeapons.tiers[weaponId] || 1);
+            result = { ...result, success: true, applied: 'unlock', tier: state.pilotWeapons.tiers[weaponId] };
+        } else {
+            result = { ...result, success: true, applied: 'unlock_already_owned', tier: state.pilotWeapons.tiers[weaponId] || 0 };
+        }
+    } else if (rewardSpec.type === 'tier_token') {
+        const upgraded = upgradePilotWeaponTierMeta(weaponId);
+        result = { ...result, success: Boolean(upgraded.success), applied: 'tier_token', tier: upgraded.tier || state.pilotWeapons.tiers[weaponId] || 0 };
+    } else if (rewardSpec.type === 'ammo_cap_bonus') {
+        const amount = Math.max(0, Math.round(rewardSpec.amount || 0));
+        const key = weaponId === 'lightningGun' ? 'lightningGun' : (weaponId === 'plasmaLauncher' ? 'plasmaLauncher' : 'scattergun');
+        bonusState.nextDeploymentAmmoBonus[key] = Math.max(0, Math.round((bonusState.nextDeploymentAmmoBonus[key] || 0) + amount));
+        result = { ...result, success: true, applied: 'ammo_cap_bonus', amount, queued: bonusState.nextDeploymentAmmoBonus[key] };
+    }
+
+    bonusState.history = [...bonusState.history, {
+        timestamp: Date.now(),
+        threshold,
+        type: rewardSpec.type,
+        weaponId,
+        label: rewardSpec.label || null,
+        success: result.success
+    }].slice(-20);
+
+    persistMetaProgression();
+    return result;
+}
+
 function applyLoadoutEffects(gameState, playerState) {
     const profile = getPilotWeaponProfile();
     const runtimePilotState = typeof pilotState !== 'undefined' ? pilotState : null;
@@ -272,6 +355,8 @@ function applyLoadoutEffects(gameState, playerState) {
         lightningGun: false,
         stingerDrone: false
     };
+    const state = loadMetaProgression();
+    const bonusState = ensurePilotIntelBonusState(state);
     const maxAmmo = profile.startAmmo || {
         scattergun: 200,
         plasmaLauncher: 150,
@@ -279,9 +364,14 @@ function applyLoadoutEffects(gameState, playerState) {
     };
     Object.keys(maxAmmo).forEach((weapon) => {
         if (weaponState.unlocked[weapon]) {
-            weaponState.ammo[weapon] = maxAmmo[weapon];
+            const queuedBonus = Number(bonusState.nextDeploymentAmmoBonus?.[weapon] || 0);
+            weaponState.ammo[weapon] = Math.max(0, Math.round(maxAmmo[weapon] + queuedBonus));
         }
     });
+    bonusState.nextDeploymentAmmoBonus.scattergun = 0;
+    bonusState.nextDeploymentAmmoBonus.plasmaLauncher = 0;
+    bonusState.nextDeploymentAmmoBonus.lightningGun = 0;
+    persistMetaProgression();
     const order = ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
     if (!weaponState.unlocked[weaponState.selected]) {
         weaponState.selected = order.find((weapon) => weaponState.unlocked[weapon]) || 'combatRifle';
@@ -620,6 +710,7 @@ window.metaProgression = {
     getPilotWeaponProfile,
     purchasePilotWeapon,
     upgradePilotWeaponTier: upgradePilotWeaponTierMeta,
+    grantPilotIntelMilestoneReward,
     getLoadoutOptions,
     applyLoadoutEffects,
     LOOT_TABLES,

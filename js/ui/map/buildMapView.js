@@ -610,6 +610,7 @@ class BuildMapView {
             this.districtGraphics.strokeCircle(projected.x, projected.y, radius);
 
             this.drawProsperitySignals(district, projected, radius);
+            this.drawPilotIntelRibbon(district, projected, radius);
 
             district.projectedX = projected.x;
             district.projectedY = projected.y;

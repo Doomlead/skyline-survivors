@@ -362,7 +362,10 @@ function updateUI(scene) {
                 : '';
             const siegeActive = aegisState?.active && aegisState?.mode === 'bulwark';
             const siegeTag = siegeActive ? ' · BULWARK SIEGE READY' : '';
-            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}${prosperityTag}${lossTag}${siegeTag}`;
+            const intelTag = directives.pilotIntelNextMilestone
+                ? ` · PILOT INTEL ${directives.pilotIntel || 0}/${directives.pilotIntelNextMilestone}`
+                : ' · PILOT INTEL MAX';
+            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}${prosperityTag}${lossTag}${siegeTag}${intelTag}`;
 
             rewardEl.classList.toggle('jackpot-callout', Boolean(gameState.lastAssaultReward?.isJackpot));
             rewardEl.classList.toggle('mystery-callout', Boolean(gameState.lastAssaultReward && !gameState.lastAssaultReward.isJackpot));

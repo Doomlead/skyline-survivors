@@ -67,6 +67,16 @@ function showMissionDefeat(scene, metaResult) {
     } else {
         statsLines.push('Assault Reward: No payout (mission failed/aborted)');
     }
+    const intel = gameState.lastPilotIntelOutcome;
+    if (intel) {
+        const bonusTag = intel.criticalApplied ? ' · CRITICAL +50%' : '';
+        const suppressedTag = intel.suppressed ? ' · OCCUPIED SUPPRESSED' : '';
+        statsLines.push(`Pilot Intel: +${intel.gainedIntel}${bonusTag}${suppressedTag}`);
+        if (intel.milestoneRewards?.length) {
+            const rewards = intel.milestoneRewards.map((reward) => reward?.label || reward?.type || 'reward').join(', ');
+            statsLines.push(`Ribbon Rewards: ${rewards}`);
+        }
+    }
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
     statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
@@ -232,6 +242,16 @@ function showMissionVictory(scene, metaResult) {
             statsLines.push(`Assault Reward: ${reward.payload.label}${valueLabel} · ${typeLabel} · ${reward.rarity || 'n/a'}`);
         } else {
             statsLines.push('Assault Reward: Pending settlement');
+        }
+    }
+    const intel = gameState.lastPilotIntelOutcome;
+    if (intel) {
+        const bonusTag = intel.criticalApplied ? ' · CRITICAL +50%' : '';
+        const suppressedTag = intel.suppressed ? ' · OCCUPIED SUPPRESSED' : '';
+        statsLines.push(`Pilot Intel: +${intel.gainedIntel}${bonusTag}${suppressedTag}`);
+        if (intel.milestoneRewards?.length) {
+            const rewards = intel.milestoneRewards.map((reward) => reward?.label || reward?.type || 'reward').join(', ');
+            statsLines.push(`Ribbon Rewards: ${rewards}`);
         }
     }
     statsLines.push(`Time Played: ${timePlayed}`);

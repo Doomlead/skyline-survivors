@@ -4,6 +4,7 @@
 
 (function() {
     function buildDistrictMissionDirectives(config, state, modeOverride = null) {
+        const pilotIntel = window.pilotIntelRibbon || {};
         if (!config || !state) return null;
 
         const urgency = state.status === 'occupied'
@@ -34,6 +35,15 @@
         threatMix.push({ type: 'lander', weight: 1 });
         threatMix.push({ type: 'mutant', weight: 1 });
 
+        const pilotProfile = window.metaProgression?.getPilotWeaponProfile?.();
+        const intelSummary = pilotIntel.getRibbonSummary
+            ? pilotIntel.getRibbonSummary({
+                intel: state.pilotIntel || 0,
+                claimedMilestones: state.pilotIntelMilestonesClaimed || [],
+                pilotProfile
+            })
+            : null;
+
         return {
             districtId: config.id,
             districtName: config.name,
@@ -52,7 +62,13 @@
             status: state.status,
             mode: modeOverride,
             districtState: { ...state },
-            threatMix
+            threatMix,
+            pilotIntel: state.pilotIntel || 0,
+            pilotIntelNextMilestone: intelSummary?.nextMilestone?.threshold || null,
+            pilotIntelToNext: intelSummary?.nextMilestone?.remaining || 0,
+            pilotIntelRibbonProgress: intelSummary?.nextMilestone?.progress ?? 0,
+            pilotIntelNextRewardPreview: intelSummary?.nextReward || null,
+            pilotWeaponProfile: pilotProfile
         };
     }
 

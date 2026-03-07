@@ -289,8 +289,30 @@ const DistrictLayoutManager = (function() {
         
         const timerText = district.state?.status === 'threatened' && district.state?.timer > 0
             ? `Destabilization in: ${formatSeconds(district.state.timer)}`
-            : 'No active timer';
-        
+            : district.state?.status === 'critical' && district.state?.criticalTimer > 0
+                ? `CRITICAL: ${formatSeconds(district.state.criticalTimer)}`
+                : 'No active timer';
+
+        const intelModule = window.pilotIntelRibbon || {};
+        const profile = window.metaProgression?.getPilotWeaponProfile?.() || { unlocked: {}, tiers: {} };
+        const intelSummary = intelModule.getRibbonSummary
+            ? intelModule.getRibbonSummary({
+                intel: district.state?.pilotIntel || 0,
+                claimedMilestones: district.state?.pilotIntelMilestonesClaimed || [],
+                pilotProfile: profile
+            })
+            : null;
+        const rewardPreview = intelSummary?.nextReward
+            ? `${intelSummary.nextReward.type.replace(/_/g, ' ')} · ${intelSummary.nextReward.weaponId}`
+            : 'All milestones claimed';
+        const ownership = ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone']
+            .map((weaponId) => {
+                const owned = profile.unlocked?.[weaponId];
+                const tier = profile.tiers?.[weaponId] || 0;
+                return `${weaponId}:${owned ? `T${tier}` : 'LOCKED'}`;
+            })
+            .join(' · ');
+
         container.innerHTML = `
             <div class="district-stat-row">
                 <span class="district-stat-label">Status</span>
@@ -303,6 +325,18 @@ const DistrictLayoutManager = (function() {
             <div class="district-stat-row">
                 <span class="district-stat-label">Reward Focus</span>
                 <span class="district-stat-value">${district.config?.reward || 'Standard'}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Pilot Intel</span>
+                <span class="district-stat-value">${district.state?.pilotIntel || 0}${intelSummary?.nextMilestone?.threshold ? ` / ${intelSummary.nextMilestone.threshold}` : ''}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Next Ribbon Reward</span>
+                <span class="district-stat-value">${rewardPreview}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Pilot Weapons</span>
+                <span class="district-stat-value">${ownership}</span>
             </div>
         `;
     }
