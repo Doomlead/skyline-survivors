@@ -264,12 +264,33 @@
         backgroundStyle: 'mothership_exterior'
     };
 
+    const PILOT_INTEL_ECONOMY = {
+        baseAwards: {
+            defenseSuccess: 40,
+            assaultSuccess: 65,
+            failedMission: 8
+        },
+        criticalMultiplier: 1.5,
+        occupiedSuppression: {
+            suppressWhenOccupied: true,
+            allowOnLiberation: true
+        },
+        milestoneThresholds: [100, 250, 450, 700, 1000, 1350, 1750],
+        rewardPriority: ['unlock', 'tier_token', 'ammo_cap_bonus'],
+        ammoCapBonusByReward: {
+            scattergun: 40,
+            plasmaLauncher: 30,
+            lightningGun: 5000
+        }
+    };
+
     window.missionPlannerData = {
         STORAGE_KEY,
         DISTRICT_CONFIGS,
         BATTLESHIP_CONFIG,
         CRITICAL_WINDOW_SECONDS,
         PROSPERITY_CONFIG,
-        MOTHERSHIP_CONFIG
+        MOTHERSHIP_CONFIG,
+        PILOT_INTEL_ECONOMY
     };
 })();

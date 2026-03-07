@@ -140,6 +140,9 @@ class BuildMapView {
             if (node.node) node.node.destroy();
             if (node.label) node.label.destroy();
             if (node.timerText) node.timerText.destroy();
+            if (node.ribbonBg) node.ribbonBg.destroy();
+            if (node.ribbonFill) node.ribbonFill.destroy();
+            if (node.ribbonPips) node.ribbonPips.destroy();
             if (node.connector) node.connector.destroy();
         });
         this.mapNodes = [];
@@ -758,18 +761,29 @@ class BuildMapView {
     createOrbitNodes() {
         if (typeof missionPlanner === 'undefined') return;
 
-        // Configuration relative to globe size
+        const districtConfigs = typeof missionPlanner?.getDistrictConfigs === 'function'
+            ? missionPlanner.getDistrictConfigs()
+            : [];
+        const districtRing = districtConfigs.map((cfg, index) => ({
+            id: cfg.id,
+            label: cfg.name,
+            angle: (index / Math.max(1, districtConfigs.length)) * 360,
+            distScale: 1.72,
+            color: cfg.color || 0x22d3ee,
+            isDistrict: true
+        }));
         this.nodeConfigs = [
-            { id: 'mothership', label: 'Mothership',angle: 160, distScale: 1.4, color: 0x818cf8 }
+            ...districtRing,
+            { id: 'mothership', label: 'Mothership', angle: 160, distScale: 1.4, color: 0x818cf8, isDistrict: false }
         ];
 
         this.nodeConfigs.forEach(config => {
             const connector = this.scene.add.graphics();
             const node = this.scene.add.image(0, 0, 'mapMothershipIcon');
-            node.setScale(0.9);
+            node.setScale(config.isDistrict ? 0.6 : 0.9);
             node.setAlpha(0.95);
             node.setBlendMode(Phaser.BlendModes.ADD);
-            const pulse = this.scene.tweens.add({ targets: node, scale: 1.25, duration: 700, yoyo: true, repeat: -1 });
+            const pulse = this.scene.tweens.add({ targets: node, scale: node.scale * 1.18, duration: 700, yoyo: true, repeat: -1 });
 
             const label = this.scene.add.text(0, 0, config.label, {
                 fontFamily: 'Orbitron', fontSize: '12px', color: '#c7e6ff', align: 'center'
@@ -778,15 +792,25 @@ class BuildMapView {
             const timerText = this.scene.add.text(0, 0, '--', {
                 fontFamily: 'Orbitron', fontSize: '11px', color: '#ffffff'
             }).setOrigin(0.5).setDepth(5);
+            const ribbonBg = this.scene.add.rectangle(0, 0, 68, 6, 0x0f172a, 0.8).setOrigin(0.5).setDepth(5);
+            const ribbonFill = this.scene.add.rectangle(0, 0, 0, 4, 0x22c55e, 0.95).setOrigin(0, 0.5).setDepth(6);
+            const ribbonPips = this.scene.add.graphics().setDepth(6);
+            const nodeState = config.isDistrict
+                ? (missionPlanner.getDistrictState(config.id) || missionPlanner.ensureMapNodeState(config))
+                : missionPlanner.ensureMapNodeState(config);
 
-            const nodeState = missionPlanner.ensureMapNodeState(config);
-
-            this.mapNodes.push({ id: config.id, config, node, label, timerText, pulse, connector, state: nodeState, isEnabled: true });
+            this.mapNodes.push({ id: config.id, config, node, label, timerText, ribbonBg, ribbonFill, ribbonPips, pulse, connector, state: nodeState, isEnabled: true });
 
             node.setInteractive({ useHandCursor: true });
             node.on('pointerdown', () => {
                 this.flashConnector(connector);
-                const liveState = missionPlanner.getMapNodeState(config.id) || nodeState;
+                const liveState = config.isDistrict
+                    ? (missionPlanner.getDistrictState(config.id) || nodeState)
+                    : (missionPlanner.getMapNodeState(config.id) || nodeState);
+                if (config.isDistrict) {
+                    const district = this.districts.find(entry => entry.config.id === config.id);
+                    if (district) this.focusDistrict(district);
+                }
                 this.onOrbitNodeSelected?.(config.id, liveState);
             });
         });
@@ -810,6 +834,8 @@ class BuildMapView {
             mapNode.node.setPosition(x, y);
             mapNode.label.setPosition(x, y - 26);
             mapNode.timerText.setPosition(x, y + 18);
+            if (mapNode.ribbonBg) mapNode.ribbonBg.setPosition(x, y + 42);
+            if (mapNode.ribbonFill) mapNode.ribbonFill.setPosition(x - 33, y + 42);
             
             mapNode.connector.clear();
             mapNode.connector.lineStyle(1.5, 0x1dcaff, 0.3);
@@ -862,6 +888,10 @@ class BuildMapView {
             const ready = !!allFriendly;
             node.state = { ...(node.state || {}), status: ready ? 'ready' : 'locked', timer: 0 };
             
+            if (node.ribbonBg) node.ribbonBg.setVisible(false);
+            if (node.ribbonFill) node.ribbonFill.setVisible(false);
+            if (node.ribbonPips) node.ribbonPips.clear();
+
             // Safety check for destroyed text objects
             if (node.timerText && node.timerText.active) {
                 node.timerText.setText(ready ? 'READY' : 'LOCKED');
@@ -882,14 +912,20 @@ class BuildMapView {
 
         this.mapNodes.forEach(node => {
             if (node.id === 'mothership') return;
-            const stored = missionPlanner.getMapNodeState(node.id) || node.state;
+            const stored = node.config.isDistrict
+                ? (missionPlanner.getDistrictState(node.id) || node.state)
+                : (missionPlanner.getMapNodeState(node.id) || node.state);
             node.state = stored;
-            
-            // Safety check for destroyed text objects
+
             if (node.timerText && node.timerText.active) {
                 const isCritical = node.state.status === 'critical';
                 const prosperityMultiplier = node.state.prosperityMultiplier || 1;
                 const prosperityLabel = `PROSPERITY x${prosperityMultiplier.toFixed(2)}`;
+                const intelNow = Math.max(0, Math.round(node.state.pilotIntel || 0));
+                const intelPreview = missionPlanner.buildIntelPreview?.(node.state) || { nextThreshold: null };
+                const intelLabel = intelPreview.nextThreshold
+                    ? `INTEL ${intelNow}/${intelPreview.nextThreshold}`
+                    : `INTEL ${intelNow} MAX`;
                 const lossActive = node.state.prosperityLossTimer > 0 && node.state.lastProsperityLoss > 0;
                 const lossLabel = lossActive ? `LOSS -${node.state.lastProsperityLoss}` : null;
                 const timerLabel = node.state.status === 'destroyed'
@@ -901,15 +937,44 @@ class BuildMapView {
                             : 'STABLE';
                 const color = lossActive
                     ? '#f87171'
-                    : node.state.status === 'destroyed'
-                        ? '#f87171'
+                    : node.state.status === 'occupied'
+                        ? '#ef4444'
                         : isCritical
                             ? '#fb923c'
                             : (node.state.timer > 0 ? '#fef08a' : '#a7f3d0');
-                const lines = [timerLabel, prosperityLabel];
+                const lines = [timerLabel, intelLabel, prosperityLabel];
                 if (lossLabel) lines.unshift(lossLabel);
                 node.timerText.setText(lines.join('\n'));
                 node.timerText.setColor(color);
+            }
+
+            if (node.ribbonBg && node.ribbonFill && node.ribbonPips) {
+                const intelPreview = missionPlanner.buildIntelPreview?.(node.state) || { current: 0, nextThreshold: null };
+                const currentIntel = Math.max(0, Math.round(intelPreview.current || node.state.pilotIntel || 0));
+                const thresholds = window.missionPlannerData?.PILOT_INTEL_ECONOMY?.milestoneThresholds || [];
+                const previousThreshold = thresholds.filter(v => v <= currentIntel).slice(-1)[0] || 0;
+                const nextThreshold = intelPreview.nextThreshold || (previousThreshold + 100);
+                const denom = Math.max(1, nextThreshold - previousThreshold);
+                const fillRatio = Phaser.Math.Clamp((currentIntel - previousThreshold) / denom, 0, 1);
+                const statusColor = node.state.status === 'occupied'
+                    ? 0xef4444
+                    : node.state.status === 'critical'
+                        ? 0xf97316
+                        : node.state.status === 'threatened'
+                            ? 0xfacc15
+                            : 0x22c55e;
+                node.ribbonBg.setVisible(true).setFillStyle(0x0f172a, 0.78);
+                node.ribbonFill.setVisible(true).setFillStyle(statusColor, 0.95);
+                node.ribbonFill.width = 66 * fillRatio;
+
+                node.ribbonPips.clear();
+                node.ribbonPips.lineStyle(1, 0xe2e8f0, 0.7);
+                const y = node.ribbonBg.y;
+                const left = node.ribbonBg.x - 33;
+                for (let i = 1; i <= 4; i += 1) {
+                    const px = left + (66 / 5) * i;
+                    node.ribbonPips.lineBetween(px, y - 4, px, y + 4);
+                }
             }
         });
 

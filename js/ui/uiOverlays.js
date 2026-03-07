@@ -6,7 +6,7 @@ function gameOver(scene) {
     const audioManager = scene.audioManager;
     gameState.gameOver = true;
     gameState.victory = false;
-    if (window.missionPlanner) missionPlanner.recordMissionOutcome(false);
+    const missionOutcome = window.missionPlanner ? missionPlanner.recordMissionOutcome(false) : null;
     const metaResult = recordMetaOutcome(false);
     scene.physics.pause();
     if (audioManager) {
@@ -19,7 +19,7 @@ function gameOver(scene) {
         return;
     }
 
-    showMissionDefeat(scene, metaResult);
+    showMissionDefeat(scene, metaResult, missionOutcome);
 }
 
 /**
@@ -38,7 +38,7 @@ function getOverlayScale(scene) {
  * Parameters: scene, metaResult.
  * Returns: value defined by the surrounding game flow.
  */
-function showMissionDefeat(scene, metaResult) {
+function showMissionDefeat(scene, metaResult, missionOutcome = null) {
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
     const centerY = cam.height / 2;
@@ -70,6 +70,14 @@ function showMissionDefeat(scene, metaResult) {
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
     statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
+    const intelSummary = missionOutcome?.intelSummary;
+    if (intelSummary) {
+        const criticalTag = intelSummary.criticalBonusApplied ? ' · CRITICAL +50%' : '';
+        statsLines.push(`Pilot Intel: +${intelSummary.gained}${criticalTag}`);
+        if (Array.isArray(intelSummary.rewardsGranted) && intelSummary.rewardsGranted.length) {
+            statsLines.push(`Ribbon Rewards: ${intelSummary.rewardsGranted.map(reward => reward.label || reward.type).join(', ')}`);
+        }
+    }
 
     scene.add.text(centerX, centerY - 20 * overlayScale, statsLines.join('\n'), {
         fontSize: `${Math.round(26 * overlayScale)}px`,
@@ -114,7 +122,7 @@ function winGame(scene) {
     const audioManager = scene.audioManager;
     gameState.gameOver = true;
     gameState.victory = true;
-    if (window.missionPlanner) missionPlanner.recordMissionOutcome(true);
+    const missionOutcome = window.missionPlanner ? missionPlanner.recordMissionOutcome(true) : null;
     const metaResult = recordMetaOutcome(true);
     scene.physics.pause();
     if (audioManager) {
@@ -126,7 +134,7 @@ function winGame(scene) {
         showCampaignVictory(scene, metaResult);
         return;
     }
-    showMissionVictory(scene, metaResult);
+    showMissionVictory(scene, metaResult, missionOutcome);
 }
 
 /**
@@ -198,7 +206,7 @@ function showCampaignDefeat(scene, metaResult) {
  * Parameters: scene, metaResult.
  * Returns: value defined by the surrounding game flow.
  */
-function showMissionVictory(scene, metaResult) {
+function showMissionVictory(scene, metaResult, missionOutcome = null) {
     const cam = scene.cameras.main;
     const centerX = cam.width / 2;
     const centerY = cam.height / 2;
@@ -237,6 +245,14 @@ function showMissionVictory(scene, metaResult) {
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
     statsLines.push(`Meta Credits: +${metaCredits} (Bank: ${metaBank})`);
+    const intelSummary = missionOutcome?.intelSummary;
+    if (intelSummary) {
+        const criticalTag = intelSummary.criticalBonusApplied ? ' · CRITICAL +50%' : '';
+        statsLines.push(`Pilot Intel: +${intelSummary.gained}${criticalTag}`);
+        if (Array.isArray(intelSummary.rewardsGranted) && intelSummary.rewardsGranted.length) {
+            statsLines.push(`Ribbon Rewards: ${intelSummary.rewardsGranted.map(reward => reward.label || reward.type).join(', ')}`);
+        }
+    }
 
     scene.add.text(centerX, centerY - 20 * overlayScale, statsLines.join('\n'), {
         fontSize: `${Math.round(26 * overlayScale)}px`,

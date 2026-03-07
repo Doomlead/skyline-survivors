@@ -280,17 +280,29 @@ const DistrictLayoutManager = (function() {
     function updateDistrictStatus(district) {
         const container = document.getElementById('district-node-status');
         if (!container) return;
-        
+
         const statusLabel = district.state?.status === 'occupied'
             ? '🔴 OCCUPIED'
-            : district.state?.status === 'friendly'
-                ? '🟢 FRIENDLY'
-                : '🟡 THREATENED';
-        
+            : district.state?.status === 'critical'
+                ? '🟠 CRITICAL'
+                : district.state?.status === 'friendly'
+                    ? '🟢 FRIENDLY'
+                    : '🟡 THREATENED';
+
         const timerText = district.state?.status === 'threatened' && district.state?.timer > 0
             ? `Destabilization in: ${formatSeconds(district.state.timer)}`
-            : 'No active timer';
-        
+            : district.state?.status === 'critical' && district.state?.criticalTimer > 0
+                ? `Critical window: ${formatSeconds(district.state.criticalTimer)}`
+                : 'No active timer';
+
+        const intelPreview = window.missionPlanner?.buildIntelPreview?.(district.state) || { current: 0, nextThreshold: null, remaining: 0 };
+        const nextReward = window.missionPlanner?.buildNextRibbonRewardPreview?.(district.state) || { label: 'N/A' };
+        const pilotWeapons = window.missionPlanner?.listPilotWeaponState?.() || [];
+        const weaponSummary = pilotWeapons
+            .filter(w => w.weaponId === 'combatRifle' || w.unlocked)
+            .map(w => `${w.weaponId} T${w.tier}`)
+            .join(', ') || 'None';
+
         container.innerHTML = `
             <div class="district-stat-row">
                 <span class="district-stat-label">Status</span>
@@ -303,6 +315,18 @@ const DistrictLayoutManager = (function() {
             <div class="district-stat-row">
                 <span class="district-stat-label">Reward Focus</span>
                 <span class="district-stat-value">${district.config?.reward || 'Standard'}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Pilot Intel</span>
+                <span class="district-stat-value">${Math.round(intelPreview.current)}${intelPreview.nextThreshold ? ` / ${intelPreview.nextThreshold}` : ' (max ribbon)'}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Next Ribbon Reward</span>
+                <span class="district-stat-value">${nextReward.label || nextReward.type || 'N/A'}</span>
+            </div>
+            <div class="district-stat-row">
+                <span class="district-stat-label">Pilot Weapons</span>
+                <span class="district-stat-value">${weaponSummary}</span>
             </div>
         `;
     }

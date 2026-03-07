@@ -51,6 +51,8 @@
             lastProsperityLoss: state.lastProsperityLoss ?? 0,
             status: state.status,
             mode: modeOverride,
+            pilotIntel: Math.max(0, Number(state.pilotIntel || 0)),
+            pilotIntelMilestonesClaimed: Array.isArray(state.pilotIntelMilestonesClaimed) ? [...state.pilotIntelMilestonesClaimed] : [],
             districtState: { ...state },
             threatMix
         };
