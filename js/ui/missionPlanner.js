@@ -27,6 +27,27 @@
         threatMix: ['shield', 'spawner', 'seeker', 'kamikaze', 'bomber'],
         backgroundStyle: 'mothership_exterior'
     };
+    const PILOT_INTEL_ECONOMY = plannerData.PILOT_INTEL_ECONOMY || {
+        baseAwards: {
+            defenseSuccess: 40,
+            assaultSuccess: 65,
+            failedMission: 8
+        },
+        criticalMultiplier: 1.5,
+        occupiedSuppression: {
+            suppressWhenOccupied: true,
+            allowOnLiberation: true
+        },
+        milestoneThresholds: [100, 250, 450, 700, 1000],
+        rewardPriority: ['unlock', 'tier_token', 'ammo_cap_bonus'],
+        ammoCapBonusByReward: {
+            scattergun: 40,
+            plasmaLauncher: 30,
+            lightningGun: 5000
+        }
+    };
+
+    const RIBBON_REWARD_ROTATION = ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
 
     let mission = null;
     let districtState = null;
@@ -50,7 +71,15 @@
             lastProsperityLoss: 0,
             prosperityLossTimer: 0,
             lastOutcome: null,
-            clearedRuns: 0
+            clearedRuns: 0,
+            pilotIntel: 0,
+            pilotIntelMilestonesClaimed: [],
+            lastIntelAward: null,
+            ammoCapBonus: {
+                scattergun: 0,
+                plasmaLauncher: 0,
+                lightningGun: 0
+            }
         };
         syncProsperityMetrics(state);
         return state;
@@ -95,6 +124,168 @@
         entry.prosperityLossTimer = PROSPERITY_CONFIG.lossFlashSeconds;
         entry.prosperity = 0;
         syncProsperityMetrics(entry);
+    }
+
+
+    function normalizeIntelState(entry) {
+        if (!entry) return;
+        entry.pilotIntel = Math.max(0, Number(entry.pilotIntel || 0));
+        entry.pilotIntelMilestonesClaimed = Array.isArray(entry.pilotIntelMilestonesClaimed)
+            ? entry.pilotIntelMilestonesClaimed.filter(v => Number.isFinite(v)).map(v => Math.round(v))
+            : [];
+        if (!entry.lastIntelAward || typeof entry.lastIntelAward !== 'object') {
+            entry.lastIntelAward = null;
+        }
+        const ammoCapBonus = entry.ammoCapBonus && typeof entry.ammoCapBonus === 'object' ? entry.ammoCapBonus : {};
+        entry.ammoCapBonus = {
+            scattergun: Math.max(0, Math.round(ammoCapBonus.scattergun || 0)),
+            plasmaLauncher: Math.max(0, Math.round(ammoCapBonus.plasmaLauncher || 0)),
+            lightningGun: Math.max(0, Math.round(ammoCapBonus.lightningGun || 0))
+        };
+    }
+
+    function buildIntelPreview(entry) {
+        const thresholds = PILOT_INTEL_ECONOMY.milestoneThresholds || [];
+        const current = Math.max(0, Number(entry?.pilotIntel || 0));
+        const nextThreshold = thresholds.find(value => value > current) || null;
+        return {
+            current,
+            nextThreshold,
+            remaining: nextThreshold ? Math.max(0, nextThreshold - current) : 0
+        };
+    }
+
+    function listPilotWeaponState() {
+        const profile = window.metaProgression?.getPilotWeaponProfile?.();
+        if (!profile) return [];
+        return Object.keys(profile.tiers || {}).map((weaponId) => ({
+            weaponId,
+            unlocked: Boolean(profile.unlocked?.[weaponId]),
+            tier: Math.max(0, Number(profile.tiers?.[weaponId] || 0))
+        }));
+    }
+
+    function buildNextRibbonRewardPreview(entry) {
+        const profile = window.metaProgression?.getPilotWeaponProfile?.();
+        if (!profile) {
+            return { type: 'ammo_cap_bonus', label: 'Ammo-cap bonus (meta offline)' };
+        }
+
+        const rotation = RIBBON_REWARD_ROTATION;
+        const nextUnlock = rotation.find(weaponId => !profile.unlocked?.[weaponId]);
+        if (nextUnlock) {
+            return { type: 'unlock', weaponId: nextUnlock, label: `Unlock ${nextUnlock}` };
+        }
+
+        const nextTier = ['combatRifle', ...rotation].find((weaponId) => {
+            if (weaponId !== 'combatRifle' && !profile.unlocked?.[weaponId]) return false;
+            return (profile.tiers?.[weaponId] || 0) < 3;
+        });
+        if (nextTier) {
+            return { type: 'tier_token', weaponId: nextTier, label: `Tier token for ${nextTier}` };
+        }
+
+        const ammoTargets = Object.keys(PILOT_INTEL_ECONOMY.ammoCapBonusByReward || {});
+        const baseBonus = entry?.ammoCapBonus || {};
+        const pick = ammoTargets.reduce((best, weaponId) => {
+            if (!best) return weaponId;
+            return (baseBonus[weaponId] || 0) <= (baseBonus[best] || 0) ? weaponId : best;
+        }, ammoTargets[0]);
+
+        return {
+            type: 'ammo_cap_bonus',
+            weaponId: pick,
+            amount: PILOT_INTEL_ECONOMY.ammoCapBonusByReward?.[pick] || 0,
+            label: `Ammo-cap bonus for ${pick}`
+        };
+    }
+
+    function grantMilestoneReward(entry, milestone) {
+        const profile = window.metaProgression?.getPilotWeaponProfile?.();
+        if (!profile) {
+            return { milestone, type: 'ammo_cap_bonus', label: 'Ammo-cap bonus deferred (meta unavailable)', amount: 0, granted: false };
+        }
+
+        const unlockCandidate = RIBBON_REWARD_ROTATION.find(weaponId => !profile.unlocked?.[weaponId]);
+        if (unlockCandidate) {
+            const result = window.metaProgression?.purchasePilotWeapon?.(unlockCandidate);
+            return {
+                milestone,
+                type: 'unlock',
+                weaponId: unlockCandidate,
+                granted: Boolean(result?.success),
+                label: `Unlocked ${unlockCandidate}`
+            };
+        }
+
+        const tierCandidate = ['combatRifle', ...RIBBON_REWARD_ROTATION].find((weaponId) => {
+            if (weaponId !== 'combatRifle' && !profile.unlocked?.[weaponId]) return false;
+            return (profile.tiers?.[weaponId] || 0) < 3;
+        });
+        if (tierCandidate) {
+            const result = window.metaProgression?.upgradePilotWeaponTier?.(tierCandidate);
+            return {
+                milestone,
+                type: 'tier_token',
+                weaponId: tierCandidate,
+                granted: Boolean(result?.success),
+                tier: result?.tier || profile.tiers?.[tierCandidate],
+                label: `Tier token applied to ${tierCandidate}`
+            };
+        }
+
+        const ammoBonuses = entry.ammoCapBonus || {};
+        const ammoTargets = Object.keys(PILOT_INTEL_ECONOMY.ammoCapBonusByReward || {});
+        const bonusWeapon = ammoTargets.reduce((best, weaponId) => {
+            if (!best) return weaponId;
+            return (ammoBonuses[weaponId] || 0) <= (ammoBonuses[best] || 0) ? weaponId : best;
+        }, ammoTargets[0]);
+        const amount = Math.max(0, Math.round(PILOT_INTEL_ECONOMY.ammoCapBonusByReward?.[bonusWeapon] || 0));
+        if (bonusWeapon && amount > 0) {
+            entry.ammoCapBonus[bonusWeapon] = (entry.ammoCapBonus[bonusWeapon] || 0) + amount;
+        }
+        return {
+            milestone,
+            type: 'ammo_cap_bonus',
+            weaponId: bonusWeapon,
+            amount,
+            granted: Boolean(bonusWeapon && amount > 0),
+            label: `+${amount} max ammo (${bonusWeapon})`
+        };
+    }
+
+    function computeIntelAward(state, success, mode) {
+        const isLiberation = state?.status === 'occupied' && success;
+        const isSuppressed = state?.status === 'occupied' && !isLiberation && PILOT_INTEL_ECONOMY.occupiedSuppression?.suppressWhenOccupied;
+        const baseAwards = PILOT_INTEL_ECONOMY.baseAwards || {};
+        const baseAmount = success
+            ? (mode === 'assault' || state?.status === 'occupied' ? baseAwards.assaultSuccess : baseAwards.defenseSuccess)
+            : baseAwards.failedMission;
+        const hasCriticalBonus = state?.status === 'critical';
+        const multiplier = hasCriticalBonus ? Number(PILOT_INTEL_ECONOMY.criticalMultiplier || 1) : 1;
+        const computed = Math.max(0, Math.round((Number(baseAmount || 0)) * multiplier));
+        const totalAwarded = isSuppressed ? 0 : computed;
+        return {
+            baseAmount: Math.max(0, Math.round(Number(baseAmount || 0))),
+            totalAwarded,
+            suppressed: Boolean(isSuppressed),
+            hasCriticalBonus,
+            multiplier,
+            liberationAward: Boolean(isLiberation)
+        };
+    }
+
+    function appendIntelTelemetry(payload) {
+        if (typeof localStorage === 'undefined') return;
+        try {
+            const key = 'skyline_pilot_intel_telemetry_v1';
+            const existing = JSON.parse(localStorage.getItem(key) || '[]');
+            const rows = Array.isArray(existing) ? existing : [];
+            rows.push({ ...payload, at: Date.now() });
+            localStorage.setItem(key, JSON.stringify(rows.slice(-250)));
+        } catch (err) {
+            // Ignore storage failures
+        }
     }
 
     /**
@@ -156,6 +347,7 @@
             if (base.prosperityLossTimer > 0) {
                 base.prosperityLossTimer = Math.max(0, base.prosperityLossTimer - elapsed);
             }
+            normalizeIntelState(base);
             syncProsperityMetrics(base);
             districtState.districts[cfg.id] = base;
         });
@@ -508,7 +700,7 @@
         const state = safeLoadState();
         if (!state.districts[id]) {
             const cfg = getDistrictConfigById(id);
-            state.districts[id] = cfg ? getDefaultDistrictState(cfg) : { id, status: 'friendly', timer: 90 };
+            state.districts[id] = cfg ? getDefaultDistrictState(cfg) : { id, status: 'friendly', timer: 90, pilotIntel: 0, pilotIntelMilestonesClaimed: [], ammoCapBonus: { scattergun: 0, plasmaLauncher: 0, lightningGun: 0 }, lastIntelAward: null };
         }
         return state.districts[id];
     }
@@ -522,6 +714,7 @@
         const state = safeLoadState();
         const existing = getDistrictState(id);
         state.districts[id] = { ...existing, ...patch };
+        normalizeIntelState(state.districts[id]);
         state.lastUpdated = Date.now();
         persistState();
         return state.districts[id];
@@ -591,6 +784,8 @@
             lastProsperityLoss: state.lastProsperityLoss ?? 0,
             status: state.status,
             mode: modeOverride,
+            pilotIntel: Math.max(0, Number(state.pilotIntel || 0)),
+            pilotIntelMilestonesClaimed: Array.isArray(state.pilotIntelMilestonesClaimed) ? [...state.pilotIntelMilestonesClaimed] : [],
             districtState: { ...state },
             threatMix
         };
@@ -680,10 +875,35 @@
      */
     function recordMissionOutcome(success) {
         const currentMission = mission;
-        if (!currentMission?.district) return;
+        if (!currentMission?.district) return null;
         const cfg = getDistrictConfigById(currentMission.district);
         const state = getDistrictState(currentMission.district);
-        if (!cfg) return;
+        if (!cfg) return null;
+
+        normalizeIntelState(state);
+        const preOutcomeState = { ...state };
+        const intelAward = computeIntelAward(preOutcomeState, success, currentMission.mode);
+        const previousIntel = Math.max(0, Number(state.pilotIntel || 0));
+        state.pilotIntel = previousIntel + intelAward.totalAwarded;
+
+        const thresholds = PILOT_INTEL_ECONOMY.milestoneThresholds || [];
+        const crossedMilestones = thresholds.filter((threshold) => previousIntel < threshold && state.pilotIntel >= threshold);
+        const rewardGrants = crossedMilestones.map((milestone) => grantMilestoneReward(state, milestone));
+        const claimed = new Set(state.pilotIntelMilestonesClaimed || []);
+        crossedMilestones.forEach((milestone) => claimed.add(milestone));
+        state.pilotIntelMilestonesClaimed = Array.from(claimed).sort((a, b) => a - b);
+
+        state.lastIntelAward = {
+            amount: intelAward.totalAwarded,
+            baseAmount: intelAward.baseAmount,
+            suppressed: intelAward.suppressed,
+            criticalBonusApplied: intelAward.hasCriticalBonus,
+            multiplier: intelAward.multiplier,
+            mode: currentMission.mode,
+            success: Boolean(success),
+            milestonesTriggered: crossedMilestones,
+            rewardsGranted: rewardGrants
+        };
 
         if (success) {
             state.status = 'friendly';
@@ -703,9 +923,43 @@
 
         districtState.lastUpdated = Date.now();
         persistState();
+
+        appendIntelTelemetry({
+            districtId: currentMission.district,
+            mode: currentMission.mode,
+            statusAtStart: preOutcomeState.status,
+            success: Boolean(success),
+            intelAwarded: intelAward.totalAwarded,
+            milestoneCount: crossedMilestones.length,
+            unlockCount: rewardGrants.filter(reward => reward.type === 'unlock' && reward.granted).length,
+            criticalBonusApplied: intelAward.hasCriticalBonus,
+            suppressionApplied: intelAward.suppressed
+        });
+
+        const intelSummary = {
+            gained: intelAward.totalAwarded,
+            base: intelAward.baseAmount,
+            suppressed: intelAward.suppressed,
+            criticalBonusApplied: intelAward.hasCriticalBonus,
+            multiplier: intelAward.multiplier,
+            milestonesTriggered: crossedMilestones,
+            rewardsGranted: rewardGrants,
+            totalIntel: state.pilotIntel,
+            nextMilestone: buildIntelPreview(state).nextThreshold,
+            ribbonPreview: buildNextRibbonRewardPreview(state)
+        };
+
         mission = {
             ...currentMission,
             directives: buildMissionDirectives(cfg, state, currentMission.mode),
+            districtState: { ...state },
+            intelSummary
+        };
+
+        return {
+            districtId: currentMission.district,
+            success: Boolean(success),
+            intelSummary,
             districtState: { ...state }
         };
     }
@@ -731,11 +985,13 @@
         const cfg = getDistrictConfigById(current.district);
         const state = cfg ? getDistrictState(cfg.id) : null;
         const effectiveMode = state?.status === 'occupied' ? 'assault' : current.mode;
+        const ammoCapBonus = state?.ammoCapBonus ? { ...state.ammoCapBonus } : null;
         return {
             ...current,
             mode: effectiveMode,
             directives: cfg ? buildMissionDirectives(cfg, state, effectiveMode) : current.directives,
             districtState: state ? { ...state } : null,
+            intelRuntime: state ? { ammoCapBonus } : null,
             mapState
         };
     }
@@ -844,6 +1100,9 @@
         buildMissionDirectives,
         resetCampaignState,
         recordMissionOutcome,
+        buildIntelPreview,
+        buildNextRibbonRewardPreview,
+        listPilotWeaponState,
         prepareLaunchPayload,
         tickDistricts,
         ensureMapNodeState,

@@ -277,9 +277,11 @@ function applyLoadoutEffects(gameState, playerState) {
         plasmaLauncher: 150,
         lightningGun: 25000
     };
+    const missionAmmoBonus = gameState?.missionContext?.intelRuntime?.ammoCapBonus || {};
     Object.keys(maxAmmo).forEach((weapon) => {
         if (weaponState.unlocked[weapon]) {
-            weaponState.ammo[weapon] = maxAmmo[weapon];
+            const bonus = Math.max(0, Math.round(missionAmmoBonus[weapon] || 0));
+            weaponState.ammo[weapon] = maxAmmo[weapon] + bonus;
         }
     });
     const order = ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
