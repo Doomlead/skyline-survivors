@@ -113,7 +113,7 @@ function resolveRibbonReward({ metaState, milestone, districtId } = {}) {
     };
 }
 
-const exported = {
+const PILOT_INTEL_RIBBON_EXPORTS = {
     PILOT_INTEL_RULES,
     PILOT_RIBBON_MILESTONES,
     computePilotIntelAward,
@@ -125,9 +125,9 @@ const exported = {
 };
 
 if (typeof module !== 'undefined') {
-    module.exports = exported;
+    module.exports = PILOT_INTEL_RIBBON_EXPORTS;
 }
 
 if (typeof window !== 'undefined') {
-    window.pilotIntelRibbon = exported;
+    window.pilotIntelRibbon = PILOT_INTEL_RIBBON_EXPORTS;
 }
