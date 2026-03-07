@@ -75,6 +75,16 @@ const DEFAULT_META_STATE = {
     lastRun: null,
     totalDropsPurchased: 0,
     lootHistory: [], // Last 5 drops for "history" display
+    pilotIntel: {
+        totalEarned: 0,
+        rewardHistory: []
+    },
+    pilotIntelAmmoCapBonus: {
+        active: false,
+        weaponId: null,
+        amount: 0,
+        sourceDistrict: null
+    },
     pilotWeapons: {
         unlocked: {
             combatRifle: true,
@@ -163,6 +173,26 @@ function normalizePilotWeaponProfile(raw) {
 }
 
 // Loads and initializes persistent meta-progression state from local storage.
+
+function normalizePilotIntelState(raw) {
+    const source = raw && typeof raw === 'object' ? raw : {};
+    return {
+        totalEarned: Math.max(0, Math.round(source.totalEarned || 0)),
+        rewardHistory: Array.isArray(source.rewardHistory) ? source.rewardHistory.slice(-20) : []
+    };
+}
+
+function normalizePilotIntelAmmoBonus(raw) {
+    const source = raw && typeof raw === 'object' ? raw : {};
+    const amount = Math.max(0, Math.round(source.amount || 0));
+    return {
+        active: Boolean(source.active) && amount > 0 && Boolean(source.weaponId),
+        weaponId: source.weaponId || null,
+        amount,
+        sourceDistrict: source.sourceDistrict || null
+    };
+}
+
 function loadMetaProgression() {
     if (metaState) return metaState;
 
@@ -183,6 +213,8 @@ function loadMetaProgression() {
                 metaState.assaultRewards = window.assaultJackpotRewards.ensureRewardState(stored.assaultRewards);
             }
             metaState.pilotWeapons = normalizePilotWeaponProfile(stored.pilotWeapons);
+            metaState.pilotIntel = normalizePilotIntelState(stored.pilotIntel);
+            metaState.pilotIntelAmmoCapBonus = normalizePilotIntelAmmoBonus(stored.pilotIntelAmmoCapBonus);
         }
     } catch (err) {
         metaState = { ...DEFAULT_META_STATE };
@@ -212,6 +244,8 @@ function getMetaState() {
         runHistory: [...state.runHistory],
         lootHistory: [...state.lootHistory],
         assaultRewards,
+        pilotIntel: normalizePilotIntelState(state.pilotIntel),
+        pilotIntelAmmoCapBonus: normalizePilotIntelAmmoBonus(state.pilotIntelAmmoCapBonus),
         pilotWeapons: normalizePilotWeaponProfile(state.pilotWeapons)
     };
 }
@@ -251,6 +285,99 @@ function upgradePilotWeaponTierMeta(weaponId) {
     return { success: true, weaponId, tier: nextTier, profile: normalizePilotWeaponProfile(state.pilotWeapons) };
 }
 
+function getPilotIntelBonusState() {
+    const state = loadMetaProgression();
+    state.pilotIntelAmmoCapBonus = normalizePilotIntelAmmoBonus(state.pilotIntelAmmoCapBonus);
+    return { ...state.pilotIntelAmmoCapBonus };
+}
+
+function consumePilotIntelBonusOnMissionStart() {
+    const state = loadMetaProgression();
+    state.pilotIntelAmmoCapBonus = normalizePilotIntelAmmoBonus(state.pilotIntelAmmoCapBonus);
+    const bonus = { ...state.pilotIntelAmmoCapBonus };
+    if (!bonus.active) return { consumed: false, bonus: null };
+    state.pilotIntelAmmoCapBonus = {
+        active: false,
+        weaponId: null,
+        amount: 0,
+        sourceDistrict: null
+    };
+    persistMetaProgression();
+    return { consumed: true, bonus };
+}
+
+function addPilotIntelEarned(amount, districtId = null) {
+    const state = loadMetaProgression();
+    state.pilotIntel = normalizePilotIntelState(state.pilotIntel);
+    const delta = Math.max(0, Math.round(amount || 0));
+    state.pilotIntel.totalEarned = Math.max(0, Math.round((state.pilotIntel.totalEarned || 0) + delta));
+    if (delta > 0) {
+        state.pilotIntel.rewardHistory = [
+            ...(state.pilotIntel.rewardHistory || []),
+            { timestamp: Date.now(), rewardType: 'intel_gain', amount: delta, districtId }
+        ].slice(-20);
+    }
+    persistMetaProgression();
+    return state.pilotIntel.totalEarned;
+}
+
+function applyPilotIntelReward(rewardPayload = {}) {
+    const state = loadMetaProgression();
+    state.pilotWeapons = normalizePilotWeaponProfile(state.pilotWeapons);
+    state.pilotIntel = normalizePilotIntelState(state.pilotIntel);
+    state.pilotIntelAmmoCapBonus = normalizePilotIntelAmmoBonus(state.pilotIntelAmmoCapBonus);
+
+    const payload = rewardPayload && typeof rewardPayload === 'object' ? rewardPayload : {};
+    const rewardType = payload.type;
+    let result = { applied: false, rewardType, reason: 'invalid_reward' };
+
+    if (rewardType === 'unlock' && payload.weaponId) {
+        const alreadyOwned = Boolean(state.pilotWeapons.unlocked[payload.weaponId]);
+        if (!alreadyOwned && Object.prototype.hasOwnProperty.call(state.pilotWeapons.unlocked, payload.weaponId)) {
+            state.pilotWeapons.unlocked[payload.weaponId] = true;
+            state.pilotWeapons.tiers[payload.weaponId] = Math.max(1, state.pilotWeapons.tiers[payload.weaponId] || 1);
+        }
+        result = { applied: true, rewardType, weaponId: payload.weaponId, alreadyOwned };
+    } else if (rewardType === 'tier' && payload.weaponId) {
+        const amount = Math.max(1, Math.round(payload.amount || 1));
+        const weaponId = payload.weaponId;
+        const currentTier = state.pilotWeapons.tiers[weaponId] || (weaponId === 'combatRifle' ? 1 : 0);
+        const nextTier = Math.max(weaponId === 'combatRifle' ? 1 : 0, Math.min(3, currentTier + amount));
+        state.pilotWeapons.tiers[weaponId] = nextTier;
+        if (weaponId !== 'combatRifle') {
+            state.pilotWeapons.unlocked[weaponId] = true;
+            if (state.pilotWeapons.tiers[weaponId] <= 0) state.pilotWeapons.tiers[weaponId] = 1;
+        }
+        result = { applied: true, rewardType, weaponId, previousTier: currentTier, tier: nextTier };
+    } else if (rewardType === 'ammo_cap_bonus' && payload.weaponId) {
+        const amount = Math.max(1, Math.round(payload.amount || 0));
+        state.pilotIntelAmmoCapBonus = {
+            active: true,
+            weaponId: payload.weaponId,
+            amount,
+            sourceDistrict: payload.sourceDistrict || payload.source || null
+        };
+        result = { applied: true, rewardType, weaponId: payload.weaponId, amount };
+    }
+
+    state.pilotIntel.totalEarned = Math.max(0, Math.round((state.pilotIntel.totalEarned || 0) + Math.max(0, Math.round(payload.intelAward || 0))));
+    state.pilotIntel.rewardHistory = [
+        ...(state.pilotIntel.rewardHistory || []),
+        {
+            timestamp: Date.now(),
+            rewardType: rewardType || 'unknown',
+            threshold: payload.threshold || null,
+            districtId: payload.sourceDistrict || null,
+            weaponId: payload.weaponId || null,
+            amount: payload.amount || null,
+            result
+        }
+    ].slice(-20);
+
+    persistMetaProgression();
+    return result;
+}
+
 function applyLoadoutEffects(gameState, playerState) {
     const profile = getPilotWeaponProfile();
     const runtimePilotState = typeof pilotState !== 'undefined' ? pilotState : null;
@@ -277,10 +404,13 @@ function applyLoadoutEffects(gameState, playerState) {
         plasmaLauncher: 150,
         lightningGun: 25000
     };
+    const consumedIntelBonus = consumePilotIntelBonusOnMissionStart();
     Object.keys(maxAmmo).forEach((weapon) => {
-        if (weaponState.unlocked[weapon]) {
-            weaponState.ammo[weapon] = maxAmmo[weapon];
-        }
+        if (!weaponState.unlocked[weapon]) return;
+        const bonus = consumedIntelBonus.consumed && consumedIntelBonus.bonus?.weaponId === weapon
+            ? consumedIntelBonus.bonus.amount || 0
+            : 0;
+        weaponState.ammo[weapon] = maxAmmo[weapon] + bonus;
     });
     const order = ['combatRifle', 'scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone'];
     if (!weaponState.unlocked[weaponState.selected]) {
@@ -622,6 +752,10 @@ window.metaProgression = {
     upgradePilotWeaponTier: upgradePilotWeaponTierMeta,
     getLoadoutOptions,
     applyLoadoutEffects,
+    applyPilotIntelReward,
+    addPilotIntelEarned,
+    getPilotIntelBonusState,
+    consumePilotIntelBonusOnMissionStart,
     LOOT_TABLES,
     POWERUP_TIERS,
     PILOT_WEAPON_SHOP

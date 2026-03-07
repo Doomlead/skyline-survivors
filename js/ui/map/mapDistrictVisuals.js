@@ -28,6 +28,30 @@
         }
     }
 
+
+    function drawPilotRibbonSignals({ graphics, district, projected, radius }) {
+        if (!graphics || !district?.state) return;
+        const intelModule = window.pilotIntelRibbon;
+        const currentIntel = Math.max(0, Math.round(district.state.pilotIntel || 0));
+        const nextMilestone = intelModule?.getNextRibbonMilestone
+            ? intelModule.getNextRibbonMilestone(currentIntel)
+            : null;
+        const threshold = nextMilestone?.threshold || currentIntel;
+        const progress = nextMilestone ? Phaser.Math.Clamp(currentIntel / Math.max(1, threshold), 0, 1) : 1;
+
+        const ringRadius = radius * 2.5;
+        graphics.lineStyle(1.5, 0x1f2937, 0.65);
+        graphics.strokeCircle(projected.x, projected.y, ringRadius);
+
+        const color = district.state.status === 'occupied' ? 0xfb7185 : 0x38bdf8;
+        graphics.lineStyle(2.5, color, 0.9);
+        const startAngle = Phaser.Math.DegToRad(-90);
+        const endAngle = startAngle + Phaser.Math.DegToRad(360 * progress);
+        graphics.beginPath();
+        graphics.arc(projected.x, projected.y, ringRadius, startAngle, endAngle, false);
+        graphics.strokePath();
+    }
+
     function drawProsperitySignals({ graphics, district, projected, radius, now }) {
         if (!graphics || !district?.state) return;
 
@@ -55,6 +79,7 @@
 
     window.mapDistrictVisuals = {
         drawDistrictThreatPulse,
-        drawProsperitySignals
+        drawProsperitySignals,
+        drawPilotRibbonSignals
     };
 })();

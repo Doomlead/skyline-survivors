@@ -434,9 +434,13 @@ function update(time, delta) {
     }
     
     if (gameState.gameOver) {
-        if (!gameState.victory && this.restartKey && Phaser.Input.Keyboard.JustDown(this.restartKey)) {
+        if (this.restartKey && Phaser.Input.Keyboard.JustDown(this.restartKey)) {
             resetGameState();
-            this.scene.restart();
+            if (window.enterDistrictMap) {
+                enterDistrictMap({ fromVictory: true });
+            } else {
+                this.scene.restart();
+            }
         }
         return;
     }
