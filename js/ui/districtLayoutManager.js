@@ -194,6 +194,10 @@ const DistrictLayoutManager = (function() {
         updateElement('district-lives', gameState?.lives ?? 3);
         updateElement('district-bombs', gameState?.smartBombs ?? 3);
         updateElement('district-score', gameState?.score ?? 0);
+        updateElement('district-pilot-primary', playerState?.primaryWeapon || 'laser');
+        updateElement('district-pilot-secondary', playerState?.secondaryWeapon || 'missile');
+        const cargoCount = window.ShipController?.cargo ?? 0;
+        updateElement('district-pilot-capacity', `${cargoCount}/8`);
         
         const meta = window.metaProgression?.getMetaState?.() || { credits: 0 };
         updateElement('district-credits', meta.credits);
