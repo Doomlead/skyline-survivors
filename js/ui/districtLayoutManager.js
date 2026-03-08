@@ -80,14 +80,10 @@ const DistrictLayoutManager = (function() {
         // Show ALL game-related HTML elements
         const gameHud = document.getElementById('hud-container');
         const gameRadar = document.getElementById('radar-container');
-        const gameControls = document.getElementById('controls-text');
-        const touchControls = document.getElementById('touch-controls');
         const buildToggle = document.getElementById('build-toggle');
         
         if (gameHud) gameHud.style.display = 'block';
         if (gameRadar) gameRadar.style.display = 'block';
-        if (gameControls) gameControls.style.display = 'block';
-        if (touchControls) touchControls.style.display = 'flex';
         if (buildToggle) buildToggle.style.display = 'block';
         
         const gameLayout = document.getElementById('game-layout');
