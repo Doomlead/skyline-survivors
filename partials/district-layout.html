@@ -66,10 +66,19 @@
             </button>
         </div>
 
-        <!-- Center Panel: Globe/World Map -->
-        <div id="district-center-panel">
-            <div id="district-game-container">
-                <!-- Phaser canvas will be moved here in district mode -->
+        <!-- Center Column: Globe above Pilot Status -->
+        <div id="district-center-column">
+            <div id="district-center-panel">
+                <div id="district-game-container">
+                    <!-- Phaser canvas will be moved here in district mode -->
+                </div>
+            </div>
+
+            <div id="district-pilot-panel" class="district-panel-section">
+                <h4>Pilot Status</h4>
+                <div id="district-node-status" style="max-height: 120px; overflow-y: auto;">
+                    <p style="color: #64748b; font-size: 10px;">Select a district to view status</p>
+                </div>
             </div>
         </div>
 
@@ -116,13 +125,6 @@
                 <div class="district-shop-group">
                     <div class="district-shop-subhead">Drop History</div>
                     <div id="district-shop-history"></div>
-                </div>
-            </div>
-
-            <div class="district-panel-section">
-                <h4>District Status</h4>
-                <div id="district-node-status" style="max-height: 120px; overflow-y: auto;">
-                    <p style="color: #64748b; font-size: 10px;">Select a district to view status</p>
                 </div>
             </div>
 

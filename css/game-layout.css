@@ -78,8 +78,36 @@ body.fullscreen-active #game-container {
 }
 
 /* Game Layout (default) */
-#game-layout { display: flex; flex-direction: column; }
-#game-container { position: relative; }
+#game-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+#game-layout main {
+    flex: 1;
+    min-height: 0;
+}
+
+#gameplay-shell {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+#weapons-container {
+    flex-shrink: 0;
+}
+
+#game-container {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+}
+
 
 #menu-overlay {
     display: none;
