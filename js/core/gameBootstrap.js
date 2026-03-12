@@ -33,6 +33,16 @@ document.addEventListener('fullscreenchange', () => {
 let lastResizeWidth = 0;
 let lastResizeHeight = 0;
 
+function getAspectFitDimensions(maxWidth, maxHeight) {
+    const baseWidth = CONFIG?.width || 960;
+    const baseHeight = CONFIG?.height || 540;
+    const fitScale = Math.min(maxWidth / baseWidth, maxHeight / baseHeight);
+    return {
+        width: Math.max(1, Math.floor(baseWidth * fitScale)),
+        height: Math.max(1, Math.floor(baseHeight * fitScale))
+    };
+}
+
 // Resizes the Phaser canvas for district, fullscreen, or standard layouts while avoiding redundant work.
 function applyResponsiveResize(options = {}) {
     const { force = false } = options;
@@ -68,19 +78,20 @@ function applyResponsiveResize(options = {}) {
     if (document.body.classList.contains('fullscreen-active')) {
         const container = document.getElementById('game-container');
         if (container && container.clientWidth > 0 && container.clientHeight > 0) {
-            if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
+            const fitted = getAspectFitDimensions(container.clientWidth, container.clientHeight);
+            if (!force && fitted.width === lastResizeWidth && fitted.height === lastResizeHeight) {
                 return;
             }
-            console.log(`[ResponsiveResize] Fullscreen - Updating game size to: ${container.clientWidth}x${container.clientHeight}`);
-            game.scale.resize(container.clientWidth, container.clientHeight);
-            game.canvas.style.width = `${container.clientWidth}px`;
-            game.canvas.style.height = `${container.clientHeight}px`;
+            console.log(`[ResponsiveResize] Fullscreen - Updating game size to: ${fitted.width}x${fitted.height}`);
+            game.scale.resize(fitted.width, fitted.height);
+            game.canvas.style.width = `${fitted.width}px`;
+            game.canvas.style.height = `${fitted.height}px`;
             if (typeof resizeParallaxLayers === 'function') {
-                resizeParallaxLayers(container.clientWidth, container.clientHeight);
+                resizeParallaxLayers(fitted.width, fitted.height);
             }
             game.scale.refresh();
-            lastResizeWidth = container.clientWidth;
-            lastResizeHeight = container.clientHeight;
+            lastResizeWidth = fitted.width;
+            lastResizeHeight = fitted.height;
         }
         return;
     }
