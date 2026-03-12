@@ -4,11 +4,11 @@
 
 (function() {
     const GLOBE_LAYOUT = {
-        centerXRatio: 0.75,
-        centerYRatio: 0.75,
-        radiusScale: 0.15,
-        minRadius: 100,
-        maxRadius: 200
+        centerXRatio: 0.5,
+        centerYRatio: 0.5,
+        radiusScale: 0.36,
+        minRadius: 140,
+        maxRadius: 420
     };
 
     function calculateGlobeDimensions(width, height, layout = GLOBE_LAYOUT) {
@@ -16,7 +16,7 @@
         const safeHeight = height || window.innerHeight;
         const centerX = safeWidth * layout.centerXRatio;
         const centerY = safeHeight * layout.centerYRatio;
-        const constrainingDimension = Math.min(safeWidth, safeHeight * 0.6);
+        const constrainingDimension = Math.min(safeWidth, safeHeight);
         const baseRadius = constrainingDimension * layout.radiusScale;
         const globeRadius = Phaser.Math.Clamp(baseRadius, layout.minRadius, layout.maxRadius);
 

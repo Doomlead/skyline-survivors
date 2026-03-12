@@ -168,11 +168,11 @@ class BuildMapView {
 	 */
 	calculateDimensions(width, height) {
         const layout = MAP_VIEW_UTILS.GLOBE_LAYOUT || {
-            centerXRatio: 0.75,
-            centerYRatio: 0.75,
-            radiusScale: 0.15,
-            minRadius: 100,
-            maxRadius: 200
+            centerXRatio: 0.5,
+            centerYRatio: 0.5,
+            radiusScale: 0.36,
+            minRadius: 140,
+            maxRadius: 420
         };
         const calc = MAP_VIEW_UTILS.calculateGlobeDimensions
             ? MAP_VIEW_UTILS.calculateGlobeDimensions(width, height, layout)
@@ -183,7 +183,7 @@ class BuildMapView {
         this.centerX = calc?.centerX ?? safeWidth * layout.centerXRatio;
         this.centerY = calc?.centerY ?? safeHeight * layout.centerYRatio;
         this.globeRadius = calc?.globeRadius ?? Phaser.Math.Clamp(
-            Math.min(safeWidth, safeHeight * 0.6) * layout.radiusScale,
+            Math.min(safeWidth, safeHeight) * layout.radiusScale,
             layout.minRadius,
             layout.maxRadius
         );
