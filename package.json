@@ -2,12 +2,17 @@
   "name": "last-bastion",
   "version": "1.0.0",
   "description": "Last Bastion - Defend. Liberate. Survive.",
-  "main": "index.js",
+  "main": "electron/main.js",
   "scripts": {
+    "start": "electron .",
+    "start:web": "python3 -m http.server 8080",
     "test": "node --test --experimental-test-coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^31.7.7"
+  }
 }
