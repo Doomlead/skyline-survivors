@@ -99,36 +99,32 @@ function applyResponsiveResize(options = {}) {
     // 4. Normal Game Mode Logic:
     const container = document.getElementById('game-container');
     if (container && container.clientWidth > 0 && container.clientHeight > 0) {
-        const responsive = typeof getResponsiveScale === 'function'
-            ? getResponsiveScale()
-            : { width: container.clientWidth, height: container.clientHeight };
-        const targetWidth = responsive.width || container.clientWidth;
-        const targetHeight = responsive.height || container.clientHeight;
+        const fitted = getAspectFitDimensions(container.clientWidth, container.clientHeight);
 
-        if (!force && targetWidth === lastResizeWidth && targetHeight === lastResizeHeight) {
+        if (!force && fitted.width === lastResizeWidth && fitted.height === lastResizeHeight) {
             return;
         }
-        console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${targetWidth}x${targetHeight}`);
+        console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${fitted.width}x${fitted.height}`);
 
         // Clear any inline styles that might have been set during fullscreen
         game.canvas.style.width = '';
         game.canvas.style.height = '';
 
-        // Force Phaser to use these dimensions
-        game.scale.resize(targetWidth, targetHeight);
+        // Force Phaser to use aspect-fit dimensions inside the available game container
+        game.scale.resize(fitted.width, fitted.height);
 
         // Set CSS to match
-        game.canvas.style.width = `${targetWidth}px`;
-        game.canvas.style.height = `${targetHeight}px`;
+        game.canvas.style.width = `${fitted.width}px`;
+        game.canvas.style.height = `${fitted.height}px`;
 
         if (typeof resizeParallaxLayers === 'function') {
-            resizeParallaxLayers(targetWidth, targetHeight);
+            resizeParallaxLayers(fitted.width, fitted.height);
         }
 
         // Refresh the scale manager internals
         game.scale.refresh();
-        lastResizeWidth = targetWidth;
-        lastResizeHeight = targetHeight;
+        lastResizeWidth = fitted.width;
+        lastResizeHeight = fitted.height;
     }
 }
 

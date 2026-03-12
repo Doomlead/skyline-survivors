@@ -87,7 +87,7 @@ const DistrictLayoutManager = (function() {
         if (gameHud) gameHud.style.display = 'block';
         if (gameRadar) gameRadar.style.display = 'block';
         if (gameControls) gameControls.style.display = 'block';
-        if (touchControls) touchControls.style.display = 'flex';
+        if (touchControls) touchControls.style.display = '';
         if (buildToggle) buildToggle.style.display = 'block';
         
         const gameLayout = document.getElementById('game-layout');

@@ -217,40 +217,19 @@ function createEnhancedDeathEffect(scene, x, y, enemyType) {
 
 // Calculates responsive game viewport dimensions based on available layout space and device constraints.
 function getResponsiveScale() {
-    const isMobile = window.innerWidth <= 900;
-    const isLandscape = window.innerWidth > window.innerHeight;
-    const hud = document.getElementById('hud-container');
-    const controls = document.getElementById('controls-text');
-    const touchControls = document.getElementById('touch-controls');
-    const footer = document.getElementById('footer-note');
-    const buildControls = document.getElementById('build-controls');
     const gameContainer = document.getElementById('game-container');
-
-    /**
-     * Handles the getOuterHeight routine and encapsulates its core gameplay logic.
-     * Parameters: el.
-     * Returns: value defined by the surrounding game flow.
-     */
-    const getOuterHeight = (el) => {
-        if (!el) return 0;
-        const styles = window.getComputedStyle(el);
-        const marginTop = parseFloat(styles.marginTop) || 0;
-        const marginBottom = parseFloat(styles.marginBottom) || 0;
-        return el.offsetHeight + marginTop + marginBottom;
-    };
-
-    const reservedHeight = getOuterHeight(hud) + getOuterHeight(controls) + getOuterHeight(buildControls) + getOuterHeight(touchControls) + getOuterHeight(footer) + 16;
-    const containerWidth = gameContainer?.clientWidth || 0;
-    const maxWidth = Math.max(320, containerWidth || window.innerWidth - 24);
-    let maxHeight = Math.max(180, window.innerHeight - reservedHeight);
-
     const baseWidth = CONFIG.width;
     const baseHeight = CONFIG.height;
-    const scaleX = maxWidth / baseWidth;
-    const scaleY = maxHeight / baseHeight;
-    const scale = Math.min(scaleX, scaleY);
-    const maxScale = isMobile ? 1 : 2;
-    const finalScale = Math.min(scale, maxScale);
+
+    const maxWidth = gameContainer?.clientWidth || window.innerWidth;
+    const maxHeight = gameContainer?.clientHeight || window.innerHeight;
+
+    const safeWidth = Math.max(320, maxWidth);
+    const safeHeight = Math.max(180, maxHeight);
+
+    const fitScale = Math.min(safeWidth / baseWidth, safeHeight / baseHeight);
+    const finalScale = Math.max(0.1, fitScale);
+
     return {
         width: Math.floor(baseWidth * finalScale),
         height: Math.floor(baseHeight * finalScale),
