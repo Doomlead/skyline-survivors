@@ -1,10 +1,13 @@
-/* District Map Layout (hidden by default) */
+/* ── DISTRICT MAP LAYOUT ── */
 #district-layout {
     display: none;
     width: 100%;
-    height: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
     flex-direction: column;
+    overflow: hidden;
 }
+
 #district-layout.active {
     display: flex;
 }
@@ -14,67 +17,141 @@
     display: none !important;
 }
 
-/* District layout panels */
+/* ── TOP PANEL: Full-width title bar ── */
 #district-top-panel {
-    height: 60px;
+    height: 52px;
+    min-height: 52px;
+    flex-shrink: 0;
     background: linear-gradient(180deg, #0b1628 0%, #061018 100%);
     border-bottom: 2px solid #33c0ff;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
 }
 
+/* ── MAIN AREA: fills all remaining vertical space ── */
 #district-main {
     flex: 1;
-    display: flex;
     min-height: 0;
+    display: flex;
+    flex-direction: row;
     overflow: hidden;
 }
 
+/* ── LEFT PANEL: Mission & Build ── */
 #district-left-panel {
-    width: 280px;
+    width: 260px;
+    flex-shrink: 0;
     background: linear-gradient(90deg, #0c1e34 0%, #0a1628 100%);
     border-right: 2px solid #33c0ff;
-    padding: 16px;
+    padding: 12px;
     overflow-y: auto;
-    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+    box-sizing: border-box;
 }
 
+/* ── CENTER COLUMN: Globe on top, Pilot Status below ── */
+#district-center-column {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Globe / Phaser canvas area — grows to fill space */
 #district-center-panel {
     flex: 1;
+    min-height: 0;
     background: #050912;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: stretch;
+    justify-content: stretch;
     position: relative;
-    min-width: 400px;
-    min-height: 600px; /* Minimum height for the globe */
 }
 
-#district-right-panel {
-    width: 260px;
-    background: linear-gradient(270deg, #0c1e34 0%, #0a1628 100%);
-    border-left: 2px solid #22d3ee;
-    padding: 16px;
-    overflow-y: auto;
+#district-game-container {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    background: #050912;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Phaser canvas fills its container */
+#district-game-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
+/* ── PILOT STATUS BAR: full-width strip below globe ── */
+#district-pilot-status {
     flex-shrink: 0;
+    height: 80px;
+    background: linear-gradient(180deg, #061018 0%, #0b1628 100%);
+    border-top: 2px solid #33c0ff;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 24px;
+    overflow: hidden;
+}
+
+.district-pilot-stat {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    align-items: center;
+    gap: 2px;
 }
 
-/* Panel styling */
+.district-pilot-stat-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    color: #7dd3fc;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.district-pilot-stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    color: #e0f2fe;
+    font-weight: bold;
+}
+
+.district-pilot-divider {
+    width: 1px;
+    height: 48px;
+    background: rgba(51, 192, 255, 0.25);
+    flex-shrink: 0;
+}
+
+/* ── RIGHT PANEL: Ship Status & Shop ── */
+#district-right-panel {
+    width: 260px;
+    flex-shrink: 0;
+    background: linear-gradient(270deg, #0c1e34 0%, #0a1628 100%);
+    border-left: 2px solid #22d3ee;
+    padding: 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+/* ── PANEL TYPOGRAPHY ── */
 .district-panel-header {
     font-family: 'Orbitron', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     color: #8bffff;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     text-shadow: 0 0 8px #0ea5e9;
 }
 
@@ -82,14 +159,14 @@
     background: rgba(11, 18, 32, 0.8);
     border: 1px solid rgba(51, 192, 255, 0.3);
     border-radius: 8px;
-    padding: 12px;
+    padding: 10px;
 }
 
 .district-panel-section h4 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     color: #c7e3ff;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
     text-transform: uppercase;
     letter-spacing: 0.1em;
 }
@@ -106,33 +183,23 @@
 .district-stat-row {
     display: flex;
     justify-content: space-between;
-    padding: 4px 0;
+    padding: 3px 0;
     border-bottom: 1px solid rgba(51, 192, 255, 0.15);
 }
+.district-stat-row:last-child { border-bottom: none; }
+.district-stat-label { color: #7dd3fc; }
+.district-stat-value { color: #e0f2fe; font-weight: bold; }
 
-.district-stat-row:last-child {
-    border-bottom: none;
-}
-
-.district-stat-label {
-    color: #7dd3fc;
-}
-
-.district-stat-value {
-    color: #e0f2fe;
-    font-weight: bold;
-}
-
-.district-shop-group {
-    margin-top: 10px;
-}
+/* ── SHOP ── */
+.district-shop-group { margin-top: 8px; }
 
 .district-shop-subhead {
     font-size: 10px;
     color: #7dd3fc;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    font-family: 'Orbitron', sans-serif;
 }
 
 .district-shop-row {
@@ -140,140 +207,104 @@
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    padding: 8px;
+    padding: 7px 8px;
     border-radius: 6px;
     background: rgba(15, 23, 42, 0.85);
     border: 1px solid rgba(29, 202, 255, 0.3);
-    margin-bottom: 6px;
+    margin-bottom: 5px;
 }
+.district-shop-row:last-child { margin-bottom: 0; }
 
-.district-shop-row:last-child {
-    margin-bottom: 0;
-}
-
-.district-shop-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.district-shop-title {
-    font-size: 11px;
-    color: #e0f2fe;
-}
-
-.district-shop-desc {
-    font-size: 10px;
-    color: #94a3b8;
-}
+.district-shop-meta { display: flex; flex-direction: column; gap: 2px; }
+.district-shop-title { font-size: 11px; color: #e0f2fe; }
+.district-shop-desc  { font-size: 10px; color: #94a3b8; }
 
 .district-shop-button {
     border: 1px solid rgba(34, 211, 238, 0.7);
     background: rgba(15, 23, 42, 0.9);
     color: #dbeafe;
     font-size: 10px;
-    padding: 6px 10px;
+    padding: 5px 9px;
     border-radius: 6px;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    font-family: 'Orbitron', sans-serif;
+    white-space: nowrap;
 }
-
 .district-shop-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     border-color: rgba(148, 163, 184, 0.4);
 }
 
-#district-game-container {
-    flex: 1;
-    background: #050912; /* Use the same dark color as the scene */
-    position: relative;
-    min-height: 0;
-    overflow: hidden;
-    border: 1px solid #1e293b;
-}
-
-/* Mode buttons in district layout */
+/* ── MODE BUTTONS ── */
 .district-mode-btn {
-    padding: 10px 16px;
+    padding: 9px 14px;
     border-radius: 6px;
     background: #0f172a;
     border: 2px solid #33c0ff;
     color: #d1f6ff;
     font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     cursor: pointer;
     transition: all 0.15s ease;
     width: 100%;
+    box-sizing: border-box;
 }
-
-.district-mode-btn:hover {
-    background: #1e293b;
-    border-color: #7dd3fc;
-}
-
+.district-mode-btn:hover { background: #1e293b; border-color: #7dd3fc; }
 .district-mode-btn.active {
     background: #164e63;
     border-color: #22d3ee;
     box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
 }
 
+/* ── LAUNCH BUTTON ── */
 .district-launch-btn {
-    padding: 14px 20px;
+    padding: 12px 18px;
     border-radius: 8px;
     background: linear-gradient(180deg, #065f46 0%, #064e3b 100%);
     border: 2px solid #34d399;
     color: #ecfdf5;
     font-family: 'Orbitron', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
     cursor: pointer;
     transition: all 0.15s ease;
     width: 100%;
+    box-sizing: border-box;
 }
-
 .district-launch-btn:hover:not(:disabled) {
     background: linear-gradient(180deg, #047857 0%, #065f46 100%);
     box-shadow: 0 0 16px rgba(52, 211, 153, 0.4);
 }
+.district-launch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.district-launch-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-    #district-left-panel { width: 240px; }
+/* ── RESPONSIVE ── */
+@media (max-width: 1100px) {
+    #district-left-panel  { width: 220px; }
     #district-right-panel { width: 220px; }
 }
 
-@media (max-width: 900px) {
-    #district-main {
-        flex-direction: column;
-    }
+@media (max-width: 800px) {
+    #district-main { flex-direction: column; }
+
     #district-left-panel,
     #district-right-panel {
         width: 100%;
-        max-height: 200px;
-        border: none;
+        max-height: 180px;
+        border-right: none;
+        border-left: none;
         border-bottom: 2px solid #33c0ff;
     }
-    #district-right-panel {
-        border-bottom: none;
-        border-top: 2px solid #22d3ee;
-    }
-    #district-center-panel {
-        min-width: 0;
-        min-height: 1200px;
-    }
-    .transition-all {
-        transition-property: all;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 150ms;
-    }
+
+    #district-right-panel { border-bottom: none; border-top: 2px solid #22d3ee; }
+
+    #district-center-column { flex: 1; min-height: 300px; }
+
+    #district-pilot-status { height: 64px; padding: 0 12px; gap: 16px; }
+    .district-pilot-stat-value { font-size: 13px; }
 }

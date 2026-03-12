@@ -2,32 +2,38 @@
 <!-- DISTRICT MAP LAYOUT (for BuildScene) -->
 <!-- ============================================ -->
 <div id="district-layout">
-    <!-- Top Panel: Title -->
+
+    <!-- TOP PANEL: Full-width title bar -->
     <div id="district-top-panel">
         <h1 class="text-xl md:text-2xl font-bold tracking-[0.25em] text-cyan-300 uppercase font-orbitron">
             Select a District
         </h1>
     </div>
 
-    <!-- Main 3-column layout -->
+    <!-- MAIN: 3-column layout filling remaining height -->
     <div id="district-main">
-        <!-- Left Panel: Mission & Build Routing -->
+
+        <!-- LEFT PANEL: Mission & Build -->
         <div id="district-left-panel">
-            <div class="district-panel-header">Mission & Build</div>
+            <div class="district-panel-header">Mission &amp; Build</div>
 
             <div class="district-panel-section" id="district-mission-info">
                 <h4>Current Mission</h4>
                 <p id="district-mission-city">No district selected</p>
-                <p id="district-mission-details" class="mt-2" style="color: #7dd3fc;">Click a district on the globe to begin</p>
+                <p id="district-mission-details" class="mt-2" style="color: #7dd3fc;">
+                    Click a district on the globe to begin
+                </p>
             </div>
 
             <div class="district-panel-section">
                 <h4>Deployment Mode</h4>
                 <div class="flex flex-col gap-2 mt-2">
-                    <button id="district-mode-wave" class="district-mode-btn active" onclick="selectDistrictMode('classic')">
+                    <button id="district-mode-wave" class="district-mode-btn active"
+                            onclick="selectDistrictMode('classic')">
                         Defense Mode
                     </button>
-                    <button id="district-mode-survival" class="district-mode-btn" onclick="selectDistrictMode('survival')">
+                    <button id="district-mode-survival" class="district-mode-btn"
+                            onclick="selectDistrictMode('survival')">
                         Survival Mode
                     </button>
                 </div>
@@ -57,23 +63,62 @@
 
             <div class="flex-1"></div>
 
-            <button id="district-launch-btn" class="district-launch-btn" onclick="launchFromDistrictMap()" disabled>
+            <button id="district-launch-btn" class="district-launch-btn"
+                    onclick="launchFromDistrictMap()" disabled>
                 Select District to Launch
             </button>
 
-            <button onclick="returnToGameFromDistrict()" class="district-mode-btn" style="border-color: #f97316; margin-top: 8px;">
+            <button onclick="returnToGameFromDistrict()"
+                    class="district-mode-btn"
+                    style="border-color: #f97316; margin-top: 6px;">
                 Return to Battle
             </button>
         </div>
 
-        <!-- Center Panel: Globe/World Map -->
-        <div id="district-center-panel">
-            <div id="district-game-container">
-                <!-- Phaser canvas will be moved here in district mode -->
-            </div>
-        </div>
+        <!-- CENTER COLUMN: Globe (fills height) + Pilot Status bar (bottom strip) -->
+        <div id="district-center-column">
 
-        <!-- Right Panel: Ship Status & Shop -->
+            <!-- Globe / Phaser canvas area -->
+            <div id="district-center-panel">
+                <div id="district-game-container">
+                    <!-- Phaser canvas will be moved here in district mode -->
+                </div>
+            </div>
+
+            <!-- Pilot Status bar: full-width strip below the globe -->
+            <div id="district-pilot-status">
+                <div class="district-pilot-stat">
+                    <span class="district-pilot-stat-label">Lives</span>
+                    <span class="district-pilot-stat-value" id="district-lives">3</span>
+                </div>
+                <div class="district-pilot-divider"></div>
+                <div class="district-pilot-stat">
+                    <span class="district-pilot-stat-label">Smart Bombs</span>
+                    <span class="district-pilot-stat-value" id="district-bombs">3</span>
+                </div>
+                <div class="district-pilot-divider"></div>
+                <div class="district-pilot-stat">
+                    <span class="district-pilot-stat-label">Score</span>
+                    <span class="district-pilot-stat-value" id="district-score">0</span>
+                </div>
+                <div class="district-pilot-divider"></div>
+                <div class="district-pilot-stat">
+                    <span class="district-pilot-stat-label">Credits</span>
+                    <span class="district-pilot-stat-value" id="district-credits" style="color:#fef08a;">0</span>
+                </div>
+                <div class="district-pilot-divider"></div>
+                <div class="district-pilot-stat" style="align-items:flex-start; flex:1;">
+                    <span class="district-pilot-stat-label">District Status</span>
+                    <div id="district-node-status"
+                         style="font-family:'Orbitron',sans-serif; font-size:11px; color:#94a3b8;">
+                        Select a district
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end #district-center-column -->
+
+        <!-- RIGHT PANEL: Ship Status & Shop -->
         <div id="district-right-panel">
             <div class="district-panel-header">Ship Status</div>
 
@@ -81,24 +126,17 @@
                 <h4>Current Loadout</h4>
                 <div id="district-ship-stats">
                     <div class="district-stat-row">
-                        <span class="district-stat-label">Lives</span>
-                        <span class="district-stat-value" id="district-lives">3</span>
+                        <span class="district-stat-label">Hull Integrity</span>
+                        <span class="district-stat-value" id="district-hull">100%</span>
                     </div>
                     <div class="district-stat-row">
-                        <span class="district-stat-label">Smart Bombs</span>
-                        <span class="district-stat-value" id="district-bombs">3</span>
+                        <span class="district-stat-label">Shield</span>
+                        <span class="district-stat-value" id="district-shield">--</span>
                     </div>
                     <div class="district-stat-row">
-                        <span class="district-stat-label">Score</span>
-                        <span class="district-stat-value" id="district-score">0</span>
+                        <span class="district-stat-label">Primary Weapon</span>
+                        <span class="district-stat-value" id="district-weapon">Std</span>
                     </div>
-                </div>
-            </div>
-
-            <div class="district-panel-section">
-                <h4>Credits</h4>
-                <div class="text-center py-2">
-                    <span id="district-credits" style="font-size: 18px; color: #fef08a; font-weight: bold;">0</span>
                 </div>
             </div>
 
@@ -119,16 +157,12 @@
                 </div>
             </div>
 
-            <div class="district-panel-section">
-                <h4>District Status</h4>
-                <div id="district-node-status" style="max-height: 120px; overflow-y: auto;">
-                    <p style="color: #64748b; font-size: 10px;">Select a district to view status</p>
-                </div>
-            </div>
-
-            <button onclick="openSettingsMenu()" class="district-mode-btn" style="border-color: #a78bfa; margin-top: auto;">
+            <button onclick="openSettingsMenu()"
+                    class="district-mode-btn"
+                    style="border-color: #a78bfa; margin-top: auto;">
                 ⚙ Settings
             </button>
         </div>
-    </div>
+
+    </div><!-- end #district-main -->
 </div>
