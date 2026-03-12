@@ -61,15 +61,48 @@
                 Select District to Launch
             </button>
 
-            <button onclick="returnToGameFromDistrict()" class="district-mode-btn" style="border-color: #f97316; margin-top: 8px;">
+            <button onclick="returnToGameFromDistrict()" class="district-mode-btn" style="border-color: #f97316; margin-top: 6px;">
                 Return to Battle
             </button>
         </div>
 
-        <!-- Center Panel: Globe/World Map -->
-        <div id="district-center-panel">
-            <div id="district-game-container">
-                <!-- Phaser canvas will be moved here in district mode -->
+        <!-- CENTER COLUMN: Globe (fills height) + Pilot Status bar (bottom strip) -->
+        <div id="district-center-column">
+            <!-- Globe / Phaser canvas area -->
+            <div id="district-center-panel">
+                <div id="district-game-container">
+                    <!-- Phaser canvas will be moved here in district mode -->
+                </div>
+            </div>
+
+            <!-- Pilot Status bar: full-width strip below the globe -->
+            <div id="district-pilot-status">
+                <div class="district-pilot-stat">
+                    <span class="district-pilot-stat-label">Lives</span>
+                    <span class="district-pilot-stat-value" id="district-lives">3</span>
+                </div>
+                <div class="district-pilot-divider"></div>
+                <div class="district-pilot-stat">
+                    <span class="district-pilot-stat-label">Smart Bombs</span>
+                    <span class="district-pilot-stat-value" id="district-bombs">3</span>
+                </div>
+                <div class="district-pilot-divider"></div>
+                <div class="district-pilot-stat">
+                    <span class="district-pilot-stat-label">Score</span>
+                    <span class="district-pilot-stat-value" id="district-score">0</span>
+                </div>
+                <div class="district-pilot-divider"></div>
+                <div class="district-pilot-stat">
+                    <span class="district-pilot-stat-label">Credits</span>
+                    <span class="district-pilot-stat-value" id="district-credits" style="color:#fef08a;">0</span>
+                </div>
+                <div class="district-pilot-divider"></div>
+                <div class="district-pilot-stat" style="align-items:flex-start; flex:1;">
+                    <span class="district-pilot-stat-label">District Status</span>
+                    <div id="district-node-status" style="font-family:'Orbitron',sans-serif; font-size:11px; color:#94a3b8;">
+                        Select a district
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -81,24 +114,17 @@
                 <h4>Current Loadout</h4>
                 <div id="district-ship-stats">
                     <div class="district-stat-row">
-                        <span class="district-stat-label">Lives</span>
-                        <span class="district-stat-value" id="district-lives">3</span>
+                        <span class="district-stat-label">Hull Integrity</span>
+                        <span class="district-stat-value" id="district-hull">100%</span>
                     </div>
                     <div class="district-stat-row">
-                        <span class="district-stat-label">Smart Bombs</span>
-                        <span class="district-stat-value" id="district-bombs">3</span>
+                        <span class="district-stat-label">Shield</span>
+                        <span class="district-stat-value" id="district-shield">--</span>
                     </div>
                     <div class="district-stat-row">
-                        <span class="district-stat-label">Score</span>
-                        <span class="district-stat-value" id="district-score">0</span>
+                        <span class="district-stat-label">Primary Weapon</span>
+                        <span class="district-stat-value" id="district-weapon">Std</span>
                     </div>
-                </div>
-            </div>
-
-            <div class="district-panel-section">
-                <h4>Credits</h4>
-                <div class="text-center py-2">
-                    <span id="district-credits" style="font-size: 18px; color: #fef08a; font-weight: bold;">0</span>
                 </div>
             </div>
 
@@ -116,13 +142,6 @@
                 <div class="district-shop-group">
                     <div class="district-shop-subhead">Drop History</div>
                     <div id="district-shop-history"></div>
-                </div>
-            </div>
-
-            <div class="district-panel-section">
-                <h4>District Status</h4>
-                <div id="district-node-status" style="max-height: 120px; overflow-y: auto;">
-                    <p style="color: #64748b; font-size: 10px;">Select a district to view status</p>
                 </div>
             </div>
 
