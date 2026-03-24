@@ -78,12 +78,16 @@ body.fullscreen-active #game-container {
 }
 
 /* Game Layout (default) */
-#game-layout { display: flex; flex-direction: column; }
+#game-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
 #game-container { position: relative; }
 body.mode-game #game-container canvas {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
     max-width: 100%;
 }
 
