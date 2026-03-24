@@ -8,6 +8,37 @@ const DistrictLayoutManager = (function() {
     let originalParent = null;
     let selectedMode = 'classic';
     let assaultLocked = false;
+
+    function setBodyLayoutMode(mode) {
+        document.body.classList.remove('mode-game', 'mode-district');
+        document.body.classList.add(mode === 'district' ? 'mode-district' : 'mode-game');
+    }
+
+    function applyDistrictCanvasStyles() {
+        if (!phaserCanvas) return;
+
+        phaserCanvas.style.width = '100%';
+        phaserCanvas.style.height = '100%';
+        phaserCanvas.style.display = 'block';
+        phaserCanvas.style.objectFit = 'contain';
+        phaserCanvas.style.maxWidth = '100%';
+        phaserCanvas.style.maxHeight = '100%';
+    }
+
+    function resetCanvasInlineStyles() {
+        if (!phaserCanvas) return;
+
+        phaserCanvas.style.width = '';
+        phaserCanvas.style.height = '';
+        phaserCanvas.style.objectFit = '';
+        phaserCanvas.style.display = '';
+        phaserCanvas.style.maxWidth = '';
+        phaserCanvas.style.maxHeight = '';
+        phaserCanvas.style.position = '';
+        phaserCanvas.style.borderRadius = '';
+        phaserCanvas.style.border = '';
+        phaserCanvas.style.boxShadow = '';
+    }
     
     /**
      * Handles the init routine and encapsulates its core gameplay logic.
@@ -15,6 +46,8 @@ const DistrictLayoutManager = (function() {
      * Returns: value defined by the surrounding game flow.
      */
     function init() {
+        setBodyLayoutMode(currentLayout);
+
         // Find the Phaser canvas once it's created
         const checkCanvas = setInterval(() => {
             phaserCanvas = document.querySelector('#game-container canvas, #district-game-container canvas');
@@ -34,6 +67,7 @@ const DistrictLayoutManager = (function() {
     function switchToDistrictLayout() {
         if (currentLayout === 'district') return;
         currentLayout = 'district';
+        setBodyLayoutMode('district');
 
         if (window.FullscreenController?.forceExitFullscreen) {
             window.FullscreenController.forceExitFullscreen();
@@ -50,8 +84,7 @@ const DistrictLayoutManager = (function() {
         // 2. Move the Canvas
         if (phaserCanvas && districtCenter) {
             districtCenter.appendChild(phaserCanvas);
-            phaserCanvas.style.width = '100%';
-            phaserCanvas.style.height = '100%';
+            applyDistrictCanvasStyles();
             
             // Critical: Force Phaser to recognize the new container size
             setTimeout(() => {
@@ -76,6 +109,7 @@ const DistrictLayoutManager = (function() {
     function switchToGameLayout() {
         if (currentLayout === 'game') return;
         currentLayout = 'game';
+        setBodyLayoutMode('game');
         
         // Show ALL game-related HTML elements
         const gameHud = document.getElementById('hud-container');
@@ -105,15 +139,7 @@ const DistrictLayoutManager = (function() {
         
         if (phaserCanvas && gameContainer) {
             gameContainer.appendChild(phaserCanvas);
-            
-            // Remove ALL district styling so Phaser takes control
-            phaserCanvas.style.width = '';
-            phaserCanvas.style.height = '';
-            phaserCanvas.style.objectFit = '';
-            phaserCanvas.style.display = '';
-            phaserCanvas.style.borderRadius = '';
-            phaserCanvas.style.border = '';
-            phaserCanvas.style.boxShadow = '';
+            resetCanvasInlineStyles();
             
             // Force the game canvas back to its proper size
             // This ensures it doesn't stay at the district size
@@ -150,21 +176,9 @@ const DistrictLayoutManager = (function() {
      * Parameters: container.
      * Returns: value defined by the surrounding game flow.
      */
-    function styleCanvasForDistrict(container) {
-    if (!phaserCanvas) return;
-    
-    // Ensure the canvas fills the district panel
-    phaserCanvas.style.position = 'relative'; // or 'absolute' depending on your CSS
-    phaserCanvas.style.width = '100%';
-    phaserCanvas.style.height = '100%';
-    phaserCanvas.style.display = 'block';
-    
-    // Ensure the container itself isn't collapsed
-    container.style.display = 'flex';
-    container.style.alignItems = 'center';
-    container.style.justifyContent = 'center';
-    container.style.overflow = 'hidden';
-}
+    function styleCanvasForDistrict() {
+        applyDistrictCanvasStyles();
+    }
     
     /**
      * Handles the removeDistrictStyling routine and encapsulates its core gameplay logic.
@@ -172,17 +186,7 @@ const DistrictLayoutManager = (function() {
      * Returns: value defined by the surrounding game flow.
      */
     function removeDistrictStyling() {
-        if (!phaserCanvas) return;
-        
-        // Remove overrides so Phaser's scaling takes back control
-        phaserCanvas.style.width = '';
-        phaserCanvas.style.height = '';
-        phaserCanvas.style.objectFit = '';
-        phaserCanvas.style.display = '';
-        
-        phaserCanvas.style.borderRadius = '';
-        phaserCanvas.style.border = '';
-        phaserCanvas.style.boxShadow = '';
+        resetCanvasInlineStyles();
     }
     
     /**

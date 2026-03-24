@@ -80,6 +80,12 @@ body.fullscreen-active #game-container {
 /* Game Layout (default) */
 #game-layout { display: flex; flex-direction: column; }
 #game-container { position: relative; }
+body.mode-game #game-container canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+}
 
 #menu-overlay {
     display: none;

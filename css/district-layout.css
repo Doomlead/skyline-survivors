@@ -1,16 +1,16 @@
 /* District Map Layout (hidden by default) */
-#district-layout {
+body.mode-district #district-layout {
     display: none;
     width: 100%;
     height: 100%;
     flex-direction: column;
 }
-#district-layout.active {
+body.mode-district #district-layout.active {
     display: flex;
 }
 
 /* Hide game layout when district is active */
-#game-layout.hidden-for-district {
+body.mode-district #game-layout.hidden-for-district {
     display: none !important;
 }
 
@@ -192,6 +192,15 @@
     min-height: 0;
     overflow: hidden;
     border: 1px solid #1e293b;
+}
+
+body.mode-district #district-game-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 /* Mode buttons in district layout */
