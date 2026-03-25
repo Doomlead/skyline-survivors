@@ -87,6 +87,11 @@ body.mode-game #game-container canvas {
     max-width: 100%;
 }
 
+body.mode-game #game-container canvas.phaser-game-canvas {
+    object-fit: fill;
+    max-height: none;
+}
+
 #menu-overlay {
     display: none;
 }
