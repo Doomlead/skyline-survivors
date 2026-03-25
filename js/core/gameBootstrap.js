@@ -18,8 +18,11 @@ window.addEventListener('orientationchange', () => {
 // Listen for fullscreen changes to force reset
 document.addEventListener('fullscreenchange', () => {
     // Reset the cached dimensions when fullscreen changes
-    lastResizeWidth = 0;
-    lastResizeHeight = 0;
+    lastResizeByLayout = {
+        game: { width: 0, height: 0 },
+        district: { width: 0, height: 0 },
+        fullscreen: { width: 0, height: 0 }
+    };
     
     // Wait for DOM to settle, then force resize
     setTimeout(() => {
@@ -30,8 +33,11 @@ document.addEventListener('fullscreenchange', () => {
 // ------------------------
 // Responsive Resize Helper
 // ------------------------
-let lastResizeWidth = 0;
-let lastResizeHeight = 0;
+let lastResizeByLayout = {
+    game: { width: 0, height: 0 },
+    district: { width: 0, height: 0 },
+    fullscreen: { width: 0, height: 0 }
+};
 
 // Resizes the Phaser canvas for district, fullscreen, or standard layouts while avoiding redundant work.
 function applyResponsiveResize(options = {}) {
@@ -48,8 +54,9 @@ function applyResponsiveResize(options = {}) {
         window.DistrictLayoutManager.getCurrentLayout() === 'district') {
         
         const container = document.getElementById('district-game-container');
+        const districtCache = lastResizeByLayout.district;
         if (container && container.clientWidth > 0 && container.clientHeight > 0) {
-            if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
+            if (!force && container.clientWidth === districtCache.width && container.clientHeight === districtCache.height) {
                 return;
             }
             // Resize Phaser to match the container exactly
@@ -58,8 +65,8 @@ function applyResponsiveResize(options = {}) {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
             game.scale.refresh();
-            lastResizeWidth = container.clientWidth;
-            lastResizeHeight = container.clientHeight;
+            districtCache.width = container.clientWidth;
+            districtCache.height = container.clientHeight;
         }
         return; 
     }
@@ -67,8 +74,9 @@ function applyResponsiveResize(options = {}) {
     // 3. Fullscreen Gameplay Logic:
     if (document.body.classList.contains('fullscreen-active')) {
         const container = document.getElementById('game-container');
+        const fullscreenCache = lastResizeByLayout.fullscreen;
         if (container && container.clientWidth > 0 && container.clientHeight > 0) {
-            if (!force && container.clientWidth === lastResizeWidth && container.clientHeight === lastResizeHeight) {
+            if (!force && container.clientWidth === fullscreenCache.width && container.clientHeight === fullscreenCache.height) {
                 return;
             }
             console.log(`[ResponsiveResize] Fullscreen - Updating game size to: ${container.clientWidth}x${container.clientHeight}`);
@@ -79,14 +87,15 @@ function applyResponsiveResize(options = {}) {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
             game.scale.refresh();
-            lastResizeWidth = container.clientWidth;
-            lastResizeHeight = container.clientHeight;
+            fullscreenCache.width = container.clientWidth;
+            fullscreenCache.height = container.clientHeight;
         }
         return;
     }
 
     // 4. Normal Game Mode Logic:
     const container = document.getElementById('game-container');
+    const gameCache = lastResizeByLayout.game;
     if (container && container.clientWidth > 0 && container.clientHeight > 0) {
         const responsive = typeof getResponsiveScale === 'function'
             ? getResponsiveScale()
@@ -94,7 +103,7 @@ function applyResponsiveResize(options = {}) {
         const targetWidth = responsive.width || container.clientWidth;
         const targetHeight = responsive.height || container.clientHeight;
 
-        if (!force && targetWidth === lastResizeWidth && targetHeight === lastResizeHeight) {
+        if (!force && targetWidth === gameCache.width && targetHeight === gameCache.height) {
             return;
         }
         console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${targetWidth}x${targetHeight}`);
@@ -116,8 +125,8 @@ function applyResponsiveResize(options = {}) {
 
         // Refresh the scale manager internals
         game.scale.refresh();
-        lastResizeWidth = targetWidth;
-        lastResizeHeight = targetHeight;
+        gameCache.width = targetWidth;
+        gameCache.height = targetHeight;
     }
 }
 

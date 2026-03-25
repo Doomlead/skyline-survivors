@@ -14,30 +14,10 @@ const DistrictLayoutManager = (function() {
         document.body.classList.add(mode === 'district' ? 'mode-district' : 'mode-game');
     }
 
-    function applyDistrictCanvasStyles() {
+    function setCanvasLayoutClass(layout) {
         if (!phaserCanvas) return;
-
-        phaserCanvas.style.width = '100%';
-        phaserCanvas.style.height = '100%';
-        phaserCanvas.style.display = 'block';
-        phaserCanvas.style.objectFit = 'contain';
-        phaserCanvas.style.maxWidth = '100%';
-        phaserCanvas.style.maxHeight = '100%';
-    }
-
-    function resetCanvasInlineStyles() {
-        if (!phaserCanvas) return;
-
-        phaserCanvas.style.width = '';
-        phaserCanvas.style.height = '';
-        phaserCanvas.style.objectFit = '';
-        phaserCanvas.style.display = '';
-        phaserCanvas.style.maxWidth = '';
-        phaserCanvas.style.maxHeight = '';
-        phaserCanvas.style.position = '';
-        phaserCanvas.style.borderRadius = '';
-        phaserCanvas.style.border = '';
-        phaserCanvas.style.boxShadow = '';
+        phaserCanvas.classList.remove('phaser-game-canvas', 'phaser-district-canvas');
+        phaserCanvas.classList.add(layout === 'district' ? 'phaser-district-canvas' : 'phaser-game-canvas');
     }
     
     /**
@@ -50,9 +30,10 @@ const DistrictLayoutManager = (function() {
 
         // Find the Phaser canvas once it's created
         const checkCanvas = setInterval(() => {
-            phaserCanvas = document.querySelector('#game-container canvas, #district-game-container canvas');
+            phaserCanvas = window.game?.canvas || document.querySelector('#game-container canvas');
             if (phaserCanvas) {
                 originalParent = document.getElementById('game-container');
+                setCanvasLayoutClass('game');
                 clearInterval(checkCanvas);
                 console.log('DistrictLayoutManager initialized');
             }
@@ -84,7 +65,7 @@ const DistrictLayoutManager = (function() {
         // 2. Move the Canvas
         if (phaserCanvas && districtCenter) {
             districtCenter.appendChild(phaserCanvas);
-            applyDistrictCanvasStyles();
+            setCanvasLayoutClass('district');
             
             // Critical: Force Phaser to recognize the new container size
             setTimeout(() => {
@@ -139,7 +120,7 @@ const DistrictLayoutManager = (function() {
         
         if (phaserCanvas && gameContainer) {
             gameContainer.appendChild(phaserCanvas);
-            resetCanvasInlineStyles();
+            setCanvasLayoutClass('game');
             
             // Force the game canvas back to its proper size
             // This ensures it doesn't stay at the district size
@@ -177,7 +158,7 @@ const DistrictLayoutManager = (function() {
      * Returns: value defined by the surrounding game flow.
      */
     function styleCanvasForDistrict() {
-        applyDistrictCanvasStyles();
+        setCanvasLayoutClass('district');
     }
     
     /**
@@ -186,7 +167,7 @@ const DistrictLayoutManager = (function() {
      * Returns: value defined by the surrounding game flow.
      */
     function removeDistrictStyling() {
-        resetCanvasInlineStyles();
+        setCanvasLayoutClass('game');
     }
     
     /**

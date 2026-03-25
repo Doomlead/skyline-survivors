@@ -1,17 +1,17 @@
 /* District Map Layout (hidden by default) */
 body.mode-district #district-layout {
-    display: none;
+    display: flex;
     width: 100%;
     height: 100%;
     flex-direction: column;
 }
-body.mode-district #district-layout.active {
-    display: flex;
-}
 
 /* Hide game layout when district is active */
+body.mode-district #game-layout,
 body.mode-district #game-layout.hidden-for-district {
     display: none !important;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 /* District layout panels */
@@ -201,6 +201,11 @@ body.mode-district #district-game-container canvas {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
+}
+
+body.mode-district #district-game-container canvas.phaser-district-canvas {
+    width: 100%;
+    height: 100%;
 }
 
 /* Mode buttons in district layout */
