@@ -218,11 +218,29 @@ function createEnhancedDeathEffect(scene, x, y, enemyType) {
 // Calculates responsive game viewport dimensions based on available layout space and device constraints.
 function getResponsiveScale() {
     const isMobile = window.innerWidth <= 900;
+    const hud = document.getElementById('hud-container');
+    const controls = document.getElementById('controls-text');
+    const touchControls = document.getElementById('touch-controls');
+    const buildControls = document.getElementById('build-controls');
     const gameContainer = document.getElementById('game-container');
-    const containerWidth = gameContainer?.clientWidth || window.innerWidth;
-    const containerHeight = gameContainer?.clientHeight || Math.floor(window.innerHeight * 0.7);
-    const maxWidth = Math.max(320, containerWidth);
-    const maxHeight = Math.max(180, containerHeight);
+
+    /**
+     * Handles the getOuterHeight routine and encapsulates its core gameplay logic.
+     * Parameters: el.
+     * Returns: value defined by the surrounding game flow.
+     */
+    const getOuterHeight = (el) => {
+        if (!el) return 0;
+        const styles = window.getComputedStyle(el);
+        const marginTop = parseFloat(styles.marginTop) || 0;
+        const marginBottom = parseFloat(styles.marginBottom) || 0;
+        return el.offsetHeight + marginTop + marginBottom;
+    };
+
+    const reservedHeight = getOuterHeight(hud) + getOuterHeight(controls) + getOuterHeight(buildControls) + getOuterHeight(touchControls) + 16;
+    const containerWidth = gameContainer?.clientWidth || 0;
+    const maxWidth = Math.max(320, containerWidth || window.innerWidth - 24);
+    const maxHeight = Math.max(180, Math.min(gameContainer?.clientHeight || window.innerHeight, window.innerHeight - reservedHeight));
 
     const baseWidth = CONFIG.width;
     const baseHeight = CONFIG.height;
