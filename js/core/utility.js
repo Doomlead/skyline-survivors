@@ -239,10 +239,11 @@ function getResponsiveScale() {
         return el.offsetHeight + marginTop + marginBottom;
     };
 
-    const reservedHeight = getOuterHeight(hud) + getOuterHeight(controls) + getOuterHeight(buildControls) + getOuterHeight(touchControls) + getOuterHeight(footer) + 16;
     const containerWidth = gameContainer?.clientWidth || 0;
+    const containerHeight = gameContainer?.clientHeight || 0;
+    const reservedHeight = getOuterHeight(hud) + getOuterHeight(controls) + getOuterHeight(buildControls) + getOuterHeight(touchControls) + getOuterHeight(footer) + 16;
     const maxWidth = Math.max(320, containerWidth || window.innerWidth - 24);
-    let maxHeight = Math.max(180, window.innerHeight - reservedHeight);
+    let maxHeight = Math.max(180, containerHeight || (window.innerHeight - reservedHeight));
 
     const baseWidth = CONFIG.width;
     const baseHeight = CONFIG.height;
