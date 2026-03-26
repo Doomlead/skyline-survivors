@@ -1,175 +1,27 @@
 // ------------------------
-// File: js/ui/districtLayoutManager.js 
+// File: js/ui/districtLayoutManager.js
 // ------------------------
 
 const DistrictLayoutManager = (function() {
-    let currentLayout = 'game'; // 'game' or 'district'
-    let phaserCanvas = null;
-    let originalParent = null;
     let selectedMode = 'classic';
     let assaultLocked = false;
 
-    function setBodyLayoutMode(mode) {
-        document.body.classList.remove('mode-game', 'mode-district');
-        document.body.classList.add(mode === 'district' ? 'mode-district' : 'mode-game');
-    }
-
-    function setCanvasLayoutClass(layout) {
-        if (!phaserCanvas) return;
-        phaserCanvas.classList.remove('phaser-game-canvas', 'phaser-district-canvas');
-        phaserCanvas.classList.add(layout === 'district' ? 'phaser-district-canvas' : 'phaser-game-canvas');
-    }
-    
-    /**
-     * Handles the init routine and encapsulates its core gameplay logic.
-     * Parameters: none.
-     * Returns: value defined by the surrounding game flow.
-     */
-    function init() {
-        setBodyLayoutMode(currentLayout);
-
-        // Find the Phaser canvas once it's created
-        const checkCanvas = setInterval(() => {
-            phaserCanvas = window.game?.canvas || document.querySelector('#game-container canvas');
-            if (phaserCanvas) {
-                originalParent = document.getElementById('game-container');
-                setCanvasLayoutClass('game');
-                clearInterval(checkCanvas);
-                console.log('DistrictLayoutManager initialized');
-            }
-        }, 100);
-    }
-    
-    /**
-     * Handles the switchToDistrictLayout routine and encapsulates its core gameplay logic.
-     * Parameters: none.
-     * Returns: value defined by the surrounding game flow.
-     */
     function switchToDistrictLayout() {
-        if (currentLayout === 'district') return;
-        currentLayout = 'district';
-        setBodyLayoutMode('district');
-
-        if (window.FullscreenController?.forceExitFullscreen) {
-            window.FullscreenController.forceExitFullscreen();
-        }
-        
-        const gameLayout = document.getElementById('game-layout');
-        const districtLayout = document.getElementById('district-layout');
-        const districtCenter = document.getElementById('district-game-container');
-        
-        // 1. Swap visibility
-        if (gameLayout) gameLayout.style.display = 'none';
-        if (districtLayout) districtLayout.style.display = 'flex';
-        
-        // 2. Move the Canvas
-        if (phaserCanvas && districtCenter) {
-            districtCenter.appendChild(phaserCanvas);
-            setCanvasLayoutClass('district');
-            
-            // Critical: Force Phaser to recognize the new container size
-            setTimeout(() => {
-                if (window.game) {
-                    window.game.scale.refresh();
-                }
-            }, 50);
-        }
-
-        // Hide other HUD elements
-        const hud = document.getElementById('hud-container');
-        if (hud) hud.style.display = 'none';
-        const buildToggle = document.getElementById('build-toggle');
-        if (buildToggle) buildToggle.style.display = 'none';
+        window.GameLayoutManager?.switchToDistrictLayout?.();
     }
-	
-    /**
-     * Handles the switchToGameLayout routine and encapsulates its core gameplay logic.
-     * Parameters: none.
-     * Returns: value defined by the surrounding game flow.
-     */
+
     function switchToGameLayout() {
-        if (currentLayout === 'game') return;
-        currentLayout = 'game';
-        setBodyLayoutMode('game');
-        
-        // Show ALL game-related HTML elements
-        const gameHud = document.getElementById('hud-container');
-        const gameRadar = document.getElementById('radar-container');
-        const gameControls = document.getElementById('controls-text');
-        const touchControls = document.getElementById('touch-controls');
-        const buildToggle = document.getElementById('build-toggle');
-        
-        if (gameHud) gameHud.style.display = 'block';
-        if (gameRadar) gameRadar.style.display = 'block';
-        if (gameControls) gameControls.style.display = 'block';
-        if (touchControls) touchControls.style.display = 'flex';
-        if (buildToggle) buildToggle.style.display = 'block';
-        
-        const gameLayout = document.getElementById('game-layout');
-        const districtLayout = document.getElementById('district-layout');
-        const gameContainer = document.getElementById('game-container');
-        
-        if (gameLayout) {
-            gameLayout.style.display = 'flex';
-            gameLayout.classList.remove('hidden-for-district');
-        }
-        if (districtLayout) {
-            districtLayout.style.display = 'none';
-            districtLayout.classList.remove('active');
-        }
-        
-        if (phaserCanvas && gameContainer) {
-            gameContainer.appendChild(phaserCanvas);
-            setCanvasLayoutClass('game');
-            
-            // Force the game canvas back to its proper size
-            // This ensures it doesn't stay at the district size
-            if (window.game && window.game.scale) {
-                /**
-                 * Handles the resizeToGameLayout routine and encapsulates its core gameplay logic.
-                 * Parameters: none.
-                 * Returns: value defined by the surrounding game flow.
-                 */
-                const resizeToGameLayout = () => {
-                    const responsive = typeof getResponsiveScale === 'function'
-                        ? getResponsiveScale()
-                        : { width: CONFIG.width, height: CONFIG.height };
-                    const width = responsive.width || CONFIG.width;
-                    const height = responsive.height || CONFIG.height;
-                    
-                    console.log('[DistrictLayoutManager] Resizing canvas for game layout');
-                    window.game.scale.resize(width, height);
-                    window.game.scale.refresh();
-                    phaserCanvas.style.width = `${width}px`;
-                    phaserCanvas.style.height = `${height}px`;
-                };
-                
-                // Wait for DOM layout to settle after moving the canvas
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(resizeToGameLayout);
-                });
-            }
-        }
+        window.GameLayoutManager?.switchToGameLayout?.();
     }
-    
-    /**
-     * Handles the styleCanvasForDistrict routine and encapsulates its core gameplay logic.
-     * Parameters: container.
-     * Returns: value defined by the surrounding game flow.
-     */
-    function styleCanvasForDistrict() {
-        setCanvasLayoutClass('district');
+
+    function getCurrentLayout() {
+        return window.GameLayoutManager?.getCurrentLayout?.() || 'game';
     }
-    
-    /**
-     * Handles the removeDistrictStyling routine and encapsulates its core gameplay logic.
-     * Parameters: none.
-     * Returns: value defined by the surrounding game flow.
-     */
-    function removeDistrictStyling() {
-        setCanvasLayoutClass('game');
+
+    function init() {
+        window.GameLayoutManager?.init?.();
     }
-    
+
     /**
      * Handles the updateDistrictPanels routine and encapsulates its core gameplay logic.
      * Parameters: none.
@@ -179,10 +31,10 @@ const DistrictLayoutManager = (function() {
         updateElement('district-lives', gameState?.lives ?? 3);
         updateElement('district-bombs', gameState?.smartBombs ?? 3);
         updateElement('district-score', gameState?.score ?? 0);
-        
+
         const meta = window.metaProgression?.getMetaState?.() || { credits: 0 };
         updateElement('district-credits', meta.credits);
-        
+
         const loadout = window.metaProgression?.getLoadoutOptions?.() || {};
         const offenseEquipped = loadout.offense?.find(o => o.equipped)?.name || 'Standard';
         const defenseEquipped = loadout.defense?.find(o => o.equipped)?.name || 'Standard';
@@ -192,10 +44,10 @@ const DistrictLayoutManager = (function() {
         if (window.DistrictShop?.refresh) {
             window.DistrictShop.refresh();
         }
-        
+
         updateModeButtons(selectedMode);
     }
-    
+
     /**
      * Handles the updateMissionPanel routine and encapsulates its core gameplay logic.
      * Parameters: mission, district.
@@ -210,7 +62,7 @@ const DistrictLayoutManager = (function() {
             updateElement('district-spawn-rate', '1.00x');
             assaultLocked = false;
             updateModeButtons(selectedMode);
-            
+
             const launchBtn = document.getElementById('district-launch-btn');
             if (launchBtn) {
                 launchBtn.disabled = true;
@@ -218,14 +70,15 @@ const DistrictLayoutManager = (function() {
             }
             return;
         }
-        
+
         const { city, directives, latitude, longitude, seed } = mission;
-        
+
         updateElement('district-mission-city', city || 'Unknown Region');
-        updateElement('district-mission-details', 
+        updateElement(
+            'district-mission-details',
             `Lat ${latitude?.toFixed(1) || '--'} · Lon ${longitude?.toFixed(1) || '--'}\nSeed: ${seed?.slice(0, 8) || '--'}`
         );
-        
+
         updateElement('district-urgency', directives?.urgency?.toUpperCase() || 'NORMAL');
         updateElement('district-reward-mult', (directives?.rewardMultiplier || 1).toFixed(2) + 'x');
         updateElement('district-spawn-rate', (directives?.spawnMultiplier || 1).toFixed(2) + 'x');
@@ -244,19 +97,19 @@ const DistrictLayoutManager = (function() {
             }
         }
         updateModeButtons(selectedMode);
-        
+
         const launchBtn = document.getElementById('district-launch-btn');
         if (launchBtn) {
             launchBtn.disabled = false;
             const modeLabel = getModeLabel(selectedMode);
             launchBtn.textContent = `Launch ${modeLabel} — ${district?.config?.name || city}`;
         }
-        
+
         if (district) {
             updateDistrictStatus(district);
         }
     }
-    
+
     /**
      * Handles the updateDistrictStatus routine and encapsulates its core gameplay logic.
      * Parameters: district.
@@ -285,7 +138,9 @@ const DistrictLayoutManager = (function() {
         const currentIntel = Math.max(0, Math.round(district.state?.pilotIntel || 0));
         const nextMilestone = intelModule?.getNextRibbonMilestone?.(currentIntel) || null;
         const intelText = nextMilestone ? `${currentIntel} / ${nextMilestone.threshold}` : `${currentIntel} / MAX`;
-        const nextReward = nextMilestone?.reward ? (intelModule?.describeReward?.(nextMilestone.reward) || nextMilestone.reward.type) : 'All ribbon rewards claimed';
+        const nextReward = nextMilestone?.reward
+            ? (intelModule?.describeReward?.(nextMilestone.reward) || nextMilestone.reward.type)
+            : 'All ribbon rewards claimed';
         const pilotWeapons = meta?.pilotWeapons || { unlocked: {} };
         const ownership = ['scattergun', 'plasmaLauncher', 'lightningGun', 'stingerDrone']
             .map((weaponId) => `${intelModule?.getWeaponDisplayName?.(weaponId) || weaponId}: ${pilotWeapons.unlocked?.[weaponId] ? 'Owned' : 'Locked'}`)
@@ -323,7 +178,7 @@ const DistrictLayoutManager = (function() {
             </div>
         `;
     }
-    
+
     /**
      * Handles the updateModeButtons routine and encapsulates its core gameplay logic.
      * Parameters: mode.
@@ -331,11 +186,11 @@ const DistrictLayoutManager = (function() {
      */
     function updateModeButtons(mode) {
         selectedMode = mode;
-        
+
         const waveBtn = document.getElementById('district-mode-wave');
         const survivalBtn = document.getElementById('district-mode-survival');
         const isAssault = mode === 'assault';
-        
+
         if (waveBtn) {
             waveBtn.classList.toggle('active', mode === 'classic');
             waveBtn.disabled = isAssault || assaultLocked;
@@ -345,7 +200,7 @@ const DistrictLayoutManager = (function() {
             survivalBtn.disabled = isAssault || assaultLocked;
         }
     }
-    
+
     /**
      * Handles the selectMode routine and encapsulates its core gameplay logic.
      * Parameters: mode.
@@ -357,11 +212,11 @@ const DistrictLayoutManager = (function() {
         }
         selectedMode = mode;
         updateModeButtons(mode);
-        
+
         if (typeof missionPlanner !== 'undefined') {
             missionPlanner.setMode(mode);
         }
-        
+
         const launchBtn = document.getElementById('district-launch-btn');
         if (launchBtn && !launchBtn.disabled) {
             const currentText = launchBtn.textContent;
@@ -378,7 +233,7 @@ const DistrictLayoutManager = (function() {
     function getModeLabel(mode) {
         return mode === 'survival' ? 'Survival' : mode === 'assault' ? 'Assault' : 'Defense';
     }
-    
+
     /**
      * Handles the getSelectedMode routine and encapsulates its core gameplay logic.
      * Parameters: none.
@@ -387,16 +242,7 @@ const DistrictLayoutManager = (function() {
     function getSelectedMode() {
         return selectedMode;
     }
-    
-    /**
-     * Handles the getCurrentLayout routine and encapsulates its core gameplay logic.
-     * Parameters: none.
-     * Returns: value defined by the surrounding game flow.
-     */
-    function getCurrentLayout() {
-        return currentLayout;
-    }
-    
+
     /**
      * Handles the updateElement routine and encapsulates its core gameplay logic.
      * Parameters: id, value.
@@ -406,7 +252,7 @@ const DistrictLayoutManager = (function() {
         const el = document.getElementById(id);
         if (el) el.textContent = value;
     }
-    
+
     /**
      * Handles the formatSeconds routine and encapsulates its core gameplay logic.
      * Parameters: seconds.
@@ -417,13 +263,7 @@ const DistrictLayoutManager = (function() {
         const secs = Math.floor(seconds % 60);
         return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
-    
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-    
+
     return {
         switchToDistrictLayout,
         switchToGameLayout,
@@ -440,7 +280,7 @@ const DistrictLayoutManager = (function() {
 // Global functions for HTML onclick handlers
 function selectDistrictMode(mode) {
     DistrictLayoutManager.selectMode(mode);
-    
+
     if (window.game?.scene?.isActive?.(SCENE_KEYS.build)) {
         const buildScene = game.scene.getScene(SCENE_KEYS.build);
         if (buildScene?.selectMode) {
@@ -456,7 +296,7 @@ function selectDistrictMode(mode) {
  */
 function launchFromDistrictMap() {
     const mode = DistrictLayoutManager.getSelectedMode();
-    
+
     if (window.game?.scene?.isActive?.(SCENE_KEYS.build)) {
         const buildScene = game.scene.getScene(SCENE_KEYS.build);
         if (buildScene?.launchMission) {
@@ -464,7 +304,7 @@ function launchFromDistrictMap() {
             return;
         }
     }
-    
+
     if (window.startGame) {
         startGame(mode);
     }
@@ -487,7 +327,7 @@ function returnToGameFromDistrict() {
 function closeSettingsToGame() {
     const menu = document.getElementById('menu-overlay');
     if (menu) menu.style.display = 'none';
-    
+
     if (window.game?.scene) {
         const mainScene = game.scene.getScene(SCENE_KEYS.game);
         if (mainScene?.scene?.isPaused()) {
