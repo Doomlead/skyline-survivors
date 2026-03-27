@@ -47,9 +47,6 @@ let lastResizeByLayout = {
 function applyResponsiveResize(options = {}) {
     const { force = false } = options;
 
-    // 1. Safety check
-    if (!game || !game.scale || !game.canvas) return;
-
     // 2. District Mode Logic:
     if (
         window.DistrictLayoutManager &&
@@ -62,22 +59,27 @@ function applyResponsiveResize(options = {}) {
             if (!force && container.clientWidth === districtCache.width && container.clientHeight === districtCache.height) {
                 return;
             }
-            game.scale.resize(container.clientWidth, container.clientHeight);
-
-            // Clear any inline pixel sizing from fullscreen/game layout.
-            // District layout CSS should be the sole owner of canvas sizing.
-            game.canvas.style.width = '';
-            game.canvas.style.height = '';
+            const districtGame = window.districtGame;
+            if (districtGame?.scale) {
+                districtGame.scale.resize(container.clientWidth, container.clientHeight);
+                if (districtGame.canvas) {
+                    districtGame.canvas.style.width = '';
+                    districtGame.canvas.style.height = '';
+                }
+                districtGame.scale.refresh();
+            }
 
             if (typeof resizeParallaxLayers === 'function') {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
-            game.scale.refresh();
             districtCache.width = container.clientWidth;
             districtCache.height = container.clientHeight;
         }
         return;
     }
+
+    // Safety check for gameplay renderer branches.
+    if (!game || !game.scale || !game.canvas) return;
 
     // 3. Fullscreen Gameplay Logic:
     if (document.body.classList.contains('fullscreen-active')) {

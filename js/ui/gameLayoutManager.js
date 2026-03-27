@@ -52,25 +52,8 @@ class GameLayoutManager {
 
         const gameLayout = document.getElementById('game-layout');
         const districtLayout = document.getElementById('district-layout');
-        const districtCenter = document.getElementById('district-game-container');
-
         if (gameLayout) gameLayout.style.display = 'none';
         if (districtLayout) districtLayout.style.display = 'flex';
-
-        if (this.phaserCanvas && districtCenter) {
-            // Decouple from game layout sizing: let district CSS own canvas dimensions.
-            this.phaserCanvas.style.width = '';
-            this.phaserCanvas.style.height = '';
-
-            districtCenter.appendChild(this.phaserCanvas);
-            this.setCanvasLayoutClass('district');
-
-            setTimeout(() => {
-                if (window.game) {
-                    window.game.scale.refresh();
-                }
-            }, 50);
-        }
 
         const hud = document.getElementById('hud-container');
         if (hud) hud.style.display = 'none';
@@ -103,7 +86,10 @@ class GameLayoutManager {
         }
 
         if (this.phaserCanvas && gameContainer) {
-            gameContainer.appendChild(this.phaserCanvas);
+            // Keep game canvas pinned to #game-container permanently.
+            if (this.phaserCanvas.parentElement !== gameContainer) {
+                gameContainer.appendChild(this.phaserCanvas);
+            }
             this.setCanvasLayoutClass('game');
             this.resizeToContainer();
         }
