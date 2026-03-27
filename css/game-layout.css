@@ -1,9 +1,137 @@
-:root { color-scheme: dark; }
-html, body { width: 100%; height: 100%; }
-body { margin: 0; overflow: hidden; }
+/* ============================================================
+   css/game-layout.css
+   ROOT & BASE RESET
+   ============================================================ */
+
+:root {
+    color-scheme: dark;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
 .font-orbitron { font-family: 'Orbitron', sans-serif; }
-#page-shell { height: 100%; max-height: 100dvh; }
+
+/* page-shell fills the full viewport — no max-width, no padding */
+#page-shell {
+    width: 100% !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Radar slot: nothing extra when empty */
 #gameplay-radar-slot:empty { display: none; }
+
+/* Always hidden */
+#touch-controls { display: none !important; }
+footer          { display: none !important; }
+#footer-note    { display: none !important; }
+
+/* Remove the "Last Bastion" title */
+#game-hud-header h1 { display: none !important; }
+
+/* Controls text hidden */
+#controls-text { display: none !important; }
+
+
+/* ============================================================
+   GAME LAYOUT — fills full viewport as a column
+   ============================================================ */
+
+#game-layout {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: 0;
+}
+
+/* Keep entire HUD (including radar) visible in normal layout. */
+#game-hud-header {
+    width: 100%;
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+#hud-container {
+    width: 100%;
+    overflow: visible;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Radar inside HUD — borderless */
+#radar-container {
+    border: none !important;
+}
+
+/* ── Game main ── takes all remaining space */
+#game-main {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#gameplay-shell {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Game container — edge-to-edge, no border, no rounding */
+#game-container {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    position: relative;
+    background: black;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    max-width: none !important;
+}
+
+/*
+  With Phaser.Scale.NONE the canvas is sized by game.scale.resize().
+  Force it to cover the container so there are no gaps.
+*/
+body.mode-game #game-container canvas,
+body.mode-game #game-container canvas.phaser-game-canvas {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: fill;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+
+/* ============================================================
+   FULLSCREEN TOGGLE BUTTON
+   ============================================================ */
 
 #fullscreen-overlay-toggle {
     position: absolute;
@@ -28,6 +156,11 @@ body.fullscreen-active #fullscreen-overlay-toggle {
     display: inline-flex;
 }
 
+
+/* ============================================================
+   FULLSCREEN MODE OVERRIDES (unchanged behaviour)
+   ============================================================ */
+
 body.fullscreen-active #page-shell {
     max-width: none;
     padding: 0;
@@ -37,17 +170,15 @@ body.fullscreen-active #game-layout {
     height: 100%;
 }
 
-body.fullscreen-active #game-layout header h1,
+body.fullscreen-active #game-hud-header h1,
 body.fullscreen-active #controls-text,
-body.fullscreen-active #build-controls,
-body.fullscreen-active #touch-controls {
+body.fullscreen-active #build-controls {
     display: none !important;
 }
 
-body.fullscreen-active #game-layout main {
+body.fullscreen-active #game-main {
     flex: 1;
     width: 100%;
-    margin: 0;
 }
 
 body.fullscreen-active #gameplay-shell {
@@ -77,20 +208,10 @@ body.fullscreen-active #game-container {
     justify-content: center;
 }
 
-/* Game Layout (default) */
-#game-layout { display: flex; flex-direction: column; }
-#game-container { position: relative; }
-body.mode-game #game-container canvas {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-}
 
-body.mode-game #game-container canvas.phaser-game-canvas {
-    object-fit: fill;
-    max-height: none;
-}
+/* ============================================================
+   OVERLAYS
+   ============================================================ */
 
 #menu-overlay {
     display: none;
@@ -106,6 +227,11 @@ body.mode-game #game-container canvas.phaser-game-canvas {
     justify-content: center;
     padding: 24px;
 }
+
+
+/* ============================================================
+   TERMINAL BRIEFING PANEL
+   ============================================================ */
 
 .terminal-briefing {
     font-family: 'Orbitron', monospace;
@@ -161,9 +287,7 @@ body.mode-game #game-container canvas.phaser-game-canvas {
 }
 
 @keyframes terminal-blink {
-    50% {
-        opacity: 0;
-    }
+    50% { opacity: 0; }
 }
 
 .terminal-actions {
@@ -204,6 +328,11 @@ body.mode-game #game-container canvas.phaser-game-canvas {
     right: 16px;
     font-size: 10px;
 }
+
+
+/* ============================================================
+   REWARD CALLOUT STATES
+   ============================================================ */
 
 #reward-el.jackpot-callout {
     color: #fde68a;
