@@ -15,6 +15,10 @@ window.addEventListener('orientationchange', () => {
     }, 100);
 });
 
+window.addEventListener('gamelayout-resize', () => {
+    applyResponsiveResize({ force: true });
+});
+
 // Listen for fullscreen changes to force reset
 document.addEventListener('fullscreenchange', () => {
     // Reset the cached dimensions when fullscreen changes
@@ -23,7 +27,7 @@ document.addEventListener('fullscreenchange', () => {
         district: { width: 0, height: 0 },
         fullscreen: { width: 0, height: 0 }
     };
-    
+
     // Wait for DOM to settle, then force resize
     setTimeout(() => {
         applyResponsiveResize({ force: true });
@@ -42,25 +46,29 @@ let lastResizeByLayout = {
 // Resizes the Phaser canvas for district, fullscreen, or standard layouts while avoiding redundant work.
 function applyResponsiveResize(options = {}) {
     const { force = false } = options;
-    
+
     // 1. Safety check
     if (!game || !game.scale || !game.canvas) return;
 
     // 2. District Mode Logic:
-    // If we are in District Mode, simply force the canvas to fill the container.
-    // This allows the globe to use the full resolution of your new larger container.
-    if (window.DistrictLayoutManager && 
-        window.DistrictLayoutManager.getCurrentLayout && 
-        window.DistrictLayoutManager.getCurrentLayout() === 'district') {
-        
+    if (
+        window.DistrictLayoutManager &&
+        window.DistrictLayoutManager.getCurrentLayout &&
+        window.DistrictLayoutManager.getCurrentLayout() === 'district'
+    ) {
         const container = document.getElementById('district-game-container');
         const districtCache = lastResizeByLayout.district;
         if (container && container.clientWidth > 0 && container.clientHeight > 0) {
             if (!force && container.clientWidth === districtCache.width && container.clientHeight === districtCache.height) {
                 return;
             }
-            // Resize Phaser to match the container exactly
             game.scale.resize(container.clientWidth, container.clientHeight);
+
+            // Clear any inline pixel sizing from fullscreen/game layout.
+            // District layout CSS should be the sole owner of canvas sizing.
+            game.canvas.style.width = '';
+            game.canvas.style.height = '';
+
             if (typeof resizeParallaxLayers === 'function') {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
@@ -68,7 +76,7 @@ function applyResponsiveResize(options = {}) {
             districtCache.width = container.clientWidth;
             districtCache.height = container.clientHeight;
         }
-        return; 
+        return;
     }
 
     // 3. Fullscreen Gameplay Logic:
@@ -97,33 +105,25 @@ function applyResponsiveResize(options = {}) {
     const container = document.getElementById('game-container');
     const gameCache = lastResizeByLayout.game;
     if (container && container.clientWidth > 0 && container.clientHeight > 0) {
-        const responsive = typeof getResponsiveScale === 'function'
-            ? getResponsiveScale()
-            : { width: container.clientWidth, height: container.clientHeight };
-        const targetWidth = responsive.width || container.clientWidth;
-        const targetHeight = responsive.height || container.clientHeight;
+        const targetWidth = Math.floor(container.clientWidth);
+        const targetHeight = Math.floor(container.clientHeight);
 
         if (!force && targetWidth === gameCache.width && targetHeight === gameCache.height) {
             return;
         }
         console.log(`[ResponsiveResize] Normal mode - Updating game size to: ${targetWidth}x${targetHeight}`);
 
-        // Clear any inline styles that might have been set during fullscreen
+        // Clear any inline pixel styles left over from fullscreen mode.
+        // In normal mode CSS keeps the canvas at 100% x 100% of #game-container.
         game.canvas.style.width = '';
         game.canvas.style.height = '';
 
-        // Force Phaser to use these dimensions
         game.scale.resize(targetWidth, targetHeight);
-
-        // Set CSS to match
-        game.canvas.style.width = `${targetWidth}px`;
-        game.canvas.style.height = `${targetHeight}px`;
 
         if (typeof resizeParallaxLayers === 'function') {
             resizeParallaxLayers(targetWidth, targetHeight);
         }
 
-        // Refresh the scale manager internals
         game.scale.refresh();
         gameCache.width = targetWidth;
         gameCache.height = targetHeight;
@@ -137,11 +137,6 @@ function applyResponsiveResize(options = {}) {
 // Wires touch-button pointer events into shared virtual input flags and bomb activation behavior.
 (function setupTouchControls() {
     const buttons = document.querySelectorAll('#touch-controls .tc-btn');
-    /**
-     * Handles the setFlag routine and encapsulates its core gameplay logic.
-     * Parameters: btn, isDown.
-     * Returns: value defined by the surrounding game flow.
-     */
     function setFlag(btn, isDown) {
         const dir = btn.getAttribute('data-dir');
         const action = btn.getAttribute('data-action');
@@ -154,12 +149,19 @@ function applyResponsiveResize(options = {}) {
             if (scene && scene.scene.isActive()) useSmartBomb(scene);
         }
     }
+
     buttons.forEach(btn => {
-        ['pointerdown','touchstart','mousedown'].forEach(ev => {
-            btn.addEventListener(ev, e => { e.preventDefault(); setFlag(btn, true); });
+        ['pointerdown', 'touchstart', 'mousedown'].forEach(ev => {
+            btn.addEventListener(ev, e => {
+                e.preventDefault();
+                setFlag(btn, true);
+            });
         });
-        ['pointerup','pointerleave','touchend','touchcancel','mouseup','mouseleave'].forEach(ev => {
-            btn.addEventListener(ev, e => { e.preventDefault(); setFlag(btn, false); });
+        ['pointerup', 'pointerleave', 'touchend', 'touchcancel', 'mouseup', 'mouseleave'].forEach(ev => {
+            btn.addEventListener(ev, e => {
+                e.preventDefault();
+                setFlag(btn, false);
+            });
         });
     });
 })();

@@ -30,8 +30,15 @@ class GameLayoutManager {
                 this.setCanvasLayoutClass('game');
                 clearInterval(checkCanvas);
                 console.log('GameLayoutManager initialized');
+                this.resizeToContainer();
             }
         }, 100);
+
+        window.addEventListener('resize', () => {
+            if (this.currentLayout === 'game') {
+                this.resizeToContainer();
+            }
+        });
     }
 
     switchToDistrictLayout() {
@@ -51,6 +58,10 @@ class GameLayoutManager {
         if (districtLayout) districtLayout.style.display = 'flex';
 
         if (this.phaserCanvas && districtCenter) {
+            // Decouple from game layout sizing: let district CSS own canvas dimensions.
+            this.phaserCanvas.style.width = '';
+            this.phaserCanvas.style.height = '';
+
             districtCenter.appendChild(this.phaserCanvas);
             this.setCanvasLayoutClass('district');
 
@@ -72,17 +83,11 @@ class GameLayoutManager {
         this.currentLayout = 'game';
         this.setBodyLayoutMode('game');
 
+        // Restore primary HUD/build controls; permanently hidden items remain CSS-driven
         const gameHud = document.getElementById('hud-container');
-        const gameRadar = document.getElementById('radar-container');
-        const gameControls = document.getElementById('controls-text');
-        const touchControls = document.getElementById('touch-controls');
         const buildToggle = document.getElementById('build-toggle');
-
-        if (gameHud) gameHud.style.display = 'block';
-        if (gameRadar) gameRadar.style.display = 'block';
-        if (gameControls) gameControls.style.display = 'block';
-        if (touchControls) touchControls.style.display = 'flex';
-        if (buildToggle) buildToggle.style.display = 'block';
+        if (gameHud) gameHud.style.display = '';
+        if (buildToggle) buildToggle.style.display = '';
 
         const gameLayout = document.getElementById('game-layout');
         const districtLayout = document.getElementById('district-layout');
@@ -100,27 +105,34 @@ class GameLayoutManager {
         if (this.phaserCanvas && gameContainer) {
             gameContainer.appendChild(this.phaserCanvas);
             this.setCanvasLayoutClass('game');
-
-            if (window.game && window.game.scale) {
-                const resizeToGameLayout = () => {
-                    const responsive = typeof getResponsiveScale === 'function'
-                        ? getResponsiveScale()
-                        : { width: CONFIG.width, height: CONFIG.height };
-                    const width = responsive.width || CONFIG.width;
-                    const height = responsive.height || CONFIG.height;
-
-                    console.log('[GameLayoutManager] Resizing canvas for game layout');
-                    window.game.scale.resize(width, height);
-                    window.game.scale.refresh();
-                    this.phaserCanvas.style.width = `${width}px`;
-                    this.phaserCanvas.style.height = `${height}px`;
-                };
-
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(resizeToGameLayout);
-                });
-            }
+            this.resizeToContainer();
         }
+    }
+
+    resizeToContainer() {
+        if (!window.game || !window.game.scale) return;
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                const container = document.getElementById('game-container');
+                if (!container) return;
+                const w = Math.floor(container.clientWidth) || window.innerWidth;
+                const h = Math.floor(container.clientHeight) || window.innerHeight;
+                if (w < 10 || h < 10) return;
+
+                console.log('[GameLayoutManager] Resizing Phaser to container', w, h);
+                window.game.scale.resize(w, h);
+                window.game.scale.refresh();
+
+                // Keep sizing ownership in CSS to avoid cross-layout coupling.
+                if (this.phaserCanvas) {
+                    this.phaserCanvas.style.width = '';
+                    this.phaserCanvas.style.height = '';
+                }
+
+                window.dispatchEvent(new CustomEvent('gamelayout-resize', { detail: { width: w, height: h } }));
+            });
+        });
     }
 
     getCurrentLayout() {
