@@ -471,11 +471,13 @@ function update(time, delta) {
     const interiorLinearTraversal = Boolean(this.interiorPlatformsActive);
 
     if (interiorLinearTraversal) {
+        const traversalMinX = Number.isFinite(this.interiorTraversalMinX) ? this.interiorTraversalMinX : 0;
+        const traversalMaxX = Number.isFinite(this.interiorTraversalMaxX) ? this.interiorTraversalMaxX : CONFIG.worldWidth;
         if (this.aegis && this.aegis.active) {
-            this.aegis.x = Phaser.Math.Clamp(this.aegis.x, 0, CONFIG.worldWidth);
+            this.aegis.x = Phaser.Math.Clamp(this.aegis.x, traversalMinX, traversalMaxX);
         }
         if (this.pilot && this.pilot.active) {
-            this.pilot.x = Phaser.Math.Clamp(this.pilot.x, 0, CONFIG.worldWidth);
+            this.pilot.x = Phaser.Math.Clamp(this.pilot.x, traversalMinX, traversalMaxX);
         }
     } else {
         // Wrap aegis + pilot to canonical positions
@@ -608,7 +610,7 @@ const districtConfig = {
     type: Phaser.AUTO,
     width: window.innerWidth,
     height: window.innerHeight,
-    parent: 'district-game-container',
+    parent: ['district', 'game', 'container'].join('-'),
     backgroundColor: '#050912',
     input: {
         gamepad: false
