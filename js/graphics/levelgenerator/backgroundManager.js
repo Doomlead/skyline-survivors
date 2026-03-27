@@ -62,6 +62,10 @@ function resolveBackgroundStyle(style) {
  * Returns: value defined by the surrounding game flow.
  */
 function createBackground(scene, style) {
+    // Defensive cleanup in case the previous scene/layout did not fully teardown yet.
+    // This prevents old parallax layers from lingering under a fresh run.
+    destroyParallax();
+
     // Use the ACTUAL current camera dimensions, not just CONFIG
     var cam = scene.cameras ? scene.cameras.main : null;
     var actualWidth = cam ? cam.width : CONFIG.width;
@@ -77,6 +81,7 @@ function createBackground(scene, style) {
 
     var styleToUse = resolveBackgroundStyle(style);
     setActiveBackgroundLayers(styleToUse);
+    cleanupBackgroundTextures(scene);
     var GeneratorClass = BACKGROUND_STYLE_GENERATORS[styleToUse];
 
     console.log('[BackgroundManager] Creating ' + styleToUse.toUpperCase() + ' background (' + actualWidth + 'x' + actualHeight + ')');
@@ -94,6 +99,33 @@ function createBackground(scene, style) {
         console.log('[BackgroundManager] Post-creation resize to match camera: ' + cam.width + 'x' + cam.height);
         parallaxManagerInstance.resize(cam.width, cam.height);
     }
+}
+
+/**
+ * Removes previously generated parallax textures before rebuilding a fresh layout.
+ * Parameters: scene.
+ * Returns: none.
+ */
+function cleanupBackgroundTextures(scene) {
+    if (!scene || !scene.textures || !BACKGROUND_LAYER_SETS) return;
+
+    var seenKeys = {};
+
+    Object.keys(BACKGROUND_LAYER_SETS).forEach(function(setKey) {
+        var set = BACKGROUND_LAYER_SETS[setKey];
+        var layers = set && set.layers ? set.layers : null;
+        if (!layers) return;
+
+        Object.keys(layers).forEach(function(layerName) {
+            var key = layers[layerName] && layers[layerName].key;
+            if (!key || seenKeys[key]) return;
+            seenKeys[key] = true;
+
+            if (scene.textures.exists(key)) {
+                scene.textures.remove(key);
+            }
+        });
+    });
 }
 
 /**
