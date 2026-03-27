@@ -86,13 +86,35 @@ class GameLayoutManager {
         }
 
         if (this.phaserCanvas && gameContainer) {
-            // Keep game canvas pinned to #game-container permanently.
-            if (this.phaserCanvas.parentElement !== gameContainer) {
-                gameContainer.appendChild(this.phaserCanvas);
-            }
+            gameContainer.appendChild(this.phaserCanvas);
             this.setCanvasLayoutClass('game');
             this.resizeToContainer();
         }
+    }
+
+    resizeToContainer() {
+        if (!window.game || !window.game.scale) return;
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                const container = document.getElementById('game-container');
+                if (!container) return;
+                const w = Math.floor(container.clientWidth) || window.innerWidth;
+                const h = Math.floor(container.clientHeight) || window.innerHeight;
+                if (w < 10 || h < 10) return;
+
+                console.log('[GameLayoutManager] Resizing Phaser to container', w, h);
+                window.game.scale.resize(w, h);
+                window.game.scale.refresh();
+
+                if (this.phaserCanvas) {
+                    this.phaserCanvas.style.width = '100%';
+                    this.phaserCanvas.style.height = '100%';
+                }
+
+                window.dispatchEvent(new CustomEvent('gamelayout-resize', { detail: { width: w, height: h } }));
+            });
+        });
     }
 
     resizeToContainer() {

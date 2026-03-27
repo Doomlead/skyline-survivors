@@ -47,6 +47,9 @@ let lastResizeByLayout = {
 function applyResponsiveResize(options = {}) {
     const { force = false } = options;
 
+    // 1. Safety check
+    if (!game || !game.scale || !game.canvas) return;
+
     // 2. District Mode Logic:
     if (
         window.DistrictLayoutManager &&
@@ -59,16 +62,7 @@ function applyResponsiveResize(options = {}) {
             if (!force && container.clientWidth === districtCache.width && container.clientHeight === districtCache.height) {
                 return;
             }
-            const districtGame = window.districtGame;
-            if (districtGame?.scale) {
-                districtGame.scale.resize(container.clientWidth, container.clientHeight);
-                if (districtGame.canvas) {
-                    districtGame.canvas.style.width = '';
-                    districtGame.canvas.style.height = '';
-                }
-                districtGame.scale.refresh();
-            }
-
+            game.scale.resize(container.clientWidth, container.clientHeight);
             if (typeof resizeParallaxLayers === 'function') {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
