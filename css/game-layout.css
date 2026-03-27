@@ -5,7 +5,6 @@
 
 :root {
     color-scheme: dark;
-    --hud-max-height: clamp(170px, 26vh, 260px);
 }
 
 html,
@@ -58,23 +57,16 @@ footer          { display: none !important; }
     gap: 0;
 }
 
-/*
-  HUD header stays compact while avoiding clipping of critical rows.
-  If content grows (small screens), it scrolls instead of hiding radar/weapon rows.
-*/
+/* Keep entire HUD (including radar) visible in normal layout. */
 #game-hud-header {
     width: 100%;
     flex-shrink: 0;
-    max-height: var(--hud-max-height);
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: visible;
 }
 
 #hud-container {
     width: 100%;
-    max-height: var(--hud-max-height);
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: visible;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
