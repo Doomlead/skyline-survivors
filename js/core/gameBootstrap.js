@@ -66,12 +66,14 @@ function applyResponsiveResize(options = {}) {
             if (typeof resizeParallaxLayers === 'function') {
                 resizeParallaxLayers(container.clientWidth, container.clientHeight);
             }
-            game.scale.refresh();
             districtCache.width = container.clientWidth;
             districtCache.height = container.clientHeight;
         }
         return;
     }
+
+    // Safety check for gameplay renderer branches.
+    if (!game || !game.scale || !game.canvas) return;
 
     // 3. Fullscreen Gameplay Logic:
     if (document.body.classList.contains('fullscreen-active')) {

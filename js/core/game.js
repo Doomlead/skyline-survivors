@@ -285,12 +285,6 @@ function create() {
         DistrictLayoutManager.switchToGameLayout();
     }
     
-    // Hide the BuildScene if it's active
-    if (this.scene.isActive(SCENE_KEYS.build)) {
-        this.scene.setVisible(false, SCENE_KEYS.build);
-        this.scene.sleep(SCENE_KEYS.build); // Ensure it stops updating
-    }
-    
     // Mark that the game scene has been properly initialized
     gameSceneInitialized = true;
     
@@ -602,9 +596,38 @@ const config = {
             debug: false
         }
     },
-    scene: [TitleScene, MainMenuScene, BuildScene, mainSceneConfig]
+    scene: [TitleScene, MainMenuScene, mainSceneConfig]
 };
 
 const game = new Phaser.Game(config);
 // Expose the Phaser game instance for UI helpers (startGame, enterMainMenu, etc.)
 window.game = game;
+
+// Dedicated district renderer (hard-decoupled from the gameplay renderer).
+const districtConfig = {
+    type: Phaser.AUTO,
+    width: window.innerWidth,
+    height: window.innerHeight,
+    parent: 'district-game-container',
+    backgroundColor: '#050912',
+    input: {
+        gamepad: false
+    },
+    scale: {
+        mode: Phaser.Scale.NONE,
+        autoCenter: Phaser.Scale.NO_CENTER,
+        width: window.innerWidth,
+        height: window.innerHeight
+    },
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 0 },
+            debug: false
+        }
+    },
+    scene: [BuildScene]
+};
+
+const districtGame = new Phaser.Game(districtConfig);
+window.districtGame = districtGame;

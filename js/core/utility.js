@@ -243,6 +243,10 @@ function getScreenPosition(scene, worldX, worldY) {
     };
 }
 
+function getDistrictSceneManager() {
+    return window.districtGame?.scene || null;
+}
+
 // Starts or restarts gameplay in the selected mode, applying mission payload and scene transitions.
 function startGame(mode = 'classic') {
     const missionPayload = window.missionPlanner ? missionPlanner.prepareLaunchPayload(mode) : null;
@@ -273,12 +277,14 @@ function startGame(mode = 'classic') {
         } else if (game.scene) {
             game.scene.start(SCENE_KEYS.game);
         }
-        if (game.scene.isActive(SCENE_KEYS.build)) {
-            game.scene.stop(SCENE_KEYS.build);
-        }
         if (game.scene.isActive(SCENE_KEYS.menu)) {
             game.scene.stop(SCENE_KEYS.menu);
         }
+    }
+
+    const districtSceneManager = getDistrictSceneManager();
+    if (districtSceneManager?.isActive?.(SCENE_KEYS.build)) {
+        districtSceneManager.stop(SCENE_KEYS.build);
     }
 
     // Update UI buttons
@@ -423,9 +429,6 @@ function enterMainMenu() {
         const menu = document.getElementById('menu-overlay');
         if (menu) menu.style.display = 'none';
 
-        if (game.scene.isActive(SCENE_KEYS.build)) {
-            game.scene.stop(SCENE_KEYS.build);
-        }
         if (game.scene.isActive(SCENE_KEYS.game)) {
             game.scene.stop(SCENE_KEYS.game);
         }
@@ -437,9 +440,6 @@ function enterMainMenu() {
     if (menu) menu.style.display = 'flex';
 
     if (window.game && game.scene) {
-        if (game.scene.isActive(SCENE_KEYS.build)) {
-            game.scene.stop(SCENE_KEYS.build);
-        }
         if (game.scene.isActive(SCENE_KEYS.game)) {
             game.scene.stop(SCENE_KEYS.game);
         }
@@ -494,14 +494,12 @@ function enterDistrictMap(options = false) {
             game.scene.stop(SCENE_KEYS.menu);
         }
         
-        // 3. Start/Restart the Build Scene
-        // Using 'start' ensures the scene runs its create() method again,
-        // rebuilding the map with updated data.
-        game.scene.start(SCENE_KEYS.build);
-        game.scene.bringToTop(SCENE_KEYS.build);
-        
-        // REMOVED: game.scene.setVisible(...) - This was causing the crash. 
-        // Scene visibility is handled by the Scene object, not the SceneManager.
+        const districtSceneManager = getDistrictSceneManager();
+        if (districtSceneManager) {
+            // Start/restart the dedicated district renderer scene.
+            districtSceneManager.start(SCENE_KEYS.build);
+            districtSceneManager.bringToTop(SCENE_KEYS.build);
+        }
     }
 }
 
@@ -519,10 +517,12 @@ function closeBuildView() {
         DistrictLayoutManager.switchToGameLayout();
     }
     
+    const districtSceneManager = getDistrictSceneManager();
+    if (districtSceneManager?.isActive?.(SCENE_KEYS.build)) {
+        districtSceneManager.stop(SCENE_KEYS.build);
+    }
+
     if (window.game && game.scene) {
-        if (game.scene.isActive(SCENE_KEYS.build)) {
-            game.scene.stop(SCENE_KEYS.build);
-        }
         const mainScene = game.scene.getScene(SCENE_KEYS.game);
         if (mainScene) {
             // Resume or Start Game
@@ -543,7 +543,7 @@ function closeBuildView() {
 
 // Launches the currently selected district mission or falls back to starting the planned mode.
 function launchSelectedMission() {
-    const buildScene = game?.scene?.getScene ? game.scene.getScene(SCENE_KEYS.build) : null;
+    const buildScene = window.districtGame?.scene?.getScene ? window.districtGame.scene.getScene(SCENE_KEYS.build) : null;
     if (buildScene && buildScene.scene && buildScene.scene.isActive()) {
         buildScene.launchMission();
         return;

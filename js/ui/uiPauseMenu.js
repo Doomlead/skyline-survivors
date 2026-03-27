@@ -468,9 +468,6 @@ function returnToMainMenu(scene) {
     resetGameState();
 
     if (window.game && game.scene) {
-        if (game.scene.isActive(SCENE_KEYS.build)) {
-            game.scene.stop(SCENE_KEYS.build);
-        }
         if (game.scene.isActive(SCENE_KEYS.game)) {
             game.scene.stop(SCENE_KEYS.game);
         }
@@ -479,6 +476,10 @@ function returnToMainMenu(scene) {
         } else {
             game.scene.bringToTop(SCENE_KEYS.menu);
         }
+    }
+
+    if (window.districtGame?.scene?.isActive?.(SCENE_KEYS.build)) {
+        window.districtGame.scene.stop(SCENE_KEYS.build);
     }
 
     const menu = document.getElementById('menu-overlay');

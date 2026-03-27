@@ -52,21 +52,8 @@ class GameLayoutManager {
 
         const gameLayout = document.getElementById('game-layout');
         const districtLayout = document.getElementById('district-layout');
-        const districtCenter = document.getElementById('district-game-container');
-
         if (gameLayout) gameLayout.style.display = 'none';
         if (districtLayout) districtLayout.style.display = 'flex';
-
-        if (this.phaserCanvas && districtCenter) {
-            districtCenter.appendChild(this.phaserCanvas);
-            this.setCanvasLayoutClass('district');
-
-            setTimeout(() => {
-                if (window.game) {
-                    window.game.scale.refresh();
-                }
-            }, 50);
-        }
 
         const hud = document.getElementById('hud-container');
         if (hud) hud.style.display = 'none';
@@ -123,6 +110,32 @@ class GameLayoutManager {
                 if (this.phaserCanvas) {
                     this.phaserCanvas.style.width = '100%';
                     this.phaserCanvas.style.height = '100%';
+                }
+
+                window.dispatchEvent(new CustomEvent('gamelayout-resize', { detail: { width: w, height: h } }));
+            });
+        });
+    }
+
+    resizeToContainer() {
+        if (!window.game || !window.game.scale) return;
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                const container = document.getElementById('game-container');
+                if (!container) return;
+                const w = Math.floor(container.clientWidth) || window.innerWidth;
+                const h = Math.floor(container.clientHeight) || window.innerHeight;
+                if (w < 10 || h < 10) return;
+
+                console.log('[GameLayoutManager] Resizing Phaser to container', w, h);
+                window.game.scale.resize(w, h);
+                window.game.scale.refresh();
+
+                // Keep sizing ownership in CSS to avoid cross-layout coupling.
+                if (this.phaserCanvas) {
+                    this.phaserCanvas.style.width = '';
+                    this.phaserCanvas.style.height = '';
                 }
 
                 window.dispatchEvent(new CustomEvent('gamelayout-resize', { detail: { width: w, height: h } }));

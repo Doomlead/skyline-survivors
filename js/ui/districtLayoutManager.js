@@ -281,8 +281,8 @@ const DistrictLayoutManager = (function() {
 function selectDistrictMode(mode) {
     DistrictLayoutManager.selectMode(mode);
 
-    if (window.game?.scene?.isActive?.(SCENE_KEYS.build)) {
-        const buildScene = game.scene.getScene(SCENE_KEYS.build);
+    if (window.districtGame?.scene?.isActive?.(SCENE_KEYS.build)) {
+        const buildScene = window.districtGame.scene.getScene(SCENE_KEYS.build);
         if (buildScene?.selectMode) {
             buildScene.selectMode(mode);
         }
@@ -297,8 +297,8 @@ function selectDistrictMode(mode) {
 function launchFromDistrictMap() {
     const mode = DistrictLayoutManager.getSelectedMode();
 
-    if (window.game?.scene?.isActive?.(SCENE_KEYS.build)) {
-        const buildScene = game.scene.getScene(SCENE_KEYS.build);
+    if (window.districtGame?.scene?.isActive?.(SCENE_KEYS.build)) {
+        const buildScene = window.districtGame.scene.getScene(SCENE_KEYS.build);
         if (buildScene?.launchMission) {
             buildScene.launchMission();
             return;
