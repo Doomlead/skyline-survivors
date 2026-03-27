@@ -175,6 +175,7 @@ function updatePlayer(scene, time, delta) {
             } else {
                 pilotState.climbing = false;
                 pilot.body.setAllowGravity(true);
+                const previousPilotY = pilot.y;
 
                 if (left) {
                     pilotState.vx = -horizontalSpeed;
@@ -202,8 +203,10 @@ function updatePlayer(scene, time, delta) {
                 if (pilot.y < minY) pilot.y = minY;
                 pilotState.grounded = Boolean((pilot.body && pilot.body.blocked && pilot.body.blocked.down) || (pilot.body && pilot.body.touching && pilot.body.touching.down));
 
+                const supportedByPlatform = resolveInteriorPlatformSupport(scene, pilot, pilotState, previousPilotY);
+
                 var interiorFloorY = getInteriorGroundClampY(scene, pilot);
-                if (!pilotState.grounded && pilot.y > interiorFloorY) {
+                if (!pilotState.grounded && !supportedByPlatform && pilot.y > interiorFloorY) {
                     pilot.y = interiorFloorY;
                     pilotState.vy = 0;
                     pilot.body.setVelocityY(0);
@@ -420,6 +423,56 @@ function getInteriorGroundClampY(scene, pilot) {
         ? pilot.body.halfHeight
         : ((pilot && pilot.body && typeof pilot.body.height === 'number') ? pilot.body.height * 0.5 : 9);
     return groundTopY - halfHeight;
+}
+
+// Snap-resolves pilot support on top of interior one-way platforms while preserving jump-through-from-below behavior.
+function resolveInteriorPlatformSupport(scene, pilot, pilotState, previousPilotY) {
+    if (!scene || !pilot || !pilotState) return false;
+    if (pilotState.vy < 0) return false;
+
+    const halfHeight = (pilot && pilot.body && typeof pilot.body.halfHeight === 'number')
+        ? pilot.body.halfHeight
+        : ((pilot && pilot.body && typeof pilot.body.height === 'number') ? pilot.body.height * 0.5 : 9);
+    const currentBottomY = pilot.y + halfHeight;
+    const priorCenterY = typeof previousPilotY === 'number' ? previousPilotY : pilot.y;
+    const previousBottomY = priorCenterY + halfHeight;
+    const platforms = (scene.platforms && scene.platforms.children && Array.isArray(scene.platforms.children.entries))
+        ? scene.platforms.children.entries
+        : [];
+
+    let bestTopY = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < platforms.length; i++) {
+        const platform = platforms[i];
+        if (!platform || !platform.active || platform.platformType !== 'platform') continue;
+
+        const platformWidth = (platform.body && typeof platform.body.width === 'number')
+            ? platform.body.width
+            : (platform.width || 0);
+        const platformHeight = (platform.body && typeof platform.body.height === 'number')
+            ? platform.body.height
+            : (platform.height || 0);
+        const halfWidth = platformWidth * 0.5;
+        const topY = platform.y - platformHeight * 0.5;
+
+        const inHorizontalBounds = pilot.x >= platform.x - halfWidth && pilot.x <= platform.x + halfWidth;
+        if (!inHorizontalBounds) continue;
+
+        const approachedFromAbove = previousBottomY <= topY + 8;
+        const crossedTopSurface = currentBottomY >= topY - 1;
+        if (!approachedFromAbove || !crossedTopSurface) continue;
+
+        if (topY < bestTopY) bestTopY = topY;
+    }
+
+    if (!Number.isFinite(bestTopY)) return false;
+
+    pilot.y = bestTopY - halfHeight;
+    pilotState.vy = 0;
+    if (pilot.body && typeof pilot.body.setVelocityY === 'function') {
+        pilot.body.setVelocityY(0);
+    }
+    pilotState.grounded = true;
+    return true;
 }
 
 // Computes pilot aim direction from movement inputs and grounded state.
