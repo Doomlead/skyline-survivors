@@ -4,11 +4,11 @@
 
 (function() {
     const GLOBE_LAYOUT = {
-        centerXRatio: 0.75,
-        centerYRatio: 0.75,
-        radiusScale: 0.15,
-        minRadius: 100,
-        maxRadius: 200
+        centerXRatio: 0.5,
+        centerYRatio: 0.5,
+        radiusScale: 0.30,
+        minRadius: 200,
+        maxRadius: 400
     };
 
     function calculateGlobeDimensions(width, height, layout = GLOBE_LAYOUT) {
