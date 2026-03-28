@@ -183,6 +183,7 @@ function beginMothershipInterior(scene) {
 
     // 3. Force pilot ejection - lock ship controls
     forceOnFoot(scene);
+    configureMothershipInteriorTraversal(scene, objective);
 
     // 4. Spawn interior objectives
     spawnInteriorObjectives(scene);
@@ -324,6 +325,39 @@ function getActiveMothershipInteriorSection(objective) {
     return null;
 }
 
+function getMothershipInteriorSectionBounds(scene, objective, sectionIndexOverride = null) {
+    const sectionCount = Math.max(1, objective?.sectionCount || 1);
+    const sectionIndex = sectionIndexOverride == null
+        ? Math.max(0, Math.min(sectionCount - 1, objective?.currentSectionIndex || 0))
+        : Math.max(0, Math.min(sectionCount - 1, sectionIndexOverride));
+    const sectionWidth = CONFIG.worldWidth / sectionCount;
+    const left = sectionIndex * sectionWidth;
+    const right = (sectionIndex + 1) * sectionWidth;
+    const padding = Math.max(32, Math.min(80, sectionWidth * 0.08));
+    return {
+        sectionIndex,
+        sectionCount,
+        sectionWidth,
+        left: left + padding,
+        right: right - padding,
+        center: left + sectionWidth * 0.5
+    };
+}
+
+function lockMothershipInteriorTraversal(scene, objective) {
+    if (!scene || !objective) return;
+    const bounds = getMothershipInteriorSectionBounds(scene, objective);
+    scene.interiorTraversalMinX = 0;
+    scene.interiorTraversalMaxX = Math.max(bounds.left, Math.min(CONFIG.worldWidth, bounds.right));
+}
+
+function configureMothershipInteriorTraversal(scene, objective) {
+    if (!scene || !objective) return;
+    scene.interiorSectionCount = Math.max(1, objective.sectionCount || 1);
+    scene.interiorSectionWidth = CONFIG.worldWidth / scene.interiorSectionCount;
+    lockMothershipInteriorTraversal(scene, objective);
+}
+
 // Updates section progression state for the mothership interior objective.
 function setMothershipSectionState(objective, index, state, patch = {}) {
     const progress = objective?.sectionProgress;
@@ -363,7 +397,7 @@ function advanceMothershipInteriorSection(scene) {
         });
     }
 
-    buildInteriorPlatforms(scene, CONFIG.backgroundSeed || 1337, nextSection || objective.activeSectionId);
+    lockMothershipInteriorTraversal(scene, objective);
     spawnInteriorObjectives(scene);
 
     const sectionTheme = nextSection?.theme ? nextSection.theme.toUpperCase() : 'NEXT DECK';
@@ -377,6 +411,7 @@ function spawnInteriorObjectives(scene) {
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
     const section = getActiveMothershipInteriorSection(objective);
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+    const sectionBounds = getMothershipInteriorSectionBounds(scene, objective);
 
     const sectionProgress = objective.sectionProgress?.[objective.currentSectionIndex || 0];
     if (sectionProgress) {
@@ -413,10 +448,11 @@ function spawnInteriorObjectives(scene) {
     objective.coreChamberHpMax = cfg.coreChamberHp;
     objective.interiorReinforcementTimer = 0;
 
-    const conduitSpacing = CONFIG.worldWidth / (cfg.powerConduitCount + 1);
+    const sectionSpan = Math.max(120, sectionBounds.right - sectionBounds.left);
+    const conduitSpacing = sectionSpan / (cfg.powerConduitCount + 1);
     for (let i = 0; i < cfg.powerConduitCount; i++) {
-        const cxBase = conduitSpacing * (i + 1) + (Math.random() - 0.5) * 100;
-        const cx = typeof toInteriorDirectionalX === 'function' ? toInteriorDirectionalX(scene, cxBase) : cxBase;
+        const cxBase = sectionBounds.left + conduitSpacing * (i + 1) + (Math.random() - 0.5) * 80;
+        const cx = Phaser.Math.Clamp(cxBase, sectionBounds.left, sectionBounds.right);
         const terrainVar = Math.sin(cx / 200) * 30;
         const fallbackY = Math.max(120, groundLevel - terrainVar - 20);
         const cy = getInteriorAnchorY(scene, cx, fallbackY, 20);
@@ -430,10 +466,10 @@ function spawnInteriorObjectives(scene) {
         conduit.setTint(0x00ffff);
     }
 
-    const nodeSpacing = CONFIG.worldWidth / (cfg.securityNodeCount + 1);
+    const nodeSpacing = sectionSpan / (cfg.securityNodeCount + 1);
     for (let i = 0; i < cfg.securityNodeCount; i++) {
-        const nxBase = nodeSpacing * (i + 1) + (Math.random() - 0.5) * 150;
-        const nx = typeof toInteriorDirectionalX === 'function' ? toInteriorDirectionalX(scene, nxBase) : nxBase;
+        const nxBase = sectionBounds.left + nodeSpacing * (i + 1) + (Math.random() - 0.5) * 100;
+        const nx = Phaser.Math.Clamp(nxBase, sectionBounds.left, sectionBounds.right);
         const terrainVar = Math.sin(nx / 200) * 30;
         const fallbackY = Math.max(100, groundLevel - terrainVar - 40);
         const ny = getInteriorAnchorY(scene, nx, fallbackY, 40);
@@ -500,9 +536,8 @@ function spawnCoreChamber(scene) {
     const cfg = MOTHERSHIP_INTERIOR_CONFIG;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
 
-    // Place core chamber at center of world
-    const coreXBase = CONFIG.worldWidth * 0.5;
-    const coreX = typeof toInteriorDirectionalX === 'function' ? toInteriorDirectionalX(scene, coreXBase) : coreXBase;
+    const sectionBounds = getMothershipInteriorSectionBounds(scene, objective);
+    const coreX = sectionBounds.center;
     const terrainVar = Math.sin(coreX / 200) * 30;
     const fallbackY = Math.max(140, groundLevel - terrainVar - 30);
     const coreY = getInteriorAnchorY(scene, coreX, fallbackY, 30);
@@ -694,6 +729,8 @@ function hitInteriorTarget(projectile, target) {
             target.destroy();
             objective.active = false;
             objective.interiorPhase = false;
+            scene.interiorTraversalMinX = 0;
+            scene.interiorTraversalMaxX = CONFIG.worldWidth;
             if (typeof clearInteriorHazards === 'function') {
                 clearInteriorHazards(scene);
             }
