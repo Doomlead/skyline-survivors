@@ -596,6 +596,9 @@ function updateProjectiles(scene) {
         particleManager
     } = scene;
     if (!player) return;
+    const timeSlowLevel = (typeof playerState !== 'undefined' && playerState && playerState.powerUps)
+        ? playerState.powerUps.timeSlow || 0
+        : 0;
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     /**
      * Handles the destroyIfGrounded routine and encapsulates its core gameplay logic.
@@ -696,10 +699,10 @@ function updateProjectiles(scene) {
         if (!proj.active || destroyIfGrounded(proj)) return;
         const velocity = proj.body && proj.body.velocity;
         if (!velocity || typeof proj.setVelocity !== 'function') return;
-        if (playerState.powerUps.timeSlow > 0 && !proj.isSlowed) {
+        if (timeSlowLevel > 0 && !proj.isSlowed) {
             proj.setVelocity(velocity.x * 0.3, velocity.y * 0.3);
             proj.isSlowed = true;
-        } else if (playerState.powerUps.timeSlow <= 0 && proj.isSlowed) {
+        } else if (timeSlowLevel <= 0 && proj.isSlowed) {
             proj.setVelocity(velocity.x * 3.33, velocity.y * 3.33);
             proj.isSlowed = false;
         }
