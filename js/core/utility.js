@@ -472,6 +472,11 @@ function enterDistrictMap(options = false) {
     // 1. Switch DOM Layout
     if (window.DistrictLayoutManager) {
         DistrictLayoutManager.switchToDistrictLayout();
+        if (fromVictory) {
+            DistrictLayoutManager.showChallengeReportFromLastRun?.();
+        } else {
+            DistrictLayoutManager.hideChallengeReport?.();
+        }
     }
 
     // 2. Manage Scenes

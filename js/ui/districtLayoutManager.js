@@ -264,6 +264,65 @@ const DistrictLayoutManager = (function() {
         return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
+    function buildChallengeRows(summary) {
+        const directives = summary?.directives || {};
+        const urgency = typeof directives.urgency === 'string' ? directives.urgency.toUpperCase() : 'NORMAL';
+        const rewardMult = Number.isFinite(directives.rewardMultiplier) ? directives.rewardMultiplier.toFixed(2) : '1.00';
+        const spawnMult = Number.isFinite(directives.spawnMultiplier) ? directives.spawnMultiplier.toFixed(2) : '1.00';
+        const playedAt = summary?.timestamp ? new Date(summary.timestamp).toLocaleString() : 'Unknown';
+        const mode = summary?.mode || 'classic';
+
+        return [
+            ['Outcome', summary?.success ? 'SUCCESS' : 'FAILED'],
+            ['District', summary?.districtName || summary?.districtId || 'Unknown'],
+            ['Mode', mode.toUpperCase()],
+            ['Challenge Urgency', urgency],
+            ['Reward Mult', `${rewardMult}x`],
+            ['Spawn Rate', `${spawnMult}x`],
+            ['Score', String(summary?.score || 0)],
+            ['Humans Rescued', String(summary?.humansRescued || 0)],
+            ['Meta Credits Earned', `+${summary?.earnedCredits || 0}`],
+            ['Recorded At', playedAt]
+        ];
+    }
+
+    function showChallengeReportFromLastRun() {
+        const root = document.getElementById('district-challenge-report');
+        const body = document.getElementById('district-challenge-body');
+        const title = document.getElementById('district-challenge-title');
+        const subtitle = document.getElementById('district-challenge-subtitle');
+        const closeButton = document.getElementById('district-challenge-close');
+        if (!root || !body) return;
+        if (closeButton && !closeButton.dataset.bound) {
+            closeButton.addEventListener('click', hideChallengeReport);
+            closeButton.dataset.bound = 'true';
+        }
+
+        const summary = window.metaProgression?.getLastRunSummary?.();
+        if (!summary) {
+            hideChallengeReport();
+            return;
+        }
+
+        const titleText = summary.success ? 'Challenge Report: Mission Complete' : 'Challenge Report: Mission Failed';
+        if (title) title.textContent = titleText;
+        if (subtitle) subtitle.textContent = 'Summary loaded from meta progression run history';
+        body.innerHTML = buildChallengeRows(summary).map(([label, value]) => `
+            <div class="district-challenge-row">
+                <span class="district-challenge-label">${label}</span>
+                <span class="district-challenge-value">${value}</span>
+            </div>
+        `).join('');
+
+        root.classList.remove('hidden');
+    }
+
+    function hideChallengeReport() {
+        const root = document.getElementById('district-challenge-report');
+        if (!root) return;
+        root.classList.add('hidden');
+    }
+
     return {
         switchToDistrictLayout,
         switchToGameLayout,
@@ -273,7 +332,9 @@ const DistrictLayoutManager = (function() {
         selectMode,
         getSelectedMode,
         getCurrentLayout,
-        init
+        init,
+        showChallengeReportFromLastRun,
+        hideChallengeReport
     };
 })();
 
