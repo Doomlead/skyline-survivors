@@ -120,53 +120,53 @@
 
 ## Overall Completion Statistics
 
-- **Design Document Alignment:** ~91% (core mission architecture, rescue/deploy loop, phase-gated encounters, Pilot Intel ribbon logic, assault jackpot pipeline, Bulwark siege identity, and run-summary persistence scaffolding are in; largest remaining deltas are challenge-mode productization and world reactivity).
+- **Design Document Alignment:** ~82% (core district loop, ship/pilot transition baseline, Pilot Intel ribbon logic, and assault jackpot systems are implemented; however, newly expanded assault-liberation/Reclaimer feature set and challenge-mode productization from the updated design document are still largely unimplemented).
 - **Major Milestones Achieved:**
-  1. District pressure state machine with critical near-miss handling.
-  2. Full rescue-carry-deploy loop with cargo inertia and operative conversion.
-  3. Mothership exterior-to-interior final chain.
-  4. Pilot Intel ribbon logic + district persistence + reward routing.
-  5. Assault jackpot/mystery reward system with idempotent settlement and telemetry.
-  6. Bulwark siege multipliers limited to valid assault structures + HUD feedback.
-  7. Comprehensive Node test suite passing in CI-style local run.
+  1. District pressure state machine (Friendly/Threatened/Critical/Occupied) with timer consequence flow.
+  2. Rescue/carry/deploy baseline loop for defense-style civilian extraction.
+  3. Pilot Intel ribbon progression rules (critical bonus + occupied suppression).
+  4. Meta progression foundations (credits, drops, pilot weapon ownership/tiering, run history persistence).
+  5. Assault jackpot reward settlement with idempotency safeguards.
+  6. Mothership exterior/interior phase chain and generalized interior mission scaffolding.
+  7. Existing automated test suite passing in local run.
 - **Immediate Next Steps (Recommended Order):**
-  1. **Challenge Mode Productization (Last Stand / Assault Only)** — promote current survival/mode plumbing into explicit menu surfaces, rulesets, and persistent per-mode records.
-  2. **Post-Run Reporting UX** — convert existing run-history data into a dedicated report screen with challenge-specific stat blocks.
-  3. **Weather/Time-of-Day Reactivity Pass** — visual/audio hooks tied to district state and mission intensity.
-  4. **Reward Presentation Polish** — stronger jackpot reveal sequencing and post-mission payoff UI.
-  5. **Operative Autonomy Pass** — enhance defensive perimeter behavior when pilot is airborne.
-- **Estimated Remaining Work:** ~4-7 focused dev days for MVP-aligned compliance; ~2 additional polish weeks for presentation/balance/readability.
-- **Post-MVP Polish (Optional):** adaptive music layers, district transition cinematics, biome hazard mutators, richer leaderboard segmentation.
-- **MVP Completion:** ~92%
+  1. **Implement Reclaimer Ship-Recovery Loop (Assault)** — spawn/announce Reclaimer after Aegis destruction in assault, add extraction timer, destruction recovery, and no-spawn rule during interior breach.
+  2. **Implement Liberation Sources (Stasis Arrays + Prisoner Transports)** — add assault entities, captive release behavior, and operative-economy linkage to liberated captives.
+  3. **Wire Assault UI/Scoring/Radar for New Entities** — amber Reclaimer radar icon, captive/liberation scoring hooks, and clear mission callouts for assault-only recovery rules.
+  4. **Challenge Mode Product Surface** — explicit Last Stand and Assault Only entry points with per-mode records/rules.
+  5. **Weather/Time-of-Day Reactivity** — environment gameplay/visual hooks tied to urgency and mission intensity.
+- **Estimated Remaining Work:** ~8-12 focused dev days for MVP-compliant implementation against the updated design doc; ~2 additional polish weeks for presentation/balance/readability.
+- **Post-MVP Polish (Optional):** adaptive music layers, transition cinematics for critical/near-miss states, richer challenge telemetry, and expanded accessibility/tutorial clarity.
+- **MVP Completion:** ~84%
 - **Critical Missing Features for Design Document Compliance:**
-  1. Full Challenge mode surface (Last Stand + Assault Only) with explicit mode identity and per-mode records.
-  2. Weather/time-of-day reactive environment layer.
-  3. Final-pass cinematic/audio feedback polish for major reward and urgency beats.
-  4. Dedicated post-run challenge reporting UI wired to existing summary persistence.
-
----
+  1. **Reclaimer assault recovery system** (spawn, extraction pressure, recovery win/fail loop, interior-phase exception).
+  2. **Assault Liberation loop entities** (Stasis Arrays and Prisoner Transports) with captive release and drop-off flow.
+  3. **Updated assault telemetry/UI rules** (radar amber Reclaimer marker, liberation-aware scoring and HUD feedback).
+  4. **Explicit Challenge hub implementation** (Last Stand + Assault Only identity, per-mode records/rules).
+  5. **Dynamic weather/time-of-day reactivity layer**.
 
 ## What We Should Work On Next
 
-The best next milestone is still **Challenge Mode Productization**, but now as a **finish-and-surface** pass (not greenfield).
+Given the updated design document, the highest-value next task is to build the **Reclaimer assault recovery loop** first.
 
 ### Why this should be next
-- Existing mode-selection and run-summary plumbing reduces implementation risk.
-- It resolves the most visible design-document compliance gap in a player-facing way.
-- It unlocks replayability and cleaner balancing telemetry with minimal new combat content.
+- It is now a central assault identity requirement in the design document, not optional polish.
+- It unblocks several dependent requirements (radar signaling, scoring hooks, operative priority behaviors, and assault flow clarity).
+- It resolves a major gameplay gap where assault recovery currently does not match the specified "destroy the Reclaimer" rule.
 
-### One-Task Update (Next Sprint)
+### One-Task Update (Recommended Next Task)
 
-**Task:** Ship **Challenge Surface v1** (Last Stand + Assault Only front-end flow on top of existing mission-mode and run-summary foundations).
+**Task:** Implement **Reclaimer Recovery v1** for assault missions.
 
 **Definition of Done:**
-1. Add explicit Challenge menu entries for Last Stand and Assault Only (separate from campaign routing).
-2. Track and persist per-mode best score + best survival time.
-3. Build a post-run Challenge Report screen using stored run summary fields.
-4. Validate that Challenge runs do not mutate campaign district/prosperity state.
-5. Add automated tests for challenge bootstrapping, per-mode persistence, and report payload formatting.
+1. On Aegis destruction in assault mode, spawn Reclaimer with mission announcement/telegraph and radar marker.
+2. Add extraction behavior + countdown pressure and failure handling (escape -> respawn cycle).
+3. Destroying Reclaimer reconstructs/returns Aegis as the only assault recovery path.
+4. Disable Reclaimer spawning during assault interior breach phase (explicit edge-case guard).
+5. Add automated tests covering spawn gating, recovery success path, extraction failure/respawn, and interior no-spawn behavior.
 
 ### Recommended Follow-Up After That
-1. Add weather/time-of-day reactivity toggles keyed off mission urgency.
-2. Layer in cinematic reward/critical-state presentation polish.
-3. Revisit airborne operative autonomy behaviors for late-wave readability.
+1. Implement Stasis Arrays + Prisoner Transports with captive liberation outputs.
+2. Hook liberation/rescue parity into ammo/scoring/HUD/radar outputs.
+3. Productize Last Stand + Assault Only challenge surfaces with per-mode records.
+4. Add weather/time-of-day reactivity pass.
