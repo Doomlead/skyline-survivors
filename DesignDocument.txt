@@ -1,3 +1,5 @@
+
+
 # Last Bastion – Design Document v2.0
 
 **Tagline:** "Defend. Liberate. Survive."
@@ -42,7 +44,7 @@ A modern reimagining of *Defender/Stargate* fused with *Strike Force*, *Vampire 
 ### 2.2. Side-Scrolling Combat View
 **Perspective:** Horizontal wraparound map above a cityscape.
 *   **Defense Missions:** Defend 1 fixed **Extraction Hub (Fortified Hangar)**. 15 Waves.
-*   **Assault Missions:** Push into enemy territory to destroy a Ground Base.
+*   **Assault Missions:** Push into enemy territory to destroy a Ground Base. Operatives are acquired through the Liberation Loop (see §3.1.3). Ship recovery after Aegis destruction requires destroying the **Reclaimer** salvage enemy (see §5.5) rather than reaching a Hangar.
 *   **Key Features:** Radar HUD, Parallax Cityscape, Day/Night Cycle.
 
 ### 2.3. Meta Progression & Shop
@@ -76,11 +78,25 @@ Instead of humans being passive scoring items, they are the primary resource for
 3.  **Tactical Deployment:** Dropping off humans at the Hangar triggers a **Deployment Animation**.
     *   *Result:* A squad of 3–5 armed operatives exits the Hangar to join the fray on the ground below.
 
+#### 3.1.1. Defense Mode Loop
+In Threatened Districts, civilians are free-roaming on the ground. The standard Rescue & Drop-Off flow applies as described above: intercept Landers before they capture civilians, tractor-beam survivors, and deliver them to the Fortified Hangar.
+
+#### 3.1.2. Assault Mode Adaptation: The "Liberation" Loop
+In Occupied Districts, civilians are not free-roaming; they have been captured and processed by the enemy. The Rescue Loop shifts from "Interception" to "Liberation."
+
+*   **Captive Sources:** Enemy bases include two captive-holding structure types:
+    *   **Stasis Arrays:** Stationary structures embedded in the base exterior. Visually distinct pods with a pulsing energy field and visible humanoid silhouettes inside. Integrated into base defense perimeters alongside Turrets and Shield Generators (see §5.4).
+    *   **Prisoner Transports:** Roaming heavy carrier enemies that patrol the airspace around the base. Larger than standard enemies, slower, and escorted by Garrison Forces. Visually marked with the same stasis-energy glow and amber detention-bay lighting used by the Reclaimer's color language (see §5.5.3).
+*   **Liberation Mechanic:** Destroying a Stasis Array or Prisoner Transport releases **Captives** (encased in floating stasis bubbles that drift downward, mirroring the visual cadence of falling civilians in defense mode).
+*   **Consistency:** Captives behave identically to free civilians once released. They must be tractor-beamed into cargo and delivered to the **Fortified Hangar** to deploy Comrades. All carry-weight, inertia, and deployment rules from §3.1 apply without modification.
+*   **Tactical Layer:** Stasis Arrays are heavily defended within the base perimeter. Prisoner Transports are mobile but escorted. The player must weigh the risk of pushing deep into enemy fire to liberate Captives versus focusing purely on base destruction. This creates a meaningful resource tension unique to assault missions: operatives are earned through offensive action rather than defensive interception.
+*   **Fortified Hangar in Assault:** A forward-deployed allied Hangar is established at the assault staging area. It functions identically to the defense-mode Hangar for Captive drop-off and Comrade deployment, but is **not** available for Aegis rebuilds (see §4.3.3 for assault-mode ship recovery via the Reclaimer).
+
 ### 3.2. Core Loop
 1.  **System Map:** Choose Defense (Threatened) or Assault (Occupied).
-2.  **Combat:** Pilot the Aegis -> Rescue Humans -> Deploy Comrades -> Survive Waves.
-3.  **Crisis:** If the Aegis is destroyed -> Enter On-Foot Command -> Rebuild at Hangar.
-4.  **Extraction:** Complete Wave 15 or Destroy Base.
+2.  **Combat:** Pilot the Aegis → Rescue Humans (Defense) or Liberate Captives (Assault, see §3.1.2) → Deploy Comrades → Survive Waves / Destroy Base.
+3.  **Crisis:** If the Aegis is destroyed → Enter On-Foot Command → Rebuild at Hangar (Defense) or Destroy the Reclaimer (Assault, see §5.5).
+4.  **Extraction:** Complete Wave 15 or Destroy Base (exterior + interior).
 
 ---
 
@@ -111,8 +127,8 @@ These soldiers provide "fire-and-forget" support, making the battlefield feel al
 | Operative Type | Rarity | Combat Behavior & Abilities |
 | :--- | :--- | :--- |
 | **Standard Infantry** | Common (65%) | Equipped with a rapid-fire rifle; auto-fires at nearest enemy. Moves in small squads to provide basic screen coverage. |
-| **Heavy Gunner** | Uncommon (20%) | High DPS unit with a Gatling-style weapon. Slows down to a "braced" position to shred through Bombers or Pods. |
-| **Saboteur** | Elite (5%) | Specifically targets **Enemy Ground Bases** in Assault Missions. Uses EMP grenades to disable Turrets and Shield Generators. |
+| **Heavy Gunner** | Uncommon (20%) | High DPS unit with a Gatling-style weapon. Slows down to a "braced" position to shred through Bombers or Pods. Particularly effective against the Reclaimer (see §5.5). |
+| **Saboteur** | Elite (5%) | Specifically targets **Enemy Ground Bases** in Assault Missions. Uses EMP grenades to disable Turrets and Shield Generators. Deals bonus damage to the Reclaimer (see §5.5.7). |
 | **Medic** | Rare (10%) | Prioritizes keeping nearby Comrades and the on-foot pilot alive via sustain pulses and support positioning during rebuild/extraction pressure. |
 
 ### 4.3. On-Foot Command (Ship Destruction)
@@ -127,13 +143,21 @@ If the Aegis is destroyed, the game does not end. The pilot ejects, and the genr
 *   When on foot, nearby Comrades stop patrolling and follow the player's movement exactly.
 *   **Visual:** This creates a "Bullet Hell" wall of return fire (similar to "Options" in *Gradius*), concentrating firepower wherever the pilot moves.
 
-**4.3.2. Extraction Defense (Rebuild Mechanic)**
+**4.3.2. Extraction Defense — Defense Mode (Rebuild Mechanic)**
+*   **Applies to:** Defense missions (Threatened districts) only.
 *   To rebuild the Aegis, the pilot must reach the **Fortified Hangar** (Drop-off point) and stand their ground.
 *   **Sacrifice:** While the "Ship Rebuild" timer ticks down, Comrades will physically body-block incoming enemy fire, sacrificing themselves to ensure the pilot gets back in the air.
 
-**4.3.3. Operative Synergy During On-Foot Command**
+**4.3.3. Ship Recovery — Assault Mode (The Reclaimer)**
+*   **Applies to:** Assault missions (Occupied districts) only.
+*   In assault missions there is no allied Hangar available for Aegis rebuilds. Instead, ship recovery is achieved by destroying the **Reclaimer** — an armored enemy salvage vessel that spawns when the Aegis is destroyed (see §5.5 for full specification).
+*   The pilot must intercept and destroy the Reclaimer before it extracts the Aegis wreckage. On destruction, the Aegis is field-reconstructed around the pilot.
+*   Surviving operatives auto-target the Reclaimer as a highest-priority threat, creating a direct payoff for players who invested in liberating Captives from Stasis Arrays and Prisoner Transports (see §3.1.2).
+
+**4.3.4. Operative Synergy During On-Foot Command**
 *   Operatives now explicitly fight alongside the pilot during emergency ground phases.
 *   **Saboteur Update:** Saboteurs auto-disable nearby turrets in local combat spaces and can temporarily suppress heavy mechanical threats.
+*   **Reclaimer Priority:** In assault mode, all operative classes auto-target the Reclaimer when it spawns, with Saboteurs and Heavy Gunners providing the highest damage contribution.
 
 ### 4.4. Pilot Weapon Upgrade System (New)
 The pilot now has an independent infantry weapon progression tree. These upgrades are persistent when bought in the Supply Drop Shop and are available in all missions, including internal maps.
@@ -156,7 +180,7 @@ The pilot now has an independent infantry weapon progression tree. These upgrade
 *   **Infinite:** Combat Rifle and Stinger Drone (until drone destruction).
 *   **Limited:** Scattergun (200), Plasma Launcher (150), Lightning Gun (25s active pool).
 *   **Replenishment methods:**
-    *   Rescue humans and deliver to Hangar: **+2 ammo** to current pilot weapon.
+    *   Rescue humans (Defense) or liberate Captives (Assault) and deliver to Hangar: **+2 ammo** to current pilot weapon.
     *   Collect ammo packs from defeated enemies: restores **30% max capacity**.
     *   Mission start: owned pilot weapons begin at full ammo.
 
@@ -192,7 +216,7 @@ The pilot now has an independent infantry weapon progression tree. These upgrade
 **4.5.2. Advanced Systems**
 *   **Weapon Decay:** Power-ups have duration; encourages aggression.
 *   **Mystery Drops:** Random effects/Jackpots.
-*   **Assault Rewards:** Destroying base sections reveals rare power-ups.
+*   **Assault Rewards:** Destroying base sections (including Stasis Arrays) reveals rare power-ups.
 
 ### 4.6. Implemented Player Weapon System (Code-Accurate)
 This section reflects the current in-code behavior of the player weapon stack.
@@ -255,6 +279,9 @@ This section documents the exact pickup flow for weapon-related power-ups from s
     *   Rescued falling/abducted humans have a 24% chance to drop a pickup.
 *   **Guaranteed boss payout:** Boss deaths spawn two pickups.
 *   **Support-generated pickup:** Medic support can spawn a short-lived shield pickup using the same world pickup group.
+*   **Assault-specific sources:**
+    *   Destroying Stasis Arrays has a 100% chance to drop one power-up alongside releasing Captives.
+    *   Destroying Prisoner Transports has a 50% chance to drop one power-up alongside releasing Captives.
 *   All of these routes converge into the same `spawnPowerUp`/`powerUps` collection path (except supply drops, which apply directly to state and do not spawn world entities).
 
 **4.7.2. Pickup Type Pool and Spawn Representation**
@@ -330,15 +357,155 @@ This section documents the exact pickup flow for weapon-related power-ups from s
 *   **Turrets:** Auto-targeting. Saboteurs can disable these.
 *   **Shield Generators:** Protect the core. Must be destroyed first.
 *   **Garrison Forces:** Elite troops that only spawn within base perimeters.
+*   **Stasis Arrays:** Stationary captive-holding pods embedded in the base exterior. Destroying them releases Captives for the Liberation Loop (see §3.1.2). Heavily defended; positioned behind Turret and Shield Generator coverage to force tactical pushes.
+*   **Prisoner Transports:** Roaming heavy carrier enemies that patrol the airspace around the base perimeter. Escorted by Garrison Forces. Destroying them releases Captives. Slower and larger than standard enemies, visually marked with amber detention-bay lighting (see §5.5.3 for shared color language).
+
+### 5.5. The Reclaimer (Assault Ship Recovery Enemy)
+
+#### 5.5.1. The Problem
+In defense missions, the pilot rebuilds the Aegis by reaching the Fortified Hangar and surviving a timed rebuild (see §4.3.2). In assault missions there is no allied Hangar available for rebuilds. The Reclaimer fills the role of a dedicated assault-mode ship recovery target: an armored enemy salvage vessel the pilot must destroy to reclaim the Aegis.
+
+#### 5.5.2. Concept
+An armored enemy salvage vessel that spawns when the Aegis is destroyed during assault mode. Its mission: recover the Aegis wreckage for enemy reverse-engineering. The pilot's mission: destroy it to reclaim the parts and trigger a field reconstruction.
+
+#### 5.5.3. Visual Design / Sprite Description
+
+**Silhouette & Scale:**
+*   Side-view profile (matching game camera)
+*   Approximately 96×64 pixels at game scale — roughly 2× the width and 1.5× the height of a standard Lander
+*   Wide, squat, industrial silhouette — visually distinct from every angular combat enemy
+
+**Hull:**
+*   Dark gunmetal gray base plating
+*   Hazard-yellow chevron stripes along both flanks (universal "industrial/salvage" visual language)
+*   Heavy riveted armor panels with visible seam lines
+*   Belly-mounted cargo bay doors — closed during approach, visibly cracking open when near wreckage
+
+**Grapple System:**
+*   Two articulated mechanical arms extending downward from the hull underside
+*   Each arm terminates in a three-pronged magnetic claw/gripper
+*   Arms are folded during transit, extend outward when the Reclaimer enters salvage range
+*   At 50% HP: one arm sparks, hangs limp, and trails debris
+
+**Cockpit:**
+*   Small angular viewport at the front, illuminated amber (distinguishes from standard enemy red/green cockpit lights)
+
+**Engines:**
+*   Two oversized thruster pods at the rear, wider than the hull
+*   Emit orange exhaust glow with visible heat distortion shimmer
+*   At low HP: one engine sputters, trails black smoke
+
+**Tractor Beam:**
+*   Amber cone of light projected downward from the nose
+*   Only activates when within range of the Aegis wreckage
+*   Wreckage visibly lifts/shakes when beam is active (communicates urgency to the player)
+
+**Damage States:**
+
+| HP Threshold | Visual Change |
+| :--- | :--- |
+| 75% | Armor panel on left flank cracks, sparks emit |
+| 50% | Left grapple arm goes limp, trails debris; smoke from one engine |
+| 25% | Multiple hull breaches glow orange; cargo bay doors visibly buckle; erratic flight wobble |
+| 0% | Dramatic multi-stage explosion; wreckage scatters; Aegis parts visibly eject |
+
+**Color Palette Summary:**
+*   Primary: Dark steel gray (#3A3F47)
+*   Accent: Hazard yellow (#F5C518)
+*   Lights: Amber (#FFBF00)
+*   Engine glow: Orange (#FF6B00)
+*   Damage: Orange-red interior glow through hull breaches
+
+#### 5.5.4. Spawn & Announcement
+
+| Event | Timing |
+| :--- | :--- |
+| Aegis destroyed | T+0 |
+| Klaxon warning SFX + screen-edge directional indicator | T+3s |
+| HUD callout banner: "⚠ RECLAIMER INBOUND — RECOVER YOUR SHIP" | T+3s |
+| Radar pulse: unique amber diamond icon appears at map edge | T+3s |
+| Reclaimer enters playfield from nearest map edge | T+5s |
+
+*   The 5-second window gives the pilot time to orient, rally nearby operatives, and plan an intercept route.
+*   The Reclaimer always spawns from the opposite side of the map from the pilot's current position (maximizes traversal tension).
+
+#### 5.5.5. Behavior & AI
+
+**Navigation Priority:**
+*   Primary: Fly to the Aegis wreckage marker at moderate speed (roughly 60% of standard Lander speed).
+*   Secondary: Does not actively pursue the pilot — it is focused on the wreckage.
+*   Avoids terrain collision but does not dodge player fire.
+
+**Combat (Defensive Only):**
+*   Twin spread-shot turrets mounted on dorsal hull.
+*   Fires only when the pilot or operatives are within medium range — it's not hunting, it's defending itself while completing its salvage mission.
+*   Turret fire rate: moderate (roughly 1 volley per 1.5 seconds).
+*   Spread pattern: 3-shot fan, moderate projectile speed.
+
+**HP & Durability:**
+*   Total HP: approximately 3× standard enemy HP — a mini-boss-tier target.
+*   No shield phases — pure HP pool (keeps the fight simple and readable during an already stressful moment).
+*   Vulnerable to all pilot weapons and operative fire.
+*   Saboteur operatives deal bonus damage to the Reclaimer (inherits the "mechanical target" bonus).
+
+**Wreckage Interaction:**
+*   When the Reclaimer reaches the Aegis wreckage, it activates its tractor beam and begins a **30-second extraction timer**.
+*   During extraction: the Reclaimer is stationary but gains a 25% damage resistance buff (armored for loading).
+*   HUD displays countdown: "EXTRACTION IN: 28... 27..."
+*   If the timer reaches zero: the Reclaimer escapes with the parts, and a new Reclaimer spawns after 15 seconds from a random map edge (extending recovery time as punishment, not making it impossible).
+
+#### 5.5.6. On Destruction
+
+| Step | Event |
+| :--- | :--- |
+| 1 | Dramatic multi-stage explosion (unique VFX — larger and more orange/yellow than standard enemy death) |
+| 2 | Aegis parts visibly eject from the wreckage and magnetically converge at pilot's position |
+| 3 | 3-second field reconstruction animation: parts assemble around the pilot with energy welding VFX |
+| 4 | Pilot is auto-loaded into reconstructed Aegis |
+| 5 | Aegis returns at 50% shield capacity (not full strength — maintains tension) |
+| 6 | Brief invincibility window (2 seconds) to prevent immediate re-destruction |
+| 7 | HUD banner: "AEGIS RECONSTRUCTED" with a recovery chime |
+
+**Audio Sequence:**
+*   Reclaimer death: heavy metallic crunch → bass explosion → debris scatter
+*   Reconstruction: ascending energy hum → mechanical assembly clicks → cockpit seal hiss → engine ignition roar
+*   Musical: brief heroic sting layered over combat music
+
+#### 5.5.7. Interaction with Operatives
+*   Active operatives will auto-target the Reclaimer when it spawns (it is flagged as highest-priority threat).
+*   Operative fire contributes to Reclaimer damage normally.
+*   Heavy Gunners are particularly effective due to sustained DPS.
+*   If the pilot has no surviving operatives, the Reclaimer fight is solo — creating strong incentive to liberate Captives from Stasis Arrays and Prisoner Transports early in the assault (see §3.1.2).
+
+#### 5.5.8. Edge Cases
+
+| Scenario | Resolution |
+| :--- | :--- |
+| Pilot destroys Reclaimer during extraction timer | Normal recovery; timer cancels |
+| Reclaimer escapes (timer hits 0) | Parts lost; new Reclaimer spawns in 15s; cycle repeats until one is destroyed |
+| Pilot dies on foot before destroying Reclaimer | Standard life-loss rules apply; on respawn, a fresh Reclaimer spawns |
+| Multiple Aegis destructions in one assault | Each destruction spawns a new Reclaimer; no limit on recovery attempts (lives permitting) |
+| Interior breach phase (pilot already on foot by design) | Reclaimer does not spawn during interior phase; Aegis is design-locked, not destroyed |
+
+#### 5.5.9. Design Rationale
+*   **Clear objective under pressure:** The pilot is vulnerable, and the Reclaimer gives them exactly one thing to focus on.
+*   **Urgency without impossibility:** The extraction timer punishes passivity but the respawning Reclaimer ensures recovery is always possible.
+*   **Earns the recovery:** Moderate-high HP means the pilot must fight for the ship rather than trivially pop a weak target.
+*   **Operative synergy payoff:** Players who invested in liberating Captives have meaningful fire support during the Reclaimer fight; players who skipped Stasis Arrays / Prisoner Transports feel the cost.
+*   **Visual distinctness:** The industrial salvage aesthetic, amber color language, and unique silhouette ensure the Reclaimer is instantly readable as "that's my target" even in chaotic assault combat.
 
 ---
 
 ## 6. Game Systems & UI
 
 ### 6.1. Radar / HUD
-*   **Mini-Radar:** Shows Player, Comrades (Blue dots), Mutants/Enemies (Red dots), Pickups.
+*   **Mini-Radar:** Shows Player, Comrades (Blue dots), Mutants/Enemies (Red dots), Pickups, Reclaimer (Amber diamond, assault only).
 *   **Engagement Tracking:** A "Combo Meter" that does not reset as long as the player moves toward an objective (Flow state).
 *   **Visual Urgency:** Radar pulses faster as "Near-Miss" timers approach zero.
+*   **Assault-Specific HUD Elements:**
+    *   Stasis Array / Prisoner Transport markers on radar (amber pod icons).
+    *   Captive count indicator when carrying liberated Captives.
+    *   Reclaimer extraction countdown when applicable (see §5.5.5).
 *   **Internal Mission HUD Additions:**
     *   Active pilot weapon icon + name
     *   Ammo count or active-time meter
@@ -350,6 +517,8 @@ This section documents the exact pickup flow for weapon-related power-ups from s
 *   **Points:** Kills, Rescues, Base Destruction.
 *   **Comrade Bonus:** Significant points for every Operative alive at mission end.
 *   **Reconversion:** Rescuing a human from a Lander/Mutant grants bonus points.
+*   **Liberation Bonus (Assault):** Bonus points for each Captive liberated from Stasis Arrays and Prisoner Transports.
+*   **Reclaimer Kill Bonus:** Destroying the Reclaimer awards a score bonus scaled by how quickly it was killed after spawning (speed bonus).
 
 ---
 
@@ -361,13 +530,13 @@ This section documents the exact pickup flow for weapon-related power-ups from s
 *   **Endgame:** Secure 100% of districts to unlock the Mothership.
 
 ### 7.2. Mission Types
-*   **Defense:** 15 Waves. Focus on keeping the Fortified Hangar safe and deploying troops.
-*   **Assault:** Two-phase strike. First destroy the exterior base core, then board and destroy the interior reactor core.
+*   **Defense:** 15 Waves. Focus on keeping the Fortified Hangar safe and deploying troops. Civilians roam freely; the standard Rescue & Drop-Off Loop applies (see §3.1.1).
+*   **Assault:** Two-phase strike. First destroy the exterior base core, then board and destroy the interior reactor core. Operatives are acquired by destroying **Stasis Arrays** and **Prisoner Transports** to liberate Captives (see §3.1.2), then delivering them to a forward-deployed Fortified Hangar. Ship recovery after Aegis destruction requires destroying the **Reclaimer** salvage enemy (see §5.5) rather than reaching a Hangar for a timed rebuild.
 *   **Mothership:** A two-part finale: exterior core siege followed by an interior boarding run-and-gun objective chain.
 
 #### 7.2.1. Assault Base Interior Breach (Run-and-Gun Phase)
 *   **Transition Trigger:** Destroying the assault base exterior defenses/core starts an interior breach sequence.
-*   **Pilot-Only Lock:** The AEGIS is disabled/locked and combat continues on foot.
+*   **Pilot-Only Lock:** The AEGIS is disabled/locked and combat continues on foot. The Reclaimer does not spawn during the interior phase (see §5.5.8).
 *   **Primary Objective:** Reach and destroy the **Reactor Core**.
 *   **Map Structure:** Three authored sections with checkpoint gates.
 
@@ -434,7 +603,7 @@ This section documents the exact pickup flow for weapon-related power-ups from s
 
 ### 7.3. Challenges
 *   **"Last Stand":** Infinite waves, global leaderboard.
-*   **"Assault Only":** All districts start Occupied.
+*   **"Assault Only":** All districts start Occupied. The Liberation Loop (§3.1.2) and Reclaimer recovery (§5.5) are the exclusive operative and ship-recovery mechanics for the entire run.
 
 ---
 
@@ -451,15 +620,20 @@ This section documents the exact pickup flow for weapon-related power-ups from s
 *   **Feedback:**
     *   **Rescue:** Satisfying "Lock-and-Load" sound when beaming up humans.
     *   **Deployment:** Sound of boots hitting the ground and radio chatter ("Squad deployed!") when dropping off at the Hangar.
+    *   **Liberation (Assault):** Stasis Array destruction triggers a crystalline shatter SFX as energy fields break. Captive stasis bubbles emit a soft harmonic chime as they drift free.
+    *   **Reclaimer:** Klaxon warning on spawn; heavy metallic crunch on destruction; ascending reconstruction hum and heroic sting on Aegis recovery (see §5.5.6 for full audio sequence).
 
 ---
 
-## 9. Key Design Changes Summary 
+## 9. Key Design Changes Summary
 *   **Resource vs. Score:** Humans are now ammunition for the ground war via the "Strike Force" Carry and Deployment system.
 *   **Inertia Mechanic:** Carrying humans adds weight, creating a risk/reward balance.
 *   **Operative Depth:** Added 3 distinct classes (Infantry, Gunner, Saboteur) and AI behaviors (Defensive Perimeter).
 *   **Weapon Synergy:** Tier 3 ship overflow upgrades ground troops.
 *   **Second Chance Mechanic:** On-Foot Command turns the pilot into a Squad Leader, using "Bullet Hell" squad tactics and "Sacrifice" mechanics to rebuild the Aegis.
+*   **Assault Liberation Loop (v2.0):** Occupied districts use Stasis Arrays and Prisoner Transports as captive sources, replacing the free-roaming civilian rescue loop with an offensive "Liberation" loop that ties operative acquisition to base-assault aggression (see §3.1.2).
+*   **The Reclaimer (v2.0):** Assault-mode ship recovery is handled by a dedicated enemy type — an armored salvage vessel the pilot must destroy to field-reconstruct the Aegis, replacing the Hangar-based rebuild used in defense missions (see §5.5).
+
 ---
 
 ## 10. Phase-Gated Boss Flow (v2.1 Update)
@@ -475,6 +649,8 @@ This applies to:
 - Mini-boss battleships
 - Assault mission base cores
 - Mothership core encounter
+
+*Note: The Reclaimer (§5.5) intentionally does **not** use the shield-phase system. Its pure HP pool keeps the recovery fight simple and readable during a high-stress moment.*
 
 ### 10.2 Behavior Driven by Encounter Phase (Not HP Ratio)
 Boss and battleship attack timing now references the phase controller state rather than raw HP %, enabling deterministic progression beats for tuning and readability.
