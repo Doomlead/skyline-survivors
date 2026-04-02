@@ -7,7 +7,7 @@
 **Trailer Hook:** "The last line of defense is you."
 
 
-**Implementation Status: 84% Complete**
+**Implementation Status: 85% Complete**
 
 ### Key Themes Progress
 
@@ -95,15 +95,20 @@
 
 ## 4. Environment & Modes
 
-**Implementation Status: 62% Complete**
+**Implementation Status: 68% Complete**
 
 ✅ **Implemented:**
 - Multi-biome parallax/background generation
 - Exterior + interior mission spaces with hazard hooks
+- District mission mode switching foundation (Defense/Survival) in mission routing UI
+- Run outcome persistence scaffolding (`lastRun` + rolling `runHistory`) for post-mission summaries
+
+⚠️ **Partially Implemented:**
+- Challenge-mode foundations exist but are not yet productized as explicit Last Stand / Assault Only experiences
 
 ❌ **Not Yet Implemented:**
 - Dynamic weather/time-of-day gameplay reactivity layer
-- Productized challenge mode flow (Last Stand / Assault Only entry points, persistence/reporting UX)
+- Dedicated Challenge hub surface with per-mode records, rulesets, and reporting UX
 
 ---
 
@@ -115,7 +120,7 @@
 
 ## Overall Completion Statistics
 
-- **Design Document Alignment:** ~90% (core mission architecture, rescue/deploy loop, phase-gated encounters, Pilot Intel ribbon logic, assault jackpot pipeline, and Bulwark siege identity are now in; largest remaining deltas are challenge-mode productization and world reactivity).
+- **Design Document Alignment:** ~91% (core mission architecture, rescue/deploy loop, phase-gated encounters, Pilot Intel ribbon logic, assault jackpot pipeline, Bulwark siege identity, and run-summary persistence scaffolding are in; largest remaining deltas are challenge-mode productization and world reactivity).
 - **Major Milestones Achieved:**
   1. District pressure state machine with critical near-miss handling.
   2. Full rescue-carry-deploy loop with cargo inertia and operative conversion.
@@ -125,36 +130,43 @@
   6. Bulwark siege multipliers limited to valid assault structures + HUD feedback.
   7. Comprehensive Node test suite passing in CI-style local run.
 - **Immediate Next Steps (Recommended Order):**
-  1. **Challenge Mode Productization (Last Stand / Assault Only)** — build mode-select entry path, run summary, and persistent score records.
-  2. **Weather/Time-of-Day Reactivity Pass** — visual/audio hooks tied to district state and mission intensity.
-  3. **Reward Presentation Polish** — stronger jackpot reveal sequencing and post-mission payoff UI.
-  4. **Operative Autonomy Pass** — enhance defensive perimeter behavior when pilot is airborne.
-- **Estimated Remaining Work:** ~5-8 focused dev days for MVP-aligned compliance; ~2 additional polish weeks for presentation/balance/readability.
+  1. **Challenge Mode Productization (Last Stand / Assault Only)** — promote current survival/mode plumbing into explicit menu surfaces, rulesets, and persistent per-mode records.
+  2. **Post-Run Reporting UX** — convert existing run-history data into a dedicated report screen with challenge-specific stat blocks.
+  3. **Weather/Time-of-Day Reactivity Pass** — visual/audio hooks tied to district state and mission intensity.
+  4. **Reward Presentation Polish** — stronger jackpot reveal sequencing and post-mission payoff UI.
+  5. **Operative Autonomy Pass** — enhance defensive perimeter behavior when pilot is airborne.
+- **Estimated Remaining Work:** ~4-7 focused dev days for MVP-aligned compliance; ~2 additional polish weeks for presentation/balance/readability.
 - **Post-MVP Polish (Optional):** adaptive music layers, district transition cinematics, biome hazard mutators, richer leaderboard segmentation.
-- **MVP Completion:** ~91%
+- **MVP Completion:** ~92%
 - **Critical Missing Features for Design Document Compliance:**
-  1. Challenge mode surface + persistence/reporting loop.
+  1. Full Challenge mode surface (Last Stand + Assault Only) with explicit mode identity and per-mode records.
   2. Weather/time-of-day reactive environment layer.
   3. Final-pass cinematic/audio feedback polish for major reward and urgency beats.
+  4. Dedicated post-run challenge reporting UI wired to existing summary persistence.
 
 ---
 
 ## What We Should Work On Next
 
-The highest-leverage next milestone is **Challenge Mode Productization**.
+The best next milestone is still **Challenge Mode Productization**, but now as a **finish-and-surface** pass (not greenfield).
 
 ### Why this should be next
-- It closes one of the two largest remaining design-document compliance gaps.
-- It reuses existing combat systems with limited net-new content risk.
-- It creates a durable replayability pillar and clear telemetry for future balancing.
+- Existing mode-selection and run-summary plumbing reduces implementation risk.
+- It resolves the most visible design-document compliance gap in a player-facing way.
+- It unlocks replayability and cleaner balancing telemetry with minimal new combat content.
 
 ### One-Task Update (Next Sprint)
 
-**Task:** Implement **Challenge Mode v1 (Last Stand + Assault Only)**.
+**Task:** Ship **Challenge Surface v1** (Last Stand + Assault Only front-end flow on top of existing mission-mode and run-summary foundations).
 
 **Definition of Done:**
-1. Add mode-select entry points for Last Stand and Assault Only.
-2. Persist high scores / run summaries per mode.
-3. Show post-run report screen (time survived / waves / score / district outcomes).
-4. Gate mode-specific modifiers cleanly from core campaign state.
-5. Add automated tests for mode initialization, score persistence, and report payload formatting.
+1. Add explicit Challenge menu entries for Last Stand and Assault Only (separate from campaign routing).
+2. Track and persist per-mode best score + best survival time.
+3. Build a post-run Challenge Report screen using stored run summary fields.
+4. Validate that Challenge runs do not mutate campaign district/prosperity state.
+5. Add automated tests for challenge bootstrapping, per-mode persistence, and report payload formatting.
+
+### Recommended Follow-Up After That
+1. Add weather/time-of-day reactivity toggles keyed off mission urgency.
+2. Layer in cinematic reward/critical-state presentation polish.
+3. Revisit airborne operative autonomy behaviors for late-wave readability.
