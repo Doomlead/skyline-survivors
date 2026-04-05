@@ -274,6 +274,131 @@ function updateSpawnerBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
     }
 }
 
+// Drives the assault Reclaimer salvage vessel movement and animated salvage telegraphs.
+function updateReclaimerBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
+    const objective = gameState.rebuildObjective;
+    const anchorX = objective?.extractionX ?? enemy.wreckageAnchorX ?? enemy.x;
+    const anchorY = Math.max(52, (objective?.extractionY ?? enemy.wreckageAnchorY ?? enemy.y) - 16);
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(enemy.x, anchorX, CONFIG.worldWidth)
+        : (anchorX - enemy.x);
+    const dy = anchorY - enemy.y;
+    const dist = Math.hypot(dx, dy);
+    const salvageRange = enemy.salvageRange || 120;
+    const inSalvageRange = dist <= salvageRange;
+
+    const moveSpeed = inSalvageRange ? 28 : 64;
+    if (dist > 2) {
+        enemy.setVelocity(
+            (dx / Math.max(dist, 1)) * moveSpeed * timeSlowMultiplier,
+            (dy / Math.max(dist, 1)) * moveSpeed * timeSlowMultiplier
+        );
+    } else {
+        enemy.setVelocity(0, 0);
+    }
+
+    if (!enemy.reclaimerFx) {
+        const arms = scene.add.graphics().setDepth(enemy.depth + 1);
+        const beam = scene.add.graphics().setDepth(enemy.depth - 1).setAlpha(0);
+        const wreckage = scene.add.graphics().setDepth(enemy.depth - 2);
+        enemy.reclaimerFx = { arms, beam, wreckage };
+        enemy.once('destroy', () => {
+            Object.values(enemy.reclaimerFx || {}).forEach((fx) => {
+                if (fx && fx.destroy) fx.destroy();
+            });
+            enemy.reclaimerFx = null;
+        });
+    }
+
+    const maxHp = Math.max(enemy.maxHp || enemy.hp || 1, 1);
+    const hpRatio = Phaser.Math.Clamp((enemy.hp || 0) / maxHp, 0, 1);
+    const halfHp = hpRatio <= 0.5;
+    const lowHp = hpRatio <= 0.3;
+    enemy.damagedArm = halfHp;
+    enemy.engineDamaged = lowHp;
+
+    const { arms, beam, wreckage } = enemy.reclaimerFx;
+    if (arms) {
+        arms.clear();
+        const doorSpread = inSalvageRange ? 5 : 1;
+        arms.fillStyle(0x111827, 0.95);
+        arms.fillRect(enemy.x - 8 - doorSpread, enemy.y + 7, 7, 3);
+        arms.fillRect(enemy.x + 1 + doorSpread, enemy.y + 7, 7, 3);
+        const armReach = inSalvageRange ? 20 : 10;
+        const leftJointX = enemy.x - 10;
+        const rightJointX = enemy.x + 10;
+        const jointY = enemy.y + 9;
+        arms.lineStyle(2, 0x6b7280, 1);
+        arms.lineBetween(leftJointX, jointY, leftJointX - 4, jointY + armReach * 0.55);
+        arms.lineBetween(leftJointX - 4, jointY + armReach * 0.55, leftJointX - 8, jointY + armReach);
+
+        const rightDrop = halfHp ? armReach * 0.35 : armReach;
+        arms.lineBetween(rightJointX, jointY, rightJointX + 4, jointY + armReach * 0.55);
+        arms.lineBetween(rightJointX + 4, jointY + armReach * 0.55, rightJointX + 8, jointY + rightDrop);
+
+        arms.fillStyle(0x9ca3af, 1);
+        [[leftJointX - 8, jointY + armReach], [rightJointX + 8, jointY + rightDrop]].forEach(([x, y]) => {
+            arms.fillTriangle(x, y, x - 2, y + 3, x + 1, y + 2);
+            arms.fillTriangle(x, y, x + 2, y + 3, x - 1, y + 2);
+            arms.fillTriangle(x, y, x, y + 4, x + 1, y + 2);
+        });
+
+        if (halfHp) {
+            arms.fillStyle(0xf97316, 0.8);
+            const sparkX = rightJointX + 6 + Math.sin(time * 0.03) * 2;
+            const sparkY = jointY + armReach * 0.65 + Math.cos(time * 0.05);
+            arms.fillCircle(sparkX, sparkY, 1.8);
+            arms.fillStyle(0x94a3b8, 0.45);
+            arms.fillCircle(sparkX + 3, sparkY + 2.5, 1.5);
+        }
+    }
+
+    if (beam) {
+        beam.clear();
+        if (inSalvageRange) {
+            beam.setAlpha(0.75);
+            beam.fillStyle(0xf59e0b, 0.34);
+            beam.beginPath();
+            beam.moveTo(enemy.x - 5, enemy.y + 2);
+            beam.lineTo(enemy.x + 5, enemy.y + 2);
+            beam.lineTo(anchorX + 22, anchorY + 34);
+            beam.lineTo(anchorX - 22, anchorY + 34);
+            beam.closePath();
+            beam.fillPath();
+        } else {
+            beam.setAlpha(0);
+        }
+    }
+
+    if (wreckage) {
+        wreckage.clear();
+        const shake = inSalvageRange ? Math.sin(time * 0.035) * 2.6 : 0;
+        const lift = inSalvageRange ? Math.abs(Math.sin(time * 0.028)) * 3.2 : 0;
+        const wreckY = anchorY + shake - lift;
+        wreckage.fillStyle(0x334155, 0.9);
+        wreckage.fillRoundedRect(anchorX - 14, wreckY, 28, 8, 3);
+        wreckage.lineStyle(1, 0x94a3b8, 0.8);
+        wreckage.strokeRoundedRect(anchorX - 14, wreckY, 28, 8, 3);
+        if (inSalvageRange) {
+            wreckage.fillStyle(0xfbbf24, 0.6);
+            wreckage.fillCircle(anchorX, wreckY - 2, 1.6);
+        }
+    }
+
+    // Cargo-bay and engine distress telegraphs.
+    if (inSalvageRange) {
+        enemy.setScale(enemy.scaleX, enemy.scaleY + Math.sin(time * 0.01) * 0.01);
+    }
+    if (lowHp && Math.random() < 0.08) {
+        createExplosion(scene, enemy.x + 14, enemy.y - 2, 0x111111, 0.35);
+    }
+
+    if (time > enemy.lastShot + 2400 && Math.random() < 0.028) {
+        shootAtPlayer(scene, enemy);
+        enemy.lastShot = time;
+    }
+}
+
 // Links nearby allies with protective tethers and throttles their speed to keep formation.
 function updateShielderBehavior(scene, enemy, time, timeSlowMultiplier) {
     const enemies = scene.enemies;
@@ -518,6 +643,9 @@ function updateEnemies(scene, time, delta) {
                 break;
             case 'spawner':
                 updateSpawnerBehavior(scene, enemy, time, delta, timeSlowMultiplier);
+                break;
+            case 'reclaimer':
+                updateReclaimerBehavior(scene, enemy, time, delta, timeSlowMultiplier);
                 break;
             case 'shielder':
                 updateShielderBehavior(scene, enemy, time, timeSlowMultiplier);

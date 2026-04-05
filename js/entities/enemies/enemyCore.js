@@ -67,6 +67,7 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     let speed = 50 + Math.random() * 100;
     if (type === 'kamikaze' || type === 'bouncer') speed *= 1.5;
     if (type === 'turret' || type === 'sniper') speed = 20;
+    if (type === 'reclaimer') speed = 55;
     enemy.setVelocity((Math.random() - 0.5) * speed, (Math.random() - 0.5) * speed);
     
     // Special properties
@@ -75,6 +76,12 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     if (type === 'swarmLeader') enemy.buffRadius = 200;
     if (type === 'regenerator') { enemy.lastHeal = 0; enemy.healAmount = 1; }
     if (type === 'spawner') { enemy.spawnTimer = 0; enemy.minionsSpawned = 0; }
+    if (type === 'reclaimer') {
+        enemy.salvageRange = 120;
+        enemy.lastShot = 0;
+        enemy.damagedArm = false;
+        enemy.engineDamaged = false;
+    }
     if (type === 'turret') { enemy.isPlanted = false; enemy.plantTimer = 0; }
     
     createSpawnEffect(scene, x, spawnY, type);

@@ -224,14 +224,18 @@ function spawnAssaultReclaimer(scene, objective) {
     const direction = Math.random() < 0.5 ? -1 : 1;
     const spawnX = wrapValue((objective.extractionX || CONFIG.worldWidth * 0.5) + direction * offset, CONFIG.worldWidth);
     const spawnY = CONFIG.worldHeight * RECLAIMER_RECOVERY_CONFIG.spawnYFactor;
-    const reclaimer = spawnEnemy(scene, 'spawner', spawnX, spawnY, false);
+    const reclaimer = spawnEnemy(scene, 'reclaimer', spawnX, spawnY, false);
     if (!reclaimer) return null;
 
     reclaimer.isExtractionTarget = true;
     reclaimer.isReclaimer = true;
     reclaimer.hp = Math.round(reclaimer.hp * RECLAIMER_RECOVERY_CONFIG.hpMultiplier);
-    reclaimer.setScale(reclaimer.scaleX * 1.55, reclaimer.scaleY * 1.55);
-    reclaimer.setTint(0xf59e0b);
+    reclaimer.maxHp = reclaimer.hp;
+    reclaimer.wreckageAnchorX = objective.extractionX || reclaimer.x;
+    reclaimer.wreckageAnchorY = Math.max(60, (objective.extractionY || reclaimer.y) - 16);
+    if (reclaimer.body) {
+        reclaimer.body.setSize(40, 22, true);
+    }
     reclaimer.setDepth(FG_DEPTH_BASE + 7);
     showRebuildObjectiveBanner(scene, 'RECLAIMER INBOUND\nDESTROY BEFORE EXTRACTION', '#f97316');
     return reclaimer;

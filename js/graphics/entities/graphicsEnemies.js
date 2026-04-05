@@ -23,6 +23,7 @@ function createNewEnemyGraphics(scene) {
     createShieldGraphics(scene);
     createSeekerGraphics(scene);
     createSpawnerGraphics(scene);
+    createReclaimerGraphics(scene);
     createShielderGraphics(scene);
     createBouncerGraphics(scene);
     createSniperGraphics(scene);

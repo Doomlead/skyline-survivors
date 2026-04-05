@@ -141,6 +141,14 @@ const ENEMY_TRAIL_CONFIGS = {
         alpha: { start: 0.4, end: 0 },
         lifespan: 350,
         frequency: 90
+    },
+    reclaimer: {
+        tint: [0xf59e0b, 0xfb923c],
+        speed: 12,
+        scale: { start: 0.7, end: 0 },
+        alpha: { start: 0.45, end: 0 },
+        lifespan: 420,
+        frequency: 95
     }
 };
 
@@ -161,7 +169,8 @@ const ENEMY_HP_VALUES = {
     bouncer: 2,
     sniper: 2,
     swarmLeader: 4,
-    regenerator: 3
+    regenerator: 3,
+    reclaimer: 12
 };
 
 const ENEMY_SCORE_VALUES = {
@@ -181,7 +190,8 @@ const ENEMY_SCORE_VALUES = {
     bouncer: 160,
     sniper: 260,
     swarmLeader: 450,
-    regenerator: 300
+    regenerator: 300,
+    reclaimer: 900
 };
 
 const ENEMY_SCALE_VALUES = {
@@ -196,6 +206,7 @@ const ENEMY_SCALE_VALUES = {
     swarmLeader: 2.3,
     seeker: 2.0,
     regenerator: 2.0,
+    reclaimer: 2.0,
     default: 2.0
 };
 
