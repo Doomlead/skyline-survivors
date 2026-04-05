@@ -2,6 +2,8 @@ const STRUCTURAL_ASSAULT_ROLES = Object.freeze([
     'shield',
     'turret',
     'core',
+    'stasis_array',
+    'prisoner_transport',
     'power_conduit',
     'security_node',
     'interior_core'
@@ -11,6 +13,8 @@ const STRUCTURAL_SIEGE_MULTIPLIERS = Object.freeze({
     shield: 1.55,
     turret: 1.45,
     core: 1.35,
+    stasis_array: 1.35,
+    prisoner_transport: 1.3,
     power_conduit: 1.4,
     security_node: 1.35,
     interior_core: 1.3,

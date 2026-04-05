@@ -24,13 +24,23 @@ function rescueHuman(playerSprite, human) {
     const isFalling = Boolean(human.body && human.body.gravity && human.body.gravity.y > 0);
     if (!human.isAbducted && !isFalling) return;
     gameState.humansRescued++;
-    const cargoCount = window.ShipController?.addCargo(1) ?? 0;
+    const wasLiberatedCaptive = Boolean(human.isLiberatedCaptive);
+    const cargoCount = window.ShipController?.addCargo(1, { liberated: wasLiberatedCaptive }) ?? 0;
+    if (wasLiberatedCaptive) {
+        if (!gameState.liberationTelemetry) {
+            gameState.liberationTelemetry = { liberated: 0, rescued: 0, delivered: 0, bonusScore: 0, ammoGranted: 0 };
+        }
+        gameState.liberationTelemetry.rescued = (gameState.liberationTelemetry.rescued || 0) + 1;
+    }
     registerComboEvent(1);
     const rescueScore = getCombatScaledReward(HUMAN_RESCUE_SCORE);
     gameState.score += rescueScore;
     if (audioManager) audioManager.playSound('humanRescued');
-    if (typeof pilotState !== 'undefined' && pilotState?.active && typeof refillCurrentPilotWeaponByRescueBonus === 'function') {
-        refillCurrentPilotWeaponByRescueBonus();
+    if (typeof grantPilotAmmoByRescueDeliveryBonus === 'function') {
+        const ammoResult = grantPilotAmmoByRescueDeliveryBonus(1, wasLiberatedCaptive ? 'liberation_rescue' : 'rescue');
+        if (ammoResult?.granted > 0 && wasLiberatedCaptive) {
+            createFloatingText(this, human.x, human.y - 34, `LIBERATION AMMO +${ammoResult.granted}`, '#22d3ee');
+        }
     }
     const rescueText = this.add.text(
         human.x,

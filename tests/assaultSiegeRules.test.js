@@ -8,6 +8,7 @@ const {
 
 test('siege bonus applies only to approved structural targets', () => {
     assert.strictEqual(isStructuralAssaultRole('shield'), true);
+    assert.strictEqual(isStructuralAssaultRole('stasis_array'), true);
     assert.strictEqual(isStructuralAssaultRole('mutant'), false);
 
     const structural = computeBulwarkSiegeDamage(2, 'shield', { sourceMode: 'bulwark' }, { active: true, mode: 'bulwark' });

@@ -229,10 +229,13 @@ function alignGroundedActors(scene) {
                 case 'turret':
                     target.y = baseY + 34;
                     break;
+                case 'stasis_array':
+                    target.y = baseY - 34;
+                    break;
                 default:
                     break;
             }
-            if (target.body) {
+            if (target.body && target.assaultRole !== 'prisoner_transport') {
                 target.setVelocity(0, 0);
             }
         });

@@ -104,7 +104,12 @@ function updateUI(scene) {
     scoreEl.innerText = gameState.score.toString().padStart(6, '0');
     if (cargoEl) {
         const cargoCount = window.ShipController?.cargo ?? 0;
-        cargoEl.innerText = String(cargoCount).padStart(2, '0');
+        const liberatedCargo = window.ShipController?.liberatedCargo ?? 0;
+        if (gameState.mode === 'assault') {
+            cargoEl.innerText = `${String(cargoCount).padStart(2, '0')}|${String(liberatedCargo).padStart(2, '0')}`;
+        } else {
+            cargoEl.innerText = String(cargoCount).padStart(2, '0');
+        }
     }
     if (operativesEl) {
         const friendlies = scene?.friendlies?.children?.entries || [];
@@ -144,10 +149,12 @@ function updateUI(scene) {
             assaultCoreLabelEl.innerText = `Core ${Math.max(0, Math.ceil(baseHp))}/${Math.max(0, Math.ceil(baseMax))}`;
         }
         if (assaultShieldLabelEl) {
+            const liberation = gameState.liberationTelemetry || {};
             if (interiorPhase) {
                 const phase = objective?.phaseLabel || 'PHASE 2 - INTERIOR';
                 const gate = objective?.gateLabel ? ` · ${objective.gateLabel}` : '';
-                assaultShieldLabelEl.innerText = `${phase}${gate}`;
+                const telemetryTag = ` · Captives ${objective?.liberatedCaptivesDelivered || 0}/${objective?.liberatedCaptives || 0}`;
+                assaultShieldLabelEl.innerText = `${phase}${gate}${telemetryTag}`;
                 if (objective?.gateColor) assaultShieldLabelEl.style.color = objective.gateColor;
             } else {
                 const shields = objective?.shieldsRemaining ?? 0;
@@ -156,7 +163,8 @@ function updateUI(scene) {
                 const now = scene?.time?.now || 0;
                 const windowLeft = Math.max(0, ((objective?.damageWindowUntil || 0) - now));
                 const windowTag = windowLeft > 0 ? ` · Window ${Math.ceil(windowLeft / 1000)}s` : '';
-                assaultShieldLabelEl.innerText = `Stage ${stage}/${total} · Shields: ${shields}${windowTag}`;
+                const telemetryTag = ` · Captives ${objective?.liberatedCaptivesDelivered || 0}/${objective?.liberatedCaptives || 0} · Bonus +${liberation.bonusScore || 0}`;
+                assaultShieldLabelEl.innerText = `Stage ${stage}/${total} · Shields: ${shields}${windowTag}${telemetryTag}`;
                 assaultShieldLabelEl.style.color = '';
             }
         }
@@ -254,6 +262,10 @@ function updateUI(scene) {
         if (p.timeSlow > 0) powerUpText += `[SLOW:${Math.ceil(p.timeSlow/1000)}s] `;
     }
 
+    if (gameState.mode === 'assault') {
+        const liberation = gameState.liberationTelemetry || {};
+        powerUpText += ` [LIB:${liberation.rescued || 0}/${liberation.liberated || 0}] [DEL:${liberation.delivered || 0}] [AMMO+${liberation.ammoGranted || 0}]`;
+    }
     powerupsEl.innerText = powerUpText || '[NORMAL FIRE]';
 
     if (comboEl) {
