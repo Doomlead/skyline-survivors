@@ -99,20 +99,26 @@ function playerDie(scene) {
             || (gameState.mode === 'assault' && gameState.assaultObjective?.shipLocked);
         if (gameState.rebuildObjective && !shipLocked) {
             const useHangarRebuild = typeof isDefenseMission === 'function' ? isDefenseMission() : false;
-            const defaultBranch = (gameState.mode === 'assault' || gameState.mode === 'mothership')
+            const isAssaultRecovery = gameState.mode === 'assault';
+            const defaultBranch = (isAssaultRecovery || gameState.mode === 'mothership')
                 ? 'dropship'
                 : (gameState.rebuildObjective.branch || 'dropship');
             gameState.rebuildObjective.active = true;
-            gameState.rebuildObjective.stage = useHangarRebuild ? 'hangar_rebuild' : 'secure_extraction';
+            gameState.rebuildObjective.stage = useHangarRebuild
+                ? 'hangar_rebuild'
+                : (isAssaultRecovery ? 'reclaimer_recovery' : 'secure_extraction');
             gameState.rebuildObjective.timer = 0;
             gameState.rebuildObjective.encounterSpawned = false;
             gameState.rebuildObjective.extractionX = scene.pilot ? scene.pilot.x : player.x;
             gameState.rebuildObjective.extractionY = scene.pilot ? scene.pilot.y : player.y;
-            gameState.rebuildObjective.branch = useHangarRebuild ? 'hangar' : defaultBranch;
+            gameState.rebuildObjective.branch = useHangarRebuild
+                ? 'hangar'
+                : (isAssaultRecovery ? 'reclaimer' : defaultBranch);
             gameState.rebuildObjective.requiredAlienTech = gameState.rebuildObjective.branch === 'station' ? 3 : 0;
             gameState.rebuildObjective.collectedAlienTech = 0;
             gameState.rebuildObjective.shipReturned = false;
             gameState.rebuildObjective.hangarRebuildTimer = 0;
+            gameState.rebuildObjective.extractionDeadlineMs = isAssaultRecovery ? 30000 : 0;
         }
         playerState.powerUps.invincibility = 1500;
         return;

@@ -204,7 +204,8 @@ const gameState = {
         requiredAlienTech: 0,
         collectedAlienTech: 0,
         shipReturned: false,
-        hangarRebuildTimer: 0
+        hangarRebuildTimer: 0,
+        extractionDeadlineMs: 0
     }
 };
 
@@ -505,7 +506,8 @@ function resetGameState() {
         requiredAlienTech: 0,
         collectedAlienTech: 0,
         shipReturned: false,
-        hangarRebuildTimer: 0
+        hangarRebuildTimer: 0,
+        extractionDeadlineMs: 0
     };
 
     if (window.ShipController?.resetCargo) {

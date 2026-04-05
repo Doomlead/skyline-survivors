@@ -319,6 +319,17 @@ function findNearestEnemy(scene, origin) {
     if (bosses) candidates.push(...bosses.children.entries);
     if (battleships) candidates.push(...battleships.children.entries);
 
+    if (gameState.mode === 'assault' && gameState.rebuildObjective?.active && gameState.rebuildObjective.stage === 'reclaimer_recovery') {
+        const reclaimer = candidates.find((target) => target && target.active && target.isReclaimer);
+        if (reclaimer) {
+            const dx = typeof wrappedDistance === 'function'
+                ? wrappedDistance(origin.x, reclaimer.x, CONFIG.worldWidth)
+                : (reclaimer.x - origin.x);
+            const dy = reclaimer.y - origin.y;
+            return { target: reclaimer, distance: Math.hypot(dx, dy) };
+        }
+    }
+
     let nearest = null;
     let nearestDist = Infinity;
     candidates.forEach((target) => {

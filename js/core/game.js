@@ -139,6 +139,14 @@ function showSupplyDropBanner(scene, message, color = '#38bdf8') {
     });
 }
 
+const RECLAIMER_RECOVERY_CONFIG = {
+    timeoutMs: 30000,
+    hpMultiplier: 3.5,
+    spawnOffsetMin: 280,
+    spawnOffsetMax: 420,
+    spawnYFactor: 0.32
+};
+
 // Creates the hangar rebuild objective HUD text container if it has not been created yet.
 function initHangarRebuildUi(scene) {
     if (!scene || scene.hangarRebuildUi) return;
@@ -164,11 +172,16 @@ function updateHangarRebuildUi(scene) {
     const objective = gameState.rebuildObjective;
     const hangar = scene.hangar;
     const landingZone = hangar?.landingZone;
-    const shouldShow = objective?.active
-        && objective.stage === 'hangar_rebuild'
-        && aegisState.destroyed
-        && pilotState.active
+    const isHangarStage = objective?.stage === 'hangar_rebuild'
         && landingZone?.active;
+    const isReclaimerStage = objective?.stage === 'reclaimer_recovery'
+        && objective?.active
+        && aegisState.destroyed
+        && pilotState.active;
+    const shouldShow = objective?.active
+        && (isHangarStage || isReclaimerStage)
+        && aegisState.destroyed
+        && pilotState.active;
 
     if (!shouldShow) {
         ui.text.setVisible(false);
@@ -180,21 +193,48 @@ function updateHangarRebuildUi(scene) {
     const durationMs = typeof HANGAR_REBUILD_CONFIG !== 'undefined'
         ? HANGAR_REBUILD_CONFIG.durationMs
         : 30000;
-    const remainingMs = Math.max(0, durationMs - (objective.hangarRebuildTimer || 0));
-    const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
-    const durationSec = Math.max(1, Math.ceil(durationMs / 1000));
-    const isOnZone = typeof isPlayerOnLandingZone === 'function'
-        ? isPlayerOnLandingZone(scene, landingZone)
-        : false;
-    const statusLine = isOnZone
-        ? `Hold position: ${remainingSec}s remaining`
-        : 'Return to the landing zone to resume the rebuild timer';
-    const message = `REBUILD PROTOCOL\nStand on the landing zone under the hangar for ${durationSec}s to respawn an AEGIS.\n${statusLine}`;
+    let message = '';
+    if (isReclaimerStage) {
+        const deadlineMs = objective.extractionDeadlineMs || RECLAIMER_RECOVERY_CONFIG.timeoutMs;
+        const remainingMs = Math.max(0, deadlineMs - (objective.timer || 0));
+        const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+        message = `SALVAGE INTERCEPT\nDestroy the Reclaimer before extraction completes.\nExtraction in: ${remainingSec}s`;
+    } else {
+        const remainingMs = Math.max(0, durationMs - (objective.hangarRebuildTimer || 0));
+        const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+        const durationSec = Math.max(1, Math.ceil(durationMs / 1000));
+        const isOnZone = typeof isPlayerOnLandingZone === 'function'
+            ? isPlayerOnLandingZone(scene, landingZone)
+            : false;
+        const statusLine = isOnZone
+            ? `Hold position: ${remainingSec}s remaining`
+            : 'Return to the landing zone to resume the rebuild timer';
+        message = `REBUILD PROTOCOL\nStand on the landing zone under the hangar for ${durationSec}s to respawn an AEGIS.\n${statusLine}`;
+    }
 
     ui.text.setText(message);
     ui.text.setFontSize(`${Math.round(20 * scale)}px`);
     ui.text.setPosition(cam.width / 2, 90 * scale);
     ui.text.setVisible(true);
+}
+
+// Spawns the Reclaimer salvage vessel for assault-mode ship recovery.
+function spawnAssaultReclaimer(scene, objective) {
+    const offset = Phaser.Math.Between(RECLAIMER_RECOVERY_CONFIG.spawnOffsetMin, RECLAIMER_RECOVERY_CONFIG.spawnOffsetMax);
+    const direction = Math.random() < 0.5 ? -1 : 1;
+    const spawnX = wrapValue((objective.extractionX || CONFIG.worldWidth * 0.5) + direction * offset, CONFIG.worldWidth);
+    const spawnY = CONFIG.worldHeight * RECLAIMER_RECOVERY_CONFIG.spawnYFactor;
+    const reclaimer = spawnEnemy(scene, 'spawner', spawnX, spawnY, false);
+    if (!reclaimer) return null;
+
+    reclaimer.isExtractionTarget = true;
+    reclaimer.isReclaimer = true;
+    reclaimer.hp = Math.round(reclaimer.hp * RECLAIMER_RECOVERY_CONFIG.hpMultiplier);
+    reclaimer.setScale(reclaimer.scaleX * 1.55, reclaimer.scaleY * 1.55);
+    reclaimer.setTint(0xf59e0b);
+    reclaimer.setDepth(FG_DEPTH_BASE + 7);
+    showRebuildObjectiveBanner(scene, 'RECLAIMER INBOUND\nDESTROY BEFORE EXTRACTION', '#f97316');
+    return reclaimer;
 }
 
 // Spawns and configures the extraction dropship encounter for rebuild objectives.
@@ -254,7 +294,21 @@ function updateRebuildObjective(scene, delta) {
 
     objective.timer += delta;
 
-    if (objective.stage === 'secure_extraction') {
+    if (objective.stage === 'reclaimer_recovery') {
+        if (!objective.encounterSpawned) {
+            spawnAssaultReclaimer(scene, objective);
+            objective.encounterSpawned = true;
+        }
+        const timeoutMs = objective.extractionDeadlineMs || RECLAIMER_RECOVERY_CONFIG.timeoutMs;
+        if (objective.timer >= timeoutMs) {
+            objective.active = false;
+            objective.stage = null;
+            objective.timer = 0;
+            objective.encounterSpawned = false;
+            showRebuildObjectiveBanner(scene, 'RECLAIMER EXTRACTION COMPLETE\nLIFE LOST', '#ef4444');
+            playerDie(scene);
+        }
+    } else if (objective.stage === 'secure_extraction') {
         if (!objective.encounterSpawned && objective.branch !== 'station') {
             spawnExtractionDropship(scene, objective);
             objective.encounterSpawned = true;
