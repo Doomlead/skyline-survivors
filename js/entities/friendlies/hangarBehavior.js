@@ -33,6 +33,7 @@ function dropOffCargo(scene, hangar) {
     if (cargoCount <= 0) return;
     if (!isPlayerOverHangar(scene, hangar)) return;
 
+    const liberatedCargo = window.ShipController?.consumeLiberatedCargo?.() || 0;
     window.ShipController?.resetCargo();
     registerComboEvent(Math.min(3, cargoCount));
     const dropOffScore = getCombatScaledReward(HUMAN_RESCUE_SCORE * HUMAN_DROP_OFF_SCORE_MULTIPLIER * cargoCount);
@@ -60,8 +61,40 @@ function dropOffCargo(scene, hangar) {
         onComplete: () => dropText.destroy()
     });
     createExplosion(scene, hangar.x, hangar.y - 18, 0x38bdf8);
-    if (typeof pilotState !== 'undefined' && pilotState?.active && typeof refillCurrentPilotWeaponByRescueBonus === 'function') {
-        refillCurrentPilotWeaponByRescueBonus();
+    if (liberatedCargo > 0 && gameState.mode === 'assault') {
+        const objective = gameState.assaultObjective;
+        if (objective) {
+            objective.liberatedCaptivesDelivered = (objective.liberatedCaptivesDelivered || 0) + liberatedCargo;
+        }
+        if (!gameState.liberationTelemetry) {
+            gameState.liberationTelemetry = { liberated: 0, rescued: 0, delivered: 0, bonusScore: 0, ammoGranted: 0 };
+        }
+        gameState.liberationTelemetry.delivered = (gameState.liberationTelemetry.delivered || 0) + liberatedCargo;
+        const deliveryBonusBase = typeof window.liberationEconomy?.getLiberationDeliveryBonusScore === 'function'
+            ? window.liberationEconomy.getLiberationDeliveryBonusScore(liberatedCargo)
+            : liberatedCargo * 125;
+        const deliveryBonus = getCombatScaledReward(deliveryBonusBase);
+        gameState.score += deliveryBonus;
+        gameState.liberationTelemetry.bonusScore = (gameState.liberationTelemetry.bonusScore || 0) + deliveryBonus;
+        createFloatingText(scene, hangar.x, hangar.y - 104, `LIBERATION BONUS +${deliveryBonus}`, '#facc15');
+        const deliveredTotal = objective?.liberatedCaptivesDelivered || 0;
+        const nextBuffLevel = typeof window.liberationEconomy?.getComradeBuffLevelFromLiberated === 'function'
+            ? window.liberationEconomy.getComradeBuffLevelFromLiberated(deliveredTotal)
+            : Math.floor(deliveredTotal / 4);
+        const previousLevel = Math.max(0, playerState.comradeBuffs?.level || 0);
+        if (!playerState.comradeBuffs) playerState.comradeBuffs = { level: 0 };
+        playerState.comradeBuffs.level = Math.max(previousLevel, nextBuffLevel);
+        if (playerState.comradeBuffs.level > previousLevel) {
+            createFloatingText(scene, hangar.x, hangar.y - 84, `OPERATIVE UPLINK TIER ${playerState.comradeBuffs.level}`, '#22d3ee');
+        } else {
+            createFloatingText(scene, hangar.x, hangar.y - 84, `LIBERATED +${liberatedCargo}`, '#7dd3fc');
+        }
+    }
+    if (typeof grantPilotAmmoByRescueDeliveryBonus === 'function' && cargoCount > 0) {
+        const ammoResult = grantPilotAmmoByRescueDeliveryBonus(cargoCount, gameState.mode === 'assault' ? 'dropoff_assault' : 'dropoff_defense');
+        if (ammoResult?.granted > 0) {
+            createFloatingText(scene, hangar.x, hangar.y - 116, `AMMO +${ammoResult.granted}`, '#5eead4');
+        }
     }
 
     for (let i = 0; i < cargoCount; i++) {

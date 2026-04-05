@@ -176,11 +176,25 @@ function grantPilotAmmo(weapon, amount, options = {}) {
 }
 
 function refillCurrentPilotWeaponByRescueBonus() {
-    if (typeof pilotState === 'undefined' || !pilotState?.active) return;
+    grantPilotAmmoByRescueDeliveryBonus(1, 'rescue');
+}
+
+function grantPilotAmmoByRescueDeliveryBonus(units = 1, source = 'rescue') {
+    if (typeof pilotState === 'undefined' || !pilotState) return { granted: 0, weapon: null, ammo: null };
     const state = pilotState.weaponState;
-    if (!state) return;
+    if (!state) return { granted: 0, weapon: null, ammo: null };
+    const normalizedUnits = Math.max(0, Number(units) || 0);
+    if (normalizedUnits <= 0) return { granted: 0, weapon: state.selected || 'combatRifle', ammo: null };
     const weapon = state.selected || 'combatRifle';
-    grantPilotAmmo(weapon, 2);
+    const before = Number.isFinite(state.ammo?.[weapon]) ? Math.max(0, state.ammo[weapon] || 0) : Infinity;
+    const after = grantPilotAmmo(weapon, 2 * normalizedUnits);
+    const granted = Number.isFinite(before) && Number.isFinite(after) ? Math.max(0, after - before) : 0;
+    if (!gameState.liberationTelemetry) {
+        gameState.liberationTelemetry = { liberated: 0, rescued: 0, delivered: 0, bonusScore: 0, ammoGranted: 0 };
+    }
+    gameState.liberationTelemetry.ammoGranted = (gameState.liberationTelemetry.ammoGranted || 0) + granted;
+    gameState.liberationTelemetry.lastAmmoSource = source;
+    return { granted, weapon, ammo: after };
 }
 
 function clearTemporaryPilotWeaponUnlocks() {

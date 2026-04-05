@@ -66,6 +66,9 @@ function showMissionDefeat(scene, metaResult) {
         statsLines.push(`Humans Rescued: ${gameState.humansRescued}`);
     } else {
         statsLines.push('Assault Reward: No payout (mission failed/aborted)');
+        const liberation = gameState.liberationTelemetry || {};
+        statsLines.push(`Liberation: ${liberation.delivered || 0}/${liberation.liberated || 0} delivered · ${liberation.rescued || 0} rescued`);
+        statsLines.push(`Liberation Bonus: +${liberation.bonusScore || 0} · Ammo Granted: +${liberation.ammoGranted || 0}`);
     }
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);
@@ -243,6 +246,9 @@ function showMissionVictory(scene, metaResult) {
         } else {
             statsLines.push('Assault Reward: Pending settlement');
         }
+        const liberation = gameState.liberationTelemetry || {};
+        statsLines.push(`Liberation: ${liberation.delivered || 0}/${liberation.liberated || 0} delivered · ${liberation.rescued || 0} rescued`);
+        statsLines.push(`Liberation Bonus: +${liberation.bonusScore || 0} · Ammo Granted: +${liberation.ammoGranted || 0}`);
     }
     statsLines.push(`Time Played: ${timePlayed}`);
     statsLines.push(`Score: ${gameState.score}`);

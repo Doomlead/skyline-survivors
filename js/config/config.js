@@ -133,6 +133,13 @@ const gameState = {
         bulwarkSiegeHits: 0,
         hitsByMissionType: {}
     },
+    liberationTelemetry: {
+        liberated: 0,
+        rescued: 0,
+        delivered: 0,
+        bonusScore: 0,
+        ammoGranted: 0
+    },
     assaultObjective: {
         active: false,
         baseHp: 0,
@@ -164,6 +171,9 @@ const gameState = {
         interiorReinforcementTimer: 0,
         shipLocked: false,
         transitionTimer: 0,
+        liberatedCaptives: 0,
+        liberatedCaptivesDelivered: 0,
+        liberationSourcesDestroyed: 0,
         ...createInteriorSectionState(ASSAULT_INTERIOR_SECTIONS)
     },
     mothershipObjective: {
@@ -435,6 +445,13 @@ function resetGameState() {
     gameState.metaRewardsGranted = false;
     gameState.lastAssaultReward = null;
     gameState.combatTelemetry = { bulwarkSiegeHits: 0, hitsByMissionType: {} };
+    gameState.liberationTelemetry = {
+        liberated: 0,
+        rescued: 0,
+        delivered: 0,
+        bonusScore: 0,
+        ammoGranted: 0
+    };
     gameState.assaultObjective = {
         active: false,
         baseHp: 0,
@@ -466,6 +483,9 @@ function resetGameState() {
         interiorReinforcementTimer: 0,
         shipLocked: false,
         transitionTimer: 0,
+        liberatedCaptives: 0,
+        liberatedCaptivesDelivered: 0,
+        liberationSourcesDestroyed: 0,
         ...createInteriorSectionState(ASSAULT_INTERIOR_SECTIONS)
     };
     gameState.mothershipObjective = {

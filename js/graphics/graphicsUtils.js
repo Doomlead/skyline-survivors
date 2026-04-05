@@ -38,6 +38,23 @@ function createHumanGraphics(scene) {
 
     humanGraphics.generateTexture('human', 8, 12);
     humanGraphics.destroy();
+
+    const captiveGraphics = scene.add.graphics();
+    captiveGraphics.fillStyle(0xeebb55, 1);
+    captiveGraphics.fillRect(2, 4, 4, 5);
+    captiveGraphics.fillStyle(0xcc8800, 1);
+    captiveGraphics.fillRect(2, 9, 2, 3);
+    captiveGraphics.fillRect(5, 9, 2, 3);
+    captiveGraphics.fillStyle(0xffffff, 1);
+    captiveGraphics.fillCircle(4, 2.5, 2.5);
+    captiveGraphics.fillStyle(0xffcc00, 1);
+    captiveGraphics.fillRect(3, 2, 3, 1.5);
+    captiveGraphics.lineStyle(1, 0x67e8f9, 0.95);
+    captiveGraphics.strokeCircle(4, 6, 6);
+    captiveGraphics.fillStyle(0x22d3ee, 0.15);
+    captiveGraphics.fillCircle(4, 6, 6);
+    captiveGraphics.generateTexture('capturedHuman', 12, 12);
+    captiveGraphics.destroy();
 }
 
 /**
@@ -310,6 +327,48 @@ function createUtilityGraphics(scene) {
 
     baseTurretGraphics.generateTexture('assaultTurret', turretWidth, turretHeight);
     baseTurretGraphics.destroy();
+
+    // ========================
+    // ASSAULT STASIS ARRAY
+    // ========================
+    const stasisArrayGraphics = scene.add.graphics();
+    const stasisWidth = 56;
+    const stasisHeight = 62;
+    const stasisCenterX = stasisWidth / 2;
+
+    stasisArrayGraphics.fillStyle(0x111827, 1);
+    stasisArrayGraphics.fillRoundedRect(4, 8, stasisWidth - 8, stasisHeight - 12, 10);
+    stasisArrayGraphics.fillStyle(0x1f2937, 1);
+    stasisArrayGraphics.fillRoundedRect(10, 14, stasisWidth - 20, stasisHeight - 20, 8);
+    stasisArrayGraphics.fillStyle(0xfbbf24, 0.85);
+    stasisArrayGraphics.fillRect(stasisCenterX - 3, 28, 6, 16);
+    stasisArrayGraphics.fillStyle(0x7dd3fc, 0.25);
+    stasisArrayGraphics.fillEllipse(stasisCenterX, 34, 24, 30);
+    stasisArrayGraphics.lineStyle(2, 0x22d3ee, 0.8);
+    stasisArrayGraphics.strokeEllipse(stasisCenterX, 34, 24, 30);
+    stasisArrayGraphics.generateTexture('assaultStasisArray', stasisWidth, stasisHeight);
+    stasisArrayGraphics.destroy();
+
+    // ========================
+    // ASSAULT PRISONER TRANSPORT
+    // ========================
+    const prisonerTransportGraphics = scene.add.graphics();
+    const ptWidth = 88;
+    const ptHeight = 40;
+
+    prisonerTransportGraphics.fillStyle(0x1f2937, 1);
+    prisonerTransportGraphics.fillRoundedRect(4, 14, ptWidth - 8, 22, 10);
+    prisonerTransportGraphics.fillStyle(0x334155, 1);
+    prisonerTransportGraphics.fillRoundedRect(12, 10, ptWidth - 24, 12, 6);
+    prisonerTransportGraphics.fillStyle(0xf59e0b, 0.95);
+    prisonerTransportGraphics.fillRect(16, 20, ptWidth - 32, 4);
+    prisonerTransportGraphics.fillStyle(0x7dd3fc, 0.8);
+    prisonerTransportGraphics.fillCircle(22, 12, 3);
+    prisonerTransportGraphics.fillCircle(ptWidth - 22, 12, 3);
+    prisonerTransportGraphics.lineStyle(2, 0x94a3b8, 0.9);
+    prisonerTransportGraphics.strokeRoundedRect(4, 14, ptWidth - 8, 22, 10);
+    prisonerTransportGraphics.generateTexture('assaultPrisonerTransport', ptWidth, ptHeight);
+    prisonerTransportGraphics.destroy();
 
     // ========================
     // PARTICLES & STARS

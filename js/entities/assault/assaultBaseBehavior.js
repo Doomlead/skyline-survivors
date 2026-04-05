@@ -82,4 +82,26 @@ function updateAssaultObjective(scene, delta) {
             });
         }
     }
+
+    if (scene.assaultTargets?.children?.entries) {
+        scene.assaultTargets.children.entries.forEach((target) => {
+            if (!target || !target.active || target.assaultRole !== 'prisoner_transport' || !target.body) return;
+            const speed = target.patrolSpeed || 30;
+            const patrolRange = target.patrolRange || 280;
+            const centerX = target.patrolCenterX || (objective.baseX || CONFIG.worldWidth * 0.5);
+            const offset = typeof wrappedDistance === 'function'
+                ? wrappedDistance(centerX, target.x, CONFIG.worldWidth)
+                : (target.x - centerX);
+            if (Math.abs(offset) >= patrolRange) {
+                target.patrolDirection = offset > 0 ? -1 : 1;
+            }
+            const direction = target.patrolDirection || 1;
+            target.setVelocityX(direction * speed);
+            if (typeof wrapWorldBounds === 'function') {
+                wrapWorldBounds(target);
+            } else {
+                target.x = wrapValue(target.x, CONFIG.worldWidth);
+            }
+        });
+    }
 }

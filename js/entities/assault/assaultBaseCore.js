@@ -22,6 +22,20 @@ const ASSAULT_BASE_CONFIG = {
     intermissionMs: 1600
 };
 
+const LIBERATION_CONFIG_SOURCE = typeof window !== 'undefined'
+    ? window.liberationEconomy?.LIBERATION_SOURCE_CONFIG
+    : null;
+
+const ASSAULT_LIBERATION_CONFIG = {
+    stasisArrayCount: LIBERATION_CONFIG_SOURCE?.stasisArrayCount || 3,
+    stasisArrayHp: LIBERATION_CONFIG_SOURCE?.stasisArrayHp || 14,
+    prisonerTransportCount: LIBERATION_CONFIG_SOURCE?.prisonerTransportCount || 2,
+    prisonerTransportHp: LIBERATION_CONFIG_SOURCE?.prisonerTransportHp || 22,
+    transportEscortCount: LIBERATION_CONFIG_SOURCE?.transportEscortCount || 2,
+    transportPatrolSpeed: LIBERATION_CONFIG_SOURCE?.transportPatrolSpeed || 34,
+    transportPatrolRange: LIBERATION_CONFIG_SOURCE?.transportPatrolRange || 280
+};
+
 const ASSAULT_BASE_TEXTURES = [
     'assaultBaseRaider',
     'assaultBaseCarrier',
@@ -111,6 +125,83 @@ function createAssaultComponent(scene, x, y, texture, role, hp) {
     return component;
 }
 
+// Spawns captive-holding liberation sources that can be destroyed to release rescuable captives.
+function spawnAssaultLiberationSources(scene, objective) {
+    if (!scene?.assaultTargets || !objective) return;
+    const baseX = objective.baseX || CONFIG.worldWidth * 0.5;
+    const baseY = scene.assaultBase?.y || (CONFIG.worldHeight * 0.6);
+
+    for (let i = 0; i < ASSAULT_LIBERATION_CONFIG.stasisArrayCount; i++) {
+        const offsetX = Phaser.Math.Between(-190, 190);
+        const arrayX = wrapValue(baseX + offsetX, CONFIG.worldWidth);
+        const arrayY = baseY - Phaser.Math.Between(26, 48);
+        const stasisArray = createAssaultComponent(scene, arrayX, arrayY, 'assaultStasisArray', 'stasis_array', ASSAULT_LIBERATION_CONFIG.stasisArrayHp);
+        stasisArray.body.setAllowGravity(false);
+        stasisArray.body.setVelocity(0, 0);
+    }
+
+    for (let i = 0; i < ASSAULT_LIBERATION_CONFIG.prisonerTransportCount; i++) {
+        const offsetX = Phaser.Math.Between(-340, 340);
+        const transportX = wrapValue(baseX + offsetX, CONFIG.worldWidth);
+        const transportY = Math.max(90, baseY - Phaser.Math.Between(110, 170));
+        const transport = createAssaultComponent(scene, transportX, transportY, 'assaultPrisonerTransport', 'prisoner_transport', ASSAULT_LIBERATION_CONFIG.prisonerTransportHp);
+        transport.setImmovable(false);
+        transport.body.setAllowGravity(false);
+        transport.body.setVelocity(0, 0);
+        transport.patrolCenterX = transportX;
+        transport.patrolSpeed = ASSAULT_LIBERATION_CONFIG.transportPatrolSpeed + Phaser.Math.Between(-8, 8);
+        transport.patrolRange = ASSAULT_LIBERATION_CONFIG.transportPatrolRange + Phaser.Math.Between(-60, 60);
+        transport.patrolDirection = Math.random() < 0.5 ? -1 : 1;
+        for (let escort = 0; escort < ASSAULT_LIBERATION_CONFIG.transportEscortCount; escort++) {
+            const escortType = Phaser.Utils.Array.GetRandom(GARRISON_DEFENDER_TYPES || ['rifle']);
+            const escortOffset = Phaser.Math.Between(-80, 80);
+            spawnGarrisonDefender(scene, escortType, wrapValue(transportX + escortOffset, CONFIG.worldWidth), transportY + Phaser.Math.Between(-8, 22));
+        }
+    }
+}
+
+// Releases captives from destroyed liberation sources as drifting rescue targets.
+function releaseAssaultCaptives(scene, source, objective) {
+    if (!scene?.humans || !source) return;
+    const role = source.assaultRole || 'stasis_array';
+    const releaseCount = typeof window.liberationEconomy?.getCaptiveReleaseCount === 'function'
+        ? window.liberationEconomy.getCaptiveReleaseCount(role)
+        : (role === 'prisoner_transport' ? Phaser.Math.Between(3, 5) : Phaser.Math.Between(2, 3));
+
+    objective.liberatedCaptives = (objective.liberatedCaptives || 0) + releaseCount;
+    objective.liberationSourcesDestroyed = (objective.liberationSourcesDestroyed || 0) + 1;
+    if (!gameState.liberationTelemetry) {
+        gameState.liberationTelemetry = { liberated: 0, rescued: 0, delivered: 0, bonusScore: 0, ammoGranted: 0 };
+    }
+    gameState.liberationTelemetry.liberated = (gameState.liberationTelemetry.liberated || 0) + releaseCount;
+    const sourceBonusBase = typeof window.liberationEconomy?.getLiberationBonusScoreBySource === 'function'
+        ? window.liberationEconomy.getLiberationBonusScoreBySource(role)
+        : (role === 'prisoner_transport' ? 600 : 350);
+    const sourceBonusScore = getCombatScaledReward(sourceBonusBase);
+    gameState.score += sourceBonusScore;
+    gameState.liberationTelemetry.bonusScore = (gameState.liberationTelemetry.bonusScore || 0) + sourceBonusScore;
+
+    for (let i = 0; i < releaseCount; i++) {
+        const driftX = wrapValue(source.x + Phaser.Math.Between(-20, 20), CONFIG.worldWidth);
+        const driftY = source.y + Phaser.Math.Between(-14, 8);
+        const captive = scene.humans.create(driftX, driftY, 'capturedHuman');
+        captive.setScale(1.3);
+        captive.setDepth(FG_DEPTH_BASE + 1);
+        captive.setCollideWorldBounds(false);
+        if (captive.body) {
+            captive.body.setSize(8, 12);
+            captive.body.setAllowGravity(true);
+            captive.setGravityY(110);
+            captive.setVelocity(Phaser.Math.Between(-16, 16), Phaser.Math.Between(10, 50));
+        }
+        captive.isAbducted = true;
+        captive.abductor = null;
+        captive.isLiberatedCaptive = true;
+    }
+    createFloatingText(scene, source.x, source.y - 42, `CAPTIVES LIBERATED +${releaseCount}`, '#7dd3fc');
+    createFloatingText(scene, source.x, source.y - 58, `LIBERATION +${sourceBonusScore}`, '#facc15');
+}
+
 // Returns whether active assault shields are currently blocking direct base damage.
 function isAssaultShieldBlocking(scene) {
     const objective = gameState.assaultObjective;
@@ -173,6 +264,9 @@ function setupAssaultObjective(scene) {
     objective.activeSectionId = objective.sectionGraph?.[0]?.id || null;
     objective.rewardSettled = false;
     objective.lastRewardResult = null;
+    objective.liberatedCaptives = 0;
+    objective.liberatedCaptivesDelivered = 0;
+    objective.liberationSourcesDestroyed = 0;
     objective.settlementKey = `assault-${gameState.missionContext?.district || 'free'}-${Date.now()}`;
     if (Array.isArray(objective.sectionProgress)) {
         objective.sectionProgress = objective.sectionProgress.map((sectionProgress, index) => ({
@@ -214,6 +308,7 @@ function setupAssaultObjective(scene) {
 
     showRebuildObjectiveBanner(scene, 'ASSAULT OBJECTIVE: Destroy the base core', '#f97316');
     spawnAssaultDefenders(scene, baseX);
+    spawnAssaultLiberationSources(scene, objective);
 }
 
 // Handles projectile damage against assault targets, including shields, turret/base deaths, and scoring.
@@ -284,6 +379,10 @@ function hitAssaultTarget(projectile, target) {
                 target.destroy();
             } else if (target.assaultRole === 'turret') {
                 createExplosion(scene, target.x, target.y, 0xf97316);
+                target.destroy();
+            } else if (target.assaultRole === 'stasis_array' || target.assaultRole === 'prisoner_transport') {
+                releaseAssaultCaptives(scene, target, objective);
+                createExplosion(scene, target.x, target.y, 0x7dd3fc);
                 target.destroy();
             }
         }

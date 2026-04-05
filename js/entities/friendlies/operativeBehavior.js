@@ -346,7 +346,11 @@ function findNearestAssaultTarget(scene, origin) {
     let nearestDist = Infinity;
     assaultTargets.children.entries.forEach((target) => {
         if (!target || !target.active) return;
-        if (target.assaultRole !== 'turret' && target.assaultRole !== 'shield') return;
+        const isPriorityAssaultRole = target.assaultRole === 'turret'
+            || target.assaultRole === 'shield'
+            || target.assaultRole === 'stasis_array'
+            || target.assaultRole === 'prisoner_transport';
+        if (!isPriorityAssaultRole) return;
         const dx = typeof wrappedDistance === 'function'
             ? wrappedDistance(origin.x, target.x, CONFIG.worldWidth)
             : (target.x - origin.x);

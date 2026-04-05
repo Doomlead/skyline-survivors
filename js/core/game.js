@@ -10,8 +10,11 @@ let gameSceneInitialized = false;
 
 // Initializes a new run by spawning humans/enemies and setting up mode-specific objectives and UI.
 function initializeGame(scene) {
-    for (let i = 0; i < gameState.humans; i++) {
-        spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
+    const shouldSpawnFreeHumans = gameState.mode !== 'assault';
+    if (shouldSpawnFreeHumans) {
+        for (let i = 0; i < gameState.humans; i++) {
+            spawnHuman(scene, Math.random() * (CONFIG.worldWidth - 200) + 100);
+        }
     }
     if (gameState.mode !== 'mothership' && (!gameState.bossQueue || gameState.bossQueue.length === 0)) {
         initializeBossQueue();
