@@ -483,15 +483,9 @@ function enterDistrictMap(options = false) {
     if (window.game && game.scene) {
         const mainScene = game.scene.getScene(SCENE_KEYS.game);
         
-        // Stop or Pause the Action Game
+        // Stop the Action Game so interior/background state does not bleed into future missions.
         if (mainScene && mainScene.scene.isActive()) {
-            if (fromVictory) {
-                mainScene.scene.stop();
-            } else {
-                mainScene.scene.pause();
-                // Ensure the game scene is hidden so it doesn't bleed through
-                mainScene.scene.setVisible(false);
-            }
+            mainScene.scene.stop();
         }
         
         // Stop Menu if active
