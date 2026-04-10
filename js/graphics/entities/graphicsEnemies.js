@@ -28,4 +28,6 @@ function createNewEnemyGraphics(scene) {
     createSniperGraphics(scene);
     createSwarmLeaderGraphics(scene);
     createRegeneratorGraphics(scene);
+    createStasisArrayGraphics(scene);
+    createPrisonerTransportGraphics(scene);
 }

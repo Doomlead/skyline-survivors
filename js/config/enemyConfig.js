@@ -141,6 +141,14 @@ const ENEMY_TRAIL_CONFIGS = {
         alpha: { start: 0.4, end: 0 },
         lifespan: 350,
         frequency: 90
+    },
+    prisonerTransport: {
+        tint: [0xf59e0b],
+        speed: 10,
+        scale: { start: 0.5, end: 0 },
+        alpha: { start: 0.4, end: 0 },
+        lifespan: 320,
+        frequency: 95
     }
 };
 
@@ -161,7 +169,8 @@ const ENEMY_HP_VALUES = {
     bouncer: 2,
     sniper: 2,
     swarmLeader: 4,
-    regenerator: 3
+    regenerator: 3,
+    prisonerTransport: 10
 };
 
 const ENEMY_SCORE_VALUES = {
@@ -181,7 +190,8 @@ const ENEMY_SCORE_VALUES = {
     bouncer: 160,
     sniper: 260,
     swarmLeader: 450,
-    regenerator: 300
+    regenerator: 300,
+    prisonerTransport: 800
 };
 
 const ENEMY_SCALE_VALUES = {
@@ -196,6 +206,7 @@ const ENEMY_SCALE_VALUES = {
     swarmLeader: 2.3,
     seeker: 2.0,
     regenerator: 2.0,
+    prisonerTransport: 2.4,
     default: 2.0
 };
 

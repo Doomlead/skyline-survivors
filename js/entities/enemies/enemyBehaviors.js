@@ -447,6 +447,28 @@ function updateRegeneratorBehavior(scene, enemy, time, delta, timeSlowMultiplier
     }
 }
 
+// Keeps prisoner transports on broad patrol routes around assault objectives while periodically firing.
+function updatePrisonerTransportBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
+    const objectiveX = gameState.assaultObjective?.baseX || enemy.patrolCenterX || enemy.x;
+    if (!enemy.patrolCenterX) enemy.patrolCenterX = objectiveX;
+    if (!enemy.patrolCenterY) enemy.patrolCenterY = enemy.y;
+    if (!enemy.patrolRadiusX) enemy.patrolRadiusX = Phaser.Math.Between(80, 180);
+    if (!enemy.patrolRadiusY) enemy.patrolRadiusY = Phaser.Math.Between(35, 80);
+
+    enemy.patrolAngle += 0.004 * delta * timeSlowMultiplier;
+    const targetX = enemy.patrolCenterX + Math.cos(enemy.patrolAngle) * enemy.patrolRadiusX;
+    const targetY = enemy.patrolCenterY + Math.sin(enemy.patrolAngle * 1.4) * enemy.patrolRadiusY;
+    const angle = Phaser.Math.Angle.Between(enemy.x, enemy.y, targetX, targetY);
+    const speed = 55 * timeSlowMultiplier;
+    enemy.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
+    enemy.rotation = angle * 0.22;
+
+    if (time > enemy.lastShot + 2600 && Math.random() < 0.03) {
+        shootAtPlayer(scene, enemy);
+        enemy.lastShot = time;
+    }
+}
+
 // Main per-frame update loop that keeps every active enemy inside the play area
 // and delegates behavior logic to the appropriate handler for each enemy type.
 function updateEnemies(scene, time, delta) {
@@ -533,6 +555,9 @@ function updateEnemies(scene, time, delta) {
                 break;
             case 'regenerator':
                 updateRegeneratorBehavior(scene, enemy, time, delta, timeSlowMultiplier);
+                break;
+            case 'prisonerTransport':
+                updatePrisonerTransportBehavior(scene, enemy, time, delta, timeSlowMultiplier);
                 break;
         }
 
