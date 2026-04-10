@@ -38,6 +38,16 @@ function createHumanGraphics(scene) {
 
     humanGraphics.generateTexture('human', 8, 12);
     humanGraphics.destroy();
+
+    const captiveBubble = scene.add.graphics();
+    captiveBubble.fillStyle(0x67e8f9, 0.22);
+    captiveBubble.fillCircle(10, 10, 9);
+    captiveBubble.lineStyle(1.5, 0xa5f3fc, 0.95);
+    captiveBubble.strokeCircle(10, 10, 9);
+    captiveBubble.fillStyle(0xffffff, 0.45);
+    captiveBubble.fillCircle(7, 7, 2.3);
+    captiveBubble.generateTexture('captiveBubble', 20, 20);
+    captiveBubble.destroy();
 }
 
 /**

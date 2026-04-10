@@ -4,7 +4,7 @@
 
 function updateRadar(scene) {
     if (!radarCtx || !scene) return;
-    const { enemies, garrisonDefenders, humans, bosses } = scene;
+    const { enemies, garrisonDefenders, humans, bosses, assaultTargets } = scene;
     const player = getActivePlayer(scene);
     if (!player) return;
 
@@ -62,6 +62,7 @@ function updateRadar(scene) {
                 case 'sniper': color = '#ffffff'; break;
                 case 'swarmLeader': color = '#4400cc'; break;
                 case 'regenerator': color = '#00aaaa'; break;
+                case 'prisonerTransport': color = '#f59e0b'; break;
             }
 
             radarCtx.fillStyle = color;
@@ -118,6 +119,23 @@ function updateRadar(scene) {
             radarCtx.beginPath();
             radarCtx.arc(bx, by, 4, 0, Math.PI * 2);
             radarCtx.fill();
+        });
+    }
+
+    if (assaultTargets && gameState.mode === 'assault') {
+        assaultTargets.children.entries.forEach((target) => {
+            if (!target.active || target.assaultRole !== 'stasis_array') return;
+            const tx = target.x * scaleX;
+            const ty = (target.y / CONFIG.worldHeight) * height;
+            radarCtx.strokeStyle = '#fbbf24';
+            radarCtx.lineWidth = 1.5;
+            radarCtx.beginPath();
+            radarCtx.moveTo(tx, ty - 4);
+            radarCtx.lineTo(tx + 4, ty);
+            radarCtx.lineTo(tx, ty + 4);
+            radarCtx.lineTo(tx - 4, ty);
+            radarCtx.closePath();
+            radarCtx.stroke();
         });
     }
 

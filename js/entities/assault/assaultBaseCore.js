@@ -19,7 +19,9 @@ const ASSAULT_BASE_CONFIG = {
     reinforcementCap: 10,
     shieldStages: 3,
     damageWindowMs: 4200,
-    intermissionMs: 1600
+    intermissionMs: 1600,
+    stasisArrayCount: 3,
+    prisonerTransportCount: 2
 };
 
 const ASSAULT_BASE_TEXTURES = [
@@ -142,6 +144,53 @@ function spawnAssaultShieldGenerators(scene, objective) {
     }
 }
 
+// Spawns liberation-source objectives around the base perimeter for assault-mode captive acquisition.
+function spawnAssaultLiberationSources(scene, objective, baseY) {
+    const baseX = objective?.baseX || CONFIG.worldWidth * 0.5;
+
+    for (let i = 0; i < ASSAULT_BASE_CONFIG.stasisArrayCount; i++) {
+        let stasisX = Phaser.Math.Between(80, CONFIG.worldWidth - 80);
+        let safety = 0;
+        while (Math.abs(wrappedDistance(stasisX, baseX, CONFIG.worldWidth)) < 180 && safety < 8) {
+            stasisX = Phaser.Math.Between(80, CONFIG.worldWidth - 80);
+            safety += 1;
+        }
+        const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+        const terrainVariation = Math.sin(stasisX / 200) * 30;
+        const localGroundY = groundLevel - terrainVariation;
+        const minCombatY = 120;
+        const maxCombatY = Math.max(minCombatY + 20, Math.min(CONFIG.worldHeight - 140, localGroundY - 70));
+        const stasisY = Phaser.Math.Between(minCombatY, maxCombatY);
+        const stasis = createAssaultComponent(scene, stasisX, stasisY, 'stasisArray', 'stasis_array', 14);
+        stasis.setScale(1.5);
+        stasis.releaseCount = Phaser.Math.Between(2, 3);
+    }
+
+    const patrolRadius = Phaser.Math.Between(280, 380);
+    for (let i = 0; i < ASSAULT_BASE_CONFIG.prisonerTransportCount; i++) {
+        const direction = i % 2 === 0 ? -1 : 1;
+        const transportX = wrapValue(baseX + direction * patrolRadius + Phaser.Math.Between(-80, 80), CONFIG.worldWidth);
+        const transportY = Math.max(100, baseY - Phaser.Math.Between(120, 190));
+        const transport = spawnEnemy(scene, 'prisonerTransport', transportX, transportY, false);
+        if (!transport) continue;
+        transport.setTexture('prisonerTransport');
+        transport.setScale(1.75);
+        transport.patrolCenterX = wrapValue(baseX + direction * (patrolRadius * 0.75), CONFIG.worldWidth);
+        transport.patrolCenterY = transportY;
+        transport.patrolRadiusX = Phaser.Math.Between(120, 200);
+        transport.patrolRadiusY = Phaser.Math.Between(45, 90);
+        if (typeof spawnGarrisonDefender === 'function') {
+            const escortCount = Phaser.Math.Between(1, 2);
+            for (let e = 0; e < escortCount; e++) {
+                const escortType = Phaser.Utils.Array.GetRandom(GARRISON_DEFENDER_TYPES || ['rifle']);
+                const escortX = wrapValue(transportX + Phaser.Math.Between(-75, 75), CONFIG.worldWidth);
+                const escortY = transportY + Phaser.Math.Between(-20, 30);
+                spawnGarrisonDefender(scene, escortType, escortX, escortY);
+            }
+        }
+    }
+}
+
 // Initializes and spawns the full assault mission objective structure and defender forces.
 function setupAssaultObjective(scene) {
     if (!scene || !scene.assaultTargets) return;
@@ -212,6 +261,8 @@ function setupAssaultObjective(scene) {
         createAssaultComponent(scene, turretX, turretY, 'assaultTurret', 'turret', ASSAULT_BASE_CONFIG.turretHp);
     }
 
+    spawnAssaultLiberationSources(scene, objective, baseY);
+
     showRebuildObjectiveBanner(scene, 'ASSAULT OBJECTIVE: Destroy the base core', '#f97316');
     spawnAssaultDefenders(scene, baseX);
 }
@@ -254,7 +305,31 @@ function hitAssaultTarget(projectile, target) {
         createExplosion(scene, target.x, target.y, 0x38bdf8);
     }
 
-    if (target.assaultRole === 'core') {
+    if (target.assaultRole === 'stasis_array') {
+        target.hp -= resolvedDamage;
+        target.setTint(0xfef3c7);
+        scene.time.delayedCall(60, () => {
+            if (target?.active) target.clearTint();
+        });
+        if (target.hp <= 0) {
+            const releaseCount = target.releaseCount || Phaser.Math.Between(2, 3);
+            for (let i = 0; i < releaseCount; i++) {
+                const spawnX = wrapValue(target.x + Phaser.Math.Between(-28, 28), CONFIG.worldWidth);
+                const spawnY = target.y - Phaser.Math.Between(4, 16);
+                if (typeof spawnOperative === 'function') {
+                    const operativeType = typeof pickOperativeType === 'function' ? pickOperativeType() : 'infantry';
+                    spawnOperative(scene, operativeType, spawnX, spawnY);
+                } else if (typeof spawnLiberatedCaptive === 'function') {
+                    spawnLiberatedCaptive(scene, spawnX, spawnY, 'stasis_array');
+                }
+            }
+            gameState.captivesLiberated = (gameState.captivesLiberated || 0) + releaseCount;
+            createExplosion(scene, target.x, target.y, 0xfbbf24);
+            createFloatingText(scene, target.x, target.y - 30, `OPERATIVES DEPLOYED +${releaseCount}`, '#86efac');
+            spawnPowerUp(scene, target.x, target.y);
+            target.destroy();
+        }
+    } else if (target.assaultRole === 'core') {
         if (objective.damageWindowUntil > 0 && now < objective.damageWindowUntil) {
             target.hp -= resolvedDamage;
             objective.baseHp = Math.max(0, target.hp);

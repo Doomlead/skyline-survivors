@@ -21,9 +21,15 @@ function isDefenseMission() {
         && gameState.mode !== 'survival';
 }
 
+// Returns true when the current mode supports cargo drop-off and operative deployment.
+function hasCargoHangarSupport() {
+    return gameState.mode !== 'mothership'
+        && gameState.mode !== 'survival';
+}
+
 // Spawns the defense hangar and its landing zone, then registers them in friendly entities.
 function spawnDefenseHangar(scene) {
-    if (!scene || !scene.friendlies || !isDefenseMission()) return null;
+    if (!scene || !scene.friendlies || !hasCargoHangarSupport()) return null;
 
     const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
     const spawnX = scene.aegis ? scene.aegis.x : CONFIG.worldWidth * 0.5;

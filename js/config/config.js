@@ -90,6 +90,8 @@ const gameState = {
     score: 0,
     humans: 15,
     humansRescued: 0,
+    captivesLiberated: 0,
+    captivesRescued: 0,
     smartBombs: 3,
     lives: 3,
     paused: false,
@@ -316,6 +318,8 @@ function resetGameState() {
     gameState.score = 0;
     gameState.humans = 15;
     gameState.humansRescued = 0;
+    gameState.captivesLiberated = 0;
+    gameState.captivesRescued = 0;
     gameState.smartBombs = 3;
     gameState.lives = 3;
     gameState.paused = false;

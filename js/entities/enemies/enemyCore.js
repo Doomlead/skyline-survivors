@@ -67,6 +67,7 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     let speed = 50 + Math.random() * 100;
     if (type === 'kamikaze' || type === 'bouncer') speed *= 1.5;
     if (type === 'turret' || type === 'sniper') speed = 20;
+    if (type === 'prisonerTransport') speed = 45;
     enemy.setVelocity((Math.random() - 0.5) * speed, (Math.random() - 0.5) * speed);
     
     // Special properties
@@ -76,6 +77,12 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     if (type === 'regenerator') { enemy.lastHeal = 0; enemy.healAmount = 1; }
     if (type === 'spawner') { enemy.spawnTimer = 0; enemy.minionsSpawned = 0; }
     if (type === 'turret') { enemy.isPlanted = false; enemy.plantTimer = 0; }
+    if (type === 'prisonerTransport') {
+        enemy.patrolCenterX = clampedX;
+        enemy.patrolCenterY = spawnY;
+        enemy.patrolRadiusX = Phaser.Math.Between(80, 180);
+        enemy.patrolRadiusY = Phaser.Math.Between(35, 80);
+    }
     
     createSpawnEffect(scene, x, spawnY, type);
     if (audioManager) audioManager.playSound('enemySpawn');
@@ -285,6 +292,8 @@ function shootAtPlayer(scene, enemy) {
         sniper: { texture: 'enemyProjectile_piercing', speed: 450, damage: 2 },
         swarmLeader: { texture: 'enemyProjectile', speed: 300, damage: 1.5 },
         regenerator: { texture: 'enemyProjectile', speed: 240 }
+        ,
+        prisonerTransport: { texture: 'enemyProjectile_bomber', speed: 230, damage: 1.4 }
     };
     
     const config = shootConfig[enemy.enemyType] || {};
@@ -407,6 +416,20 @@ function destroyEnemy(scene, enemy) {
         });
     } else if (enemy.enemyType === 'regenerator') {
         enemy.lastHeal = 999999;
+    } else if (enemy.enemyType === 'prisonerTransport') {
+        const releaseCount = Phaser.Math.Between(2, 4);
+        for (let i = 0; i < releaseCount; i++) {
+            const releaseX = wrapValue(enemy.x + Phaser.Math.Between(-18, 18), CONFIG.worldWidth);
+            const releaseY = enemy.y + Phaser.Math.Between(-10, 10);
+            if (typeof spawnLiberatedCaptive === 'function') {
+                spawnLiberatedCaptive(scene, releaseX, releaseY, 'prisoner_transport');
+            }
+        }
+        gameState.captivesLiberated = (gameState.captivesLiberated || 0) + releaseCount;
+        createFloatingText(scene, enemy.x, enemy.y - 34, `CAPTIVES LIBERATED +${releaseCount}`, '#fbbf24');
+        if (Math.random() < 0.5) {
+            spawnPowerUp(scene, enemy.x, enemy.y);
+        }
     }
 
     if (enemy.enemyType === 'lander' && enemy.abductedHuman && enemy.abductedHuman.active) {
