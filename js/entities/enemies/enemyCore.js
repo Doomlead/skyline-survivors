@@ -67,6 +67,7 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     let speed = 50 + Math.random() * 100;
     if (type === 'kamikaze' || type === 'bouncer') speed *= 1.5;
     if (type === 'turret' || type === 'sniper') speed = 20;
+    if (type === 'prisonerTransport') speed = 45;
     enemy.setVelocity((Math.random() - 0.5) * speed, (Math.random() - 0.5) * speed);
     
     // Special properties
@@ -76,6 +77,12 @@ function spawnEnemy(scene, type, x, y, countsTowardsWave = true) {
     if (type === 'regenerator') { enemy.lastHeal = 0; enemy.healAmount = 1; }
     if (type === 'spawner') { enemy.spawnTimer = 0; enemy.minionsSpawned = 0; }
     if (type === 'turret') { enemy.isPlanted = false; enemy.plantTimer = 0; }
+    if (type === 'prisonerTransport') {
+        enemy.liberationSource = 'prisoner_transport';
+        enemy.captiveReleaseCount = Phaser.Math.Between(2, 4);
+        enemy.patrolDirection = Math.random() < 0.5 ? -1 : 1;
+        enemy.lastEscortSpawn = 0;
+    }
     
     createSpawnEffect(scene, x, spawnY, type);
     if (audioManager) audioManager.playSound('enemySpawn');
@@ -407,6 +414,8 @@ function destroyEnemy(scene, enemy) {
         });
     } else if (enemy.enemyType === 'regenerator') {
         enemy.lastHeal = 999999;
+    } else if (enemy.enemyType === 'prisonerTransport' && typeof releaseCaptivesFromSource === 'function') {
+        releaseCaptivesFromSource(scene, enemy.x, enemy.y, enemy.captiveReleaseCount || 3, 'PRISONER TRANSPORT LIBERATED');
     }
 
     if (enemy.enemyType === 'lander' && enemy.abductedHuman && enemy.abductedHuman.active) {

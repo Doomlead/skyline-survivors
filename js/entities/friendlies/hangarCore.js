@@ -16,8 +16,7 @@ const LANDING_ZONE_CONFIG = {
 
 // Returns true when the current mode supports defense-hangar spawning and extraction logistics.
 function isDefenseMission() {
-    return gameState.mode !== 'assault'
-        && gameState.mode !== 'mothership'
+    return gameState.mode !== 'mothership'
         && gameState.mode !== 'survival';
 }
 

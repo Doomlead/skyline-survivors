@@ -11,6 +11,8 @@ const ASSAULT_BASE_CONFIG = {
     turretHp: 16,
     shieldGeneratorCount: 2,
     turretCount: 5,
+    stasisArrayCount: 4,
+    stasisArrayHp: 14,
     defenderCount: 6,
     spawnInterval: 2200,
     turretFireInterval: 1300,
@@ -173,6 +175,9 @@ function setupAssaultObjective(scene) {
     objective.activeSectionId = objective.sectionGraph?.[0]?.id || null;
     objective.rewardSettled = false;
     objective.lastRewardResult = null;
+    objective.stasisArraysRemaining = 0;
+    objective.prisonerTransportTimer = 0;
+    objective.activePrisonerTransports = 0;
     objective.settlementKey = `assault-${gameState.missionContext?.district || 'free'}-${Date.now()}`;
     if (Array.isArray(objective.sectionProgress)) {
         objective.sectionProgress = objective.sectionProgress.map((sectionProgress, index) => ({
@@ -210,6 +215,25 @@ function setupAssaultObjective(scene) {
         const turretX = wrapValue(baseX + offset, CONFIG.worldWidth);
         const turretY = baseY + 34;
         createAssaultComponent(scene, turretX, turretY, 'assaultTurret', 'turret', ASSAULT_BASE_CONFIG.turretHp);
+    }
+
+    const stasisMinX = baseX - 320;
+    const stasisMaxX = baseX + 320;
+    objective.stasisArraysRemaining = ASSAULT_BASE_CONFIG.stasisArrayCount;
+    for (let i = 0; i < ASSAULT_BASE_CONFIG.stasisArrayCount; i++) {
+        const arrayX = wrapValue(Phaser.Math.Between(stasisMinX, stasisMaxX), CONFIG.worldWidth);
+        const terrainVariationAtArray = Math.sin(arrayX / 200) * 30;
+        const arrayY = Math.max(130, groundLevel - terrainVariationAtArray - Phaser.Math.Between(50, 86));
+        const array = createAssaultComponent(
+            scene,
+            arrayX,
+            arrayY,
+            'stasisArray',
+            'stasis_array',
+            ASSAULT_BASE_CONFIG.stasisArrayHp
+        );
+        array.liberationSource = 'stasis_array';
+        array.captiveReleaseCount = Phaser.Math.Between(2, 4);
     }
 
     showRebuildObjectiveBanner(scene, 'ASSAULT OBJECTIVE: Destroy the base core', '#f97316');
@@ -284,6 +308,19 @@ function hitAssaultTarget(projectile, target) {
                 target.destroy();
             } else if (target.assaultRole === 'turret') {
                 createExplosion(scene, target.x, target.y, 0xf97316);
+                target.destroy();
+            } else if (target.assaultRole === 'stasis_array') {
+                objective.stasisArraysRemaining = Math.max(0, (objective.stasisArraysRemaining || 0) - 1);
+                if (typeof releaseCaptivesFromSource === 'function') {
+                    releaseCaptivesFromSource(
+                        scene,
+                        target.x,
+                        target.y,
+                        target.captiveReleaseCount || Phaser.Math.Between(2, 4),
+                        'STASIS ARRAY LIBERATED'
+                    );
+                }
+                createExplosion(scene, target.x, target.y, 0x22d3ee);
                 target.destroy();
             }
         }

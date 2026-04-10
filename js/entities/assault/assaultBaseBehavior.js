@@ -30,6 +30,7 @@ function updateAssaultObjective(scene, delta) {
     objective.spawnTimer += delta;
     objective.turretFireTimer += delta;
     objective.reinforcementTimer += delta;
+    objective.prisonerTransportTimer = (objective.prisonerTransportTimer || 0) + delta;
     objective.shieldHitCooldown = Math.max(0, objective.shieldHitCooldown - delta);
     const now = scene.time?.now || 0;
     if (objective.damageWindowUntil > 0 && now > objective.damageWindowUntil && objective.shieldStage < (objective.shieldStageTotal || 1)) {
@@ -80,6 +81,20 @@ function updateAssaultObjective(scene, delta) {
                 const dummy = { x: target.x, y: target.y, enemyType: 'turret' };
                 shootAtPlayer(scene, dummy);
             });
+        }
+    }
+
+    if (objective.prisonerTransportTimer >= 9000) {
+        objective.prisonerTransportTimer = 0;
+        const activeTransports = scene.enemies?.children?.entries?.filter((enemy) => (
+            enemy && enemy.active && enemy.enemyType === 'prisonerTransport'
+        )).length || 0;
+        objective.activePrisonerTransports = activeTransports;
+        if (activeTransports < 2) {
+            const baseX = objective.baseX || CONFIG.worldWidth * 0.5;
+            const spawnX = wrapValue(baseX + Phaser.Math.Between(-420, 420), CONFIG.worldWidth);
+            const spawnY = Phaser.Math.Between(90, Math.max(140, CONFIG.height * 0.35));
+            spawnEnemy(scene, 'prisonerTransport', spawnX, spawnY, false);
         }
     }
 }

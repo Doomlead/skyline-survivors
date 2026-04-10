@@ -447,6 +447,42 @@ function updateRegeneratorBehavior(scene, enemy, time, delta, timeSlowMultiplier
     }
 }
 
+// Patrols around the assault base while occasionally requesting escort pressure.
+function updatePrisonerTransportBehavior(scene, enemy, time, delta, timeSlowMultiplier) {
+    const baseX = gameState.assaultObjective?.baseX || CONFIG.worldWidth * 0.5;
+    const orbitRadius = 280;
+    const dx = typeof wrappedDistance === 'function'
+        ? wrappedDistance(enemy.x, baseX, CONFIG.worldWidth)
+        : (baseX - enemy.x);
+    const drift = Math.sin((time + (enemy.patrolSeed || 0)) * 0.0015) * 35;
+    const velocityX = Phaser.Math.Clamp(dx * 0.2, -70, 70) + enemy.patrolDirection * 18 + drift;
+    const baseY = Math.max(80, CONFIG.height * 0.22);
+    const targetY = baseY + Math.sin((time + (enemy.patrolSeed || 0)) * 0.0018) * 46;
+    const velocityY = Phaser.Math.Clamp((targetY - enemy.y) * 0.35, -45, 45);
+    enemy.setVelocity(velocityX * timeSlowMultiplier, velocityY * timeSlowMultiplier);
+
+    const distanceFromBase = Math.abs(dx);
+    if (distanceFromBase > orbitRadius) {
+        enemy.patrolDirection = dx > 0 ? -1 : 1;
+    }
+
+    if (time > enemy.lastShot + 1900) {
+        shootAtPlayer(scene, enemy);
+        enemy.lastShot = time;
+    }
+
+    enemy.lastEscortSpawn = (enemy.lastEscortSpawn || 0) + delta;
+    if (enemy.lastEscortSpawn > 4600) {
+        enemy.lastEscortSpawn = 0;
+        if ((scene.garrisonDefenders?.countActive(true) || 0) < 16 && typeof spawnGarrisonDefender === 'function') {
+            const escortType = Phaser.Utils.Array.GetRandom(GARRISON_DEFENDER_TYPES || ['rifle']);
+            const escortX = wrapValue(enemy.x + Phaser.Math.Between(-90, 90), CONFIG.worldWidth);
+            const escortY = Phaser.Math.Clamp(enemy.y + Phaser.Math.Between(24, 70), 70, CONFIG.height - 120);
+            spawnGarrisonDefender(scene, escortType, escortX, escortY);
+        }
+    }
+}
+
 // Main per-frame update loop that keeps every active enemy inside the play area
 // and delegates behavior logic to the appropriate handler for each enemy type.
 function updateEnemies(scene, time, delta) {
@@ -533,6 +569,9 @@ function updateEnemies(scene, time, delta) {
                 break;
             case 'regenerator':
                 updateRegeneratorBehavior(scene, enemy, time, delta, timeSlowMultiplier);
+                break;
+            case 'prisonerTransport':
+                updatePrisonerTransportBehavior(scene, enemy, time, delta, timeSlowMultiplier);
                 break;
         }
 

@@ -89,6 +89,7 @@ function isPlayerOnLandingZone(scene, landingZone) {
 
 // Advances hangar-based AEGIS rebuild progress while the pilot stays on the landing zone.
 function handleHangarRebuild(scene, hangar, delta) {
+    if (gameState.mode === 'assault') return;
     const objective = gameState.rebuildObjective;
     const shipLocked = (gameState.mode === 'mothership' && gameState.mothershipObjective?.shipLocked)
         || (gameState.mode === 'assault' && gameState.assaultObjective?.shipLocked);
