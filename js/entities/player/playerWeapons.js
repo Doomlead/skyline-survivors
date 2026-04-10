@@ -16,12 +16,25 @@ function fireWeapon(scene, angleOverride = null) {
 
     const { projectiles, drones } = scene;
     if (!projectiles) return;
+    const powerUps = (typeof playerState !== 'undefined' && playerState && playerState.powerUps)
+        ? playerState.powerUps
+        : {};
+    const p = {
+        speed: 0,
+        double: 0,
+        laser: 0,
+        multiShot: 0,
+        piercing: 0,
+        coverage: 0,
+        missile: 0,
+        overdrive: 0,
+        ...powerUps
+    };
     let speed = 600;
-    if (playerState.powerUps.speed > 0) speed = 750;
-    const p = playerState.powerUps;
+    if (p.speed > 0) speed = 750;
     const baseAngle = typeof angleOverride === 'number'
         ? angleOverride
-        : (playerState.direction === 'right' ? 0 : Math.PI);
+        : ((playerState && playerState.direction === 'left') ? Math.PI : 0);
     const { fireX, fireY } = getFireOrigin(player, baseAngle);
     const velocityX = Math.cos(baseAngle) * speed;
     const velocityY = Math.sin(baseAngle) * speed;
@@ -513,7 +526,8 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
     const aegisMode = (typeof aegisState !== 'undefined' && aegisState && aegisState.active) ? aegisState.mode : null;
     const pilotMode = (typeof pilotState !== 'undefined' && pilotState && pilotState.active) ? 'pilot' : null;
     proj.sourceMode = aegisMode || pilotMode || 'interceptor';
-    proj.isPiercing = piercing || playerState.powerUps.piercing > 0 || type === 'wave' || type === 'piercing';
+    const playerPiercing = Boolean(playerState && playerState.powerUps && playerState.powerUps.piercing > 0);
+    proj.isPiercing = piercing || playerPiercing || type === 'wave' || type === 'piercing';
     proj.birthTime = scene.time.now;
     proj.travelDistance = 0;
     proj.lastX = x;
@@ -552,7 +566,8 @@ function createProjectile(scene, x, y, vx, vy, type = 'normal', damage = 1, opti
         proj.emitter = emitter;
     }
     
-    if (playerState.powerUps.timeSlow > 0) {
+    const timeSlowLevel = (playerState && playerState.powerUps && playerState.powerUps.timeSlow) || 0;
+    if (timeSlowLevel > 0) {
         proj.setVelocity(vx * 1.5, vy * 1.5);
     }
     const initialSpeed = proj.body ? Math.hypot(proj.body.velocity.x, proj.body.velocity.y) : Math.hypot(vx, vy);
