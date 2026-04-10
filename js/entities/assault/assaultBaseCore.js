@@ -147,13 +147,18 @@ function spawnAssaultShieldGenerators(scene, objective) {
 // Spawns liberation-source objectives around the base perimeter for assault-mode captive acquisition.
 function spawnAssaultLiberationSources(scene, objective, baseY) {
     const baseX = objective?.baseX || CONFIG.worldWidth * 0.5;
-    const sourceSpacing = 130;
 
     for (let i = 0; i < ASSAULT_BASE_CONFIG.stasisArrayCount; i++) {
-        const lane = i - ((ASSAULT_BASE_CONFIG.stasisArrayCount - 1) / 2);
-        const offset = lane * sourceSpacing + Phaser.Math.Between(-35, 35);
-        const stasisX = wrapValue(baseX + offset, CONFIG.worldWidth);
-        const stasisY = baseY + Phaser.Math.Between(6, 26);
+        let stasisX = Phaser.Math.Between(80, CONFIG.worldWidth - 80);
+        let safety = 0;
+        while (Math.abs(wrappedDistance(stasisX, baseX, CONFIG.worldWidth)) < 180 && safety < 8) {
+            stasisX = Phaser.Math.Between(80, CONFIG.worldWidth - 80);
+            safety += 1;
+        }
+        const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+        const terrainVariation = Math.sin(stasisX / 200) * 30;
+        const localGroundY = groundLevel - terrainVariation;
+        const stasisY = Math.max(120, localGroundY - Phaser.Math.Between(12, 28));
         const stasis = createAssaultComponent(scene, stasisX, stasisY, 'stasisArray', 'stasis_array', 14);
         stasis.setScale(1.5);
         stasis.releaseCount = Phaser.Math.Between(2, 3);
@@ -307,15 +312,18 @@ function hitAssaultTarget(projectile, target) {
         if (target.hp <= 0) {
             const releaseCount = target.releaseCount || Phaser.Math.Between(2, 3);
             for (let i = 0; i < releaseCount; i++) {
-                const releaseX = wrapValue(target.x + Phaser.Math.Between(-12, 12), CONFIG.worldWidth);
-                const releaseY = target.y + Phaser.Math.Between(-14, 8);
-                if (typeof spawnLiberatedCaptive === 'function') {
-                    spawnLiberatedCaptive(scene, releaseX, releaseY, 'stasis_array');
+                const spawnX = wrapValue(target.x + Phaser.Math.Between(-28, 28), CONFIG.worldWidth);
+                const spawnY = target.y - Phaser.Math.Between(4, 16);
+                if (typeof spawnOperative === 'function') {
+                    const operativeType = typeof pickOperativeType === 'function' ? pickOperativeType() : 'infantry';
+                    spawnOperative(scene, operativeType, spawnX, spawnY);
+                } else if (typeof spawnLiberatedCaptive === 'function') {
+                    spawnLiberatedCaptive(scene, spawnX, spawnY, 'stasis_array');
                 }
             }
             gameState.captivesLiberated = (gameState.captivesLiberated || 0) + releaseCount;
             createExplosion(scene, target.x, target.y, 0xfbbf24);
-            createFloatingText(scene, target.x, target.y - 30, `LIBERATED +${releaseCount}`, '#fde68a');
+            createFloatingText(scene, target.x, target.y - 30, `OPERATIVES DEPLOYED +${releaseCount}`, '#86efac');
             spawnPowerUp(scene, target.x, target.y);
             target.destroy();
         }
