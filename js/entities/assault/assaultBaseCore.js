@@ -158,7 +158,9 @@ function spawnAssaultLiberationSources(scene, objective, baseY) {
         const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
         const terrainVariation = Math.sin(stasisX / 200) * 30;
         const localGroundY = groundLevel - terrainVariation;
-        const stasisY = Math.max(120, localGroundY - Phaser.Math.Between(12, 28));
+        const minCombatY = 120;
+        const maxCombatY = Math.max(minCombatY + 20, Math.min(CONFIG.worldHeight - 140, localGroundY - 70));
+        const stasisY = Phaser.Math.Between(minCombatY, maxCombatY);
         const stasis = createAssaultComponent(scene, stasisX, stasisY, 'stasisArray', 'stasis_array', 14);
         stasis.setScale(1.5);
         stasis.releaseCount = Phaser.Math.Between(2, 3);
