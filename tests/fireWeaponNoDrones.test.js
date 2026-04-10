@@ -95,3 +95,47 @@ test('fireWeapon does not throw when projectile pool returns null', () => {
     delete global.playerState;
     delete global.FG_DEPTH_BASE;
 });
+
+test('fireWeapon safely defaults missing playerState powerUps values', () => {
+    global.getActivePlayer = (scene) => scene.player;
+    global.playerState = {
+        direction: 'right',
+        primaryWeapon: 'multiShot'
+    };
+    global.FG_DEPTH_BASE = 0;
+
+    const created = [];
+    const scene = {
+        player: { x: 100, y: 100, active: true },
+        projectiles: {
+            create: (x, y, texture) => {
+                const proj = {
+                    active: true,
+                    x,
+                    y,
+                    texture,
+                    body: { velocity: { x: 0, y: 0 } },
+                    setScale: () => proj,
+                    setDepth: () => proj,
+                    setVelocity: (vx, vy) => {
+                        proj.body.velocity.x = vx;
+                        proj.body.velocity.y = vy;
+                        return proj;
+                    },
+                    destroy: () => {}
+                };
+                created.push(proj);
+                return proj;
+            }
+        },
+        drones: null,
+        time: { now: 0, delayedCall: () => {} }
+    };
+
+    assert.doesNotThrow(() => fireWeapon(scene));
+    assert.ok(created.length >= 1, 'expected primary projectile creation with default power-up values');
+
+    delete global.getActivePlayer;
+    delete global.playerState;
+    delete global.FG_DEPTH_BASE;
+});
