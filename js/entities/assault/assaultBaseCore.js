@@ -324,8 +324,20 @@ function hitAssaultTarget(projectile, target) {
                 }
             }
             gameState.captivesLiberated = (gameState.captivesLiberated || 0) + releaseCount;
+            const liberationBonus = window.liberationTelemetry?.awardLiberationBonus
+                ? window.liberationTelemetry.awardLiberationBonus({
+                    gameState,
+                    pilotState: typeof pilotState !== 'undefined' ? pilotState : null,
+                    grantPilotAmmoFn: typeof grantPilotAmmo === 'function' ? grantPilotAmmo : null,
+                    scoreScaleFn: typeof getMissionScaledReward === 'function' ? getMissionScaledReward : null,
+                    nowMs: scene.time?.now || Date.now(),
+                    released: releaseCount,
+                    source: 'stasis_array'
+                })
+                : { scoreBonus: 0, ammoBonus: 0 };
             createExplosion(scene, target.x, target.y, 0xfbbf24);
-            createFloatingText(scene, target.x, target.y - 30, `OPERATIVES DEPLOYED +${releaseCount}`, '#86efac');
+            const bonusTag = liberationBonus.scoreBonus > 0 ? ` · +${liberationBonus.scoreBonus} SCORE` : '';
+            createFloatingText(scene, target.x, target.y - 30, `OPERATIVES DEPLOYED +${releaseCount}${bonusTag}`, '#86efac');
             spawnPowerUp(scene, target.x, target.y);
             target.destroy();
         }
