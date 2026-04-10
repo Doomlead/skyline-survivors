@@ -131,13 +131,39 @@ function spawnAssaultLiberationSources(scene, objective) {
     const baseX = objective.baseX || CONFIG.worldWidth * 0.5;
     const baseY = scene.assaultBase?.y || (CONFIG.worldHeight * 0.6);
 
+    const pickRandomAssaultArrayX = () => {
+        const hangarX = scene.hangar?.x;
+        const minDistanceFromBase = 320;
+        const minDistanceFromHangar = 220;
+        for (let attempt = 0; attempt < 24; attempt++) {
+            const candidate = Phaser.Math.Between(80, CONFIG.worldWidth - 80);
+            const distFromBase = Math.abs(typeof wrappedDistance === 'function'
+                ? wrappedDistance(baseX, candidate, CONFIG.worldWidth)
+                : (candidate - baseX));
+            if (distFromBase < minDistanceFromBase) continue;
+            if (Number.isFinite(hangarX)) {
+                const distFromHangar = Math.abs(typeof wrappedDistance === 'function'
+                    ? wrappedDistance(hangarX, candidate, CONFIG.worldWidth)
+                    : (candidate - hangarX));
+                if (distFromHangar < minDistanceFromHangar) continue;
+            }
+            return candidate;
+        }
+        const fallbackOffset = Phaser.Math.Between(0, 1) === 0 ? -minDistanceFromBase : minDistanceFromBase;
+        return wrapValue(baseX + fallbackOffset, CONFIG.worldWidth);
+    };
+
     for (let i = 0; i < ASSAULT_LIBERATION_CONFIG.stasisArrayCount; i++) {
-        const offsetX = Phaser.Math.Between(-190, 190);
-        const arrayX = wrapValue(baseX + offsetX, CONFIG.worldWidth);
-        const arrayY = baseY - Phaser.Math.Between(26, 48);
+        const arrayX = pickRandomAssaultArrayX();
+        const terrainVariation = Math.sin(arrayX / 200) * 30;
+        const groundLevel = scene.groundLevel || CONFIG.worldHeight - 80;
+        const groundY = groundLevel - terrainVariation;
+        const groundOffset = -38 - Phaser.Math.Between(0, 12);
+        const arrayY = groundY + groundOffset;
         const stasisArray = createAssaultComponent(scene, arrayX, arrayY, 'assaultStasisArray', 'stasis_array', ASSAULT_LIBERATION_CONFIG.stasisArrayHp);
         stasisArray.body.setAllowGravity(false);
         stasisArray.body.setVelocity(0, 0);
+        stasisArray.groundOffset = groundOffset;
     }
 
     for (let i = 0; i < ASSAULT_LIBERATION_CONFIG.prisonerTransportCount; i++) {

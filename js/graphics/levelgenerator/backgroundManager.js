@@ -230,7 +230,10 @@ function alignGroundedActors(scene) {
                     target.y = baseY + 34;
                     break;
                 case 'stasis_array':
-                    target.y = baseY - 34;
+                    var stasisTerrainVariation = Math.sin(target.x / 200) * 30;
+                    var stasisGround = groundLevel - stasisTerrainVariation;
+                    var stasisOffset = typeof target.groundOffset === 'number' ? target.groundOffset : -40;
+                    target.y = stasisGround + stasisOffset;
                     break;
                 default:
                     break;
