@@ -120,39 +120,41 @@
 
 ## Overall Completion Statistics
 
-- **Design Document Alignment:** ~82% (core district loop, ship/pilot transition baseline, Pilot Intel ribbon logic, and assault jackpot systems are implemented; however, newly expanded assault-liberation/Reclaimer feature set and challenge-mode productization from the updated design document are still largely unimplemented).
+- **Design Document Alignment:** ~86% (district pressure loop, Pilot Intel ribbon logic, liberation telemetry, assault liberation source entities, and mothership interior/exterior flow are in place; largest gaps are assault Reclaimer recovery, strict liberation-to-rescue parity for all captive sources, and explicit challenge-mode productization).
 - **Major Milestones Achieved:**
   1. District pressure state machine (Friendly/Threatened/Critical/Occupied) with timer consequence flow.
   2. Rescue/carry/deploy baseline loop for defense-style civilian extraction.
   3. Pilot Intel ribbon progression rules (critical bonus + occupied suppression).
   4. Meta progression foundations (credits, drops, pilot weapon ownership/tiering, run history persistence).
   5. Assault jackpot reward settlement with idempotency safeguards.
-  6. Mothership exterior/interior phase chain and generalized interior mission scaffolding.
-  7. Existing automated test suite passing in local run.
+  6. Assault liberation-source implementation pass (Stasis Arrays + Prisoner Transports + liberation telemetry hooks + radar icons).
+  7. Mothership exterior/interior phase chain and generalized interior mission scaffolding.
+  8. Existing automated test suite passing in local run.
 - **Immediate Next Steps (Recommended Order):**
-  1. **Implement Reclaimer Ship-Recovery Loop (Assault)** — spawn/announce Reclaimer after Aegis destruction in assault, add extraction timer, destruction recovery, and no-spawn rule during interior breach.
-  2. **Implement Liberation Sources (Stasis Arrays + Prisoner Transports)** — add assault entities, captive release behavior, and operative-economy linkage to liberated captives.
-  3. **Wire Assault UI/Scoring/Radar for New Entities** — amber Reclaimer radar icon, captive/liberation scoring hooks, and clear mission callouts for assault-only recovery rules.
-  4. **Challenge Mode Product Surface** — explicit Last Stand and Assault Only entry points with per-mode records/rules.
+  1. **Implement Reclaimer Ship-Recovery Loop (Assault)** — spawn/announce Reclaimer after Aegis destruction in assault, add extraction timer, destruction recovery, repeat-cycle failure handling, and explicit no-spawn rule during interior breach.
+  2. **Enforce Liberation Loop Parity** — make Stasis Arrays release captives (not direct operative spawns), then require hangar drop-off for operative deployment to match the design loop.
+  3. **Wire Assault UI/Scoring/HUD for Reclaimer Objective** — amber Reclaimer radar marker, extraction countdown in HUD, kill-speed bonus, and objective callouts.
+  4. **Challenge Mode Product Surface** — explicit Last Stand and Assault Only entry points with dedicated records/rules and mode-level UX copy.
   5. **Weather/Time-of-Day Reactivity** — environment gameplay/visual hooks tied to urgency and mission intensity.
-- **Estimated Remaining Work:** ~8-12 focused dev days for MVP-compliant implementation against the updated design doc; ~2 additional polish weeks for presentation/balance/readability.
+- **Estimated Remaining Work:** ~6-9 focused dev days for MVP-compliant implementation against the updated design doc; ~2 additional polish weeks for presentation/balance/readability.
 - **Post-MVP Polish (Optional):** adaptive music layers, transition cinematics for critical/near-miss states, richer challenge telemetry, and expanded accessibility/tutorial clarity.
-- **MVP Completion:** ~84%
+- **MVP Completion:** ~88%
 - **Critical Missing Features for Design Document Compliance:**
   1. **Reclaimer assault recovery system** (spawn, extraction pressure, recovery win/fail loop, interior-phase exception).
-  2. **Assault Liberation loop entities** (Stasis Arrays and Prisoner Transports) with captive release and drop-off flow.
-  3. **Updated assault telemetry/UI rules** (radar amber Reclaimer marker, liberation-aware scoring and HUD feedback).
+  2. **Liberation parity correction for Stasis Arrays** (ensure captive release + hangar conversion loop is mandatory instead of direct operative spawn bypass).
+  3. **Updated assault telemetry/UI rules** (radar amber Reclaimer marker, extraction countdown, and Reclaimer-specific scoring/HUD feedback).
   4. **Explicit Challenge hub implementation** (Last Stand + Assault Only identity, per-mode records/rules).
   5. **Dynamic weather/time-of-day reactivity layer**.
 
 ## What We Should Work On Next
 
-Given the updated design document, the highest-value next task is to build the **Reclaimer assault recovery loop** first.
+Given the current implementation state and the updated design document, the highest-value next task is still to build the **Reclaimer assault recovery loop** first.
 
 ### Why this should be next
 - It is now a central assault identity requirement in the design document, not optional polish.
 - It unblocks several dependent requirements (radar signaling, scoring hooks, operative priority behaviors, and assault flow clarity).
 - It resolves a major gameplay gap where assault recovery currently does not match the specified "destroy the Reclaimer" rule.
+- It creates the backbone needed for assault-only UI language (countdown pressure, radar target identity, recovery success/failure states).
 
 ### One-Task Update (Recommended Next Task)
 
@@ -160,13 +162,24 @@ Given the updated design document, the highest-value next task is to build the *
 
 **Definition of Done:**
 1. On Aegis destruction in assault mode, spawn Reclaimer with mission announcement/telegraph and radar marker.
-2. Add extraction behavior + countdown pressure and failure handling (escape -> respawn cycle).
+2. Add extraction behavior + 30s countdown pressure and failure handling (escape -> delayed respawn cycle).
 3. Destroying Reclaimer reconstructs/returns Aegis as the only assault recovery path.
 4. Disable Reclaimer spawning during assault interior breach phase (explicit edge-case guard).
 5. Add automated tests covering spawn gating, recovery success path, extraction failure/respawn, and interior no-spawn behavior.
 
 ### Recommended Follow-Up After That
-1. Implement Stasis Arrays + Prisoner Transports with captive liberation outputs.
-2. Hook liberation/rescue parity into ammo/scoring/HUD/radar outputs.
+1. Refactor Stasis Array destruction output to captive release + required hangar conversion (remove direct-operative bypass).
+2. Hook full Reclaimer and liberation parity state into ammo/scoring/HUD/radar outputs.
 3. Productize Last Stand + Assault Only challenge surfaces with per-mode records.
 4. Add weather/time-of-day reactivity pass.
+
+## Suggested Next Workstream (My Recommendation)
+
+If we want maximum design-document compliance per unit of effort, we should execute the next work as a single **Assault Identity Compliance Sprint**:
+
+1. **Reclaimer v1 (must-have)** — complete assault recovery identity.
+2. **Stasis parity fix (must-have)** — make liberation economy consistent across sources.
+3. **HUD/Radar objective clarity (must-have)** — make both mechanics readable under pressure.
+4. **Challenge mode productization (high value)** — expose replay loop once assault identity is stable.
+
+This sequence minimizes rework because HUD/objective text can be implemented once the Reclaimer + liberation parity data model is finalized.
