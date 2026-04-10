@@ -10,12 +10,21 @@ class AudioManager {
         this.musicVolume = userSettings.musicVolume;
         this.sfxVolume = userSettings.sfxVolume;
         this.isMuted = userSettings.muted;
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioContext = null;
         this.musicSource = null;
         this.musicGain = null;
         this.musicBufferPromise = null;
         this.setupUnlockHandlers();
         this.initSounds();
+    }
+
+    // Lazily creates an AudioContext so we avoid autoplay-policy warnings on page load.
+    ensureAudioContext() {
+        if (this.audioContext) return this.audioContext;
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        this.audioContext = new Ctx();
+        return this.audioContext;
     }
 
     // Adds one-time input listeners so browsers allow Web Audio playback after user interaction.
@@ -26,9 +35,10 @@ class AudioManager {
          * Returns: value defined by the surrounding game flow.
          */
         const unlock = async () => {
-            if (this.audioContext && this.audioContext.state === 'suspended') {
+            const context = this.ensureAudioContext();
+            if (context && context.state === 'suspended') {
                 try {
-                    await this.audioContext.resume();
+                    await context.resume();
                 } catch (e) {
                     console.warn('AudioContext resume failed:', e);
                 }
@@ -88,6 +98,7 @@ class AudioManager {
     // Plays a named sound effect if audio is enabled and the sound exists.
     playSound(soundName, options = {}) {
         if (this.isMuted || !this.sounds[soundName]) return;
+        if (!this.ensureAudioContext()) return;
         const sound = this.sounds[soundName];
         const volume = options.volume !== undefined ? options.volume : this.sfxVolume;
         try {
@@ -100,15 +111,17 @@ class AudioManager {
 
     // Generates and plays a tone-based (oscillator) sound with optional envelopes and pitch changes.
     playSynthSound(sound, volume, options = {}) {
-        const now = this.audioContext.currentTime;
+        const context = this.ensureAudioContext();
+        if (!context) return;
+        const now = context.currentTime;
         const duration = sound.duration || 0.2;
         const waveform = sound.waveform || 'sine';
 
-        const osc = this.audioContext.createOscillator();
-        const gain = this.audioContext.createGain();
+        const osc = context.createOscillator();
+        const gain = context.createGain();
         osc.type = waveform;
         osc.connect(gain);
-        gain.connect(this.audioContext.destination);
+        gain.connect(context.destination);
 
         gain.gain.setValueAtTime(volume, now);
         if (sound.decay) {
@@ -136,8 +149,8 @@ class AudioManager {
         }
 
         if (sound.modulate) {
-            const lfo = this.audioContext.createOscillator();
-            const lfoGain = this.audioContext.createGain();
+            const lfo = context.createOscillator();
+            const lfoGain = context.createGain();
             lfo.frequency.value = 8;
             lfoGain.gain.value = (sound.freq || 440) * 0.2;
             lfo.connect(lfoGain);
@@ -154,30 +167,32 @@ class AudioManager {
 
     // Generates and plays filtered white noise for impact-style effects.
     playNoiseSound(sound, volume, options = {}) {
-        const now = this.audioContext.currentTime;
+        const context = this.ensureAudioContext();
+        if (!context) return;
+        const now = context.currentTime;
         const duration = sound.duration || 0.3;
 
-        const bufferSize = this.audioContext.sampleRate * duration;
-        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+        const bufferSize = context.sampleRate * duration;
+        const buffer = context.createBuffer(1, bufferSize, context.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
             data[i] = Math.random() * 2 - 1;
         }
 
-        const source = this.audioContext.createBufferSource();
+        const source = context.createBufferSource();
         source.buffer = buffer;
 
-        const gain = this.audioContext.createGain();
+        const gain = context.createGain();
         gain.gain.setValueAtTime(volume, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
-        const filter = this.audioContext.createBiquadFilter();
+        const filter = context.createBiquadFilter();
         filter.type = 'highpass';
         filter.frequency.value = 2000;
 
         source.connect(filter);
         filter.connect(gain);
-        gain.connect(this.audioContext.destination);
+        gain.connect(context.destination);
 
         source.start(now);
         source.stop(now + duration);
@@ -186,11 +201,13 @@ class AudioManager {
     // Lazily fetches and decodes the background music file, caching the decoded buffer.
     async loadMusicBuffer() {
         if (this.sounds.bgMusic.buffer) return this.sounds.bgMusic.buffer;
+        const context = this.ensureAudioContext();
+        if (!context) return null;
 
         if (!this.musicBufferPromise) {
             this.musicBufferPromise = fetch(this.sounds.bgMusic.url)
                 .then(response => response.arrayBuffer())
-                .then(data => this.audioContext.decodeAudioData(data))
+                .then(data => context.decodeAudioData(data))
                 .then(buffer => {
                     this.sounds.bgMusic.buffer = buffer;
                     return buffer;
@@ -210,19 +227,21 @@ class AudioManager {
         if (this.isMuted || this.musicSource) return;
 
         try {
-            await this.audioContext.resume();
+            const context = this.ensureAudioContext();
+            if (!context) return;
+            await context.resume();
             const buffer = await this.loadMusicBuffer();
             if (!buffer) return;
 
-            const source = this.audioContext.createBufferSource();
-            const gain = this.audioContext.createGain();
+            const source = context.createBufferSource();
+            const gain = context.createGain();
 
             source.buffer = buffer;
             source.loop = true;
             gain.gain.value = this.musicVolume;
 
             source.connect(gain);
-            gain.connect(this.audioContext.destination);
+            gain.connect(context.destination);
 
             source.start(0);
 

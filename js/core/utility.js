@@ -293,8 +293,9 @@ function startGame(mode = 'classic') {
 
     const mainScene = game?.scene?.getScene ? game.scene.getScene(SCENE_KEYS.game) : null;
     const audioManager = mainScene?.audioManager;
-    if (audioManager && audioManager.audioContext.state === 'suspended') {
-        audioManager.audioContext.resume().catch(() => {});
+    const audioContext = audioManager?.ensureAudioContext ? audioManager.ensureAudioContext() : audioManager?.audioContext;
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().catch(() => {});
     }
 }
 

@@ -18,26 +18,33 @@
     </div>
     
     <script>
-        // Load partials directly into page-shell
-        const loadPartial = (url) => {
+        // Load partials directly into page-shell (async; avoids deprecated sync XHR).
+        const loadPartial = async (url) => {
             const shell = document.getElementById('page-shell');
             if (!shell) return;
-            const request = new XMLHttpRequest();
-            request.open('GET', url, false);
-            request.send(null);
-            if (request.status >= 200 && request.status < 400) {
+            try {
+                const response = await fetch(url, { credentials: 'same-origin' });
+                if (!response.ok) {
+                    console.error(`Failed to load partial: ${url} (${response.status})`);
+                    return;
+                }
+                const markup = await response.text();
                 const temp = document.createElement('div');
-                temp.innerHTML = request.responseText;
+                temp.innerHTML = markup;
                 while (temp.firstChild) {
                     shell.appendChild(temp.firstChild);
                 }
-            } else {
-                console.error(`Failed to load partial: ${url} (${request.status})`);
+            } catch (error) {
+                console.error(`Failed to load partial: ${url}`, error);
             }
         };
 
-        loadPartial('partials/game-layout.html');
-        loadPartial('partials/district-layout.html');
+        Promise.all([
+            loadPartial('partials/game-layout.html'),
+            loadPartial('partials/district-layout.html')
+        ]).catch((error) => {
+            console.error('Failed to load page partials', error);
+        });
     </script>
 
     <!-- Title Briefing Overlay -->
