@@ -362,7 +362,10 @@ function updateUI(scene) {
                 : '';
             const siegeActive = aegisState?.active && aegisState?.mode === 'bulwark';
             const siegeTag = siegeActive ? ' · BULWARK SIEGE READY' : '';
-            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}${prosperityTag}${lossTag}${siegeTag}`;
+            const liberationTag = window.liberationTelemetry?.formatLiberationRewardTag
+                ? window.liberationTelemetry.formatLiberationRewardTag(gameState.liberationTelemetry, scene?.time?.now || Date.now())
+                : '';
+            rewardEl.innerText = `REWARDS: x${(gameState.rewardMultiplier || 1).toFixed(2)} · ${directives.reward || 'Standard'}${clutchTag}${prosperityTag}${lossTag}${siegeTag}${liberationTag}`;
 
             rewardEl.classList.toggle('jackpot-callout', Boolean(gameState.lastAssaultReward?.isJackpot));
             rewardEl.classList.toggle('mystery-callout', Boolean(gameState.lastAssaultReward && !gameState.lastAssaultReward.isJackpot));
@@ -373,7 +376,10 @@ function updateUI(scene) {
             threatEl.classList.remove('animate-pulse', 'text-red-300');
             threatEl.classList.add('text-amber-200');
             const siegeActive = aegisState?.active && aegisState?.mode === 'bulwark';
-            rewardEl.innerText = `REWARDS: x1.00 standard loot${siegeActive ? ' · BULWARK SIEGE READY' : ''}`;
+            const liberationTag = window.liberationTelemetry?.formatLiberationRewardTag
+                ? window.liberationTelemetry.formatLiberationRewardTag(gameState.liberationTelemetry, scene?.time?.now || Date.now())
+                : '';
+            rewardEl.innerText = `REWARDS: x1.00 standard loot${siegeActive ? ' · BULWARK SIEGE READY' : ''}${liberationTag}`;
             rewardEl.classList.remove('jackpot-callout', 'mystery-callout');
         }
     }

@@ -68,6 +68,14 @@ function rescueHuman(playerSprite, human) {
     if (typeof pilotState !== 'undefined' && pilotState?.active && typeof refillCurrentPilotWeaponByRescueBonus === 'function') {
         refillCurrentPilotWeaponByRescueBonus();
     }
+    if (window.liberationTelemetry?.awardLiberationBonus) {
+        window.liberationTelemetry.awardLiberationBonus({
+            gameState,
+            nowMs: this.time?.now || Date.now(),
+            rescued: 1,
+            source: human.isCaptive ? 'captive_rescue' : 'human_rescue'
+        });
+    }
     const rescueText = this.add.text(
         human.x,
         human.y - 20,

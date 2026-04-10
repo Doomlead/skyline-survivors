@@ -426,7 +426,19 @@ function destroyEnemy(scene, enemy) {
             }
         }
         gameState.captivesLiberated = (gameState.captivesLiberated || 0) + releaseCount;
-        createFloatingText(scene, enemy.x, enemy.y - 34, `CAPTIVES LIBERATED +${releaseCount}`, '#fbbf24');
+        const liberationBonus = window.liberationTelemetry?.awardLiberationBonus
+            ? window.liberationTelemetry.awardLiberationBonus({
+                gameState,
+                pilotState: typeof pilotState !== 'undefined' ? pilotState : null,
+                grantPilotAmmoFn: typeof grantPilotAmmo === 'function' ? grantPilotAmmo : null,
+                scoreScaleFn: typeof getMissionScaledReward === 'function' ? getMissionScaledReward : null,
+                nowMs: scene.time?.now || Date.now(),
+                released: releaseCount,
+                source: 'prisoner_transport'
+            })
+            : { scoreBonus: 0, ammoBonus: 0 };
+        const bonusTag = liberationBonus.scoreBonus > 0 ? ` · +${liberationBonus.scoreBonus} SCORE` : '';
+        createFloatingText(scene, enemy.x, enemy.y - 34, `CAPTIVES LIBERATED +${releaseCount}${bonusTag}`, '#fbbf24');
         if (Math.random() < 0.5) {
             spawnPowerUp(scene, enemy.x, enemy.y);
         }

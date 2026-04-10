@@ -135,6 +135,9 @@ const gameState = {
         bulwarkSiegeHits: 0,
         hitsByMissionType: {}
     },
+    liberationTelemetry: window.liberationTelemetry?.createLiberationTelemetryState
+        ? window.liberationTelemetry.createLiberationTelemetryState()
+        : { liberated: 0, rescued: 0, bonusScore: 0, bonusAmmo: 0, lastEvent: null },
     assaultObjective: {
         active: false,
         baseHp: 0,
@@ -439,6 +442,9 @@ function resetGameState() {
     gameState.metaRewardsGranted = false;
     gameState.lastAssaultReward = null;
     gameState.combatTelemetry = { bulwarkSiegeHits: 0, hitsByMissionType: {} };
+    gameState.liberationTelemetry = window.liberationTelemetry?.createLiberationTelemetryState
+        ? window.liberationTelemetry.createLiberationTelemetryState()
+        : { liberated: 0, rescued: 0, bonusScore: 0, bonusAmmo: 0, lastEvent: null };
     gameState.assaultObjective = {
         active: false,
         baseHp: 0,
