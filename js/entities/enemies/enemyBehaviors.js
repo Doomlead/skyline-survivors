@@ -499,7 +499,12 @@ function updateEnemies(scene, time, delta) {
             enemy._topEscapeAt = null;
         }
 
-        const timeSlowMultiplier = playerState.powerUps.timeSlow > 0 ? 0.3 : 1.0;
+        const timeSlowMultiplier = (
+            typeof playerState !== 'undefined'
+            && playerState
+            && playerState.powerUps
+            && playerState.powerUps.timeSlow > 0
+        ) ? 0.3 : 1.0;
 
         switch (enemy.enemyType) {
             case 'lander':
@@ -574,5 +579,5 @@ function updateEnemies(scene, time, delta) {
 }
 
 if (typeof module !== 'undefined') {
-    module.exports = { updateLanderBehavior, updateRegeneratorBehavior, updateDroneBehavior };
+    module.exports = { updateLanderBehavior, updateRegeneratorBehavior, updateDroneBehavior, updateEnemies };
 }
